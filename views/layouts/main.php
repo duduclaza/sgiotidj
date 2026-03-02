@@ -272,6 +272,11 @@ if (!function_exists('flash')) {
       0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
       40% { opacity: 1; transform: translateY(-1px); }
     }
+    .chat-ai-panel { margin: 8px 0 12px 30px; max-width: 70%; background: #ffffff; border: 1px solid #dbe5ef; border-radius: 10px; padding: 8px; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08); }
+    .chat-ai-panel-text { font-size: 12px; color: #334155; margin-bottom: 7px; line-height: 1.35; }
+    .chat-ai-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chat-ai-action-btn { border: 1px solid #cbd5e1; background: #f8fafc; color: #0f172a; border-radius: 999px; padding: 5px 10px; font-size: 11px; font-weight: 600; cursor: pointer; }
+    .chat-ai-action-btn:hover { background: #e2e8f0; }
     .chat-message-meta { margin-top: 4px; font-size: 10px; opacity: 0.8; display: inline-flex; align-items: center; gap: 4px; }
     .chat-read-status { font-size: 11px; letter-spacing: -1px; }
     .chat-read-status.sent { color: #64748b; }
@@ -309,10 +314,14 @@ if (!function_exists('flash')) {
       let isChatOpen = false;
       let isAppVisible = true;
       let isAiTyping = false;
+      let aiFlowStep = 'menu';
+      let hasEduardoWelcomed = false;
+      const aiTicketDraft = { module: '', problem: '' };
       let pollBackoffLevel = 0;
       let lastUnreadTotal = 0;
 
       const POLL_INTERVALS_MS = [15000, 30000, 60000];
+      const DEFAULT_INPUT_PLACEHOLDER = 'Digite sua mensagem...';
 
       const ui = {};
 
@@ -367,6 +376,91 @@ if (!function_exists('flash')) {
       function isAiConversation() {
         const selected = getSelectedContact();
         return !!(selected && Number(selected.is_ai) === 1);
+      }
+
+      function getEduardoWelcomeKey() {
+        return `chat_eduardo_welcome_${meId}`;
+      }
+
+      function loadEduardoWelcomeState() {
+        try {
+          hasEduardoWelcomed = localStorage.getItem(getEduardoWelcomeKey()) === '1';
+        } catch (_) {
+          hasEduardoWelcomed = false;
+        }
+      }
+
+      function markEduardoWelcomed() {
+        hasEduardoWelcomed = true;
+        try {
+          localStorage.setItem(getEduardoWelcomeKey(), '1');
+        } catch (_) {}
+      }
+
+      function resetAiFlow() {
+        aiFlowStep = 'menu';
+        aiTicketDraft.module = '';
+        aiTicketDraft.problem = '';
+      }
+
+      function updateInputPlaceholder() {
+        if (!ui.messageInput) return;
+        if (isAiConversation() && aiFlowStep === 'ticket_problem' && aiTicketDraft.module) {
+          ui.messageInput.placeholder = `Descreva o problema no módulo ${aiTicketDraft.module}...`;
+        } else if (isAiConversation() && aiFlowStep === 'qa') {
+          ui.messageInput.placeholder = 'Digite sua pergunta para o Eduardo...';
+        } else {
+          ui.messageInput.placeholder = DEFAULT_INPUT_PLACEHOLDER;
+        }
+      }
+
+      function aiQuickPanelHtml() {
+        if (!isAiConversation()) return '';
+
+        let text = '';
+        let actions = [];
+
+        if (aiFlowStep === 'ticket_module') {
+          text = 'Qual módulo está com problema?';
+          actions = [
+            { action: 'ticket-module', label: 'Triagem de Toners', value: 'Triagem de Toners' },
+            { action: 'ticket-module', label: 'Cadastro de Defeitos', value: 'Cadastro de Defeitos' },
+            { action: 'ticket-module', label: 'Toners com Defeito', value: 'Toners com Defeito' },
+            { action: 'ticket-module', label: 'Outro módulo', value: 'Outro módulo' },
+            { action: 'back-menu', label: 'Voltar' }
+          ];
+        } else if (aiFlowStep === 'ticket_problem') {
+          text = `Me conta o problema no módulo ${escapeHtml(aiTicketDraft.module)}. Vou abrir o chamado assim que você enviar.`;
+          actions = [
+            { action: 'cancel-ticket', label: 'Cancelar chamado' },
+            { action: 'back-menu', label: 'Voltar ao menu' }
+          ];
+        } else if (aiFlowStep === 'qa') {
+          text = 'Manda sua pergunta que eu pesquiso e respondo de forma direta.';
+          actions = [
+            { action: 'back-menu', label: 'Menu principal' }
+          ];
+        } else {
+          text = hasEduardoWelcomed
+            ? 'Escolha uma opção:'
+            : 'Olá, meu nome é Eduardo e estou aqui para ajudar com algumas coisas. Escolha uma opção:';
+          actions = [
+            { action: 'start-ticket', label: 'Abrir chamado' },
+            { action: 'start-qa', label: 'Responder pergunta' }
+          ];
+        }
+
+        const actionsHtml = actions.map(item => {
+          const extra = item.value ? ` data-ai-value="${escapeHtml(item.value)}"` : '';
+          return `<button type="button" class="chat-ai-action-btn" data-ai-action="${item.action}"${extra}>${escapeHtml(item.label)}</button>`;
+        }).join('');
+
+        return `
+          <div class="chat-ai-panel">
+            <div class="chat-ai-panel-text">${text}</div>
+            <div class="chat-ai-actions">${actionsHtml}</div>
+          </div>
+        `;
       }
 
       function typingIndicatorHtml(selectedContact) {
@@ -573,9 +667,12 @@ if (!function_exists('flash')) {
                 </div>
               </div>
             `;
-          }).join('') + (isAiTyping && isAiConversation() ? typingIndicatorHtml(selectedContact) : '');
+          }).join('')
+            + (isAiTyping && isAiConversation() ? typingIndicatorHtml(selectedContact) : '')
+            + aiQuickPanelHtml();
 
           ui.messages.scrollTop = ui.messages.scrollHeight;
+          updateInputPlaceholder();
         } catch (_) {}
       }
 
@@ -589,9 +686,17 @@ if (!function_exists('flash')) {
         if (!activeContactId) return;
         const isAiChat = isAiConversation();
         payload.set('receiver_id', activeContactId);
-        payload.set('message', text);
+
+        let finalText = text;
+        if (isAiChat && aiFlowStep === 'ticket_problem' && aiTicketDraft.module) {
+          aiTicketDraft.problem = text;
+          finalText = `__OPEN_TICKET__|${aiTicketDraft.module}|${aiTicketDraft.problem}`;
+        }
+
+        payload.set('message', finalText);
 
         if (isAiChat) {
+          markEduardoWelcomed();
           isAiTyping = true;
           await loadMessages();
         }
@@ -611,6 +716,9 @@ if (!function_exists('flash')) {
           ui.messageInput.value = '';
           playMessageSound('send');
           registerChatActivity();
+          if (isAiChat && aiFlowStep === 'ticket_problem') {
+            resetAiFlow();
+          }
           isAiTyping = false;
           await loadMessages();
           await loadContacts();
@@ -625,6 +733,12 @@ if (!function_exists('flash')) {
         activeMode = 'direct';
         activeContactId = String(contactId);
         isAiTyping = false;
+        if (isAiConversation()) {
+          loadEduardoWelcomeState();
+          resetAiFlow();
+        } else {
+          aiFlowStep = 'menu';
+        }
         registerChatActivity();
         loadContacts().then(loadMessages);
       }
@@ -689,6 +803,34 @@ if (!function_exists('flash')) {
           selectContact(btn.getAttribute('data-user-id'));
         });
 
+        ui.messages.addEventListener('click', function(event) {
+          const btn = event.target.closest('[data-ai-action]');
+          if (!btn || !isAiConversation()) return;
+
+          const action = btn.getAttribute('data-ai-action');
+          const value = btn.getAttribute('data-ai-value') || '';
+
+          markEduardoWelcomed();
+
+          if (action === 'start-ticket') {
+            aiFlowStep = 'ticket_module';
+          } else if (action === 'start-qa') {
+            aiFlowStep = 'qa';
+            ui.messageInput.focus();
+          } else if (action === 'ticket-module') {
+            aiTicketDraft.module = value || 'Módulo não informado';
+            aiFlowStep = 'ticket_problem';
+            ui.messageInput.focus();
+          } else if (action === 'cancel-ticket') {
+            resetAiFlow();
+          } else if (action === 'back-menu') {
+            resetAiFlow();
+          }
+
+          updateInputPlaceholder();
+          loadMessages();
+        });
+
         ui.form.addEventListener('submit', sendMessage);
       }
 
@@ -707,6 +849,9 @@ if (!function_exists('flash')) {
         ui.emojiPicker = q('chat-emoji-picker');
 
         if (!ui.toggle || !ui.panel) return;
+
+        loadEduardoWelcomeState();
+        updateInputPlaceholder();
 
         bindEvents();
         await loadContacts();

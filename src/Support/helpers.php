@@ -126,8 +126,8 @@ if (!function_exists('isSuperAdmin')) {
             return true;
         }
         
-        // Verificar role normal
-        return isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'super_admin';
+        // Verificar role normal (compatibilidade com bases antigas)
+        return isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['super_admin', 'superadmin'], true);
     }
 }
 
@@ -145,8 +145,8 @@ if (!function_exists('isAdmin')) {
             return true;
         }
         
-        // Verificar role normal
-        return isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['admin', 'super_admin']);
+        // Verificar role normal (compatibilidade com bases antigas)
+        return isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['admin', 'super_admin', 'superadmin'], true);
     }
 }
 

@@ -56,7 +56,7 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
 
   <!-- Filtros -->
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
       <div class="sm:col-span-2 lg:col-span-2">
         <label class="block text-xs font-medium text-gray-700 mb-1">Busca Inteligente</label>
         <div class="relative">
@@ -65,6 +65,10 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
           </span>
           <input id="f-search" type="text" placeholder="Modelo, cliente, colaborador ou cód. requisição..." class="w-full border border-gray-300 rounded-xl pl-9 pr-3 py-2.5 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
         </div>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Filial</label>
+        <input id="f-filial" type="text" placeholder="Ex.: Matriz" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
       </div>
       <div>
         <label class="block text-xs font-medium text-gray-700 mb-1">Destino</label>
@@ -490,6 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   const searchInput = document.getElementById('f-search');
+  const filialInput = document.getElementById('f-filial');
   const destinoSelect = document.getElementById('f-destino');
   const dataInicioInput = document.getElementById('f-data-inicio');
   const dataFimInput = document.getElementById('f-data-fim');
@@ -499,7 +504,7 @@ document.addEventListener('DOMContentLoaded', () => {
     filtrosDebounce = setTimeout(() => carregarRegistros(1), 350);
   };
 
-  [searchInput].forEach((el) => {
+  [searchInput, filialInput].forEach((el) => {
     el.addEventListener('input', filtrarComDebounce);
     el.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
@@ -524,6 +529,7 @@ function carregarRegistros(page) {
     page,
     per_page: 15,
     search:       document.getElementById('f-search').value,
+    filial:       document.getElementById('f-filial').value,
     destino:      document.getElementById('f-destino').value,
     data_inicio:  document.getElementById('f-data-inicio').value,
     data_fim:     document.getElementById('f-data-fim').value,
@@ -619,7 +625,7 @@ function renderPaginacao(pag) {
 }
 
 function limparFiltros() {
-  ['f-search','f-data-inicio','f-data-fim'].forEach(id => document.getElementById(id).value = '');
+  ['f-search','f-filial','f-data-inicio','f-data-fim'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('f-destino').value = '';
   carregarRegistros(1);
 }

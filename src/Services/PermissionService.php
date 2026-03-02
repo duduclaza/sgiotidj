@@ -98,8 +98,8 @@ class PermissionService
                 return true;
             }
             
-            // Verificar role direto
-            if ($user['role'] === 'super_admin') {
+            // Verificar role direto (compatibilidade com bases antigas)
+            if (in_array((string)$user['role'], ['super_admin', 'superadmin'], true)) {
                 return true;
             }
         }

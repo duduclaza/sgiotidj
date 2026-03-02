@@ -325,8 +325,14 @@ class ChatController
     private function sendMessageToAi(int $userId, string $message): void
     {
         try {
+            $ticketData = $this->parseSupportTicketCommand($message);
+            $displayUserMessage = $message;
+            if (is_array($ticketData)) {
+                $displayUserMessage = 'Abrir chamado - Módulo: ' . $ticketData['module'] . ' | Problema: ' . $ticketData['problem'];
+            }
+
             $userPayload = [
-                'text' => $message,
+                'text' => $displayUserMessage,
                 'format' => 'plain_text',
                 'version' => 1,
                 'chat_type' => 'direct',
@@ -336,7 +342,7 @@ class ChatController
 
             $insertUserStmt = $this->db->prepare("INSERT INTO chat_messages (sender_id, receiver_id, message, payload_json, created_at)
                 VALUES (?, ?, ?, ?, NOW())");
-            $insertUserStmt->execute([$userId, self::AI_BOT_ID, $message, json_encode($userPayload, JSON_UNESCAPED_UNICODE)]);
+            $insertUserStmt->execute([$userId, self::AI_BOT_ID, $displayUserMessage, json_encode($userPayload, JSON_UNESCAPED_UNICODE)]);
 
             $ticketResponse = $this->tryCreateSupportTicketFromChat($userId, $message);
             $aiText = $ticketResponse !== null ? $ticketResponse : $this->generateAiResponse($userId, $message);
@@ -641,7 +647,8 @@ class ChatController
 
     private function tryCreateSupportTicketFromChat(int $userId, string $message): ?string
     {
-        if (!$this->shouldCreateSupportTicket($message)) {
+        $ticketData = $this->parseSupportTicketCommand($message);
+        if (!$ticketData) {
             return null;
         }
 
@@ -651,23 +658,49 @@ class ChatController
                 return 'Consigo te ajudar com o chamado, mas a tabela de suporte ainda não está disponível no banco. Pode avisar o TI para habilitar o módulo de suporte?';
             }
 
-            $summary = trim(preg_replace('/\s+/', ' ', $message));
-            if ($summary === '') {
+            $module = trim((string)$ticketData['module']);
+            $problem = trim((string)$ticketData['problem']);
+            if ($module === '' || $problem === '') {
                 return 'Posso abrir o chamado para você, mas preciso de uma descrição rápida do problema.';
             }
 
-            $titulo = mb_substr('Chamado via Chat: ' . $summary, 0, 180, 'UTF-8');
-            $descricao = "Solicitação criada pelo Eduardo via chat interno.\n\nMensagem original do usuário:\n" . $summary;
+            $titulo = mb_substr('Chamado via Chat [' . $module . ']', 0, 180, 'UTF-8');
+            $descricao = "Solicitação criada pelo Eduardo via chat interno.\n\n"
+                . "Módulo informado: " . $module . "\n"
+                . "Problema relatado: " . $problem;
 
             $stmt = $this->db->prepare('INSERT INTO suporte_solicitacoes (titulo, descricao, anexos, status, solicitante_id, created_at) VALUES (?, ?, ?, "Pendente", ?, NOW())');
             $stmt->execute([$titulo, $descricao, json_encode([], JSON_UNESCAPED_UNICODE), $userId]);
 
             $ticketId = (int)$this->db->lastInsertId();
-            return 'Pronto! Abri um chamado no Suporte para você ✅ Protocolo #' . $ticketId . '. Se quiser, já me diga mais detalhes que eu complemento na descrição.';
+            return 'Chamado aberto com sucesso ✅ Protocolo #' . $ticketId . '.';
         } catch (\Throwable $e) {
             error_log('Eduardo suporte ticket falhou: ' . $e->getMessage());
             return 'Tentei abrir o chamado automaticamente, mas não consegui concluir agora. Você pode abrir manualmente em /suporte e eu te ajudo a preencher.';
         }
+    }
+
+    private function parseSupportTicketCommand(string $message): ?array
+    {
+        if (strpos($message, '__OPEN_TICKET__|') !== 0) {
+            return null;
+        }
+
+        $parts = explode('|', $message, 3);
+        if (count($parts) < 3) {
+            return null;
+        }
+
+        $module = trim((string)$parts[1]);
+        $problem = trim((string)$parts[2]);
+        if ($module === '' || $problem === '') {
+            return null;
+        }
+
+        return [
+            'module' => $module,
+            'problem' => $problem,
+        ];
     }
 
     private function shouldRunWebLookup(string $message): bool

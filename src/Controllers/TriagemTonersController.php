@@ -560,6 +560,10 @@ class TriagemTonersController
                 $params[] = $search;
                 $params[] = $search;
             }
+            if (!empty($_GET['filial'])) {
+                $where .= " AND COALESCE(t.filial_registro, '') LIKE ?";
+                $params[] = '%' . trim((string)$_GET['filial']) . '%';
+            }
             if (!empty($_GET['destino'])) {
                 $where .= " AND t.destino = ?";
                 $params[] = $_GET['destino'];
