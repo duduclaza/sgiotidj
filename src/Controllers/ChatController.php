@@ -326,9 +326,12 @@ class ChatController
     {
         try {
             $ticketData = $this->parseSupportTicketCommand($message);
+            $triagemQuery = $this->parseTriagemClienteCommand($message);
             $displayUserMessage = $message;
             if (is_array($ticketData)) {
                 $displayUserMessage = 'Abrir chamado - Módulo: ' . $ticketData['module'] . ' | Problema: ' . $ticketData['problem'];
+            } elseif (is_array($triagemQuery)) {
+                $displayUserMessage = 'Consulta triagem do cliente ' . $triagemQuery['cliente_codigo'] . ' (últimos ' . $triagemQuery['dias'] . ' dias)';
             }
 
             $userPayload = [
@@ -345,7 +348,8 @@ class ChatController
             $insertUserStmt->execute([$userId, self::AI_BOT_ID, $displayUserMessage, json_encode($userPayload, JSON_UNESCAPED_UNICODE)]);
 
             $ticketResponse = $this->tryCreateSupportTicketFromChat($userId, $message);
-            $aiText = $ticketResponse !== null ? $ticketResponse : $this->generateAiResponse($userId, $message);
+            $triagemResponse = $ticketResponse === null ? $this->tryQueryTriagemCliente($message) : null;
+            $aiText = $ticketResponse ?? $triagemResponse ?? $this->generateAiResponse($userId, $message);
 
             $aiPayload = [
                 'text' => $aiText,
@@ -677,6 +681,118 @@ class ChatController
         } catch (\Throwable $e) {
             error_log('Eduardo suporte ticket falhou: ' . $e->getMessage());
             return 'Tentei abrir o chamado automaticamente, mas não consegui concluir agora. Você pode abrir manualmente em /suporte e eu te ajudo a preencher.';
+        }
+    }
+
+    private function parseTriagemClienteCommand(string $message): ?array
+    {
+        if (strpos($message, '__TRIAGEM_QUERY__|') !== 0) {
+            return null;
+        }
+
+        $parts = explode('|', $message, 3);
+        if (count($parts) < 3) {
+            return null;
+        }
+
+        $clienteCodigo = trim((string)$parts[1]);
+        $dias = max(1, (int)$parts[2]);
+        if ($clienteCodigo === '') {
+            return null;
+        }
+
+        return [
+            'cliente_codigo' => $clienteCodigo,
+            'dias' => $dias,
+        ];
+    }
+
+    private function tryQueryTriagemCliente(string $message): ?string
+    {
+        $query = $this->parseTriagemClienteCommand($message);
+        if (!$query) {
+            return null;
+        }
+
+        try {
+            $codigo = $query['cliente_codigo'];
+            $dias = $query['dias'];
+            $dataLimite = date('Y-m-d', strtotime("-{$dias} days"));
+
+            $stmt = $this->db->prepare("
+                SELECT t.toner_modelo, t.cliente_nome, t.filial_registro, t.colaborador_registro,
+                       t.codigo_requisicao, t.defeito_nome, t.fornecedor_nome,
+                       t.modo, t.peso_retornado, t.percentual_calculado, t.gramatura_restante,
+                       t.parecer, t.destino, COALESCE(t.valor_recuperado, 0) AS valor_recuperado,
+                       t.observacoes, t.created_at
+                FROM triagem_toners t
+                WHERE (t.cliente_nome LIKE ? OR t.codigo_requisicao LIKE ? OR CAST(t.cliente_id AS CHAR) = ?)
+                  AND t.created_at >= ?
+                ORDER BY t.created_at DESC
+                LIMIT 50
+            ");
+            $like = '%' . $codigo . '%';
+            $stmt->execute([$like, $like, $codigo, $dataLimite]);
+            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            if (empty($rows)) {
+                return '__TRIAGEM_RESULT__|0|Nenhum registro de triagem encontrado para "' . $codigo . '" nos últimos ' . $dias . ' dias.';
+            }
+
+            $clienteNome = $rows[0]['cliente_nome'] ?? $codigo;
+            $total = count($rows);
+            $totalDescarte = 0;
+            $totalGarantia = 0;
+            $totalUsoInterno = 0;
+            $totalEstoque = 0;
+            $somaValorRecuperado = 0;
+            $detalhes = [];
+
+            foreach ($rows as $r) {
+                $destino = $r['destino'] ?? '';
+                if ($destino === 'Descarte') $totalDescarte++;
+                elseif ($destino === 'Garantia') $totalGarantia++;
+                elseif ($destino === 'Uso Interno') $totalUsoInterno++;
+                elseif ($destino === 'Estoque') $totalEstoque++;
+                $somaValorRecuperado += (float)$r['valor_recuperado'];
+
+                $data = date('d/m/Y H:i', strtotime($r['created_at']));
+                $pct = number_format((float)$r['percentual_calculado'], 1, ',', '') . '%';
+                $valor = 'R$ ' . number_format((float)$r['valor_recuperado'], 2, ',', '.');
+                $linha = $data
+                    . ' | ' . ($r['toner_modelo'] ?? '-')
+                    . ' | ' . $pct
+                    . ' | ' . ($r['destino'] ?? '-')
+                    . ' | ' . ($r['parecer'] ?? '-')
+                    . ' | ' . $valor
+                    . ' | Filial: ' . ($r['filial_registro'] ?? '-')
+                    . ' | Colab: ' . ($r['colaborador_registro'] ?? '-')
+                    . ' | Defeito: ' . ($r['defeito_nome'] ?? '-')
+                    . ' | Req: ' . ($r['codigo_requisicao'] ?? '-');
+                if (!empty($r['observacoes'])) {
+                    $linha .= ' | Obs: ' . $r['observacoes'];
+                }
+                $detalhes[] = $linha;
+            }
+
+            $valorTotal = 'R$ ' . number_format($somaValorRecuperado, 2, ',', '.');
+
+            $resumo = "📋 Relatório de Triagem - {$clienteNome}\n"
+                . "Período: últimos {$dias} dias\n"
+                . "Total de registros: {$total}\n\n"
+                . "Resumo por destino:\n"
+                . "  Descarte: {$totalDescarte}\n"
+                . "  Garantia: {$totalGarantia}\n"
+                . "  Uso Interno: {$totalUsoInterno}\n"
+                . "  Estoque: {$totalEstoque}\n"
+                . "  Valor recuperado total: {$valorTotal}\n\n"
+                . "Detalhes:\n"
+                . implode("\n", $detalhes);
+
+            return '__TRIAGEM_RESULT__|' . $total . '|' . $resumo;
+        } catch (\Throwable $e) {
+            error_log('Eduardo triagem query falhou: ' . $e->getMessage());
+            return '__TRIAGEM_RESULT__|0|Não consegui consultar a triagem agora. Tente novamente em instantes.';
         }
     }
 

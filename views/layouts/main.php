@@ -277,6 +277,13 @@ if (!function_exists('flash')) {
     .chat-ai-actions { display: flex; flex-wrap: wrap; gap: 6px; }
     .chat-ai-action-btn { border: 1px solid #cbd5e1; background: #f8fafc; color: #0f172a; border-radius: 999px; padding: 5px 10px; font-size: 11px; font-weight: 600; cursor: pointer; }
     .chat-ai-action-btn:hover { background: #e2e8f0; }
+    .chat-triagem-report { white-space: pre-wrap; word-break: break-word; font-size: 11px; line-height: 1.45; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; margin: 4px 0 6px; max-height: 260px; overflow-y: auto; font-family: 'Segoe UI', sans-serif; }
+    .chat-print-btn { margin-top: 4px; }
+    @media print {
+      body * { visibility: hidden !important; }
+      #chat-print-area, #chat-print-area * { visibility: visible !important; }
+      #chat-print-area { position: fixed; left: 0; top: 0; width: 100%; padding: 20px; font-size: 12px; white-space: pre-wrap; font-family: 'Segoe UI', sans-serif; }
+    }
     .chat-message-meta { margin-top: 4px; font-size: 10px; opacity: 0.8; display: inline-flex; align-items: center; gap: 4px; }
     .chat-read-status { font-size: 11px; letter-spacing: -1px; }
     .chat-read-status.sent { color: #64748b; }
@@ -317,6 +324,7 @@ if (!function_exists('flash')) {
       let aiFlowStep = 'menu';
       let hasEduardoWelcomed = false;
       const aiTicketDraft = { module: '', problem: '' };
+      const aiTriagemDraft = { clienteCodigo: '', dias: 0 };
       let pollBackoffLevel = 0;
       let lastUnreadTotal = 0;
 
@@ -401,12 +409,16 @@ if (!function_exists('flash')) {
         aiFlowStep = 'menu';
         aiTicketDraft.module = '';
         aiTicketDraft.problem = '';
+        aiTriagemDraft.clienteCodigo = '';
+        aiTriagemDraft.dias = 0;
       }
 
       function updateInputPlaceholder() {
         if (!ui.messageInput) return;
         if (isAiConversation() && aiFlowStep === 'ticket_problem' && aiTicketDraft.module) {
           ui.messageInput.placeholder = `Descreva o problema no módulo ${aiTicketDraft.module}...`;
+        } else if (isAiConversation() && aiFlowStep === 'triagem_code') {
+          ui.messageInput.placeholder = 'Digite o código ou nome do cliente...';
         } else if (isAiConversation() && aiFlowStep === 'qa') {
           ui.messageInput.placeholder = 'Digite sua pergunta para o Eduardo...';
         } else {
@@ -435,6 +447,19 @@ if (!function_exists('flash')) {
             { action: 'cancel-ticket', label: 'Cancelar chamado' },
             { action: 'back-menu', label: 'Voltar ao menu' }
           ];
+        } else if (aiFlowStep === 'triagem_code') {
+          text = 'Digite o código ou nome do cliente para eu consultar a triagem.';
+          actions = [
+            { action: 'back-menu', label: 'Voltar' }
+          ];
+        } else if (aiFlowStep === 'triagem_period') {
+          text = `Cliente: ${escapeHtml(aiTriagemDraft.clienteCodigo)}. Qual período deseja consultar?`;
+          actions = [
+            { action: 'triagem-days', label: '30 dias', value: '30' },
+            { action: 'triagem-days', label: '60 dias', value: '60' },
+            { action: 'triagem-days', label: '90 dias', value: '90' },
+            { action: 'back-menu', label: 'Cancelar' }
+          ];
         } else if (aiFlowStep === 'qa') {
           text = 'Manda sua pergunta que eu pesquiso e respondo de forma direta.';
           actions = [
@@ -446,6 +471,7 @@ if (!function_exists('flash')) {
             : 'Olá, meu nome é Eduardo e estou aqui para ajudar com algumas coisas. Escolha uma opção:';
           actions = [
             { action: 'start-ticket', label: 'Abrir chamado' },
+            { action: 'start-triagem', label: 'Consultar triagem de cliente' },
             { action: 'start-qa', label: 'Responder pergunta' }
           ];
         }
@@ -658,11 +684,24 @@ if (!function_exists('flash')) {
             const mine = Number(m.sender_id) === meId;
             const readClass = m.read_at ? 'read' : 'sent';
             const readLabel = mine ? `<span class="chat-read-status ${readClass}">${m.read_at ? '✓✓' : '✓'}</span>` : '';
+            const msgText = m.message || '';
+            const isTriagemResult = !mine && msgText.startsWith('__TRIAGEM_RESULT__|');
+            let renderedContent = '';
+            let printBtn = '';
+            if (isTriagemResult) {
+              const trParts = msgText.split('|');
+              const trBody = trParts.slice(2).join('|');
+              renderedContent = `<pre class="chat-triagem-report">${escapeHtml(trBody)}</pre>`;
+              printBtn = `<button type="button" class="chat-ai-action-btn chat-print-btn" onclick="printTriagemReport(this)">🖨️ Imprimir resultado</button>`;
+            } else {
+              renderedContent = `<div>${escapeHtml(msgText)}</div>`;
+            }
             return `
               <div class="chat-message-row ${mine ? 'me' : 'other'}">
                 ${mine ? '' : (selectedContact ? avatarHtml(selectedContact.id, selectedContact.name, selectedContact.has_photo, 'chat-message-avatar', selectedContact.avatar_url) : '')}
                 <div class="chat-message ${mine ? 'me' : 'other'}">
-                  <div>${escapeHtml(m.message)}</div>
+                  ${renderedContent}
+                  ${printBtn}
                   <div class="chat-message-meta">${fmtDate(m.created_at)} ${readLabel}</div>
                 </div>
               </div>
@@ -691,6 +730,13 @@ if (!function_exists('flash')) {
         if (isAiChat && aiFlowStep === 'ticket_problem' && aiTicketDraft.module) {
           aiTicketDraft.problem = text;
           finalText = `__OPEN_TICKET__|${aiTicketDraft.module}|${aiTicketDraft.problem}`;
+        } else if (isAiChat && aiFlowStep === 'triagem_code') {
+          aiTriagemDraft.clienteCodigo = text;
+          aiFlowStep = 'triagem_period';
+          ui.messageInput.value = '';
+          updateInputPlaceholder();
+          await loadMessages();
+          return;
         }
 
         payload.set('message', finalText);
@@ -716,7 +762,7 @@ if (!function_exists('flash')) {
           ui.messageInput.value = '';
           playMessageSound('send');
           registerChatActivity();
-          if (isAiChat && aiFlowStep === 'ticket_problem') {
+          if (isAiChat && (aiFlowStep === 'ticket_problem' || aiFlowStep === 'triagem_waiting')) {
             resetAiFlow();
           }
           isAiTyping = false;
@@ -727,6 +773,36 @@ if (!function_exists('flash')) {
           await loadMessages();
           alert('Erro ao enviar mensagem');
         }
+      }
+
+      async function sendTriagemQuery(triagemMsg) {
+        markEduardoWelcomed();
+        isAiTyping = true;
+        await loadMessages();
+
+        const payload = new URLSearchParams();
+        payload.set('receiver_id', activeContactId);
+        payload.set('message', triagemMsg);
+
+        try {
+          const data = await fetchJson('/api/chat/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: payload.toString()
+          });
+          if (!data.success) {
+            alert(data.message || 'Erro ao consultar triagem');
+          } else {
+            playMessageSound('send');
+            registerChatActivity();
+          }
+        } catch (_) {
+          alert('Erro ao consultar triagem');
+        }
+        resetAiFlow();
+        isAiTyping = false;
+        await loadMessages();
+        await loadContacts();
       }
 
       function selectContact(contactId) {
@@ -814,6 +890,9 @@ if (!function_exists('flash')) {
 
           if (action === 'start-ticket') {
             aiFlowStep = 'ticket_module';
+          } else if (action === 'start-triagem') {
+            aiFlowStep = 'triagem_code';
+            ui.messageInput.focus();
           } else if (action === 'start-qa') {
             aiFlowStep = 'qa';
             ui.messageInput.focus();
@@ -821,6 +900,14 @@ if (!function_exists('flash')) {
             aiTicketDraft.module = value || 'Módulo não informado';
             aiFlowStep = 'ticket_problem';
             ui.messageInput.focus();
+          } else if (action === 'triagem-days') {
+            aiTriagemDraft.dias = parseInt(value) || 30;
+            aiFlowStep = 'triagem_waiting';
+            updateInputPlaceholder();
+            loadMessages();
+            const triagemMsg = `__TRIAGEM_QUERY__|${aiTriagemDraft.clienteCodigo}|${aiTriagemDraft.dias}`;
+            sendTriagemQuery(triagemMsg);
+            return;
           } else if (action === 'cancel-ticket') {
             resetAiFlow();
           } else if (action === 'back-menu') {
@@ -871,6 +958,22 @@ if (!function_exists('flash')) {
 
       document.addEventListener('DOMContentLoaded', init);
     })();
+
+    function printTriagemReport(btn) {
+      const report = btn.closest('.chat-message').querySelector('.chat-triagem-report');
+      if (!report) return;
+      let printArea = document.getElementById('chat-print-area');
+      if (!printArea) {
+        printArea = document.createElement('div');
+        printArea.id = 'chat-print-area';
+        document.body.appendChild(printArea);
+      }
+      printArea.innerHTML = '<h2 style="margin-bottom:12px;font-size:16px;">Relatório de Triagem - Eduardo do Suporte</h2>'
+        + '<pre style="white-space:pre-wrap;font-size:12px;line-height:1.5;font-family:Segoe UI,sans-serif;">'
+        + report.textContent + '</pre>';
+      window.print();
+      setTimeout(function() { printArea.innerHTML = ''; }, 1000);
+    }
   </script>
   <?php endif; ?>
 
