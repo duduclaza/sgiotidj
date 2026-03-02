@@ -628,13 +628,6 @@ $router->get('/registros/departamentos', [App\Controllers\RegistrosController::c
 $router->get('/registros/fornecedores', [App\Controllers\RegistrosController::class , 'fornecedores']);
 $router->get('/registros/parametros', [App\Controllers\RegistrosController::class , 'parametros']);
 
-// Power BI API routes
-$router->get('/api/powerbi', [App\Controllers\PowerBIController::class , 'index']);
-$router->get('/api/powerbi/documentacao', [App\Controllers\PowerBIController::class , 'documentacao']);
-$router->get('/api/powerbi/test', [App\Controllers\PowerBIController::class , 'apiTest']);
-$router->get('/api/powerbi/garantias-simples', [App\Controllers\PowerBIController::class , 'apiGarantiasSimples']);
-$router->get('/api/powerbi/garantias', [App\Controllers\PowerBIController::class , 'apiGarantias']);
-
 // Store routes
 $router->post('/registros/filiais/store', [App\Controllers\RegistrosController::class , 'storeFilial']);
 $router->post('/registros/departamentos/store', [App\Controllers\RegistrosController::class , 'storeDepartamento']);

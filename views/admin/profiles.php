@@ -353,7 +353,6 @@ const modulesByCategory = {
     { key: 'admin_convites', name: 'Solicitações de Acesso 📧' },
     { key: 'admin_painel', name: 'Painel Administrativo ⚙️' },
     { key: 'registros_parametros', name: 'Parâmetros de Retornados 📊' },
-    { key: 'api_powerbi', name: 'APIs para Power BI 📊' },
     { key: 'configuracoes_gerais', name: 'Configurações Gerais' },
     { key: 'email_config', name: 'Configurações de Email' }
   ]

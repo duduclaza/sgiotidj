@@ -12,7 +12,6 @@ use App\Controllers\TonersController;
 use App\Controllers\RegistrosController;
 use App\Controllers\MaquinasController;
 use App\Controllers\PecasController;
-use App\Controllers\PowerBIController;
 use App\Controllers\ProfileController;
 use App\Controllers\NotificationsController;
 
@@ -29,14 +28,6 @@ $router->get('/api/parametros', [RegistrosController::class, 'getParametros']);
 $router->get('/api/toners', [TonersController::class, 'apiListToners']);
 $router->get('/api/maquinas', [MaquinasController::class, 'apiListMaquinas']);
 $router->get('/api/pecas', [PecasController::class, 'apiListPecas']);
-
-// ===== POWER BI API =====
-
-$router->get('/api/powerbi', [PowerBIController::class, 'index']);
-$router->get('/api/powerbi/documentacao', [PowerBIController::class, 'documentacao']);
-$router->get('/api/powerbi/test', [PowerBIController::class, 'apiTest']);
-$router->get('/api/powerbi/garantias-simples', [PowerBIController::class, 'apiGarantiasSimples']);
-$router->get('/api/powerbi/garantias', [PowerBIController::class, 'apiGarantias']);
 
 // ===== PROFILE API =====
 

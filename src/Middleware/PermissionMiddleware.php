@@ -28,6 +28,11 @@ class PermissionMiddleware
         '/toners/defeitos/delete' => 'toners_defeitos',
         '/toners/defeitos/{id}/foto/{n}' => 'toners_defeitos',
 
+        // Atendimento - Calculadora de Envio
+        '/atendimento/calculadora-toners' => 'calculadora_toners',
+        '/atendimento/calculadora-toners/buscar' => 'calculadora_toners',
+        '/atendimento/calculadora-toners/config' => 'calculadora_toners',
+
         // Cadastro de Defeitos (Cadastros Gerais)
         '/cadastro-defeitos' => 'cadastro_defeitos',
         '/cadastro-defeitos/store' => 'cadastro_defeitos',
@@ -158,13 +163,6 @@ class PermissionMiddleware
         '/admin/invitations' => 'admin_convites',
         '/admin' => 'admin_painel',
         '/admin/dashboard/data' => 'dashboard',
-        
-        // Power BI API
-        '/api/powerbi' => 'api_powerbi',
-        '/api/powerbi/documentacao' => 'api_powerbi',
-        '/api/powerbi/test' => 'api_powerbi',
-        '/api/powerbi/garantias-simples' => 'api_powerbi',
-        '/api/powerbi/garantias' => 'api_powerbi',
         
         // Perfil - removido pois é rota pública para usuários logados
     ];
