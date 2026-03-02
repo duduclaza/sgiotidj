@@ -338,7 +338,8 @@ class ChatController
                 VALUES (?, ?, ?, ?, NOW())");
             $insertUserStmt->execute([$userId, self::AI_BOT_ID, $message, json_encode($userPayload, JSON_UNESCAPED_UNICODE)]);
 
-            $aiText = $this->generateAiResponse($userId, $message);
+            $ticketResponse = $this->tryCreateSupportTicketFromChat($userId, $message);
+            $aiText = $ticketResponse !== null ? $ticketResponse : $this->generateAiResponse($userId, $message);
 
             $aiPayload = [
                 'text' => $aiText,
@@ -369,9 +370,7 @@ class ChatController
 
     private function generateAiResponse(int $userId, string $message): string
     {
-        if (!$this->isSupportedTopic($message)) {
-            return 'Oi! Eu sou o Eduardo do Suporte 🙂 Posso te ajudar com impressoras, toners, notebooks, notas fiscais, cálculos fiscais e dúvidas sobre os módulos do sistema. Se quiser, me manda sua dúvida nesses temas que eu te ajudo agora.';
-        }
+        $isWithinScope = $this->isSupportedTopic($message);
 
         $systemLibrary = $this->loadSystemKnowledgeBase();
         $detectedModule = $this->detectRelevantModuleFromLibrary($message, $systemLibrary);
@@ -382,7 +381,7 @@ class ChatController
 
         $webLookupContext = '';
         if ($this->shouldRunWebLookup($message)) {
-            $webLinks = $this->searchWebLinks($message, 4);
+            $webLinks = $this->searchWebLinks($message, 6);
             if (!empty($webLinks)) {
                 $webLines = [];
                 foreach ($webLinks as $item) {
@@ -415,13 +414,14 @@ class ChatController
             . "Demonstre empatia e cordialidade sem exageros.\n"
             . "Evite soar robótico: varie a forma de abertura, use linguagem natural e não repita sempre a mesma estrutura de resposta.\n"
             . "Não use jargão técnico sem explicar de forma simples.\n"
-            . "Limite estrito de escopo: impressoras, toners, notebooks, notas fiscais, cálculos fiscais e dúvidas sobre módulos do sistema.\n"
-            . "Se a pergunta sair desse escopo, recuse educadamente e convide a pessoa a perguntar sobre os temas permitidos.\n"
+            . "Seja assertivo nas orientações: quando tiver alta confiança, responda com passo a passo objetivo; quando houver incerteza, deixe explícito o que precisa ser confirmado.\n"
+            . "Você PODE ajudar também com dúvidas gerais usando pesquisa web curta e links úteis, mantendo resposta segura e honesta.\n"
             . "Quando detectar a tela/módulo no contexto, cite explicitamente o nome do módulo e o caminho da rota para orientar melhor.\n"
-            . "Se o usuário pedir drivers/manuais/download, use os links fornecidos no contexto e priorize sites oficiais do fabricante.\n"
+            . "Ao sugerir links, priorize fontes oficiais e evite prometer algo não verificado.\n"
             . "Nunca invente acesso a banco de dados em tempo real. Nunca peça senha, token ou dados sensíveis.\n"
             . "Use a biblioteca do sistema abaixo como referência principal para explicar funcionalidades e fluxos.\n"
             . "Sempre que fizer sentido, termine com uma pergunta curta para continuar o atendimento (ex.: 'quer que eu te guie no passo a passo?').\n"
+            . ($isWithinScope ? "Pergunta atual dentro do escopo principal do SGQ.\n" : "Pergunta atual fora do escopo principal do SGQ: ainda assim ajude com orientação geral e pesquisa web útil.\n")
             . "Biblioteca dinâmica do sistema:\n" . $systemLibrary . "\n\n"
             . ($moduleContext !== '' ? ($moduleContext . "\n\n") : '')
             . ($webLookupContext !== '' ? ($webLookupContext . "\n\n") : '')
@@ -639,12 +639,63 @@ class ChatController
         return false;
     }
 
+    private function tryCreateSupportTicketFromChat(int $userId, string $message): ?string
+    {
+        if (!$this->shouldCreateSupportTicket($message)) {
+            return null;
+        }
+
+        try {
+            $tableExistsStmt = $this->db->query("SHOW TABLES LIKE 'suporte_solicitacoes'");
+            if (!$tableExistsStmt || $tableExistsStmt->rowCount() === 0) {
+                return 'Consigo te ajudar com o chamado, mas a tabela de suporte ainda não está disponível no banco. Pode avisar o TI para habilitar o módulo de suporte?';
+            }
+
+            $summary = trim(preg_replace('/\s+/', ' ', $message));
+            if ($summary === '') {
+                return 'Posso abrir o chamado para você, mas preciso de uma descrição rápida do problema.';
+            }
+
+            $titulo = mb_substr('Chamado via Chat: ' . $summary, 0, 180, 'UTF-8');
+            $descricao = "Solicitação criada pelo Eduardo via chat interno.\n\nMensagem original do usuário:\n" . $summary;
+
+            $stmt = $this->db->prepare('INSERT INTO suporte_solicitacoes (titulo, descricao, anexos, status, solicitante_id, created_at) VALUES (?, ?, ?, "Pendente", ?, NOW())');
+            $stmt->execute([$titulo, $descricao, json_encode([], JSON_UNESCAPED_UNICODE), $userId]);
+
+            $ticketId = (int)$this->db->lastInsertId();
+            return 'Pronto! Abri um chamado no Suporte para você ✅ Protocolo #' . $ticketId . '. Se quiser, já me diga mais detalhes que eu complemento na descrição.';
+        } catch (\Throwable $e) {
+            error_log('Eduardo suporte ticket falhou: ' . $e->getMessage());
+            return 'Tentei abrir o chamado automaticamente, mas não consegui concluir agora. Você pode abrir manualmente em /suporte e eu te ajudo a preencher.';
+        }
+    }
+
     private function shouldRunWebLookup(string $message): bool
     {
         $normalized = $this->normalizeForLookup($message);
+        if (mb_strlen($normalized, 'UTF-8') < 8) {
+            return false;
+        }
+
+        $smallTalk = [
+            'oi', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'obrigado', 'valeu', 'blz', 'ok'
+        ];
+
+        foreach ($smallTalk as $text) {
+            if ($normalized === $this->normalizeForLookup($text)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function shouldCreateSupportTicket(string $message): bool
+    {
+        $normalized = $this->normalizeForLookup($message);
         $keywords = [
-            'driver', 'drivers', 'manual', 'firmware', 'download', 'instalador',
-            'site oficial', 'fabricante', 'suporte tecnico', 'baixar'
+            'abrir chamado', 'abre chamado', 'abrir ticket', 'abrir suporte',
+            'criar chamado', 'abrir solicitacao', 'chamado no suporte'
         ];
 
         foreach ($keywords as $keyword) {
@@ -715,7 +766,7 @@ class ChatController
             return [];
         }
 
-        $url = 'https://duckduckgo.com/html/?q=' . urlencode($query . ' driver manual download site oficial');
+        $url = 'https://duckduckgo.com/html/?q=' . urlencode($query);
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
