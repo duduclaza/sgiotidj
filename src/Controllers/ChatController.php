@@ -723,10 +723,12 @@ class ChatController
             $dataLimite = date('Y-m-d 00:00:00', strtotime("-{$dias} days"));
 
             $like = '%' . $codigo . '%';
+            $isNumeric = ctype_digit($codigo);
+            $codigoInt = $isNumeric ? (int)$codigo : 0;
 
             // Debug: contar total de registros na tabela
             $totalCheck = $this->db->query("SELECT COUNT(*) FROM triagem_toners")->fetchColumn();
-            error_log("Eduardo triagem: total registros na tabela = {$totalCheck}");
+            error_log("Eduardo triagem: total registros na tabela = {$totalCheck}, termo='{$codigo}', isNumeric=" . ($isNumeric ? 'sim' : 'nao'));
 
             $baseSelect = "
                 SELECT t.toner_modelo, t.cliente_nome, t.filial_registro, t.colaborador_registro,
@@ -746,14 +748,16 @@ class ChatController
                     OR t.filial_registro LIKE ?
                     OR t.colaborador_registro LIKE ?
                     OR t.defeito_nome LIKE ?
-                    OR CAST(t.cliente_id AS CHAR) LIKE ?
-                    OR CAST(t.id AS CHAR) = ?
+                    OR t.cliente_id = ?
+                    OR t.id = ?
                 )
             ";
 
+            $searchParams = [$like, $like, $like, $like, $like, $like, $like, $codigoInt, $codigoInt];
+
             // Tentar com filtro de data
             $stmt = $this->db->prepare($baseSelect . $searchWhere . " AND t.created_at >= ? ORDER BY t.created_at DESC LIMIT 50");
-            $stmt->execute([$like, $like, $like, $like, $like, $like, $like, $like, $codigo, $dataLimite]);
+            $stmt->execute(array_merge($searchParams, [$dataLimite]));
             $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             error_log("Eduardo triagem query: termo='{$codigo}', dias={$dias}, dataLimite={$dataLimite}, resultados=" . count($rows));
@@ -762,7 +766,7 @@ class ChatController
             if (empty($rows)) {
                 error_log("Eduardo triagem: tentando sem filtro de data...");
                 $stmt2 = $this->db->prepare($baseSelect . $searchWhere . " ORDER BY t.created_at DESC LIMIT 50");
-                $stmt2->execute([$like, $like, $like, $like, $like, $like, $like, $like, $codigo]);
+                $stmt2->execute($searchParams);
                 $rows = $stmt2->fetchAll(\PDO::FETCH_ASSOC);
                 error_log("Eduardo triagem sem data: resultados=" . count($rows));
 
