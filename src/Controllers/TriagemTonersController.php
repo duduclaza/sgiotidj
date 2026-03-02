@@ -163,8 +163,8 @@ class TriagemTonersController
                 'Valor Recuperado (R$) [calculado automaticamente]',
                 'Observações',
                 'Data Registro (DD/MM/AAAA ou DD/MM/AAAA HH:MM)',
-                'Filial (automático no sistema)',
-                'Colaborador (automático no sistema)',
+                'Filial (opcional)',
+                'Colaborador (opcional)',
             ], ';');
 
             fputcsv($output, [
@@ -230,7 +230,9 @@ class TriagemTonersController
             $hasDefeitoColumn = false;
             $hasValorRecuperadoColumn = false;
             $hasDataColumn = false;
-            foreach ($header as $h) {
+            $filialColumnIndex = null;
+            $colaboradorColumnIndex = null;
+            foreach ($header as $idx => $h) {
                 if (strpos($h, 'defeito') !== false) {
                     $hasDefeitoColumn = true;
                 }
@@ -240,13 +242,17 @@ class TriagemTonersController
                 if (strpos($h, 'data') !== false) {
                     $hasDataColumn = true;
                 }
+                if ($filialColumnIndex === null && strpos($h, 'filial') !== false) {
+                    $filialColumnIndex = $idx;
+                }
+                if ($colaboradorColumnIndex === null && (strpos($h, 'colaborador') !== false || strpos($h, 'colab') !== false)) {
+                    $colaboradorColumnIndex = $idx;
+                }
             }
 
             $imported = 0;
             $errors = [];
             $importedDetails = [];
-            $filialRegistroSessao = trim((string)($_SESSION['user_filial'] ?? ''));
-            $colaboradorRegistroSessao = trim((string)($_SESSION['user_name'] ?? ''));
 
             foreach ($rows as $index => $row) {
                 if ($index === 0) {
@@ -308,6 +314,22 @@ class TriagemTonersController
                                 $dt->setTime(0, 0, 0);
                             }
                             $createdAtImport = $dt->format('Y-m-d H:i:s');
+                        }
+                    }
+
+                    $filialRegistroImport = null;
+                    if ($filialColumnIndex !== null) {
+                        $filialRaw = trim((string)($row[$filialColumnIndex] ?? ''));
+                        if ($filialRaw !== '') {
+                            $filialRegistroImport = $filialRaw;
+                        }
+                    }
+
+                    $colaboradorRegistroImport = null;
+                    if ($colaboradorColumnIndex !== null) {
+                        $colaboradorRaw = trim((string)($row[$colaboradorColumnIndex] ?? ''));
+                        if ($colaboradorRaw !== '') {
+                            $colaboradorRegistroImport = $colaboradorRaw;
                         }
                     }
 
@@ -418,8 +440,8 @@ class TriagemTonersController
                         $toner['modelo'],
                         $cliente['id'],
                         $cliente['nome'],
-                        $filialRegistroSessao !== '' ? $filialRegistroSessao : null,
-                        $colaboradorRegistroSessao !== '' ? $colaboradorRegistroSessao : null,
+                        $filialRegistroImport,
+                        $colaboradorRegistroImport,
                         $codigoRequisicao !== '' ? $codigoRequisicao : null,
                         $defeitoId,
                         $defeitoNome,
@@ -441,8 +463,8 @@ class TriagemTonersController
                         $line,
                         $cliente['nome'],
                         $toner['modelo'],
-                        $filialRegistroSessao !== '' ? $filialRegistroSessao : 'Não informado',
-                        $colaboradorRegistroSessao !== '' ? $colaboradorRegistroSessao : 'Não informado'
+                        $filialRegistroImport ?? 'Não informado',
+                        $colaboradorRegistroImport ?? 'Não informado'
                     );
 
                     $imported++;
