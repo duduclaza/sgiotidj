@@ -43,6 +43,10 @@ Thumbs.db
 *.bak
 *.backup
 
+# Permitir SQLs controlados para novas implementações
+!/novas-queries/
+!/novas-queries/*.sql
+
 # Arquivos temporários
 /temp/*
 *.tmp

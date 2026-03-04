@@ -367,6 +367,13 @@ $router->get('/controle-descartes/template', [App\Controllers\ControleDescartesC
 $router->post('/controle-descartes/importar', [App\Controllers\ControleDescartesController::class , 'importar']);
 $router->get('/controle-descartes/relatorios', [App\Controllers\ControleDescartesController::class , 'relatorios']);
 
+// Precificação de Coleta de Descartes
+$router->get('/precificacao-coleta-descartes', [App\Controllers\PrecificacaoColetaDescartesController::class , 'index']);
+$router->get('/precificacao-coleta-descartes/list', [App\Controllers\PrecificacaoColetaDescartesController::class , 'list']);
+$router->post('/precificacao-coleta-descartes/create', [App\Controllers\PrecificacaoColetaDescartesController::class , 'create']);
+$router->post('/precificacao-coleta-descartes/update', [App\Controllers\PrecificacaoColetaDescartesController::class , 'update']);
+$router->post('/precificacao-coleta-descartes/delete', [App\Controllers\PrecificacaoColetaDescartesController::class , 'delete']);
+
 // Auditorias routes
 $router->get('/auditorias', [App\Controllers\AuditoriasController::class , 'index']);
 $router->get('/auditorias/list', [App\Controllers\AuditoriasController::class , 'listAuditorias']);

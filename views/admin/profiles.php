@@ -301,6 +301,7 @@ const modulesByCategory = {
     { key: 'amostragens_2', name: 'Amostragens 2.0 🔬' },
     { key: 'garantias', name: 'Garantias 🛡️' },
     { key: 'controle_descartes', name: 'Controle de Descartes ♻️' },
+    { key: 'precificacao_coleta_descartes', name: 'Precificação de Coleta 💰' },
     { key: 'homologacoes', name: 'Homologações ✅' },
     { key: 'certificados', name: 'Certificados 📜' },
     { key: 'fmea', name: 'FMEA 📈' },

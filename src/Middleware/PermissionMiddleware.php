@@ -69,6 +69,11 @@ class PermissionMiddleware
         '/amostragens-2' => 'amostragens_2',
         '/controle-de-descartes' => 'controle_descartes',
         '/controle-descartes' => 'controle_descartes',
+        '/precificacao-coleta-descartes' => 'precificacao_coleta_descartes',
+        '/precificacao-coleta-descartes/list' => 'precificacao_coleta_descartes',
+        '/precificacao-coleta-descartes/create' => 'precificacao_coleta_descartes',
+        '/precificacao-coleta-descartes/update' => 'precificacao_coleta_descartes',
+        '/precificacao-coleta-descartes/delete' => 'precificacao_coleta_descartes',
         '/auditorias' => 'auditorias',
         '/femea' => 'femea',
         '/pops-e-its' => 'pops_its_visualizacao', // Rota principal vai para visualização (todos podem ver)

@@ -14,6 +14,7 @@ use App\Controllers\AreaTecnicaController;
 use App\Controllers\ProfileController;
 use App\Controllers\TriagemTonersController;
 use App\Controllers\CadastroDefeitosController;
+use App\Controllers\PrecificacaoColetaDescartesController;
 
 // ===== REGISTROS GERAIS =====
 
@@ -133,3 +134,10 @@ $router->post('/triagem-toners/duplicate', [TriagemTonersController::class, 'dup
 $router->post('/triagem-toners/delete', [TriagemTonersController::class, 'delete']);
 $router->get('/triagem-toners/parametros', [TriagemTonersController::class, 'getParametrosApi']);
 $router->post('/triagem-toners/parametros/save', [TriagemTonersController::class, 'saveParametros']);
+
+// ===== PRECIFICAÇÃO DE COLETA DE DESCARTES =====
+$router->get('/precificacao-coleta-descartes', [PrecificacaoColetaDescartesController::class, 'index']);
+$router->get('/precificacao-coleta-descartes/list', [PrecificacaoColetaDescartesController::class, 'list']);
+$router->post('/precificacao-coleta-descartes/create', [PrecificacaoColetaDescartesController::class, 'create']);
+$router->post('/precificacao-coleta-descartes/update', [PrecificacaoColetaDescartesController::class, 'update']);
+$router->post('/precificacao-coleta-descartes/delete', [PrecificacaoColetaDescartesController::class, 'delete']);
