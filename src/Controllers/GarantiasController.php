@@ -135,6 +135,7 @@ class GarantiasController
             
             // Enviar notificação por email para admins, compras e qualidade
             $this->enviarNotificacaoNovaRequisicao([
+                'id' => (int)$id,
                 'ticket' => $ticket,
                 'nome_requisitante' => $nome_requisitante,
                 'produto' => $produto,
@@ -170,23 +171,70 @@ class GarantiasController
     private function enviarNotificacaoNovaRequisicao(array $dados)
     {
         try {
-            // Buscar emails dos usuários: admins, super_admins, compras, qualidade
-            $stmt = $this->db->prepare("
-                SELECT DISTINCT email FROM users 
-                WHERE (role IN ('admin', 'super_admin', 'superadmin', 'compras', 'qualidade'))
-                AND email IS NOT NULL 
-                AND email != ''
-                AND active = 1
-            ");
-            $stmt->execute();
-            $emails = $stmt->fetchAll(PDO::FETCH_COLUMN);
-            
-            if (empty($emails)) {
-                error_log("📧 Nenhum destinatário encontrado para notificação de requisição");
+            // Buscar destinatários para notificação (compatível com bases que usam status ou active)
+            $destinatarios = [];
+            $recipientQueries = [
+                "SELECT DISTINCT id, name, email FROM users
+                 WHERE role IN ('admin', 'super_admin', 'superadmin', 'compras', 'qualidade')
+                   AND status = 'active'",
+                "SELECT DISTINCT id, name, email FROM users
+                 WHERE role IN ('admin', 'super_admin', 'superadmin', 'compras', 'qualidade')
+                   AND active = 1",
+                "SELECT DISTINCT id, name, email FROM users
+                 WHERE role IN ('admin', 'super_admin', 'superadmin', 'compras', 'qualidade')"
+            ];
+
+            foreach ($recipientQueries as $sql) {
+                try {
+                    $stmt = $this->db->query($sql);
+                    $rows = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+                    if (!empty($rows)) {
+                        $destinatarios = $rows;
+                        break;
+                    }
+                } catch (\Throwable $e) {
+                    // tenta a próxima query de fallback
+                    continue;
+                }
+            }
+
+            if (empty($destinatarios)) {
+                error_log("🔔📧 Nenhum destinatário encontrado para notificação de requisição");
                 return;
             }
-            
-            error_log("📧 Enviando notificação para: " . implode(', ', $emails));
+
+            // Notificação no sistema (sininho)
+            $notifTitle = "🔔 Nova Requisição de Garantia";
+            $notifMessage = "Ticket {$dados['ticket']} | {$dados['nome_requisitante']} | {$dados['produto']}";
+            foreach ($destinatarios as $dest) {
+                if (!empty($dest['id'])) {
+                    NotificationsController::create(
+                        (int)$dest['id'],
+                        $notifTitle,
+                        $notifMessage,
+                        'garantias_requisicao',
+                        'garantias_requisicao',
+                        (int)($dados['id'] ?? 0)
+                    );
+                }
+            }
+
+            // Email (somente para quem possui email válido)
+            $emails = [];
+            foreach ($destinatarios as $dest) {
+                $email = trim((string)($dest['email'] ?? ''));
+                if ($email !== '') {
+                    $emails[] = $email;
+                }
+            }
+            $emails = array_values(array_unique($emails));
+
+            if (empty($emails)) {
+                error_log("� Notificação no sistema criada, mas sem emails válidos para envio");
+                return;
+            }
+
+            error_log("�📧 Enviando notificação por email para: " . implode(', ', $emails));
             
             $emailService = new EmailService();
             
