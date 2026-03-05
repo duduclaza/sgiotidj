@@ -218,17 +218,6 @@ class AdminController
                 $params[] = '%' . trim($_GET['filial']) . '%';
             }
 
-            if (isset($_GET['percentual_custom_min']) && $_GET['percentual_custom_min'] !== '') {
-                $customMin = max(0, min(100, (float)$_GET['percentual_custom_min']));
-                $where .= ' AND COALESCE(t.percentual_calculado, 0) >= ?';
-                $params[] = $customMin;
-            }
-            if (isset($_GET['percentual_custom_max']) && $_GET['percentual_custom_max'] !== '') {
-                $customMax = max(0, min(100, (float)$_GET['percentual_custom_max']));
-                $where .= ' AND COALESCE(t.percentual_calculado, 0) <= ?';
-                $params[] = $customMax;
-            }
-
             $faixasSelecionadasRaw = trim((string)($_GET['faixa_ids'] ?? ''));
             if ($faixasSelecionadasRaw !== '') {
                 $idsSelecionados = array_values(array_filter(array_map('intval', explode(',', $faixasSelecionadasRaw)), static fn($id) => $id > 0));

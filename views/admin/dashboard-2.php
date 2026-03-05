@@ -68,8 +68,6 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   .filter-input::placeholder { color: var(--dash-muted); }
   .filter-input option { background: #1e293b; color: var(--dash-text); }
   .filter-multi { min-height: 92px; padding-top: 6px; padding-bottom: 6px; }
-  .range-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-  .range-value { font-size: 11px; color: var(--dash-muted); text-align: right; margin-bottom: 4px; }
   .search-dropdown { position: relative; }
   .search-dropdown.open { z-index: 120; }
   .search-dropdown .sd-list { display:none; position:absolute; top:100%; left:0; right:0; z-index:50; max-height:220px; overflow-y:auto; margin-top:4px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:#1e293b; box-shadow:0 12px 32px rgba(0,0,0,0.4); }
@@ -176,7 +174,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       <span class="text-xs font-semibold uppercase tracking-widest text-slate-300">Filtros Globais</span>
       <button onclick="limparFiltros()" class="ml-auto text-xs text-cyan-400 hover:text-cyan-300 font-medium transition-colors">Limpar filtros</button>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-8 gap-3">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-3 items-start">
       <div class="search-dropdown" id="sdModelo">
         <label class="block text-[11px] font-medium text-slate-400 mb-1">Modelo</label>
         <input type="text" id="filtroModeloInput" class="filter-input" placeholder="Pesquisar modelo..." autocomplete="off">
@@ -211,19 +209,9 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
         <label class="block text-[11px] font-medium text-slate-400 mb-1">Data Fim</label>
         <input type="date" id="filtroDataFim" class="filter-input">
       </div>
-      <div>
+      <div class="xl:col-span-2">
         <label class="block text-[11px] font-medium text-slate-400 mb-1">Faixas de Retorno</label>
         <select id="filtroFaixas" class="filter-input filter-multi" multiple></select>
-      </div>
-      <div>
-        <div class="flex items-center justify-between mb-1">
-          <label class="block text-[11px] font-medium text-slate-400">Faixa Personalizada (%)</label>
-          <span class="range-value" id="filtroPercentualTexto">0% - 100%</span>
-        </div>
-        <div class="range-row">
-          <input type="range" id="filtroPercentualMin" class="filter-input" min="0" max="100" step="1" value="0">
-          <input type="range" id="filtroPercentualMax" class="filter-input" min="0" max="100" step="1" value="100">
-        </div>
       </div>
     </div>
   </div>
@@ -420,8 +408,6 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       data_inicio: document.getElementById('filtroDataInicio').value,
       data_fim:    document.getElementById('filtroDataFim').value,
       faixa_ids:   faixaIds.join(','),
-      percentual_custom_min: document.getElementById('filtroPercentualMin').value,
-      percentual_custom_max: document.getElementById('filtroPercentualMax').value,
     };
   }
 
@@ -907,34 +893,8 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
     document.getElementById('filtroModeloInput').value = '';
     document.getElementById('filtroClienteInput').value = '';
     Array.from(document.getElementById('filtroFaixas').options).forEach(o => { o.selected = false; });
-    document.getElementById('filtroPercentualMin').value = '0';
-    document.getElementById('filtroPercentualMax').value = '100';
-    updatePercentualRangeText();
     fetchDashboard();
   };
-
-  function updatePercentualRangeText() {
-    const min = Number(document.getElementById('filtroPercentualMin').value || 0);
-    const max = Number(document.getElementById('filtroPercentualMax').value || 100);
-    document.getElementById('filtroPercentualTexto').textContent = min + '% - ' + max + '%';
-  }
-
-  function normalizePercentualRange(changedInputId) {
-    const minInput = document.getElementById('filtroPercentualMin');
-    const maxInput = document.getElementById('filtroPercentualMax');
-    let min = Number(minInput.value || 0);
-    let max = Number(maxInput.value || 100);
-    if (min > max) {
-      if (changedInputId === 'filtroPercentualMin') {
-        max = min;
-        maxInput.value = String(max);
-      } else {
-        min = max;
-        minInput.value = String(min);
-      }
-    }
-    updatePercentualRangeText();
-  }
 
   // ===== Fullscreen =====
   let fullscreenChart = null;
@@ -1051,20 +1011,9 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
     });
     document.getElementById('filtroFaixas').addEventListener('change', onFilterChange);
 
-    ['filtroPercentualMin', 'filtroPercentualMax'].forEach(id => {
-      document.getElementById(id).addEventListener('input', () => {
-        normalizePercentualRange(id);
-        onFilterChange();
-      });
-      document.getElementById(id).addEventListener('change', () => {
-        normalizePercentualRange(id);
-      });
-    });
-
     ['filtroDataInicio','filtroDataFim'].forEach(id => {
       document.getElementById(id).addEventListener('input', onFilterChange);
     });
-    updatePercentualRangeText();
     fetchDashboard();
   });
 })();

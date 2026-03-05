@@ -12,9 +12,45 @@ class FluxogramasController
     {
         try {
             $this->db = Database::getInstance();
+            $this->ensureFilialProcessoColumn();
         } catch (\Exception $e) {
             error_log("FluxogramasController - Erro de conexão: " . $e->getMessage());
             $this->db = null;
+        }
+    }
+
+    private function ensureFilialProcessoColumn(): void
+    {
+        if (!$this->db) {
+            return;
+        }
+
+        try {
+            $tableExists = $this->db->query("SHOW TABLES LIKE 'fluxogramas_registros'")->fetchColumn();
+            if (!$tableExists) {
+                return;
+            }
+
+            if (!$this->hasFluxogramasRegistrosColumn('filial_processo')) {
+                $this->db->exec("ALTER TABLE fluxogramas_registros ADD COLUMN filial_processo VARCHAR(150) NULL AFTER publico");
+            }
+        } catch (\Exception $e) {
+            error_log("FluxogramasController::ensureFilialProcessoColumn - Erro: " . $e->getMessage());
+        }
+    }
+
+    private function hasFluxogramasRegistrosColumn(string $column): bool
+    {
+        if (!$this->db) {
+            return false;
+        }
+
+        try {
+            $stmt = $this->db->prepare("SHOW COLUMNS FROM fluxogramas_registros LIKE ?");
+            $stmt->execute([$column]);
+            return (bool)$stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {
+            return false;
         }
     }
 
@@ -357,6 +393,18 @@ class FluxogramasController
             
             $user_id = $_SESSION['user_id'];
             $filial_processo = trim((string)($_POST['filial_processo'] ?? ''));
+
+            if (!$this->hasFluxogramasRegistrosColumn('filial_processo')) {
+                $this->ensureFilialProcessoColumn();
+            }
+
+            if (!$this->hasFluxogramasRegistrosColumn('filial_processo')) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'A coluna filial_processo ainda não existe em fluxogramas_registros. Atualize o banco e tente novamente.'
+                ]);
+                return;
+            }
             
             // Validar dados obrigatórios
             $titulo_id = $_POST['titulo_id'] ?? '';

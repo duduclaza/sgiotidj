@@ -10,6 +10,31 @@ class TriagemTonersController
 {
     private PDO $db;
 
+    private function calcularImpactoFinanceiro(array $toner, float $percentualCalculado, string $destino): array
+    {
+        $capacidade = (float)($toner['capacidade_folhas'] ?? 0);
+        $custoFolha = (float)($toner['custo_por_folha'] ?? 0);
+        $folhasEquivalentes = ($percentualCalculado > 0 && $capacidade > 0)
+            ? (($percentualCalculado / 100) * $capacidade)
+            : 0;
+
+        $valorBase = ($folhasEquivalentes > 0 && $custoFolha > 0)
+            ? round($folhasEquivalentes * $custoFolha, 2)
+            : 0.00;
+
+        $valor = 0.00;
+        if ($destino === 'Estoque') {
+            $valor = abs($valorBase);
+        } elseif ($destino === 'Descarte') {
+            $valor = -abs($valorBase);
+        }
+
+        return [
+            'valor' => round($valor, 2),
+            'folhas_equivalentes' => (int)round($folhasEquivalentes),
+        ];
+    }
+
     public function __construct()
     {
         $this->db = Database::getInstance();
@@ -414,14 +439,8 @@ class TriagemTonersController
 
                     $parecer = $this->getParecer($percentualCalculado);
 
-                    $valorRecuperado = 0.00;
-                    if ($destino === 'Estoque') {
-                        $capacidade = (float)($toner['capacidade_folhas'] ?? 0);
-                        $custoFolha = (float)($toner['custo_por_folha'] ?? 0);
-                        if ($capacidade > 0 && $custoFolha > 0) {
-                            $valorRecuperado = round((($percentualCalculado / 100) * $capacidade) * $custoFolha, 2);
-                        }
-                    }
+                    $impactoFinanceiro = $this->calcularImpactoFinanceiro($toner, $percentualCalculado, $destino);
+                    $valorRecuperado = $impactoFinanceiro['valor'];
 
                     $insert = $this->db->prepare("
                         INSERT INTO triagem_toners
@@ -678,12 +697,36 @@ class TriagemTonersController
 
             $stmt = $this->db->prepare("
                 SELECT t.*,
-                       COALESCE(t.valor_recuperado, 0.00) AS valor_recuperado,
+                       CASE
+                           WHEN t.destino = 'Descarte' THEN ROUND(
+                               -1 * (
+                                   CASE
+                                       WHEN COALESCE(t.valor_recuperado, 0) <> 0 THEN ABS(t.valor_recuperado)
+                                       ELSE ((COALESCE(t.percentual_calculado, 0) / 100) * COALESCE(tt.capacidade_folhas, 0) * COALESCE(tt.custo_por_folha, 0))
+                                   END
+                               ),
+                               2
+                           )
+                           WHEN t.destino = 'Estoque' THEN ROUND(
+                               CASE
+                                   WHEN COALESCE(t.valor_recuperado, 0) <> 0 THEN ABS(t.valor_recuperado)
+                                   ELSE ((COALESCE(t.percentual_calculado, 0) / 100) * COALESCE(tt.capacidade_folhas, 0) * COALESCE(tt.custo_por_folha, 0))
+                               END,
+                               2
+                           )
+                           ELSE ROUND(COALESCE(t.valor_recuperado, 0), 2)
+                       END AS valor_recuperado,
+                       CASE
+                           WHEN t.destino IN ('Descarte', 'Estoque')
+                               THEN ROUND((COALESCE(t.percentual_calculado, 0) / 100) * COALESCE(tt.capacidade_folhas, 0), 0)
+                           ELSE 0
+                       END AS folhas_equivalentes,
                        COALESCE(t.colaborador_registro, u.name) AS colaborador_registro_nome,
                        COALESCE(t.filial_registro, '') AS filial_registro_nome,
                        u.name  AS criado_por_nome,
                        uu.name AS atualizado_por_nome
                 FROM triagem_toners t
+                LEFT JOIN toners tt ON tt.id = t.toner_id
                 LEFT JOIN users u  ON u.id  = t.created_by
                 LEFT JOIN users uu ON uu.id = t.updated_by
                 $where
@@ -761,21 +804,17 @@ class TriagemTonersController
 
             $parecer = $this->getParecer($percentual_calculado);
 
-            // Calcular valor recuperado se destino for estoque
-            $valor_recuperado = 0;
-            $capacidade       = (float)($toner['capacidade_folhas'] ?? 0);
-            $custo_folha      = (float)($toner['custo_por_folha']   ?? 0);
-            if ($capacidade > 0 && $custo_folha > 0 && $percentual_calculado > 0) {
-                $folhas_restantes = ($percentual_calculado / 100) * $capacidade;
-                $valor_recuperado = round($folhas_restantes * $custo_folha, 2);
-            }
+            $impactoEstoque = $this->calcularImpactoFinanceiro($toner, $percentual_calculado, 'Estoque');
+            $impactoDescarte = $this->calcularImpactoFinanceiro($toner, $percentual_calculado, 'Descarte');
 
             echo json_encode([
                 'success'              => true,
                 'percentual_calculado' => $percentual_calculado,
                 'gramatura_restante'   => $gramatura_restante,
                 'parecer'              => $parecer,
-                'valor_recuperado'     => $valor_recuperado,
+                'valor_estoque'        => $impactoEstoque['valor'],
+                'valor_descarte'       => $impactoDescarte['valor'],
+                'folhas_equivalentes'  => $impactoEstoque['folhas_equivalentes'],
             ]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
@@ -880,15 +919,8 @@ class TriagemTonersController
 
             $parecer = $this->getParecer($percentual_calculado);
 
-            $valor_recuperado = 0;
-            if ($destino === 'Estoque') {
-                $capacidade  = (float)($toner['capacidade_folhas'] ?? 0);
-                $custo_folha = (float)($toner['custo_por_folha']   ?? 0);
-                if ($capacidade > 0 && $custo_folha > 0) {
-                    $folhas_restantes = ($percentual_calculado / 100) * $capacidade;
-                    $valor_recuperado = round($folhas_restantes * $custo_folha, 2);
-                }
-            }
+            $impactoFinanceiro = $this->calcularImpactoFinanceiro($toner, $percentual_calculado, $destino);
+            $valor_recuperado = $impactoFinanceiro['valor'];
 
             $insert = $this->db->prepare("
                 INSERT INTO triagem_toners
@@ -1024,14 +1056,8 @@ class TriagemTonersController
 
             $parecer = $this->getParecer($percentual_calculado);
 
-            $valor_recuperado = 0;
-            if ($destino === 'Estoque') {
-                $capacidade  = (float)($toner['capacidade_folhas'] ?? 0);
-                $custo_folha = (float)($toner['custo_por_folha']   ?? 0);
-                if ($capacidade > 0 && $custo_folha > 0) {
-                    $valor_recuperado = round((($percentual_calculado / 100) * $capacidade) * $custo_folha, 2);
-                }
-            }
+            $impactoFinanceiro = $this->calcularImpactoFinanceiro($toner, $percentual_calculado, $destino);
+            $valor_recuperado = $impactoFinanceiro['valor'];
 
             $upd = $this->db->prepare("
                 UPDATE triagem_toners SET
