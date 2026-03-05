@@ -13,6 +13,56 @@ class AdminController
     {
         $this->db = Database::getInstance();
     }
+
+    /**
+     * Retorna faixas dinâmicas de retorno com base nos parâmetros da triagem.
+     */
+    private function getTriagemFaixasRetorno(): array
+    {
+        try {
+            $tableExists = $this->db->query("SHOW TABLES LIKE 'triagem_toners_parametros'")->rowCount() > 0;
+            if (!$tableExists) {
+                return [
+                    ['id' => 1, 'label' => '0% – 5%', 'percentual_min' => 0.0, 'percentual_max' => 5.0],
+                    ['id' => 2, 'label' => '6% – 40%', 'percentual_min' => 6.0, 'percentual_max' => 40.0],
+                    ['id' => 3, 'label' => '41% – 80%', 'percentual_min' => 41.0, 'percentual_max' => 80.0],
+                    ['id' => 4, 'label' => '81% – 100%', 'percentual_min' => 81.0, 'percentual_max' => 100.0],
+                ];
+            }
+
+            $stmt = $this->db->query("SELECT id, percentual_min, percentual_max FROM triagem_toners_parametros ORDER BY ordem ASC, id ASC");
+            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $faixas = [];
+            foreach ($rows as $row) {
+                $min = max(0, min(100, (float)($row['percentual_min'] ?? 0)));
+                $max = max(0, min(100, (float)($row['percentual_max'] ?? 0)));
+                if ($min > $max) {
+                    [$min, $max] = [$max, $min];
+                }
+
+                $faixas[] = [
+                    'id' => (int)$row['id'],
+                    'label' => rtrim(rtrim(number_format($min, 2, '.', ''), '0'), '.') . '% – ' . rtrim(rtrim(number_format($max, 2, '.', ''), '0'), '.') . '%',
+                    'percentual_min' => $min,
+                    'percentual_max' => $max,
+                ];
+            }
+
+            if (!empty($faixas)) {
+                return $faixas;
+            }
+        } catch (\Exception $e) {
+            // fallback abaixo
+        }
+
+        return [
+            ['id' => 1, 'label' => '0% – 5%', 'percentual_min' => 0.0, 'percentual_max' => 5.0],
+            ['id' => 2, 'label' => '6% – 40%', 'percentual_min' => 6.0, 'percentual_max' => 40.0],
+            ['id' => 3, 'label' => '41% – 80%', 'percentual_min' => 41.0, 'percentual_max' => 80.0],
+            ['id' => 4, 'label' => '81% – 100%', 'percentual_min' => 81.0, 'percentual_max' => 100.0],
+        ];
+    }
     
     /**
      * Admin dashboard
@@ -141,6 +191,8 @@ class AdminController
                 exit;
             }
 
+            $faixasRetorno = $this->getTriagemFaixasRetorno();
+
             // --- Build dynamic WHERE ---
             $where = '1=1';
             $params = [];
@@ -164,6 +216,43 @@ class AdminController
             if (!empty($_GET['filial'])) {
                 $where .= ' AND COALESCE(t.filial_registro, \'\') LIKE ?';
                 $params[] = '%' . trim($_GET['filial']) . '%';
+            }
+
+            if (isset($_GET['percentual_custom_min']) && $_GET['percentual_custom_min'] !== '') {
+                $customMin = max(0, min(100, (float)$_GET['percentual_custom_min']));
+                $where .= ' AND COALESCE(t.percentual_calculado, 0) >= ?';
+                $params[] = $customMin;
+            }
+            if (isset($_GET['percentual_custom_max']) && $_GET['percentual_custom_max'] !== '') {
+                $customMax = max(0, min(100, (float)$_GET['percentual_custom_max']));
+                $where .= ' AND COALESCE(t.percentual_calculado, 0) <= ?';
+                $params[] = $customMax;
+            }
+
+            $faixasSelecionadasRaw = trim((string)($_GET['faixa_ids'] ?? ''));
+            if ($faixasSelecionadasRaw !== '') {
+                $idsSelecionados = array_values(array_filter(array_map('intval', explode(',', $faixasSelecionadasRaw)), static fn($id) => $id > 0));
+                if (!empty($idsSelecionados)) {
+                    $mapFaixas = [];
+                    foreach ($faixasRetorno as $fx) {
+                        $mapFaixas[(int)$fx['id']] = $fx;
+                    }
+
+                    $condicoesFaixa = [];
+                    foreach ($idsSelecionados as $idFaixa) {
+                        if (!isset($mapFaixas[$idFaixa])) {
+                            continue;
+                        }
+                        $fx = $mapFaixas[$idFaixa];
+                        $condicoesFaixa[] = '(COALESCE(t.percentual_calculado, 0) >= ? AND COALESCE(t.percentual_calculado, 0) <= ?)';
+                        $params[] = (float)$fx['percentual_min'];
+                        $params[] = (float)$fx['percentual_max'];
+                    }
+
+                    if (!empty($condicoesFaixa)) {
+                        $where .= ' AND (' . implode(' OR ', $condicoesFaixa) . ')';
+                    }
+                }
             }
 
             $dataInicio = !empty($_GET['data_inicio']) ? trim((string)$_GET['data_inicio']) : null;
@@ -235,22 +324,34 @@ class AdminController
                 ];
             }
 
-            // --- Chart 3: Faixas de percentual de retorno ---
-            $chart3Sql = "SELECT
-                SUM(CASE WHEN t.percentual_calculado >= 0  AND t.percentual_calculado < 5   THEN 1 ELSE 0 END) AS faixa_0_5,
-                SUM(CASE WHEN t.percentual_calculado >= 5  AND t.percentual_calculado < 39  THEN 1 ELSE 0 END) AS faixa_5_39,
-                SUM(CASE WHEN t.percentual_calculado >= 39 AND t.percentual_calculado < 89  THEN 1 ELSE 0 END) AS faixa_39_89,
-                SUM(CASE WHEN t.percentual_calculado >= 89 AND t.percentual_calculado <= 100 THEN 1 ELSE 0 END) AS faixa_89_100
-                FROM triagem_toners t WHERE {$where}";
-            $stmt = $this->db->prepare($chart3Sql);
-            $stmt->execute($params);
-            $faixas = $stmt->fetch(\PDO::FETCH_ASSOC);
-            $chart3 = [
-                ['label' => '0% – 5%',   'total' => (int)($faixas['faixa_0_5'] ?? 0)],
-                ['label' => '5% – 39%',  'total' => (int)($faixas['faixa_5_39'] ?? 0)],
-                ['label' => '39% – 89%', 'total' => (int)($faixas['faixa_39_89'] ?? 0)],
-                ['label' => '89% – 100%','total' => (int)($faixas['faixa_89_100'] ?? 0)],
-            ];
+            // --- Chart 3: Faixas de percentual de retorno (dinâmico por parâmetros da triagem) ---
+            $chart3SelectParts = [];
+            $chart3Params = $params;
+            foreach ($faixasRetorno as $i => $fx) {
+                $alias = 'faixa_' . $i;
+                $chart3SelectParts[] = "SUM(CASE WHEN COALESCE(t.percentual_calculado, 0) >= ? AND COALESCE(t.percentual_calculado, 0) <= ? THEN 1 ELSE 0 END) AS {$alias}";
+                $chart3Params[] = (float)$fx['percentual_min'];
+                $chart3Params[] = (float)$fx['percentual_max'];
+            }
+
+            $chart3 = [];
+            if (!empty($chart3SelectParts)) {
+                $chart3Sql = "SELECT " . implode(', ', $chart3SelectParts) . " FROM triagem_toners t WHERE {$where}";
+                $stmt = $this->db->prepare($chart3Sql);
+                $stmt->execute($chart3Params);
+                $faixasTotals = $stmt->fetch(\PDO::FETCH_ASSOC) ?: [];
+
+                foreach ($faixasRetorno as $i => $fx) {
+                    $alias = 'faixa_' . $i;
+                    $chart3[] = [
+                        'id' => (int)$fx['id'],
+                        'label' => $fx['label'],
+                        'total' => (int)($faixasTotals[$alias] ?? 0),
+                        'percentual_min' => (float)$fx['percentual_min'],
+                        'percentual_max' => (float)$fx['percentual_max'],
+                    ];
+                }
+            }
 
             // --- Chart 4: Evolução mensal de reprovação (destino=Garantia) ---
             $chart4Sql = "SELECT
@@ -283,10 +384,10 @@ class AdminController
             $stmt->execute($params);
             $porDestino = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-            // --- Últimas triagens ---
+            // --- Triagens (todas conforme filtros aplicados) ---
             $ultimosSql = "SELECT t.cliente_nome, t.toner_modelo, t.percentual_calculado, t.destino, t.valor_recuperado, t.created_at
                            FROM triagem_toners t WHERE {$where}
-                           ORDER BY t.created_at DESC LIMIT 10";
+                           ORDER BY t.created_at DESC";
             $stmt = $this->db->prepare($ultimosSql);
             $stmt->execute($params);
             $ultimos = $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -323,6 +424,7 @@ class AdminController
                     'clientes' => $clientes ?: [],
                     'defeitos' => $defeitos ?: [],
                     'filiais' => $filiais ?: [],
+                    'faixas_retorno' => $faixasRetorno,
                 ],
             ]);
         } catch (\Exception $e) {

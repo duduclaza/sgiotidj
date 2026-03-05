@@ -230,6 +230,18 @@ const departamentos = <?= json_encode($departamentos ?? []) ?>;
                                 <p class="text-xs text-gray-500 mt-1">O sistema definirá automaticamente a próxima versão</p>
                             </div>
 
+                            <!-- Filial do Processo -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Filial do Processo *</label>
+                                <select name="filial_processo" required class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Selecione a filial...</option>
+                                    <?php foreach (($filiais ?? []) as $filial): ?>
+                                        <option value="<?= e($filial) ?>"><?= e($filial) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <p class="text-xs text-gray-500 mt-1">Somente usuários da mesma filial poderão visualizar este processo (respeitando as regras de setor).</p>
+                            </div>
+
                             <!-- Arquivo -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Arquivo * (PNG, JPEG, PDF - Max 10MB)</label>
@@ -311,13 +323,14 @@ const departamentos = <?= json_encode($departamentos ?? []) ?>;
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Arquivo</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Visibilidade</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filial</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="listaMeusRegistros" class="bg-white divide-y divide-gray-200">
                                 <tr>
-                                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                    <td colspan="8" class="px-6 py-4 text-center text-gray-500">
                                         <div class="flex items-center justify-center">
                                             <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -439,6 +452,7 @@ const departamentos = <?= json_encode($departamentos ?? []) ?>;
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Versão</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Autor</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filial</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aprovado em</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Visibilidade</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
@@ -840,7 +854,7 @@ async function loadTitulos() {
             tbody.innerHTML = `
                 <tr>
                     <td colspan="${colspan}" class="px-6 py-4 text-center text-gray-500">
-                        <div class="flex flex-col items-center py-8">
+                        <div class="flex items-center justify-center">
                             <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
@@ -1028,6 +1042,9 @@ async function loadMeusRegistros() {
                             ${!registro.publico && registro.departamentos_permitidos ? 
                                 `<div class="text-xs text-gray-500">${departamentosTexto}</div>` : ''}
                         </td>
+                        <td class="px-6 py-4">
+                            <div class="text-xs text-indigo-700 mt-1">🏬 ${registro.filial_processo || 'Não informada'}</div>
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             ${formatDate(registro.criado_em)}
                         </td>
@@ -1055,7 +1072,7 @@ async function loadMeusRegistros() {
         } else {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                    <td colspan="8" class="px-6 py-4 text-center text-gray-500">
                         <div class="flex flex-col items-center py-8">
                             <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -1071,7 +1088,7 @@ async function loadMeusRegistros() {
         console.error('Erro ao carregar registros:', error);
         document.getElementById('listaMeusRegistros').innerHTML = `
             <tr>
-                <td colspan="7" class="px-6 py-4 text-center text-red-500">
+                <td colspan="8" class="px-6 py-4 text-center text-red-500">
                     Erro ao carregar registros
                 </td>
             </tr>
@@ -1760,6 +1777,9 @@ async function loadVisualizacao() {
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-sm text-gray-900">${registro.autor_nome}</div>
                     </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-indigo-700">
+                        🏬 ${registro.filial_processo || 'Não informada'}
+                    </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         ${formatDate(registro.aprovado_em)}
                     </td>
@@ -1776,7 +1796,7 @@ async function loadVisualizacao() {
         } else {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                    <td colspan="7" class="px-6 py-4 text-center text-gray-500">
                         <div class="flex flex-col items-center py-8">
                             <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -2749,7 +2769,7 @@ function filtrarVisualizacao() {
         const tdTitulo = tr[i].getElementsByTagName('td')[0];  // Título
         const tdVersao = tr[i].getElementsByTagName('td')[1];  // Versão
         const tdAutor = tr[i].getElementsByTagName('td')[2];   // Autor
-        const tdVisibilidade = tr[i].getElementsByTagName('td')[4]; // Visibilidade (inclui departamentos)
+        const tdVisibilidade = tr[i].getElementsByTagName('td')[5]; // Visibilidade (inclui departamentos)
         
         if (tdTitulo || tdVersao || tdAutor) {
             const txtTitulo = tdTitulo ? tdTitulo.textContent || tdTitulo.innerText : '';

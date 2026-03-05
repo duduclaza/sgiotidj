@@ -67,6 +67,9 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   .filter-input:focus { border-color: var(--dash-accent); box-shadow: 0 0 0 2px rgba(34,211,238,0.15); }
   .filter-input::placeholder { color: var(--dash-muted); }
   .filter-input option { background: #1e293b; color: var(--dash-text); }
+  .filter-multi { min-height: 92px; padding-top: 6px; padding-bottom: 6px; }
+  .range-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .range-value { font-size: 11px; color: var(--dash-muted); text-align: right; margin-bottom: 4px; }
   .search-dropdown { position: relative; }
   .search-dropdown.open { z-index: 120; }
   .search-dropdown .sd-list { display:none; position:absolute; top:100%; left:0; right:0; z-index:50; max-height:220px; overflow-y:auto; margin-top:4px; border-radius:10px; border:1px solid rgba(255,255,255,0.12); background:#1e293b; box-shadow:0 12px 32px rgba(0,0,0,0.4); }
@@ -173,7 +176,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       <span class="text-xs font-semibold uppercase tracking-widest text-slate-300">Filtros Globais</span>
       <button onclick="limparFiltros()" class="ml-auto text-xs text-cyan-400 hover:text-cyan-300 font-medium transition-colors">Limpar filtros</button>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-8 gap-3">
       <div class="search-dropdown" id="sdModelo">
         <label class="block text-[11px] font-medium text-slate-400 mb-1">Modelo</label>
         <input type="text" id="filtroModeloInput" class="filter-input" placeholder="Pesquisar modelo..." autocomplete="off">
@@ -207,6 +210,20 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       <div>
         <label class="block text-[11px] font-medium text-slate-400 mb-1">Data Fim</label>
         <input type="date" id="filtroDataFim" class="filter-input">
+      </div>
+      <div>
+        <label class="block text-[11px] font-medium text-slate-400 mb-1">Faixas de Retorno</label>
+        <select id="filtroFaixas" class="filter-input filter-multi" multiple></select>
+      </div>
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <label class="block text-[11px] font-medium text-slate-400">Faixa Personalizada (%)</label>
+          <span class="range-value" id="filtroPercentualTexto">0% - 100%</span>
+        </div>
+        <div class="range-row">
+          <input type="range" id="filtroPercentualMin" class="filter-input" min="0" max="100" step="1" value="0">
+          <input type="range" id="filtroPercentualMax" class="filter-input" min="0" max="100" step="1" value="100">
+        </div>
       </div>
     </div>
   </div>
@@ -336,9 +353,9 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       <div id="destinoLegend" class="mt-4 space-y-1.5"></div>
     </div>
 
-    <!-- Recent Records -->
+    <!-- Triagens -->
     <div class="xl:col-span-3 dash-card dash-card-glow p-5 dash-animate" style="animation-delay:0.41s">
-      <h3 class="text-sm font-semibold text-white mb-4">Últimas Triagens</h3>
+      <h3 class="text-sm font-semibold text-white mb-4">Triagens</h3>
       <div class="overflow-auto rounded-xl border border-white/5" style="max-height:380px">
         <table class="w-full dash-table">
           <thead><tr class="bg-white/[0.02]"><th>Cliente</th><th>Modelo</th><th>%</th><th>Destino</th><th>Valor Rec.</th><th>Data</th></tr></thead>
@@ -381,12 +398,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
     'Uso Interno': {bg:'rgba(129,140,248,0.75)', border:'#818cf8'},
     'Estoque':     {bg:'rgba(52,211,153,0.75)',  border:'#34d399'},
   };
-  const FAIXA_COLORS = [
-    {bg:'rgba(248,113,113,0.75)', border:'#f87171'},
-    {bg:'rgba(251,191,36,0.75)',  border:'#fbbf24'},
-    {bg:'rgba(129,140,248,0.75)', border:'#818cf8'},
-    {bg:'rgba(52,211,153,0.75)',  border:'#34d399'},
-  ];
+  let faixaOptionsCache = [];
 
   // ===== Chart.js defaults =====
   Chart.defaults.color = '#94a3b8';
@@ -398,6 +410,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
 
   // ===== Fetch Data =====
   function getFilters() {
+    const faixaIds = Array.from(document.getElementById('filtroFaixas').selectedOptions).map(o => o.value).filter(Boolean);
     return {
       modelo:      document.getElementById('filtroModelo').value,
       cliente:     document.getElementById('filtroCliente').value,
@@ -406,6 +419,9 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       filial:      document.getElementById('filtroFilialHeader').value,
       data_inicio: document.getElementById('filtroDataInicio').value,
       data_fim:    document.getElementById('filtroDataFim').value,
+      faixa_ids:   faixaIds.join(','),
+      percentual_custom_min: document.getElementById('filtroPercentualMin').value,
+      percentual_custom_max: document.getElementById('filtroPercentualMax').value,
     };
   }
 
@@ -427,9 +443,8 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       renderChartDestino(json.charts.por_destino || []);
       renderTable(json.ultimos_registros || []);
 
-      if (!filterOptionsLoaded && json.filter_options) {
+      if (json.filter_options) {
         populateFilterOptions(json.filter_options);
-        filterOptionsLoaded = true;
       }
     } catch(err) {
       console.error('Dashboard fetch error:', err);
@@ -442,12 +457,17 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   let sdData = { modelo: [], cliente: [] };
 
   function populateFilterOptions(opts) {
-    sdData.modelo = opts.modelos || [];
-    sdData.cliente = opts.clientes || [];
+    const shouldInitSearch = !filterOptionsLoaded;
+    sdData.modelo = opts.modelos || sdData.modelo;
+    sdData.cliente = opts.clientes || sdData.cliente;
     fillSelect('filtroDefeito', opts.defeitos || []);
     fillSelectFilial('filtroFilialHeader', opts.filiais || []);
-    initSearchDropdown('Modelo', sdData.modelo);
-    initSearchDropdown('Cliente', sdData.cliente);
+    fillFaixasSelect('filtroFaixas', opts.faixas_retorno || []);
+    if (shouldInitSearch) {
+      initSearchDropdown('Modelo', sdData.modelo);
+      initSearchDropdown('Cliente', sdData.cliente);
+      filterOptionsLoaded = true;
+    }
   }
   function fillSelect(id, items) {
     const sel = document.getElementById(id);
@@ -459,6 +479,19 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       sel.appendChild(opt);
     });
     sel.value = current;
+  }
+  function fillFaixasSelect(id, items) {
+    const sel = document.getElementById(id);
+    const current = new Set(Array.from(sel.selectedOptions).map(o => o.value));
+    faixaOptionsCache = items || [];
+    sel.innerHTML = '';
+    faixaOptionsCache.forEach(fx => {
+      const opt = document.createElement('option');
+      opt.value = String(fx.id);
+      opt.textContent = fx.label;
+      if (current.has(String(fx.id))) opt.selected = true;
+      sel.appendChild(opt);
+    });
   }
   function fillSelectFilial(id, items) {
     const sel = document.getElementById(id);
@@ -626,14 +659,15 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
     resetChart('faixas');
     const ctx = document.getElementById('chartFaixas').getContext('2d');
     const total = data.reduce((s,d) => s + d.total, 0);
+    const faixaColors = data.map((_, i) => PALETTE[i % PALETTE.length]);
     chartInstances['faixas'] = new Chart(ctx, {
       type: 'doughnut',
       data: {
         labels: data.map(d => d.label),
         datasets: [{
           data: data.map(d => d.total),
-          backgroundColor: FAIXA_COLORS.map(c => c.bg),
-          borderColor: FAIXA_COLORS.map(c => c.border),
+          backgroundColor: faixaColors.map(c => c.bg),
+          borderColor: faixaColors.map(c => c.border),
           borderWidth: 2,
           hoverOffset: 8,
         }]
@@ -842,7 +876,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   function renderTable(rows) {
     const tbody = document.getElementById('tabelaUltimos');
     if (!rows.length) {
-      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-slate-500 py-8">Nenhum registro encontrado.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-slate-500 py-8">Nenhuma triagem encontrada para os filtros aplicados.</td></tr>';
       return;
     }
     tbody.innerHTML = rows.map(r => {
@@ -871,8 +905,35 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
     });
     document.getElementById('filtroModeloInput').value = '';
     document.getElementById('filtroClienteInput').value = '';
+    Array.from(document.getElementById('filtroFaixas').options).forEach(o => { o.selected = false; });
+    document.getElementById('filtroPercentualMin').value = '0';
+    document.getElementById('filtroPercentualMax').value = '100';
+    updatePercentualRangeText();
     fetchDashboard();
   };
+
+  function updatePercentualRangeText() {
+    const min = Number(document.getElementById('filtroPercentualMin').value || 0);
+    const max = Number(document.getElementById('filtroPercentualMax').value || 100);
+    document.getElementById('filtroPercentualTexto').textContent = min + '% - ' + max + '%';
+  }
+
+  function normalizePercentualRange(changedInputId) {
+    const minInput = document.getElementById('filtroPercentualMin');
+    const maxInput = document.getElementById('filtroPercentualMax');
+    let min = Number(minInput.value || 0);
+    let max = Number(maxInput.value || 100);
+    if (min > max) {
+      if (changedInputId === 'filtroPercentualMin') {
+        max = min;
+        maxInput.value = String(max);
+      } else {
+        min = max;
+        minInput.value = String(min);
+      }
+    }
+    updatePercentualRangeText();
+  }
 
   // ===== Fullscreen =====
   let fullscreenChart = null;
@@ -987,9 +1048,22 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
     ['filtroDefeito','filtroDestino','filtroDataInicio','filtroDataFim','filtroFilialHeader'].forEach(id => {
       document.getElementById(id).addEventListener('change', onFilterChange);
     });
+    document.getElementById('filtroFaixas').addEventListener('change', onFilterChange);
+
+    ['filtroPercentualMin', 'filtroPercentualMax'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        normalizePercentualRange(id);
+        onFilterChange();
+      });
+      document.getElementById(id).addEventListener('change', () => {
+        normalizePercentualRange(id);
+      });
+    });
+
     ['filtroDataInicio','filtroDataFim'].forEach(id => {
       document.getElementById(id).addEventListener('input', onFilterChange);
     });
+    updatePercentualRangeText();
     fetchDashboard();
   });
 })();

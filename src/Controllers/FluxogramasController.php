@@ -42,6 +42,7 @@ class FluxogramasController
             
             // Carregar departamentos para o formulário
             $departamentos = $this->getDepartamentos();
+            $filiais = $this->getFiliais();
             
             // Usar o layout padrão com TailwindCSS
             $title = 'Fluxogramas - SGQ OTI DJ';
@@ -83,6 +84,31 @@ class FluxogramasController
         } catch (\Exception $e) {
             return [];
         }
+    }
+
+    private function getFiliais(): array
+    {
+        if (!$this->db) return [];
+
+        $queries = [
+            "SELECT name AS nome FROM filiais WHERE name IS NOT NULL AND name <> '' ORDER BY name",
+            "SELECT nome FROM filiais WHERE nome IS NOT NULL AND nome <> '' ORDER BY nome",
+            "SELECT filial AS nome FROM users WHERE filial IS NOT NULL AND filial <> '' GROUP BY filial ORDER BY filial",
+        ];
+
+        foreach ($queries as $query) {
+            try {
+                $stmt = $this->db->query($query);
+                $items = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                if (!empty($items)) {
+                    return array_values(array_unique(array_map(static fn($f) => trim((string)$f), $items)));
+                }
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+
+        return [];
     }
 
     public function createTitulo()
@@ -330,12 +356,13 @@ class FluxogramasController
             }
             
             $user_id = $_SESSION['user_id'];
+            $filial_processo = trim((string)($_POST['filial_processo'] ?? ''));
             
             // Validar dados obrigatórios
             $titulo_id = $_POST['titulo_id'] ?? '';
             $visibilidade = $_POST['visibilidade'] ?? '';
             
-            if (empty($titulo_id) || empty($visibilidade)) {
+            if (empty($titulo_id) || empty($visibilidade) || $filial_processo === '') {
                 echo json_encode(['success' => false, 'message' => 'Campos obrigatórios não preenchidos']);
                 return;
             }
@@ -386,8 +413,8 @@ class FluxogramasController
             // Inserir registro
             $stmt = $this->db->prepare("
                 INSERT INTO fluxogramas_registros 
-                (titulo_id, versao, arquivo, nome_arquivo, extensao, tamanho_arquivo, publico, status, criado_por) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDENTE', ?)
+                (titulo_id, versao, arquivo, nome_arquivo, extensao, tamanho_arquivo, publico, filial_processo, status, criado_por) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDENTE', ?)
             ");
             
             $stmt->execute([
@@ -398,6 +425,7 @@ class FluxogramasController
                 $extensao,
                 $tamanho,
                 $publico,
+                $filial_processo,
                 $user_id
             ]);
             
@@ -799,6 +827,7 @@ class FluxogramasController
                     r.extensao,
                     r.tamanho_arquivo,
                     r.publico,
+                    r.filial_processo,
                     r.criado_em,
                     r.observacao_reprovacao,
                     t.titulo,
@@ -1233,6 +1262,7 @@ class FluxogramasController
                         r.nome_arquivo,
                         r.extensao,
                         r.publico,
+                        r.filial_processo,
                         r.aprovado_em,
                         t.titulo,
                         u.name as autor_nome,
@@ -1258,7 +1288,9 @@ class FluxogramasController
                 
                 // Buscar setor do usuário (igual ao POPs e ITs)
                 $user_setor = $this->getUserSetor($user_id);
+                $user_filial = $this->getUserFilial($user_id);
                 error_log("Setor do usuário: " . ($user_setor ?? 'NULL'));
+                error_log("Filial do usuário: " . ($user_filial ?? 'NULL'));
                 
                 $query = "
                     SELECT DISTINCT
@@ -1267,6 +1299,7 @@ class FluxogramasController
                         r.nome_arquivo,
                         r.extensao,
                         r.publico,
+                        r.filial_processo,
                         r.aprovado_em,
                         t.titulo,
                         u.name as autor_nome,
@@ -1279,13 +1312,18 @@ class FluxogramasController
                     LEFT JOIN departamentos d ON rd.departamento_id = d.id
                     WHERE r.status = 'APROVADO'
                     AND (
-                        r.publico = 1
-                        OR r.criado_por = ?
-                        OR EXISTS (
-                            SELECT 1
-                            FROM fluxogramas_registros_departamentos rd3
-                            INNER JOIN departamentos d3 ON rd3.departamento_id = d3.id
-                            WHERE rd3.registro_id = r.id AND d3.nome = ?
+                        r.criado_por = ?
+                        OR (
+                            r.filial_processo = ?
+                            AND (
+                                r.publico = 1
+                                OR EXISTS (
+                                    SELECT 1
+                                    FROM fluxogramas_registros_departamentos rd3
+                                    INNER JOIN departamentos d3 ON rd3.departamento_id = d3.id
+                                    WHERE rd3.registro_id = r.id AND d3.nome = ?
+                                )
+                            )
                         )
                     )
                     GROUP BY r.id
@@ -1293,7 +1331,7 @@ class FluxogramasController
                 ";
                 
                 $stmt = $this->db->prepare($query);
-                $stmt->execute([$user_id, $user_setor]);
+                $stmt->execute([$user_id, $user_filial, $user_setor]);
             }
             
             $registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -1333,6 +1371,26 @@ class FluxogramasController
             return null;
         }
     }
+
+    private function getUserFilial($user_id): ?string
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT filial, name FROM users WHERE id = ?");
+            $stmt->execute([$user_id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            $filial = trim((string)($result['filial'] ?? ''));
+            if ($filial === '') {
+                $filial = trim((string)($_SESSION['user_filial'] ?? ''));
+            }
+
+            error_log("FILIAL DO USUÁRIO: " . ($result['name'] ?? $user_id) . " (ID: $user_id) -> Filial: '$filial'");
+            return $filial !== '' ? $filial : null;
+        } catch (\Exception $e) {
+            error_log("Erro ao obter filial do usuário: " . $e->getMessage());
+            return null;
+        }
+    }
     
     public function visualizarArquivo($id)
     {
@@ -1345,9 +1403,11 @@ class FluxogramasController
             
             $user_id = $_SESSION['user_id'];
             $isAdmin = \App\Services\PermissionService::isAdmin($user_id);
+            $isSuperAdmin = \App\Services\PermissionService::isSuperAdmin($user_id);
             
             // Buscar setor do usuário
             $user_setor = $this->getUserSetor($user_id);
+            $user_filial = $this->getUserFilial($user_id);
             
             // Buscar registro
             $stmt = $this->db->prepare("
@@ -1358,7 +1418,8 @@ class FluxogramasController
                     r.extensao,
                     r.publico,
                     r.status,
-                    r.criado_por
+                    r.criado_por,
+                    r.filial_processo
                 FROM fluxogramas_registros r
                 WHERE r.id = ?
             ");
@@ -1383,21 +1444,31 @@ class FluxogramasController
             
             if ($isAdmin || $isSuperAdmin) {
                 $tem_acesso = true; // Admin ou Super Admin vê tudo
-            } elseif ($registro['publico'] == 1) {
-                $tem_acesso = true; // Público todos veem
             } elseif ($registro['criado_por'] == $user_id) {
                 $tem_acesso = true; // Criador sempre vê
             } else {
-                // Verificar se o setor do usuário tem acesso (pelo nome do departamento)
-                $stmt = $this->db->prepare("
-                    SELECT COUNT(*) as tem_acesso
-                    FROM fluxogramas_registros_departamentos rd
-                    INNER JOIN departamentos d ON rd.departamento_id = d.id
-                    WHERE rd.registro_id = ? AND d.nome = ?
-                ");
-                $stmt->execute([$id, $user_setor]);
-                $result = $stmt->fetch(PDO::FETCH_ASSOC);
-                $tem_acesso = ($result['tem_acesso'] > 0);
+                if (($registro['filial_processo'] ?? '') !== (string)($user_filial ?? '')) {
+                    http_response_code(403);
+                    echo "Você não tem permissão para visualizar este arquivo";
+                    return;
+                }
+
+                if ((int)$registro['publico'] === 1) {
+                    $tem_acesso = true; // Público dentro da mesma filial
+                }
+
+                if (!$tem_acesso) {
+                    // Verificar se o setor do usuário tem acesso (pelo nome do departamento)
+                    $stmt = $this->db->prepare(" 
+                        SELECT COUNT(*) as tem_acesso
+                        FROM fluxogramas_registros_departamentos rd
+                        INNER JOIN departamentos d ON rd.departamento_id = d.id
+                        WHERE rd.registro_id = ? AND d.nome = ?
+                    ");
+                    $stmt->execute([$id, $user_setor]);
+                    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+                    $tem_acesso = ($result['tem_acesso'] > 0);
+                }
             }
             
             if (!$tem_acesso) {
