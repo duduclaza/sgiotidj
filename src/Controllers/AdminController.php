@@ -315,13 +315,14 @@ class AdminController
 
             // --- Chart 3: Faixas de percentual de retorno (dinâmico por parâmetros da triagem) ---
             $chart3SelectParts = [];
-            $chart3Params = $params;
+            $chart3Params = [];
             foreach ($faixasRetorno as $i => $fx) {
                 $alias = 'faixa_' . $i;
                 $chart3SelectParts[] = "SUM(CASE WHEN COALESCE(t.percentual_calculado, 0) >= ? AND COALESCE(t.percentual_calculado, 0) <= ? THEN 1 ELSE 0 END) AS {$alias}";
                 $chart3Params[] = (float)$fx['percentual_min'];
                 $chart3Params[] = (float)$fx['percentual_max'];
             }
+            $chart3Params = array_merge($chart3Params, $params);
 
             $chart3 = [];
             if (!empty($chart3SelectParts)) {

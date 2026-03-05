@@ -399,7 +399,8 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
         </div>
         <div class="flex items-center justify-between text-xs text-gray-500">
           <span>Gramatura restante: <strong id="res-gram">—</strong>g</span>
-          <span id="res-valor-wrap" class="hidden">💰 Valor recuperado: <strong id="res-valor" class="text-green-700">—</strong></span>
+          <span id="res-folhas-wrap" class="hidden">📄 Folhas equivalentes: <strong id="res-folhas">—</strong></span>
+          <span id="res-valor-wrap" class="hidden"><span id="res-valor-label">💰 Impacto:</span> <strong id="res-valor" class="text-green-700">—</strong></span>
         </div>
         <!-- Parecer -->
         <div id="res-parecer-box" class="hidden rounded-lg p-3 border">
@@ -420,6 +421,9 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
         </select>
         <div id="info-estoque" class="hidden mt-2 bg-green-50 border border-green-200 rounded-lg p-3 text-xs text-green-800">
           💰 Ao selecionar <strong>Estoque</strong>, o sistema calculará automaticamente o <strong>valor em R$ recuperado</strong> com base na capacidade de folhas e custo por folha do toner.
+        </div>
+        <div id="info-descarte" class="hidden mt-2 bg-red-50 border border-red-200 rounded-lg p-3 text-xs text-red-800">
+          🗑️ Ao selecionar <strong>Descarte</strong>, o sistema calculará automaticamente as <strong>folhas descartadas</strong> e o <strong>valor em R$ perdido</strong> (negativo).
         </div>
       </div>
 
@@ -545,7 +549,7 @@ const GRID_COLUMNS_DEFAULT = [
   { key: 'percentual', label: '% Toner', visible: true },
   { key: 'parecer', label: 'Parecer', visible: true },
   { key: 'destino', label: 'Destino', visible: true },
-  { key: 'valor', label: 'Valor Recup.', visible: true },
+  { key: 'valor', label: 'Impacto (R$)', visible: true },
   { key: 'datahora', label: 'Data/Hora', visible: true },
   { key: 'acoes', label: 'Ações', visible: true, locked: true, align: 'center' },
 ];
@@ -794,9 +798,13 @@ function renderGrid(data) {
 
     const peso = r.modo === 'peso' && r.peso_retornado ? `${parseFloat(r.peso_retornado).toFixed(1)}g` : '—';
     const valorRecuperado = parseFloat(r.valor_recuperado || 0);
-    const valor = r.destino === 'Estoque'
-      ? `<span class="font-semibold text-green-700">R$ ${valorRecuperado.toLocaleString('pt-BR', {minimumFractionDigits:2})}</span>`
-      : '—';
+    const folhasEquivalentes = parseInt(r.folhas_equivalentes || 0, 10);
+    let valor = '—';
+    if (r.destino === 'Estoque' && valorRecuperado > 0) {
+      valor = `<div class="leading-tight"><span class="font-semibold text-green-700">R$ ${Math.abs(valorRecuperado).toLocaleString('pt-BR', {minimumFractionDigits:2})}</span>${folhasEquivalentes > 0 ? `<div class="text-[10px] text-green-700/80 mt-0.5">+ ${folhasEquivalentes.toLocaleString('pt-BR')} folhas</div>` : ''}</div>`;
+    } else if (r.destino === 'Descarte' && valorRecuperado < 0) {
+      valor = `<div class="leading-tight"><span class="font-semibold text-red-700">-R$ ${Math.abs(valorRecuperado).toLocaleString('pt-BR', {minimumFractionDigits:2})}</span>${folhasEquivalentes > 0 ? `<div class="text-[10px] text-red-700/80 mt-0.5">- ${folhasEquivalentes.toLocaleString('pt-BR')} folhas</div>` : ''}</div>`;
+    }
 
     const dt = new Date(r.created_at);
     const dtStr = dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
@@ -975,7 +983,14 @@ function abrirModalEditar(r) {
   document.getElementById('t-destino').value = r.destino;
   document.getElementById('t-obs').value = r.observacoes || '';
   onDestinoChange();
-  exibirResultado(parseFloat(r.percentual_calculado), r.gramatura_restante, r.parecer, r.valor_recuperado, r.destino);
+  exibirResultado(
+    parseFloat(r.percentual_calculado),
+    r.gramatura_restante,
+    r.parecer,
+    Number(r.valor_recuperado || 0),
+    r.destino,
+    Number(r.folhas_equivalentes || 0)
+  );
   document.getElementById('modal-triagem').classList.remove('hidden');
 }
 
@@ -1002,6 +1017,7 @@ function resetModalTriagem() {
   document.getElementById('info-toner').classList.add('hidden');
   document.getElementById('resultado-calc').classList.add('hidden');
   document.getElementById('info-estoque').classList.add('hidden');
+  document.getElementById('info-descarte').classList.add('hidden');
   onModoChange();
   lastCalcResult = null;
 }
@@ -1028,6 +1044,7 @@ function onModoChange() {
 function onDestinoChange() {
   const dest = document.getElementById('t-destino').value;
   document.getElementById('info-estoque').classList.toggle('hidden', dest !== 'Estoque');
+  document.getElementById('info-descarte').classList.toggle('hidden', dest !== 'Descarte');
   const wrapFornecedor = document.getElementById('wrap-fornecedor');
   const selectFornecedor = document.getElementById('t-fornecedor-id');
   const isGarantia = dest === 'Garantia';
@@ -1036,8 +1053,14 @@ function onDestinoChange() {
     selectFornecedor.value = '';
   }
   if (lastCalcResult) {
-    exibirResultado(lastCalcResult.pct, lastCalcResult.gram, lastCalcResult.parecer,
-      dest === 'Estoque' ? lastCalcResult.valor : 0, dest);
+    exibirResultado(
+      lastCalcResult.pct,
+      lastCalcResult.gram,
+      lastCalcResult.parecer,
+      dest === 'Estoque' ? lastCalcResult.valorEstoque : (dest === 'Descarte' ? lastCalcResult.valorDescarte : 0),
+      dest,
+      lastCalcResult.folhasEquivalentes
+    );
   }
 }
 
@@ -1065,14 +1088,23 @@ function recalcular() {
       .then(res => {
         if (!res.success) { showToast(res.message, 'error'); return; }
         const dest = document.getElementById('t-destino').value;
-        lastCalcResult = { pct: res.percentual_calculado, gram: res.gramatura_restante, parecer: res.parecer, valor: res.valor_recuperado };
+        lastCalcResult = {
+          pct: res.percentual_calculado,
+          gram: res.gramatura_restante,
+          parecer: res.parecer,
+          valorEstoque: Number(res.valor_estoque || 0),
+          valorDescarte: Number(res.valor_descarte || 0),
+          folhasEquivalentes: Number(res.folhas_equivalentes || 0),
+        };
         exibirResultado(res.percentual_calculado, res.gramatura_restante, res.parecer,
-          dest === 'Estoque' ? res.valor_recuperado : 0, dest);
+          dest === 'Estoque' ? Number(res.valor_estoque || 0) : (dest === 'Descarte' ? Number(res.valor_descarte || 0) : 0),
+          dest,
+          Number(res.folhas_equivalentes || 0));
       });
   }, 400);
 }
 
-function exibirResultado(pct, gram, parecer, valor, destino) {
+function exibirResultado(pct, gram, parecer, valor, destino, folhasEquivalentes = 0) {
   document.getElementById('resultado-calc').classList.remove('hidden');
   document.getElementById('res-pct').textContent  = pct.toFixed(2) + '%';
   document.getElementById('res-gram').textContent = gram ? parseFloat(gram).toFixed(2) : '—';
@@ -1083,8 +1115,27 @@ function exibirResultado(pct, gram, parecer, valor, destino) {
     (pct <= 5 ? 'bg-red-500' : pct <= 40 ? 'bg-orange-400' : pct <= 80 ? 'bg-yellow-400' : 'bg-green-500');
 
   const valorWrap = document.getElementById('res-valor-wrap');
+  const valorLabel = document.getElementById('res-valor-label');
+  const valorEl = document.getElementById('res-valor');
+  const folhasWrap = document.getElementById('res-folhas-wrap');
+  const folhasEl = document.getElementById('res-folhas');
+
+  if ((destino === 'Estoque' || destino === 'Descarte') && folhasEquivalentes > 0) {
+    folhasEl.textContent = Number(folhasEquivalentes).toLocaleString('pt-BR');
+    folhasWrap.classList.remove('hidden');
+  } else {
+    folhasWrap.classList.add('hidden');
+  }
+
   if (destino === 'Estoque' && valor > 0) {
-    document.getElementById('res-valor').textContent = 'R$ ' + parseFloat(valor).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+    valorLabel.textContent = '💰 Valor recuperado:';
+    valorEl.className = 'text-green-700';
+    valorEl.textContent = 'R$ ' + Math.abs(parseFloat(valor)).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+    valorWrap.classList.remove('hidden');
+  } else if (destino === 'Descarte' && valor < 0) {
+    valorLabel.textContent = '💸 Valor descartado:';
+    valorEl.className = 'text-red-700';
+    valorEl.textContent = '-R$ ' + Math.abs(parseFloat(valor)).toLocaleString('pt-BR', {minimumFractionDigits: 2});
     valorWrap.classList.remove('hidden');
   } else {
     valorWrap.classList.add('hidden');
