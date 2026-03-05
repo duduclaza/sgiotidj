@@ -140,8 +140,8 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       <div id="reprovClientes" class="mb-5"></div>
       <div class="overflow-auto rounded-xl border border-white/5">
         <table class="w-full dash-table">
-          <thead><tr class="bg-white/[0.02]"><th>Cliente</th><th>Modelo</th><th>Defeito</th><th>%</th><th>Valor Rec.</th><th>Data</th></tr></thead>
-          <tbody id="reprovTabela"><tr><td colspan="6" class="text-center text-slate-500 py-8">Carregando...</td></tr></tbody>
+          <thead><tr class="bg-white/[0.02]"><th>Cliente</th><th>Fornecedor</th><th>Modelo</th><th>Defeito</th><th>%</th><th>Valor Rec.</th><th>Data</th></tr></thead>
+          <tbody id="reprovTabela"><tr><td colspan="7" class="text-center text-slate-500 py-8">Carregando...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -772,7 +772,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
     document.getElementById('reprovTitle').textContent = 'Reprovados (Garantia) — ' + mesNome;
     document.getElementById('reprovSubtitle').textContent = 'Carregando...';
     document.getElementById('reprovClientes').innerHTML = '';
-    document.getElementById('reprovTabela').innerHTML = '<tr><td colspan="6" class="text-center text-slate-500 py-8"><span class="dash-spinner"></span> Buscando dados...</td></tr>';
+    document.getElementById('reprovTabela').innerHTML = '<tr><td colspan="7" class="text-center text-slate-500 py-8"><span class="dash-spinner"></span> Buscando dados...</td></tr>';
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
 
@@ -794,7 +794,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
 
       // Tabela detalhada
       if (json.registros.length === 0) {
-        document.getElementById('reprovTabela').innerHTML = '<tr><td colspan="6" class="text-center text-slate-500 py-8">Nenhum registro encontrado</td></tr>';
+        document.getElementById('reprovTabela').innerHTML = '<tr><td colspan="7" class="text-center text-slate-500 py-8">Nenhum registro encontrado</td></tr>';
       } else {
         let html = '';
         json.registros.forEach(r => {
@@ -803,6 +803,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
           const dt = r.created_at ? r.created_at.substring(0,10).split('-').reverse().join('/') : '-';
           html += '<tr>';
           html += '<td class="text-slate-200">' + esc(r.cliente_nome || '-') + '</td>';
+          html += '<td class="text-slate-300">' + esc(r.fornecedor_nome || '-') + '</td>';
           html += '<td class="font-medium text-white">' + esc(r.toner_modelo || '-') + '</td>';
           html += '<td class="text-orange-300">' + esc(r.defeito_nome || 'N/I') + '</td>';
           html += '<td class="text-slate-200 font-semibold">' + pct + '%</td>';

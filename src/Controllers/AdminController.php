@@ -464,7 +464,7 @@ class AdminController
             }
 
             $sql = "SELECT t.id, t.cliente_nome, t.toner_modelo, t.defeito_nome, t.percentual_calculado,
-                           t.destino, t.valor_recuperado, t.observacoes, t.created_at
+                           t.fornecedor_nome, t.destino, t.valor_recuperado, t.observacoes, t.created_at
                     FROM triagem_toners t
                     WHERE t.destino = 'Garantia' AND t.created_at >= ? AND t.created_at < ?
                     ORDER BY t.created_at DESC";
