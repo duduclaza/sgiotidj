@@ -143,6 +143,31 @@
 .badge-em_homologacao { background: #a855f7; }
 .badge-aprovado { background: #22c55e; }
 .badge-reprovado { background: #ef4444; }
+
+/* === VENCIMENTO === */
+@keyframes blink-expiring {
+    0%,100% { box-shadow: 0 4px 8px rgba(15,23,42,0.08); border-color: inherit; }
+    50% { box-shadow: 0 0 18px 4px rgba(220,38,38,0.7); outline: 2px solid #dc2626; }
+}
+.card-expiring {
+    animation: blink-expiring 1.2s ease-in-out infinite !important;
+}
+.badge-vencimento {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700;
+}
+.badge-venc-ok   { background:#dcfce7; color:#166534; border:1px solid #86efac; }
+.badge-venc-warn { background:#fef9c3; color:#854d0e; border:1px solid #fde047; }
+.badge-venc-late { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
+
+/* Funil pills */
+.funil-pill {
+    padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    border: 2px solid #e2e8f0; background: #f8fafc; color: #475569;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.funil-pill:hover { border-color: #3b82f6; color: #2563eb; background: #eff6ff; }
+.funil-pill.active { border-color: #2563eb; background: #2563eb; color: #fff; }
 </style>
 
 <div class="p-6">
@@ -207,16 +232,16 @@
                 </select>
             </div>
             
-            <!-- Responsável -->
+            <!-- Departamento (Funil) -->
             <div>
-                <label class="block text-xs font-medium text-slate-600 mb-1">Responsável</label>
+                <label class="block text-xs font-medium text-slate-600 mb-1">Departamento (Funil)</label>
                 <select 
-                    id="filtroResponsavel" 
+                    id="filtroDepartamento" 
                     class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
                     onchange="aplicarFiltros()">
                     <option value="">Todos</option>
-                    <?php foreach ($usuarios as $usuario): ?>
-                    <option value="<?= $usuario['id'] ?>"><?= e($usuario['name']) ?></option>
+                    <?php foreach ($departamentos as $dept): ?>
+                    <option value="<?= $dept['id'] ?>"><?= e($dept['nome']) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -250,6 +275,19 @@
         </div>
     </div>
 
+    <!-- Funil por Departamento -->
+    <div class="mb-4">
+        <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-xs font-semibold text-slate-500 mr-1">🏭 FUNIL:</span>
+            <button class="funil-pill active" data-dept-id="" onclick="selecionarFunil('', this)">Todos</button>
+            <?php foreach ($departamentos as $dept): ?>
+            <button class="funil-pill" data-dept-id="<?= $dept['id'] ?>" onclick="selecionarFunil('<?= $dept['id'] ?>', this)">
+                <?= e($dept['nome']) ?>
+            </button>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
     <!-- Scrollbar superior -->
     <div class="kanban-scroll-top" id="kanbanScrollTop"><div id="kanbanScrollTopInner" style="height:1px"></div></div>
 
@@ -267,9 +305,16 @@
             </div>
             <div class="kanban-column" data-status="aguardando_recebimento">
                 <?php foreach ($homologacoes['aguardando_recebimento'] as $h): ?>
-                    <div class="kanban-card status-aguardando_recebimento relative" 
+                    <div class="kanban-card status-aguardando_recebimento relative<?php
+                             $dr = (int)($h['dias_restantes'] ?? 99999);
+                             $da = (int)($h['dias_aviso'] ?? 7);
+                             $venc = $h['data_vencimento'] ?? null;
+                             $isExpiring = $venc && $dr <= $da && !in_array($h['status'],['aprovado','reprovado']);
+                             echo $isExpiring ? ' card-expiring' : ''; ?>" 
                          data-id="<?= $h['id'] ?>" 
                          data-status="aguardando_recebimento"
+                         data-departamento-id="<?= (int)($h['departamento_resp_id'] ?? 0) ?>"
+                         data-vencimento="<?= htmlspecialchars($h['data_vencimento'] ?? '') ?>"
                          draggable="true"
                          onclick="openCardDetails(<?= $h['id'] ?>)">
                         <button type="button" title="Excluir" onclick="event.stopPropagation(); deleteHomologacao(<?= $h['id'] ?>)" class="absolute top-2 right-2 text-slate-400 hover:text-red-600">
@@ -277,11 +322,26 @@
                         </button>
                         <div class="text-sm font-bold text-slate-700 mb-1"><?= e($h['cod_referencia']) ?></div>
                         <div class="text-xs text-slate-600 mb-2 line-clamp-2"><?= e($h['descricao']) ?></div>
+                        <?php if (!empty($h['departamento_resp_nome'])): ?>
+                        <div class="text-xs text-indigo-700 font-medium mb-1 flex items-center gap-1">
+                            <span>🏢</span><span><?= e($h['departamento_resp_nome']) ?></span>
+                        </div>
+                        <?php endif; ?>
+                        <?php if (!empty($h['data_vencimento'])): ?>
+                        <?php
+                            $diasR = (int)($h['dias_restantes'] ?? 99999);
+                            $diasA = (int)($h['dias_aviso'] ?? 7);
+                            if ($diasR < 0) { $vClass='badge-venc-late'; $vIcon='🔴'; $vTxt='Vencido '.(abs($diasR)).'d'; }
+                            elseif ($diasR <= $diasA) { $vClass='badge-venc-warn'; $vIcon='🟡'; $vTxt='Vence em '.$diasR.'d'; }
+                            else { $vClass='badge-venc-ok'; $vIcon='🟢'; $vTxt='Vence em '.$diasR.'d'; }
+                        ?>
+                        <span class="badge-vencimento <?= $vClass ?> mb-2"><?= $vIcon ?> <?= $vTxt ?></span>
+                        <?php endif; ?>
                         <div class="flex items-center justify-between text-xs mb-6">
-                            <span class="text-slate-500">👤 <?= e(substr($h['responsaveis_nomes'] ?? 'N/A', 0, 20)) ?></span>
                             <?php if ($h['total_anexos'] > 0): ?>
                             <span class="text-slate-500">📎 <?= $h['total_anexos'] ?></span>
-                            <?php endif; ?>
+                            <?php else: ?><span></span><?php endif; ?>
+                            <span class="text-slate-400 text-[10px]"><?= date('d/m/y', strtotime($h['created_at'])) ?></span>
                         </div>
                         <!-- Botões de Navegação -->
                         <div class="card-nav-buttons">
@@ -313,19 +373,29 @@
             </div>
             <div class="kanban-column" data-status="recebido">
                 <?php foreach ($homologacoes['recebido'] as $h): ?>
-                    <div class="kanban-card status-recebido relative" 
+                    <div class="kanban-card status-recebido relative<?php
+                             $dr2 = (int)($h['dias_restantes'] ?? 99999); $da2 = (int)($h['dias_aviso'] ?? 7);
+                             $venc2 = $h['data_vencimento'] ?? null;
+                             echo ($venc2 && $dr2 <= $da2 && !in_array($h['status'],['aprovado','reprovado'])) ? ' card-expiring' : ''; ?>" 
                          data-id="<?= $h['id'] ?>" 
                          data-status="recebido"
+                         data-departamento-id="<?= (int)($h['departamento_resp_id'] ?? 0) ?>"
+                         data-vencimento="<?= htmlspecialchars($h['data_vencimento'] ?? '') ?>"
                          draggable="true"
                          onclick="openCardDetails(<?= $h['id'] ?>)">
                         <button type="button" title="Excluir" onclick="event.stopPropagation(); deleteHomologacao(<?= $h['id'] ?>)" class="absolute top-2 right-2 text-slate-400 hover:text-red-600">🗑️</button>
                         <div class="text-sm font-bold text-slate-700 mb-1"><?= e($h['cod_referencia']) ?></div>
                         <div class="text-xs text-slate-600 mb-2 line-clamp-2"><?= e($h['descricao']) ?></div>
+                        <?php if (!empty($h['departamento_resp_nome'])): ?>
+                        <div class="text-xs text-indigo-700 font-medium mb-1 flex items-center gap-1"><span>🏢</span><span><?= e($h['departamento_resp_nome']) ?></span></div>
+                        <?php endif; ?>
+                        <?php if (!empty($h['data_vencimento'])): ?>
+                        <?php $dr2=(int)($h['dias_restantes']??99999);$da2=(int)($h['dias_aviso']??7); if($dr2<0){$vc='badge-venc-late';$vi='🔴';$vt='Vencido '.abs($dr2).'d';}elseif($dr2<=$da2){$vc='badge-venc-warn';$vi='🟡';$vt='Vence em '.$dr2.'d';}else{$vc='badge-venc-ok';$vi='🟢';$vt='Vence em '.$dr2.'d';} ?>
+                        <span class="badge-vencimento <?= $vc ?> mb-2"><?= $vi ?> <?= $vt ?></span>
+                        <?php endif; ?>
                         <div class="flex items-center justify-between text-xs">
-                            <span class="text-slate-500">👤 <?= e(substr($h['responsaveis_nomes'] ?? 'N/A', 0, 20)) ?></span>
-                            <?php if ($h['total_anexos'] > 0): ?>
-                            <span class="text-slate-500">📎 <?= $h['total_anexos'] ?></span>
-                            <?php endif; ?>
+                            <?php if ($h['total_anexos'] > 0): ?><span class="text-slate-500">📎 <?= $h['total_anexos'] ?></span><?php else: ?><span></span><?php endif; ?>
+                            <span class="text-slate-400 text-[10px]"><?= date('d/m/y', strtotime($h['created_at'])) ?></span>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -343,29 +413,36 @@
             </div>
             <div class="kanban-column" data-status="em_analise">
                 <?php foreach ($homologacoes['em_analise'] as $h): ?>
-                    <div class="kanban-card status-em_analise relative" 
+                    <div class="kanban-card status-em_analise relative<?php
+                             $drA=(int)($h['dias_restantes']??99999);$daA=(int)($h['dias_aviso']??7);
+                             echo ($h['data_vencimento']??null)&&$drA<=$daA&&!in_array($h['status'],['aprovado','reprovado'])?' card-expiring':'';
+                             ?>" 
                          data-id="<?= $h['id'] ?>" 
                          data-status="em_analise"
+                         data-departamento-id="<?= (int)($h['departamento_resp_id'] ?? 0) ?>"
+                         data-vencimento="<?= htmlspecialchars($h['data_vencimento'] ?? '') ?>"
                          draggable="true"
                          onclick="openCardDetails(<?= $h['id'] ?>)">
                         <button type="button" title="Excluir" onclick="event.stopPropagation(); deleteHomologacao(<?= $h['id'] ?>)" class="absolute top-2 right-2 text-slate-400 hover:text-red-600">🗑️</button>
                         <div class="text-sm font-bold text-slate-700 mb-1"><?= e($h['cod_referencia']) ?></div>
                         <div class="text-xs text-slate-600 mb-2 line-clamp-2"><?= e($h['descricao']) ?></div>
                         <?php if (!empty($h['aprovado_por_nome'])): ?>
-                        <div class="text-xs text-green-700 font-medium mb-2 flex items-center gap-1">
+                        <div class="text-xs text-green-700 font-medium mb-1 flex items-center gap-1">
                             <span>🟢</span><span>Aprovado por: <?= e($h['aprovado_por_nome']) ?></span>
                         </div>
                         <?php endif; ?>
-                        <?php if (!empty($h['departamento_nome'])): ?>
-                        <div class="text-xs text-purple-700 font-medium mb-2 flex items-center gap-1">
-                            <span>📍</span><span><?= e($h['departamento_nome']) ?></span>
-                        </div>
+                        <?php if (!empty($h['departamento_resp_nome'])): ?>
+                        <div class="text-xs text-indigo-700 font-medium mb-1 flex items-center gap-1"><span>🏢</span><span><?= e($h['departamento_resp_nome']) ?></span></div>
+                        <?php elseif (!empty($h['departamento_nome'])): ?>
+                        <div class="text-xs text-purple-700 font-medium mb-1 flex items-center gap-1"><span>📍</span><span><?= e($h['departamento_nome']) ?></span></div>
+                        <?php endif; ?>
+                        <?php if (!empty($h['data_vencimento'])): ?>
+                        <?php $drA=(int)($h['dias_restantes']??99999);$daA=(int)($h['dias_aviso']??7); if($drA<0){$vcA='badge-venc-late';$viA='🔴';$vtA='Vencido '.abs($drA).'d';}elseif($drA<=$daA){$vcA='badge-venc-warn';$viA='🟡';$vtA='Vence em '.$drA.'d';}else{$vcA='badge-venc-ok';$viA='🟢';$vtA='Vence em '.$drA.'d';} ?>
+                        <span class="badge-vencimento <?= $vcA ?> mb-2"><?= $viA ?> <?= $vtA ?></span>
                         <?php endif; ?>
                         <div class="flex items-center justify-between text-xs">
-                            <span class="text-slate-500">👤 <?= e(substr($h['responsaveis_nomes'] ?? 'N/A', 0, 20)) ?></span>
-                            <?php if ($h['total_anexos'] > 0): ?>
-                            <span class="text-slate-500">📎 <?= $h['total_anexos'] ?></span>
-                            <?php endif; ?>
+                            <?php if ($h['total_anexos'] > 0): ?><span class="text-slate-500">📎 <?= $h['total_anexos'] ?></span><?php else: ?><span></span><?php endif; ?>
+                            <span class="text-slate-400 text-[10px]"><?= date('d/m/y', strtotime($h['created_at'])) ?></span>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -383,29 +460,34 @@
             </div>
             <div class="kanban-column" data-status="em_homologacao">
                 <?php foreach ($homologacoes['em_homologacao'] as $h): ?>
-                    <div class="kanban-card status-em_homologacao relative" 
+                    <div class="kanban-card status-em_homologacao relative<?php
+                             $drH=(int)($h['dias_restantes']??99999);$daH=(int)($h['dias_aviso']??7);
+                             echo ($h['data_vencimento']??null)&&$drH<=$daH&&!in_array($h['status'],['aprovado','reprovado'])?' card-expiring':'';
+                             ?>" 
                          data-id="<?= $h['id'] ?>" 
                          data-status="em_homologacao"
+                         data-departamento-id="<?= (int)($h['departamento_resp_id'] ?? 0) ?>"
+                         data-vencimento="<?= htmlspecialchars($h['data_vencimento'] ?? '') ?>"
                          draggable="true"
                          onclick="openCardDetails(<?= $h['id'] ?>)">
                         <button type="button" title="Excluir" onclick="event.stopPropagation(); deleteHomologacao(<?= $h['id'] ?>)" class="absolute top-2 right-2 text-slate-400 hover:text-red-600">🗑️</button>
                         <div class="text-sm font-bold text-slate-700 mb-1"><?= e($h['cod_referencia']) ?></div>
                         <div class="text-xs text-slate-600 mb-2 line-clamp-2"><?= e($h['descricao']) ?></div>
                         <?php if (!empty($h['aprovado_por_nome'])): ?>
-                        <div class="text-xs text-green-700 font-medium mb-2 flex items-center gap-1">
-                            <span>🟢</span><span>Aprovado por: <?= e($h['aprovado_por_nome']) ?></span>
-                        </div>
+                        <div class="text-xs text-green-700 font-medium mb-1 flex items-center gap-1"><span>🟢</span><span>Aprovado por: <?= e($h['aprovado_por_nome']) ?></span></div>
                         <?php endif; ?>
-                        <?php if (!empty($h['departamento_nome'])): ?>
-                        <div class="text-xs text-purple-700 font-medium mb-2 flex items-center gap-1">
-                            <span>📍</span><span><?= e($h['departamento_nome']) ?></span>
-                        </div>
+                        <?php if (!empty($h['departamento_resp_nome'])): ?>
+                        <div class="text-xs text-indigo-700 font-medium mb-1 flex items-center gap-1"><span>🏢</span><span><?= e($h['departamento_resp_nome']) ?></span></div>
+                        <?php elseif (!empty($h['departamento_nome'])): ?>
+                        <div class="text-xs text-purple-700 font-medium mb-1 flex items-center gap-1"><span>📍</span><span><?= e($h['departamento_nome']) ?></span></div>
+                        <?php endif; ?>
+                        <?php if (!empty($h['data_vencimento'])): ?>
+                        <?php $drH=(int)($h['dias_restantes']??99999);$daH=(int)($h['dias_aviso']??7); if($drH<0){$vcH='badge-venc-late';$viH='🔴';$vtH='Vencido '.abs($drH).'d';}elseif($drH<=$daH){$vcH='badge-venc-warn';$viH='🟡';$vtH='Vence em '.$drH.'d';}else{$vcH='badge-venc-ok';$viH='🟢';$vtH='Vence em '.$drH.'d';} ?>
+                        <span class="badge-vencimento <?= $vcH ?> mb-2"><?= $viH ?> <?= $vtH ?></span>
                         <?php endif; ?>
                         <div class="flex items-center justify-between text-xs">
-                            <span class="text-slate-500">👤 <?= e(substr($h['responsaveis_nomes'] ?? 'N/A', 0, 20)) ?></span>
-                            <?php if ($h['total_anexos'] > 0): ?>
-                            <span class="text-slate-500">📎 <?= $h['total_anexos'] ?></span>
-                            <?php endif; ?>
+                            <?php if ($h['total_anexos'] > 0): ?><span class="text-slate-500">📎 <?= $h['total_anexos'] ?></span><?php else: ?><span></span><?php endif; ?>
+                            <span class="text-slate-400 text-[10px]"><?= date('d/m/y', strtotime($h['created_at'])) ?></span>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -423,29 +505,27 @@
             </div>
             <div class="kanban-column" data-status="aprovado">
                 <?php foreach ($homologacoes['aprovado'] as $h): ?>
-                    <div class="kanban-card status-aprovado relative" 
+                    <div class="kanban-card status-aprovado relative"
                          data-id="<?= $h['id'] ?>" 
                          data-status="aprovado"
+                         data-departamento-id="<?= (int)($h['departamento_resp_id'] ?? 0) ?>"
+                         data-vencimento="<?= htmlspecialchars($h['data_vencimento'] ?? '') ?>"
                          draggable="true"
                          onclick="openCardDetails(<?= $h['id'] ?>)">
                         <button type="button" title="Excluir" onclick="event.stopPropagation(); deleteHomologacao(<?= $h['id'] ?>)" class="absolute top-2 right-2 text-slate-400 hover:text-red-600">🗑️</button>
                         <div class="text-sm font-bold text-slate-700 mb-1"><?= e($h['cod_referencia']) ?></div>
                         <div class="text-xs text-slate-600 mb-2 line-clamp-2"><?= e($h['descricao']) ?></div>
                         <?php if (!empty($h['aprovado_por_nome'])): ?>
-                        <div class="text-xs text-green-700 font-medium mb-2 flex items-center gap-1">
-                            <span>🟢</span><span>Aprovado por: <?= e($h['aprovado_por_nome']) ?></span>
-                        </div>
+                        <div class="text-xs text-green-700 font-medium mb-1 flex items-center gap-1"><span>🟢</span><span>Aprovado por: <?= e($h['aprovado_por_nome']) ?></span></div>
                         <?php endif; ?>
-                        <?php if (!empty($h['departamento_nome'])): ?>
-                        <div class="text-xs text-purple-700 font-medium mb-2 flex items-center gap-1">
-                            <span>📍</span><span><?= e($h['departamento_nome']) ?></span>
-                        </div>
+                        <?php if (!empty($h['departamento_resp_nome'])): ?>
+                        <div class="text-xs text-indigo-700 font-medium mb-1 flex items-center gap-1"><span>🏢</span><span><?= e($h['departamento_resp_nome']) ?></span></div>
+                        <?php elseif (!empty($h['departamento_nome'])): ?>
+                        <div class="text-xs text-purple-700 font-medium mb-1 flex items-center gap-1"><span>📍</span><span><?= e($h['departamento_nome']) ?></span></div>
                         <?php endif; ?>
                         <div class="flex items-center justify-between text-xs">
-                            <span class="text-slate-500">👤 <?= e(substr($h['responsaveis_nomes'] ?? 'N/A', 0, 20)) ?></span>
-                            <?php if ($h['total_anexos'] > 0): ?>
-                            <span class="text-slate-500">📎 <?= $h['total_anexos'] ?></span>
-                            <?php endif; ?>
+                            <?php if ($h['total_anexos'] > 0): ?><span class="text-slate-500">📎 <?= $h['total_anexos'] ?></span><?php else: ?><span></span><?php endif; ?>
+                            <span class="text-slate-400 text-[10px]"><?= date('d/m/y', strtotime($h['created_at'])) ?></span>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -463,29 +543,27 @@
             </div>
             <div class="kanban-column" data-status="reprovado">
                 <?php foreach ($homologacoes['reprovado'] as $h): ?>
-                    <div class="kanban-card status-reprovado relative" 
+                    <div class="kanban-card status-reprovado relative"
                          data-id="<?= $h['id'] ?>" 
                          data-status="reprovado"
+                         data-departamento-id="<?= (int)($h['departamento_resp_id'] ?? 0) ?>"
+                         data-vencimento="<?= htmlspecialchars($h['data_vencimento'] ?? '') ?>"
                          draggable="true"
                          onclick="openCardDetails(<?= $h['id'] ?>)">
                         <button type="button" title="Excluir" onclick="event.stopPropagation(); deleteHomologacao(<?= $h['id'] ?>)" class="absolute top-2 right-2 text-slate-400 hover:text-red-600">🗑️</button>
                         <div class="text-sm font-bold text-slate-700 mb-1"><?= e($h['cod_referencia']) ?></div>
                         <div class="text-xs text-slate-600 mb-2 line-clamp-2"><?= e($h['descricao']) ?></div>
                         <?php if (!empty($h['reprovado_por_nome'])): ?>
-                        <div class="text-xs text-red-700 font-medium mb-2 flex items-center gap-1">
-                            <span>🔴</span><span>Reprovado por: <?= e($h['reprovado_por_nome']) ?></span>
-                        </div>
+                        <div class="text-xs text-red-700 font-medium mb-1 flex items-center gap-1"><span>🔴</span><span>Reprovado por: <?= e($h['reprovado_por_nome']) ?></span></div>
                         <?php endif; ?>
-                        <?php if (!empty($h['departamento_nome'])): ?>
-                        <div class="text-xs text-purple-700 font-medium mb-2 flex items-center gap-1">
-                            <span>📍</span><span><?= e($h['departamento_nome']) ?></span>
-                        </div>
+                        <?php if (!empty($h['departamento_resp_nome'])): ?>
+                        <div class="text-xs text-indigo-700 font-medium mb-1 flex items-center gap-1"><span>🏢</span><span><?= e($h['departamento_resp_nome']) ?></span></div>
+                        <?php elseif (!empty($h['departamento_nome'])): ?>
+                        <div class="text-xs text-purple-700 font-medium mb-1 flex items-center gap-1"><span>📍</span><span><?= e($h['departamento_nome']) ?></span></div>
                         <?php endif; ?>
                         <div class="flex items-center justify-between text-xs">
-                            <span class="text-slate-500">👤 <?= e(substr($h['responsaveis_nomes'] ?? 'N/A', 0, 20)) ?></span>
-                            <?php if ($h['total_anexos'] > 0): ?>
-                            <span class="text-slate-500">📎 <?= $h['total_anexos'] ?></span>
-                            <?php endif; ?>
+                            <?php if ($h['total_anexos'] > 0): ?><span class="text-slate-500">📎 <?= $h['total_anexos'] ?></span><?php else: ?><span></span><?php endif; ?>
+                            <span class="text-slate-400 text-[10px]"><?= date('d/m/y', strtotime($h['created_at'])) ?></span>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -504,14 +582,38 @@
         </div>
 
         <form id="formNovaHomologacao" class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Cód. Referência <span class="text-red-500">*</span></label>
-                <input type="text" name="cod_referencia" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Cód. Referência <span class="text-red-500">*</span></label>
+                    <input type="text" name="cod_referencia" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Departamento Responsável <span class="text-red-500">*</span></label>
+                    <select name="departamento_resp_id" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="">Selecione...</option>
+                        <?php foreach ($departamentos as $dept): ?>
+                        <option value="<?= $dept['id'] ?>"><?= e($dept['nome']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <p class="text-xs text-slate-500 mt-1">Todos do departamento serão notificados</p>
+                </div>
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1">Descrição <span class="text-red-500">*</span></label>
                 <textarea name="descricao" required rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">📅 Data de Vencimento <span class="text-red-500">*</span></label>
+                    <input type="date" name="data_vencimento" required min="<?= date('Y-m-d') ?>" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">🔔 Avisar com X dias de antecedência</label>
+                    <input type="number" name="dias_aviso" value="7" min="1" max="60" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <p class="text-xs text-slate-500 mt-1">O card piscará em vermelho quando faltar esse número de dias</p>
+                </div>
             </div>
 
             <div>
@@ -520,16 +622,6 @@
                     <label class="flex items-center"><input type="radio" name="avisar_logistica" value="1" class="mr-2"><span>Sim</span></label>
                     <label class="flex items-center"><input type="radio" name="avisar_logistica" value="0" checked class="mr-2"><span>Não</span></label>
                 </div>
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Responsável(is) <span class="text-red-500">*</span></label>
-                <select name="responsaveis[]" multiple required size="6" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                    <?php foreach ($usuarios as $usuario): ?>
-                    <option value="<?= $usuario['id'] ?>"><?= e($usuario['name']) ?> (<?= e($usuario['email']) ?>)</option>
-                    <?php endforeach; ?>
-                </select>
-                <p class="text-xs text-slate-500 mt-1">Segure Ctrl para selecionar múltiplos</p>
             </div>
 
             <div>
@@ -713,53 +805,35 @@ async function salvarContadores(homologacaoId) {
 function aplicarFiltros() {
     const pesquisa = document.getElementById('filtroPesquisa').value.toLowerCase().trim();
     const localizacao = document.getElementById('filtroLocalizacao').value;
-    const responsavel = document.getElementById('filtroResponsavel').value;
+    const filtroDept = document.getElementById('filtroDepartamento').value;
     const dataInicio = document.getElementById('filtroDataInicio').value;
     const dataFim = document.getElementById('filtroDataFim').value;
     
-    // Buscar todos os cards
     const cards = document.querySelectorAll('.kanban-card');
     let totalFiltrado = 0;
     
     cards.forEach(card => {
         let mostrar = true;
         
-        // Filtro de pesquisa (código ou descrição)
         if (pesquisa) {
             const codigo = card.querySelector('.text-sm.font-bold')?.textContent.toLowerCase() || '';
             const descricao = card.querySelector('.text-xs.text-slate-600')?.textContent.toLowerCase() || '';
-            if (!codigo.includes(pesquisa) && !descricao.includes(pesquisa)) {
-                mostrar = false;
-            }
+            if (!codigo.includes(pesquisa) && !descricao.includes(pesquisa)) mostrar = false;
         }
         
-        // Filtro de localização
         if (localizacao) {
             const cardLocalizacao = card.querySelector('.text-purple-700')?.textContent || '';
             const selectOption = Array.from(document.getElementById('filtroLocalizacao').options)
                 .find(opt => opt.value === localizacao);
             const nomeDept = selectOption ? selectOption.textContent : '';
-            if (!cardLocalizacao.includes(nomeDept)) {
-                mostrar = false;
-            }
+            if (!cardLocalizacao.includes(nomeDept)) mostrar = false;
+        }
+
+        if (filtroDept) {
+            const cardDeptId = card.getAttribute('data-departamento-id') || '';
+            if (cardDeptId !== filtroDept) mostrar = false;
         }
         
-        // Filtro de responsável
-        if (responsavel) {
-            const cardResponsaveis = card.querySelector('.text-slate-500')?.textContent || '';
-            const selectOption = Array.from(document.getElementById('filtroResponsavel').options)
-                .find(opt => opt.value === responsavel);
-            const nomeResp = selectOption ? selectOption.textContent : '';
-            if (!cardResponsaveis.includes(nomeResp)) {
-                mostrar = false;
-            }
-        }
-        
-        // Filtro de período (precisa buscar data do card via data-created)
-        // Como não temos data visível no card, vamos pular esse filtro por enquanto
-        // Pode ser implementado com data-attribute se necessário
-        
-        // Aplicar visibilidade
         if (mostrar) {
             card.style.display = 'block';
             totalFiltrado++;
@@ -768,19 +842,41 @@ function aplicarFiltros() {
         }
     });
     
-    // Atualizar contador
     document.getElementById('totalFiltrado').textContent = totalFiltrado;
-    
-    // Atualizar contadores das colunas
+    atualizarContagemColunas();
+}
+
+function selecionarFunil(deptId, btn) {
+    // Atualizar pills
+    document.querySelectorAll('.funil-pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    // Sync select dropdown
+    const sel = document.getElementById('filtroDepartamento');
+    if (sel) sel.value = deptId;
+    // Filtrar cards
+    const cards = document.querySelectorAll('.kanban-card');
+    let total = 0;
+    cards.forEach(card => {
+        const cardDeptId = card.getAttribute('data-departamento-id') || '';
+        const show = !deptId || cardDeptId === String(deptId);
+        card.style.display = show ? 'block' : 'none';
+        if (show) total++;
+    });
+    document.getElementById('totalFiltrado').textContent = total;
     atualizarContagemColunas();
 }
 
 function limparFiltros() {
     document.getElementById('filtroPesquisa').value = '';
     document.getElementById('filtroLocalizacao').value = '';
-    document.getElementById('filtroResponsavel').value = '';
+    document.getElementById('filtroDepartamento').value = '';
     document.getElementById('filtroDataInicio').value = '';
     document.getElementById('filtroDataFim').value = '';
+    
+    // Reset funil pills
+    document.querySelectorAll('.funil-pill').forEach(p => p.classList.remove('active'));
+    const todosBtn = document.querySelector('.funil-pill[data-dept-id=""]');
+    if (todosBtn) todosBtn.classList.add('active');
     
     // Mostrar todos os cards
     document.querySelectorAll('.kanban-card').forEach(card => {

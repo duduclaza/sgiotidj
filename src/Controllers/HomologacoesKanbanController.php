@@ -51,8 +51,13 @@ class HomologacoesKanbanController
                     SELECT h.*, 
                            u.name as criador_nome,
                            d.nome as departamento_nome,
+                           dr.nome as departamento_resp_nome,
                            GROUP_CONCAT(DISTINCT ur.name SEPARATOR ', ') as responsaveis_nomes,
                            COUNT(DISTINCT a.id) as total_anexos,
+                           h.data_vencimento,
+                           h.dias_aviso,
+                           h.departamento_resp_id,
+                           DATEDIFF(h.data_vencimento, CURDATE()) as dias_restantes,
                            (
                                SELECT uap.name
                                FROM homologacoes_historico hh2
@@ -72,6 +77,7 @@ class HomologacoesKanbanController
                     FROM homologacoes h
                     LEFT JOIN users u ON h.created_by = u.id
                     LEFT JOIN departamentos d ON h.departamento_id = d.id
+                    LEFT JOIN departamentos dr ON h.departamento_resp_id = dr.id
                     LEFT JOIN homologacoes_responsaveis hr ON h.id = hr.homologacao_id
                     LEFT JOIN users ur ON hr.user_id = ur.id
                     LEFT JOIN homologacoes_anexos a ON h.id = a.homologacao_id
@@ -303,11 +309,13 @@ class HomologacoesKanbanController
             }
 
             // Validar dados
-            $codReferencia = trim($_POST['cod_referencia'] ?? '');
-            $descricao = trim($_POST['descricao'] ?? '');
-            $avisarLogistica = isset($_POST['avisar_logistica']) && $_POST['avisar_logistica'] === '1';
-            $responsaveis = $_POST['responsaveis'] ?? []; // Array de IDs
-            $observacao = trim($_POST['observacao'] ?? '');
+            $codReferencia      = trim($_POST['cod_referencia'] ?? '');
+            $descricao          = trim($_POST['descricao'] ?? '');
+            $avisarLogistica    = isset($_POST['avisar_logistica']) && $_POST['avisar_logistica'] === '1';
+            $observacao         = trim($_POST['observacao'] ?? '');
+            $dataVencimento     = trim($_POST['data_vencimento'] ?? '');
+            $diasAviso          = max(1, (int)($_POST['dias_aviso'] ?? 7));
+            $departamentoRespId = !empty($_POST['departamento_resp_id']) ? (int)$_POST['departamento_resp_id'] : null;
 
             if (empty($codReferencia) || empty($descricao)) {
                 echo json_encode([
@@ -317,10 +325,18 @@ class HomologacoesKanbanController
                 exit;
             }
 
-            if (empty($responsaveis) || !is_array($responsaveis)) {
+            if (empty($departamentoRespId)) {
                 echo json_encode([
                     'success' => false, 
-                    'message' => 'Selecione pelo menos um responsável'
+                    'message' => 'Selecione o Departamento responsável pela homologação'
+                ]);
+                exit;
+            }
+
+            if (empty($dataVencimento)) {
+                echo json_encode([
+                    'success' => false, 
+                    'message' => 'Informe a Data de Vencimento'
                 ]);
                 exit;
             }
@@ -334,30 +350,26 @@ class HomologacoesKanbanController
                     descricao, 
                     avisar_logistica, 
                     observacao,
+                    data_vencimento,
+                    dias_aviso,
+                    departamento_resp_id,
                     status, 
                     created_by, 
                     created_at
-                ) VALUES (?, ?, ?, ?, 'aguardando_recebimento', ?, NOW())
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, 'aguardando_recebimento', ?, NOW())
             ");
             $stmt->execute([
                 $codReferencia,
                 $descricao,
                 $avisarLogistica ? 1 : 0,
                 $observacao,
+                $dataVencimento ?: null,
+                $diasAviso,
+                $departamentoRespId,
                 $_SESSION['user_id']
             ]);
 
             $homologacaoId = $this->db->lastInsertId();
-
-            // Inserir responsáveis
-            $stmtResp = $this->db->prepare("
-                INSERT INTO homologacoes_responsaveis (homologacao_id, user_id, created_at) 
-                VALUES (?, ?, NOW())
-            ");
-
-            foreach ($responsaveis as $userId) {
-                $stmtResp->execute([$homologacaoId, (int)$userId]);
-            }
 
             // Registrar histórico
             $stmtHist = $this->db->prepare("
@@ -374,8 +386,8 @@ class HomologacoesKanbanController
 
             $this->db->commit();
 
-            // Enviar notificações (async)
-            $this->enviarNotificacoes($homologacaoId, $responsaveis, $avisarLogistica);
+            // Notificar todos os usuários do departamento responsável
+            $this->notificarDepartamento($homologacaoId, $departamentoRespId, $avisarLogistica);
 
             echo json_encode([
                 'success' => true,
@@ -930,6 +942,74 @@ class HomologacoesKanbanController
 
         } catch (\Exception $e) {
             error_log("Erro ao enviar notificações: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Notificar todos os membros ativos de um departamento sobre nova homologação
+     */
+    private function notificarDepartamento(int $homologacaoId, int $departamentoId, bool $avisarLogistica): void
+    {
+        try {
+            // Buscar dados da homologação
+            $stmt = $this->db->prepare("
+                SELECT h.*, u.name as criador_nome, d.nome as dept_nome
+                FROM homologacoes h
+                LEFT JOIN users u ON h.created_by = u.id
+                LEFT JOIN departamentos d ON h.departamento_resp_id = d.id
+                WHERE h.id = ?
+            ");
+            $stmt->execute([$homologacaoId]);
+            $homologacao = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$homologacao) return;
+
+            // Buscar usuários ativos do departamento responsável (por setor ou por tabela departamentos)
+            $stmtUsers = $this->db->prepare("
+                SELECT u.id, u.name, u.email
+                FROM users u
+                WHERE u.status = 'active'
+                  AND u.id != ?
+                  AND (
+                      u.setor = (SELECT nome FROM departamentos WHERE id = ?)
+                      OR u.department = (SELECT nome FROM departamentos WHERE id = ?)
+                  )
+            ");
+            $stmtUsers->execute([$_SESSION['user_id'] ?? 0, $departamentoId, $departamentoId]);
+            $membros = $stmtUsers->fetchAll(PDO::FETCH_ASSOC);
+
+            $mensagem = "Nova homologação #{$homologacaoId} ({$homologacao['cod_referencia']}) atribuída ao seu departamento.";
+            $emails = [];
+
+            foreach ($membros as $membro) {
+                $this->criarNotificacao((int)$membro['id'], $homologacaoId, $mensagem);
+                if (!empty($membro['email']) && filter_var($membro['email'], FILTER_VALIDATE_EMAIL)) {
+                    $emails[] = $membro['email'];
+                }
+            }
+
+            // Enviar email em lote para o departamento
+            if (!empty($emails)) {
+                $this->enviarEmailHomologacao($emails, $homologacao, 'departamento');
+            }
+
+            // Notificar logística se solicitado
+            if ($avisarLogistica) {
+                $stmtLog = $this->db->query("SELECT id, email FROM users WHERE LOWER(department) = 'logistica' AND status = 'active'");
+                $logUsers = $stmtLog->fetchAll(PDO::FETCH_ASSOC);
+                $emailsLog = [];
+                foreach ($logUsers as $u) {
+                    $this->criarNotificacao((int)$u['id'], $homologacaoId,
+                        "Nova homologação aguardando recebimento: #{$homologacaoId} - {$homologacao['cod_referencia']}");
+                    if (!empty($u['email']) && filter_var($u['email'], FILTER_VALIDATE_EMAIL)) {
+                        $emailsLog[] = $u['email'];
+                    }
+                }
+                if (!empty($emailsLog)) {
+                    $this->enviarEmailHomologacao($emailsLog, $homologacao, 'logistica');
+                }
+            }
+        } catch (\Exception $e) {
+            error_log("Erro ao notificar departamento: " . $e->getMessage());
         }
     }
 
