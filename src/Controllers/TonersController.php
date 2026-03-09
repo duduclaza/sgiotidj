@@ -1624,13 +1624,18 @@ class TonersController
             $defeitos_historico = [];
         }
 
-        // Departamentos para o campo de notificacoes
+        // Departamentos para o campo de notificacoes (apenas setores relevantes)
         try {
-            $stmt = $this->db->query('SELECT id, nome FROM departamentos ORDER BY nome');
+            $stmt = $this->db->query("
+                SELECT id, nome FROM departamentos 
+                WHERE nome IN ('Qualidade', 'Log\u00edstica', 'Logistica', '\u00c1rea T\u00e9cnica', 'Area Tecnica', 'Atendimento')
+                ORDER BY FIELD(nome, 'Qualidade', 'Log\u00edstica', 'Logistica', '\u00c1rea T\u00e9cnica', 'Area Tecnica', 'Atendimento')
+            ");
             $departamentos_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
             $departamentos_lista = [];
         }
+
 
         $this->render('toners/defeitos', [
             'title'              => 'Toners com Defeito',
