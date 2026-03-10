@@ -59,7 +59,7 @@
 
 <!-- Modal Curso -->
 <div id="modalCurso" class="hidden fixed inset-0 bg-black/50 z-50 p-4 sm:p-6 overflow-y-auto" onclick="if(event.target===this) fecharModalCurso()">
-  <div class="bg-white rounded-2xl shadow-2xl ring-1 ring-gray-100 w-full max-w-3xl mx-auto my-4 sm:my-10 max-h-[90vh] flex flex-col overflow-hidden">
+  <div class="bg-white rounded-2xl shadow-2xl ring-1 ring-gray-100 w-full max-w-3xl mx-auto my-4 sm:my-10 min-h-[calc(100vh-8rem)] max-h-[calc(100vh-2rem)] flex flex-col">
     <div class="px-5 sm:px-7 pt-5 sm:pt-6 pb-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-white">
       <div class="flex items-start justify-between gap-4">
         <div>
@@ -71,7 +71,7 @@
         </button>
       </div>
     </div>
-    <form id="formCurso" class="px-5 sm:px-7 py-5 space-y-5 overflow-y-auto">
+    <form id="formCurso" class="px-5 sm:px-7 py-5 space-y-5 overflow-y-auto flex-1">
       <input type="hidden" name="id" id="cursoId">
       <div class="space-y-4">
         <div>
