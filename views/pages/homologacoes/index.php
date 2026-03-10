@@ -1263,7 +1263,7 @@ function renderDetails(data) {
             const obs = (reg.observacao || '').trim();
             const usuario = reg.usuario_nome || 'Sistema';
             const dataHora = reg.created_at
-                ? new Date(reg.created_at).toLocaleString('pt-BR')
+                ? new Date(reg.created_at.replace(' ', 'T')).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
                 : '';
 
             return `
