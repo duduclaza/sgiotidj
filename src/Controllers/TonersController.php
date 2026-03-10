@@ -1594,12 +1594,15 @@ class TonersController
         }
 
         try {
-            // HistÃ³rico de defeitos registrados
+            // Histórico de defeitos registrados
             $stmt = $this->db->query("
                 SELECT
                     td.id,
                     td.modelo_toner,
                     td.numero_pedido,
+                    td.numero_os,
+                    td.filial_id,
+                    COALESCE(f.nome, '') AS filial_nome,
                     td.cliente_nome,
                     td.descricao,
                     td.quantidade,
@@ -1616,6 +1619,7 @@ class TonersController
                 FROM toners_defeitos td
                 LEFT JOIN users u ON u.id = td.registrado_por
                 LEFT JOIN users ud ON ud.id = td.devolutiva_uid
+                LEFT JOIN filiais f ON f.id = td.filial_id
                 ORDER BY td.created_at DESC
                 LIMIT 200
             ");
@@ -1636,15 +1640,23 @@ class TonersController
             $departamentos_lista = [];
         }
 
+        // Filiais para o select do formulário
+        try {
+            $stmt = $this->db->query('SELECT id, nome FROM filiais ORDER BY nome');
+            $filiais_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            $filiais_lista = [];
+        }
 
         $this->render('toners/defeitos', [
-            'title'              => 'Toners com Defeito',
-            'toners_lista'       => $toners_lista,
-            'clientes_lista'     => $clientes_lista,
-            'defeitos_historico' => $defeitos_historico,
+            'title'               => 'Toners com Defeito',
+            'toners_lista'        => $toners_lista,
+            'clientes_lista'      => $clientes_lista,
+            'defeitos_historico'  => $defeitos_historico,
             'departamentos_lista' => $departamentos_lista,
-            'canEdit' => $canEdit,
-            'canDelete' => $canDelete,
+            'filiais_lista'       => $filiais_lista,
+            'canEdit'             => $canEdit,
+            'canDelete'           => $canDelete,
         ]);
     }
 
@@ -1665,6 +1677,8 @@ class TonersController
             $toner_id      = !empty($_POST['toner_id'])   ? (int)$_POST['toner_id']   : null;
             $modelo_toner  = trim($_POST['modelo_toner']  ?? '');
             $numero_pedido = trim($_POST['numero_pedido'] ?? '');
+            $numero_os     = trim($_POST['numero_os']     ?? '') ?: null;
+            $filial_id     = !empty($_POST['filial_id'])  ? (int)$_POST['filial_id']  : null;
             $cliente_id    = !empty($_POST['cliente_id']) ? (int)$_POST['cliente_id'] : null;
             $cliente_nome  = trim($_POST['cliente_nome']  ?? '');
             $descricao     = trim($_POST['descricao']     ?? '');
@@ -1715,25 +1729,29 @@ class TonersController
             // ---- Inserir no banco ----
             $stmt = $this->db->prepare("
                 INSERT INTO toners_defeitos
-                    (toner_id, modelo_toner, numero_pedido, cliente_id, cliente_nome, descricao,
+                    (toner_id, modelo_toner, numero_pedido, numero_os, filial_id,
+                     cliente_id, cliente_nome, descricao,
                      foto1, foto1_nome, foto1_tipo,
                      foto2, foto2_nome, foto2_tipo,
                      foto3, foto3_nome, foto3_tipo,
                      registrado_por, created_at)
                 VALUES
-                    (:toner_id, :modelo_toner, :numero_pedido, :cliente_id, :cliente_nome, :descricao,
+                    (:toner_id, :modelo_toner, :numero_pedido, :numero_os, :filial_id,
+                     :cliente_id, :cliente_nome, :descricao,
                      :foto1, :foto1_nome, :foto1_tipo,
                      :foto2, :foto2_nome, :foto2_tipo,
                      :foto3, :foto3_nome, :foto3_tipo,
                      :registrado_por, NOW())
             ");
 
-            $stmt->bindValue(':toner_id',     $toner_id,                     PDO::PARAM_INT);
-            $stmt->bindValue(':modelo_toner', $modelo_toner);
-            $stmt->bindValue(':numero_pedido',$numero_pedido);
-            $stmt->bindValue(':cliente_id',   $cliente_id,                    PDO::PARAM_INT);
-            $stmt->bindValue(':cliente_nome', $cliente_nome);
-            $stmt->bindValue(':descricao',    $descricao);
+            $stmt->bindValue(':toner_id',      $toner_id,   PDO::PARAM_INT);
+            $stmt->bindValue(':modelo_toner',  $modelo_toner);
+            $stmt->bindValue(':numero_pedido', $numero_pedido);
+            $stmt->bindValue(':numero_os',     $numero_os);
+            $stmt->bindValue(':filial_id',     $filial_id,  PDO::PARAM_INT);
+            $stmt->bindValue(':cliente_id',    $cliente_id, PDO::PARAM_INT);
+            $stmt->bindValue(':cliente_nome',  $cliente_nome);
+            $stmt->bindValue(':descricao',     $descricao);
             // Foto 1
             $stmt->bindValue(':foto1',        $fotos[1] ? $fotos[1]['dados'] : null, $fotos[1] ? PDO::PARAM_LOB : PDO::PARAM_NULL);
             $stmt->bindValue(':foto1_nome',   $fotos[1] ? $fotos[1]['nome']  : null);

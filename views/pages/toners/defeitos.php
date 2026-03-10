@@ -41,6 +41,28 @@
         </div>
       </div>
 
+      <!-- Nº OS -->
+      <div class="md:col-span-3 flex flex-col">
+        <label for="numeroOs" class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Nº OS <span class="text-gray-400 font-normal lowercase">opcional</span></label>
+        <div class="relative group">
+          <input type="text" id="numeroOs" name="numero_os"
+            placeholder="Ex: 10045"
+            class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-800 focus:bg-white focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all outline-none placeholder-gray-400 group-hover:bg-white group-hover:border-gray-300">
+        </div>
+      </div>
+
+      <!-- Filial -->
+      <div class="md:col-span-3 flex flex-col">
+        <label for="filialSelect" class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Filial <span class="text-gray-400 font-normal lowercase">opcional</span></label>
+        <select id="filialSelect" name="filial_id"
+          class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-800 focus:bg-white focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all outline-none group-hover:bg-white group-hover:border-gray-300">
+          <option value="">— Selecione —</option>
+          <?php foreach ($filiais_lista ?? [] as $fil): ?>
+          <option value="<?= (int)$fil['id'] ?>"><?= htmlspecialchars($fil['nome']) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+
       <!-- Modelo do Toner (Busca) -->
       <div class="md:col-span-6 flex flex-col">
         <label for="buscaToner" class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Modelo do Toner <span class="text-red-500">*</span></label>
@@ -203,6 +225,19 @@ endfor; ?>
       <span class="text-sm text-gray-400"><?php echo count($defeitos_historico ?? []); ?> registro(s)</span>
     </div>
 
+    <!-- Barra de busca -->
+    <div class="px-6 py-3 border-b border-gray-100 flex items-center gap-3">
+      <div class="relative flex-1 max-w-md">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+        <input type="text" id="buscaHistorico" placeholder="Buscar por modelo, pedido, OS, cliente, filial, descrição..."
+          class="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 transition-all"
+          oninput="filtrarHistorico()">
+      </div>
+      <span id="contadorResultados" class="text-xs text-gray-400"></span>
+    </div>
+
     <?php if (empty($defeitos_historico)): ?>
     <div class="py-14 text-center">
       <p class="text-gray-400 text-sm">Nenhum toner com defeito registrado ainda.</p>
@@ -210,12 +245,14 @@ endfor; ?>
     <?php
 else: ?>
     <div class="overflow-x-auto">
-      <table class="min-w-full text-sm">
+      <table class="min-w-full text-sm" id="tabelaHistorico">
         <thead>
           <tr class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide">
             <th class="px-4 py-3 text-left">Data</th>
             <th class="px-4 py-3 text-left">Modelo</th>
             <th class="px-4 py-3 text-left">Nº Pedido</th>
+            <th class="px-4 py-3 text-left">Nº OS</th>
+            <th class="px-4 py-3 text-left">Filial</th>
             <th class="px-4 py-3 text-left">Cliente</th>
             <th class="px-4 py-3 text-left">Descrição</th>
             <th class="px-4 py-3 text-center">Qtd</th>
@@ -227,7 +264,15 @@ else: ?>
         </thead>
         <tbody class="divide-y divide-gray-100">
           <?php foreach ($defeitos_historico as $d): ?>
-          <tr class="hover:bg-gray-50 transition-colors">
+          <tr class="hover:bg-gray-50 transition-colors defeito-row"
+              data-busca="<?= strtolower(htmlspecialchars(
+                  ($d['modelo_toner'] ?? '') . ' ' .
+                  ($d['numero_pedido'] ?? '') . ' ' .
+                  ($d['numero_os'] ?? '') . ' ' .
+                  ($d['cliente_nome'] ?? '') . ' ' .
+                  ($d['filial_nome'] ?? '') . ' ' .
+                  ($d['descricao'] ?? '')
+              )) ?>">
             <td class="px-4 py-3 text-gray-500 whitespace-nowrap">
               <?php echo date('d/m/Y H:i', strtotime($d['created_at'])); ?>
             </td>
@@ -236,6 +281,18 @@ else: ?>
             </td>
             <td class="px-4 py-3 text-gray-600 whitespace-nowrap">
               <?php echo htmlspecialchars($d['numero_pedido']); ?>
+            </td>
+            <td class="px-4 py-3 text-gray-600 whitespace-nowrap">
+              <?php echo $d['numero_os'] ? htmlspecialchars($d['numero_os']) : '<span class="text-gray-300">—</span>'; ?>
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              <?php if (!empty($d['filial_nome'])): ?>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                  <?= htmlspecialchars($d['filial_nome']) ?>
+                </span>
+              <?php else: ?>
+                <span class="text-gray-300">—</span>
+              <?php endif; ?>
             </td>
             <td class="px-4 py-3 text-gray-600 whitespace-nowrap">
               <?php echo htmlspecialchars($d['cliente_nome']); ?>
@@ -605,6 +662,27 @@ document.getElementById('formDefeito').addEventListener('submit', async (e) => {
     btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Registrar Toner com Defeito';
   }
 });
+
+// =====================================================
+// Busca inteligente no Histórico
+// =====================================================
+function filtrarHistorico() {
+  const q = (document.getElementById('buscaHistorico')?.value || '').toLowerCase().trim();
+  const rows = document.querySelectorAll('.defeito-row');
+  let visivel = 0;
+
+  rows.forEach(row => {
+    const texto = (row.getAttribute('data-busca') || '').toLowerCase();
+    const mostrar = !q || texto.includes(q);
+    row.style.display = mostrar ? '' : 'none';
+    if (mostrar) visivel++;
+  });
+
+  const contador = document.getElementById('contadorResultados');
+  if (contador) {
+    contador.textContent = q ? `${visivel} resultado(s) encontrado(s)` : '';
+  }
+}
 
 // =====================================================
 // Excluir Defeito
