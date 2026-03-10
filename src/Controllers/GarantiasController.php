@@ -41,6 +41,14 @@ class GarantiasController
     public function requisicao()
     {
         try {
+            // Buscar departamentos para checkboxes de notificação
+            try {
+                $stmt = $this->db->query("SELECT id, nome FROM departamentos ORDER BY nome ASC");
+                $departamentos_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } catch (\Exception $e) {
+                $departamentos_lista = [];
+            }
+
             $title = 'Requisição de Garantias - SGQ OTI DJ';
             $viewFile = __DIR__ . '/../../views/pages/garantias/requisicao.php';
             include __DIR__ . '/../../views/layouts/main.php';
@@ -59,7 +67,8 @@ class GarantiasController
             $produto = trim($_POST['produto'] ?? '');
             $descricao_defeito = trim($_POST['descricao_defeito'] ?? '');
             $usuario_id = $_SESSION['user_id'] ?? null;
-            
+            $notificar_setores = $_POST['notificar_setores'] ?? [];
+
             // Validações
             if (empty($nome_requisitante)) {
                 echo json_encode(['success' => false, 'message' => 'Nome do requisitante é obrigatório']);
@@ -73,6 +82,11 @@ class GarantiasController
             
             if (empty($descricao_defeito)) {
                 echo json_encode(['success' => false, 'message' => 'Descrição do defeito é obrigatória']);
+                return;
+            }
+
+            if (empty($notificar_setores) || !is_array($notificar_setores)) {
+                echo json_encode(['success' => false, 'message' => 'Selecione ao menos um setor para notificar.']);
                 return;
             }
             
@@ -133,15 +147,16 @@ class GarantiasController
             
             $id = $this->db->lastInsertId();
             
-            // Enviar notificação por email para admins, compras e qualidade
+            // Enviar notificação por email/in-app para setores selecionados + admins
             $this->enviarNotificacaoNovaRequisicao([
-                'id' => (int)$id,
-                'ticket' => $ticket,
-                'nome_requisitante' => $nome_requisitante,
-                'produto' => $produto,
-                'descricao_defeito' => $descricao_defeito,
-                'data' => date('d/m/Y H:i'),
-                'qtd_imagens' => count($imagens)
+                'id'               => (int)$id,
+                'ticket'           => $ticket,
+                'nome_requisitante'=> $nome_requisitante,
+                'produto'          => $produto,
+                'descricao_defeito'=> $descricao_defeito,
+                'data'             => date('d/m/Y H:i'),
+                'qtd_imagens'      => count($imagens),
+                'notificar_setores'=> $notificar_setores,
             ]);
             
             echo json_encode([
@@ -166,136 +181,142 @@ class GarantiasController
             ]);
         }
     }
-    
-    // Enviar notificação de nova requisição por email
+
+    // Enviar notificação de nova requisição por email e in-app (por setor)
     private function enviarNotificacaoNovaRequisicao(array $dados)
     {
         try {
-            // Buscar destinatários para notificação (compatível com bases que usam status ou active)
-            $destinatarios = [];
-            $recipientQueries = [
-                "SELECT DISTINCT id, name, email FROM users
-                 WHERE role IN ('admin', 'super_admin', 'superadmin', 'compras', 'qualidade')
-                   AND status = 'active'",
-                "SELECT DISTINCT id, name, email FROM users
-                 WHERE role IN ('admin', 'super_admin', 'superadmin', 'compras', 'qualidade')
-                   AND active = 1",
-                "SELECT DISTINCT id, name, email FROM users
-                 WHERE role IN ('admin', 'super_admin', 'superadmin', 'compras', 'qualidade')"
-            ];
+            $setoresSelecionados = $dados['notificar_setores'] ?? [];
+            $notifTitle   = "🔔 Nova Requisição de Garantia";
+            $notifMessage = "Ticket {$dados['ticket']} | {$dados['nome_requisitante']} | {$dados['produto']}";
+            $reqId        = (int)($dados['id'] ?? 0);
+            $appUrl       = $_ENV['APP_URL'] ?? 'https://djbr.sgqoti.com.br';
 
-            foreach ($recipientQueries as $sql) {
+            // 1. Notificação in-app para admins/super_admins (sininho)
+            try {
+                $admStmt = $this->db->query("
+                    SELECT DISTINCT id FROM users
+                    WHERE role IN ('admin', 'super_admin', 'superadmin')
+                      AND (status = 'active' OR active = 1 OR (status IS NULL AND active IS NULL))
+                ");
+                $admins = $admStmt ? $admStmt->fetchAll(PDO::FETCH_COLUMN) : [];
+            } catch (\Throwable $e) {
                 try {
-                    $stmt = $this->db->query($sql);
-                    $rows = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
-                    if (!empty($rows)) {
-                        $destinatarios = $rows;
-                        break;
-                    }
-                } catch (\Throwable $e) {
-                    // tenta a próxima query de fallback
-                    continue;
+                    $admStmt = $this->db->query("SELECT DISTINCT id FROM users WHERE role IN ('admin','super_admin','superadmin')");
+                    $admins = $admStmt ? $admStmt->fetchAll(PDO::FETCH_COLUMN) : [];
+                } catch (\Throwable $e2) {
+                    $admins = [];
                 }
             }
+            foreach ($admins as $adminId) {
+                NotificationsController::create(
+                    (int)$adminId,
+                    $notifTitle,
+                    $notifMessage,
+                    'garantias_requisicao',
+                    'garantias_requisicao',
+                    $reqId
+                );
+            }
 
-            if (empty($destinatarios)) {
-                error_log("🔔📧 Nenhum destinatário encontrado para notificação de requisição");
+            // 2. Notificação in-app + email para usuários dos setores selecionados
+            if (empty($setoresSelecionados)) {
+                error_log("🔔 Nenhum setor selecionado para notificação de requisição {$dados['ticket']}");
                 return;
             }
 
-            // Notificação no sistema (sininho)
-            $notifTitle = "🔔 Nova Requisição de Garantia";
-            $notifMessage = "Ticket {$dados['ticket']} | {$dados['nome_requisitante']} | {$dados['produto']}";
-            foreach ($destinatarios as $dest) {
-                if (!empty($dest['id'])) {
-                    NotificationsController::create(
-                        (int)$dest['id'],
-                        $notifTitle,
-                        $notifMessage,
-                        'garantias_requisicao',
-                        'garantias_requisicao',
-                        (int)($dados['id'] ?? 0)
-                    );
+            $placeholders = implode(',', array_fill(0, count($setoresSelecionados), '?'));
+            try {
+                $usersStmt = $this->db->prepare("
+                    SELECT DISTINCT id, name, email FROM users
+                    WHERE setor IN ($placeholders)
+                      AND (status = 'active' OR active = 1 OR (status IS NULL AND active IS NULL))
+                ");
+                $usersStmt->execute($setoresSelecionados);
+                $usersDoSetor = $usersStmt->fetchAll(PDO::FETCH_ASSOC);
+            } catch (\Throwable $e) {
+                // fallback sem filtro de status
+                try {
+                    $usersStmt = $this->db->prepare("SELECT DISTINCT id, name, email FROM users WHERE setor IN ($placeholders)");
+                    $usersStmt->execute($setoresSelecionados);
+                    $usersDoSetor = $usersStmt->fetchAll(PDO::FETCH_ASSOC);
+                } catch (\Throwable $e2) {
+                    $usersDoSetor = [];
+                    error_log("Erro ao buscar usuarios dos setores: " . $e2->getMessage());
                 }
             }
 
-            // Email (somente para quem possui email válido)
             $emails = [];
-            foreach ($destinatarios as $dest) {
-                $email = trim((string)($dest['email'] ?? ''));
-                if ($email !== '') {
+            foreach ($usersDoSetor as $u) {
+                // In-app
+                NotificationsController::create(
+                    (int)$u['id'],
+                    $notifTitle,
+                    $notifMessage,
+                    'garantias_requisicao',
+                    'garantias_requisicao',
+                    $reqId
+                );
+                // Email
+                $email = trim((string)($u['email'] ?? ''));
+                if ($email !== '' && filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     $emails[] = $email;
                 }
             }
             $emails = array_values(array_unique($emails));
 
             if (empty($emails)) {
-                error_log("� Notificação no sistema criada, mas sem emails válidos para envio");
+                error_log("🔔 Notificações in-app criadas para setores, mas sem emails válidos para o ticket {$dados['ticket']}");
                 return;
             }
 
-            error_log("�📧 Enviando notificação por email para: " . implode(', ', $emails));
-            
-            $emailService = new EmailService();
-            
-            $subject = "🔔 Nova Requisição de Garantia: {$dados['ticket']}";
-            
+            error_log("📧 Enviando notificação por email para setores [" . implode(', ', $setoresSelecionados) . "]: " . implode(', ', $emails));
+
+            $emailService   = new EmailService();
+            $subject        = "🔔 Nova Requisição de Garantia: {$dados['ticket']}";
+            $setoresTexto   = implode(', ', $setoresSelecionados);
+
             $body = "
-            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
-                <div style='background: linear-gradient(135deg, #f97316, #ea580c); padding: 20px; border-radius: 10px 10px 0 0;'>
-                    <h1 style='color: white; margin: 0; font-size: 24px;'>📋 Nova Requisição de Garantia</h1>
-                </div>
-                
-                <div style='background: #fff; padding: 25px; border: 1px solid #e5e7eb; border-top: none;'>
-                    <div style='background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin-bottom: 20px; border-radius: 0 8px 8px 0;'>
-                        <p style='margin: 0; font-weight: bold; color: #92400e;'>Ticket: {$dados['ticket']}</p>
-                        <p style='margin: 5px 0 0 0; color: #a16207;'>Status: Aguardando Recebimento</p>
-                    </div>
-                    
-                    <table style='width: 100%; border-collapse: collapse;'>
-                        <tr>
-                            <td style='padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-weight: bold; color: #374151; width: 140px;'>Requisitante:</td>
-                            <td style='padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #4b5563;'>{$dados['nome_requisitante']}</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-weight: bold; color: #374151;'>Produto:</td>
-                            <td style='padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #4b5563;'>{$dados['produto']}</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-weight: bold; color: #374151;'>Data:</td>
-                            <td style='padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #4b5563;'>{$dados['data']}</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-weight: bold; color: #374151;'>Imagens:</td>
-                            <td style='padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #4b5563;'>{$dados['qtd_imagens']} anexada(s)</td>
-                        </tr>
-                    </table>
-                    
-                    <div style='margin-top: 20px;'>
-                        <p style='font-weight: bold; color: #374151; margin-bottom: 10px;'>Descrição do Defeito:</p>
-                        <div style='background: #f9fafb; padding: 15px; border-radius: 8px; color: #4b5563;'>
-                            " . nl2br(htmlspecialchars($dados['descricao_defeito'])) . "
-                        </div>
-                    </div>
-                    
-                    <div style='margin-top: 25px; text-align: center;'>
-                        <a href='https://djbr.sgqoti.com.br/garantias/pendentes' style='display: inline-block; background: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold;'>
-                            Ver Requisições Pendentes
-                        </a>
-                    </div>
-                </div>
-                
-                <div style='background: #f3f4f6; padding: 15px; border-radius: 0 0 10px 10px; text-align: center; border: 1px solid #e5e7eb; border-top: none;'>
-                    <p style='margin: 0; color: #6b7280; font-size: 12px;'>
-                        SGQ OTI DJ - Sistema de Gestão da Qualidade<br>
-                        Esta é uma mensagem automática, por favor não responda.
-                    </p>
-                </div>
-            </div>
-            ";
-            
-            $emailService->send($emails, $subject, $body);
-            
+<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Requisição de Garantia</title></head>
+<body style='font-family:Arial,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto;padding:20px;'>
+<div style='background:linear-gradient(135deg,#f97316,#ea580c);padding:30px;text-align:center;border-radius:10px 10px 0 0;'>
+  <h1 style='color:white;margin:0;font-size:24px;'>📋 Nova Requisição de Garantia</h1>
+  <p style='color:#ffe4d0;margin:5px 0 0 0;'>SGQ OTI DJ</p>
+</div>
+<div style='background:#fff;padding:25px;border:1px solid #e5e7eb;border-top:none;'>
+  <div style='background:#fef3c7;border-left:4px solid #f59e0b;padding:15px;margin-bottom:20px;border-radius:0 8px 8px 0;'>
+    <p style='margin:0;font-weight:bold;color:#92400e;'>Ticket: {$dados['ticket']}</p>
+    <p style='margin:5px 0 0 0;color:#a16207;'>Status: Aguardando Recebimento</p>
+  </div>
+  <table style='width:100%;border-collapse:collapse;'>
+    <tr><td style='padding:10px 0;border-bottom:1px solid #e5e7eb;font-weight:bold;color:#374151;width:140px;'>Requisitante:</td>
+        <td style='padding:10px 0;border-bottom:1px solid #e5e7eb;color:#4b5563;'>" . htmlspecialchars($dados['nome_requisitante']) . "</td></tr>
+    <tr><td style='padding:10px 0;border-bottom:1px solid #e5e7eb;font-weight:bold;color:#374151;'>Produto:</td>
+        <td style='padding:10px 0;border-bottom:1px solid #e5e7eb;color:#4b5563;'>" . htmlspecialchars($dados['produto']) . "</td></tr>
+    <tr><td style='padding:10px 0;border-bottom:1px solid #e5e7eb;font-weight:bold;color:#374151;'>Data:</td>
+        <td style='padding:10px 0;border-bottom:1px solid #e5e7eb;color:#4b5563;'>{$dados['data']}</td></tr>
+    <tr><td style='padding:10px 0;border-bottom:1px solid #e5e7eb;font-weight:bold;color:#374151;'>Setores:</td>
+        <td style='padding:10px 0;border-bottom:1px solid #e5e7eb;color:#4b5563;'>" . htmlspecialchars($setoresTexto) . "</td></tr>
+    <tr><td style='padding:10px 0;border-bottom:1px solid #e5e7eb;font-weight:bold;color:#374151;'>Imagens:</td>
+        <td style='padding:10px 0;border-bottom:1px solid #e5e7eb;color:#4b5563;'>{$dados['qtd_imagens']} anexada(s)</td></tr>
+  </table>
+  <div style='margin-top:20px;'>
+    <p style='font-weight:bold;color:#374151;margin-bottom:10px;'>Descrição do Defeito:</p>
+    <div style='background:#f9fafb;padding:15px;border-radius:8px;color:#4b5563;'>
+      " . nl2br(htmlspecialchars($dados['descricao_defeito'])) . "
+    </div>
+  </div>
+  <div style='margin-top:25px;text-align:center;'>
+    <a href='{$appUrl}/garantias/pendentes' style='display:inline-block;background:#2563eb;color:white;padding:12px 30px;text-decoration:none;border-radius:8px;font-weight:bold;'>Ver Requisições Pendentes</a>
+  </div>
+</div>
+<div style='background:#f3f4f6;padding:15px;border-radius:0 0 10px 10px;text-align:center;border:1px solid #e5e7eb;border-top:none;'>
+  <p style='margin:0;color:#6b7280;font-size:12px;'>SGQ OTI DJ - Sistema de Gestão da Qualidade<br>Esta é uma mensagem automática, por favor não responda.</p>
+</div></body></html>";
+
+            $altBody = "SGQ - Requisição de Garantia\nTicket: {$dados['ticket']}\nRequisitante: {$dados['nome_requisitante']}\nProduto: {$dados['produto']}\nSetores: {$setoresTexto}\nAcesse: {$appUrl}/garantias/pendentes";
+            $emailService->send($emails, $subject, $body, $altBody);
+
         } catch (\Exception $e) {
             error_log("❌ Erro ao enviar notificação de requisição: " . $e->getMessage());
         }

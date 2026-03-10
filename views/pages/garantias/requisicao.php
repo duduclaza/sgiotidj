@@ -84,6 +84,31 @@ $userName = $_SESSION['user_name'] ?? $_SESSION['name'] ?? '';
                 <div id="previewImagens" class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4"></div>
             </div>
             
+            <!-- Notificar Setores (obrigatório) -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    <span class="text-red-500">*</span> Notificar Setores
+                    <span class="text-gray-400 font-normal text-xs ml-1">(selecione ao menos um — o sistema enviará email aos usuários do setor)</span>
+                </label>
+                <div class="flex flex-wrap gap-2" id="setoresContainer">
+                    <?php if (!empty($departamentos_lista)): ?>
+                        <?php foreach ($departamentos_lista as $dep): ?>
+                            <label class="inline-flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-all has-[:checked]:bg-blue-50 has-[:checked]:border-blue-400 has-[:checked]:text-blue-700 select-none">
+                                <input type="checkbox" name="notificar_setores[]" value="<?= htmlspecialchars($dep['nome']) ?>"
+                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                <span class="text-sm font-medium text-gray-700"><?= htmlspecialchars($dep['nome']) ?></span>
+                            </label>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <span class="text-sm text-gray-400 italic">Nenhum departamento cadastrado.</span>
+                    <?php endif; ?>
+                </div>
+                <p id="setoresErro" class="hidden text-red-600 text-sm mt-2 flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                    Selecione ao menos um setor para notificar.
+                </p>
+            </div>
+
             <!-- Botão de Envio -->
             <div class="pt-4">
                 <button type="submit" id="btnEnviar"
@@ -315,6 +340,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Submit form
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        // Validar setores
+        const setoresMarcados = form.querySelectorAll('input[name="notificar_setores[]"]');
+        const algumMarcado = Array.from(setoresMarcados).some(cb => cb.checked);
+        const erroSetores = document.getElementById('setoresErro');
+        if (!algumMarcado) {
+            if (erroSetores) erroSetores.classList.remove('hidden');
+            document.getElementById('setoresContainer')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+        if (erroSetores) erroSetores.classList.add('hidden');
         
         const btnEnviar = document.getElementById('btnEnviar');
         btnEnviar.disabled = true;
@@ -331,6 +367,11 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.append('nome_requisitante', document.getElementById('nome_requisitante').value);
             formData.append('produto', document.getElementById('produto').value);
             formData.append('descricao_defeito', document.getElementById('descricao_defeito').value);
+
+            // Adicionar setores selecionados
+            form.querySelectorAll('input[name="notificar_setores[]"]:checked').forEach(cb => {
+                formData.append('notificar_setores[]', cb.value);
+            });
             
             arquivosSelecionados.forEach((file, i) => {
                 formData.append(`imagens[${i}]`, file);
