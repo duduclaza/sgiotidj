@@ -1,4 +1,4 @@
-﻿<?php if (isset($error)): ?>
+<?php if (isset($error)): ?>
   <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
     <?= e($error) ?>
   </div>
@@ -1255,7 +1255,6 @@
                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Modelo do Toner</th>
                 <th class="px-6 py-4 text-center text-xs font-semibold text-gray-300 uppercase tracking-wider">Destino</th>
                 <th class="px-6 py-4 text-right text-xs font-semibold text-gray-300 uppercase tracking-wider">Quantidade</th>
-                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-300 uppercase tracking-wider">%</th>
               </tr>
             </thead>
             <tbody id="modalClienteToners" class="divide-y divide-gray-700/50">
@@ -3978,7 +3977,7 @@ async function abrirModalDetalhesCliente(codigoCliente, filtros = {}) {
       tbody.innerHTML = '';
       
       if (result.data.toners.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-12 text-center text-gray-500">Nenhum toner encontrado</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3" class="px-6 py-12 text-center text-gray-500">Nenhum toner encontrado</td></tr>';
       } else {
         result.data.toners.forEach((toner, index) => {
           const tr = document.createElement('tr');
@@ -4008,11 +4007,6 @@ async function abrirModalDetalhesCliente(codigoCliente, filtros = {}) {
             <td class="px-6 py-4 text-right">
               <span class="inline-flex items-center px-3 py-1 rounded-lg text-sm font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
                 ${parseInt(toner.total).toLocaleString('pt-BR')}
-              </span>
-            </td>
-            <td class="px-6 py-4 text-right">
-              <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-500/20 text-purple-400 border border-purple-500/30">
-                ${percentual}%
               </span>
             </td>
           `;
