@@ -15,6 +15,8 @@ use App\Controllers\ProfileController;
 use App\Controllers\TriagemTonersController;
 use App\Controllers\CadastroDefeitosController;
 use App\Controllers\PrecificacaoColetaDescartesController;
+use App\Controllers\ELearningGestorController;
+use App\Controllers\ELearningColaboradorController;
 
 // ===== REGISTROS GERAIS =====
 
@@ -143,7 +145,6 @@ $router->post('/precificacao-coleta-descartes/update', [PrecificacaoColetaDescar
 $router->post('/precificacao-coleta-descartes/delete', [PrecificacaoColetaDescartesController::class, 'delete']);
 
 // ===== eLEARNING GESTOR =====
-use App\Controllers\ELearningGestorController;
 $router->get('/elearning/gestor',                            [ELearningGestorController::class, 'dashboard']);
 $router->get('/elearning/gestor/cursos',                     [ELearningGestorController::class, 'cursos']);
 $router->post('/elearning/gestor/cursos/store',              [ELearningGestorController::class, 'storeCurso']);
@@ -163,7 +164,6 @@ $router->get('/elearning/gestor/cursos/{id}/progresso',      [ELearningGestorCon
 $router->post('/elearning/gestor/certificados/emitir',       [ELearningGestorController::class, 'emitirCertificado']);
 
 // ===== eLEARNING COLABORADOR =====
-use App\Controllers\ELearningColaboradorController;
 $router->get('/elearning/colaborador',                           [ELearningColaboradorController::class, 'meusCursos']);
 $router->get('/elearning/colaborador/cursos/{id}',               [ELearningColaboradorController::class, 'verCurso']);
 $router->get('/elearning/colaborador/materiais/{id}/assistir',   [ELearningColaboradorController::class, 'assistirAula']);
