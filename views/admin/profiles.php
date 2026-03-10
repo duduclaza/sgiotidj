@@ -350,6 +350,10 @@ const modulesByCategory = {
   'Atendimento': [
     { key: 'calculadora_toners', name: 'Calculadora de Envio de Toners 🧮' }
   ],
+  'eLearning': [
+    { key: 'elearning_gestor',      name: 'eLearning Gestor 👔' },
+    { key: 'elearning_colaborador', name: 'eLearning Colaborador 🎒' }
+  ],
   'Administrativo': [
     { key: 'admin_usuarios', name: 'Gerenciar Usuários 👥' },
     { key: 'admin_perfis', name: 'Gerenciar Perfis 🎭' },

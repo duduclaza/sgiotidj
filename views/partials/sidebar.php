@@ -94,6 +94,17 @@ $menu = [
     ]
   ],
   [
+    'label' => 'eLearning',
+    'href'  => '#',
+    'icon'  => '🎓',
+    'category' => true,
+    'modules' => ['elearning_gestor', 'elearning_colaborador'],
+    'submenu' => [
+      ['label' => 'eLearning Gestor',       'href' => '/elearning/gestor',       'icon' => '👔', 'module' => 'elearning_gestor'],
+      ['label' => 'eLearning Colaborador',  'href' => '/elearning/colaborador',  'icon' => '🎒', 'module' => 'elearning_colaborador'],
+    ]
+  ],
+  [
     'label' => 'Administrativo', 
     'href' => '#', 
     'icon' => '⚙️', 

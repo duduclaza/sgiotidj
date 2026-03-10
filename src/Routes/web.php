@@ -141,3 +141,36 @@ $router->get('/precificacao-coleta-descartes/list', [PrecificacaoColetaDescartes
 $router->post('/precificacao-coleta-descartes/create', [PrecificacaoColetaDescartesController::class, 'create']);
 $router->post('/precificacao-coleta-descartes/update', [PrecificacaoColetaDescartesController::class, 'update']);
 $router->post('/precificacao-coleta-descartes/delete', [PrecificacaoColetaDescartesController::class, 'delete']);
+
+// ===== eLEARNING GESTOR =====
+use App\Controllers\ELearningGestorController;
+$router->get('/elearning/gestor',                            [ELearningGestorController::class, 'dashboard']);
+$router->get('/elearning/gestor/cursos',                     [ELearningGestorController::class, 'cursos']);
+$router->post('/elearning/gestor/cursos/store',              [ELearningGestorController::class, 'storeCurso']);
+$router->post('/elearning/gestor/cursos/update',             [ELearningGestorController::class, 'updateCurso']);
+$router->post('/elearning/gestor/cursos/delete',             [ELearningGestorController::class, 'deleteCurso']);
+$router->get('/elearning/gestor/cursos/{id}/aulas',          [ELearningGestorController::class, 'aulas']);
+$router->post('/elearning/gestor/aulas/store',               [ELearningGestorController::class, 'storeAula']);
+$router->post('/elearning/gestor/aulas/delete',              [ELearningGestorController::class, 'deleteAula']);
+$router->post('/elearning/gestor/materiais/upload',          [ELearningGestorController::class, 'uploadMaterial']);
+$router->post('/elearning/gestor/materiais/delete',          [ELearningGestorController::class, 'deleteMaterial']);
+$router->get('/elearning/gestor/cursos/{id}/provas',         [ELearningGestorController::class, 'provas']);
+$router->post('/elearning/gestor/provas/store',              [ELearningGestorController::class, 'storeProva']);
+$router->post('/elearning/gestor/questoes/store',            [ELearningGestorController::class, 'storeQuestao']);
+$router->get('/elearning/gestor/cursos/{id}/matriculas',     [ELearningGestorController::class, 'matriculas']);
+$router->post('/elearning/gestor/matriculas/store',          [ELearningGestorController::class, 'matricularColaborador']);
+$router->get('/elearning/gestor/cursos/{id}/progresso',      [ELearningGestorController::class, 'progressoDashboard']);
+$router->post('/elearning/gestor/certificados/emitir',       [ELearningGestorController::class, 'emitirCertificado']);
+
+// ===== eLEARNING COLABORADOR =====
+use App\Controllers\ELearningColaboradorController;
+$router->get('/elearning/colaborador',                           [ELearningColaboradorController::class, 'meusCursos']);
+$router->get('/elearning/colaborador/cursos/{id}',               [ELearningColaboradorController::class, 'verCurso']);
+$router->get('/elearning/colaborador/materiais/{id}/assistir',   [ELearningColaboradorController::class, 'assistirAula']);
+$router->post('/elearning/colaborador/progresso/registrar',      [ELearningColaboradorController::class, 'registrarProgresso']);
+$router->get('/elearning/colaborador/provas/{id}/fazer',         [ELearningColaboradorController::class, 'fazerProva']);
+$router->post('/elearning/colaborador/provas/submeter',          [ELearningColaboradorController::class, 'submeterProva']);
+$router->get('/elearning/colaborador/provas/resultado/{id}',     [ELearningColaboradorController::class, 'resultadoProva']);
+$router->get('/elearning/colaborador/certificados',              [ELearningColaboradorController::class, 'meusCertificados']);
+$router->get('/elearning/colaborador/certificados/{codigo}',     [ELearningColaboradorController::class, 'downloadCertificado']);
+
