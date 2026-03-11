@@ -101,24 +101,33 @@ class ELearningGestorController
         $ch     = max(0, (int)($_POST['carga_horaria'] ?? 0));
         $status = in_array($_POST['status'] ?? '', ['ativo','inativo','rascunho']) ? $_POST['status'] : 'rascunho';
         $uid    = (int)($_SESSION['user_id'] ?? 0);
-        $thumb  = null;
-        // Prioridade: URL da biblioteca > upload de arquivo
+
+        // Thumbnail como BLOB
+        $thumbData = null;
+        $thumbTipo = null;
         $thumbUrl = trim($_POST['thumbnail_url'] ?? '');
+
         if ($thumbUrl && filter_var($thumbUrl, FILTER_VALIDATE_URL)) {
-            $thumb = $thumbUrl;
-        } elseif (!empty($_FILES['thumbnail']['tmp_name'])) {
+            // Baixar imagem da biblioteca e salvar como blob
+            $imgData = @file_get_contents($thumbUrl);
+            if ($imgData && strlen($imgData) > 0) {
+                $thumbData = $imgData;
+                // Detectar tipo via magic bytes
+                $finfo = new \finfo(FILEINFO_MIME_TYPE);
+                $thumbTipo = $finfo->buffer($imgData) ?: 'image/jpeg';
+            }
+        } elseif (!empty($_FILES['thumbnail']['tmp_name']) && $_FILES['thumbnail']['error'] === UPLOAD_ERR_OK) {
             $ext = strtolower(pathinfo($_FILES['thumbnail']['name'], PATHINFO_EXTENSION));
-            if (in_array($ext, ['jpg','jpeg','png','webp']) && $_FILES['thumbnail']['size'] <= 10*1024*1024) {
-                $dir = __DIR__ . '/../../../uploads/elearning/thumbnails/';
-                if (!is_dir($dir)) mkdir($dir, 0755, true);
-                $fn = uniqid('thumb_') . '.' . $ext;
-                if (move_uploaded_file($_FILES['thumbnail']['tmp_name'], $dir . $fn))
-                    $thumb = '/uploads/elearning/thumbnails/' . $fn;
+            $allowed = ['jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp'];
+            if (isset($allowed[$ext]) && $_FILES['thumbnail']['size'] <= 10*1024*1024) {
+                $thumbData = file_get_contents($_FILES['thumbnail']['tmp_name']);
+                $thumbTipo = $allowed[$ext];
             }
         }
+
         try {
-            $this->db->prepare("INSERT INTO elearning_cursos (titulo,descricao,thumbnail,id_gestor,status,carga_horaria,criado_em) VALUES (?,?,?,?,?,?,NOW())")
-                ->execute([$titulo, $desc, $thumb, $uid, $status, $ch]);
+            $st = $this->db->prepare("INSERT INTO elearning_cursos (titulo,descricao,thumbnail,thumbnail_tipo,id_gestor,status,carga_horaria,criado_em) VALUES (?,?,?,?,?,?,?,NOW())");
+            $st->execute([$titulo, $desc, $thumbData, $thumbTipo, $uid, $status, $ch]);
             $this->json(['success' => true, 'message' => 'Curso criado!', 'id' => $this->db->lastInsertId()]);
         } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
     }
