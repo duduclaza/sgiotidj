@@ -44,7 +44,8 @@ class ELearningColaboradorController
         try {
             // Buscar TODOS os cursos ativos (catálogo), com status de matrícula do usuário
             $st = $this->db->prepare("
-                SELECT c.id, c.titulo, c.descricao, c.thumbnail, c.carga_horaria, c.status,
+                SELECT c.id, c.titulo, c.descricao, c.carga_horaria, c.status,
+                       CASE WHEN c.thumbnail IS NOT NULL THEN 1 ELSE 0 END AS has_thumbnail,
                        m.id AS matricula_id, m.progresso_pct, m.status AS matricula_status, m.concluido_em,
                        u.name AS gestor_nome,
                        COUNT(DISTINCT a.id) AS total_aulas

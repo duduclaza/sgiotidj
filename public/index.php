@@ -457,6 +457,7 @@ $router->get('/elearning/gestor/cursos', [App\Controllers\ELearningGestorControl
 $router->post('/elearning/gestor/cursos/store', [App\Controllers\ELearningGestorController::class, 'storeCurso']);
 $router->post('/elearning/gestor/cursos/update', [App\Controllers\ELearningGestorController::class, 'updateCurso']);
 $router->post('/elearning/gestor/cursos/delete', [App\Controllers\ELearningGestorController::class, 'deleteCurso']);
+$router->get('/elearning/gestor/cursos/thumbnail', [App\Controllers\ELearningGestorController::class, 'thumbnailCurso']);
 $router->get('/elearning/gestor/cursos/{id}/aulas', [App\Controllers\ELearningGestorController::class, 'aulas']);
 $router->post('/elearning/gestor/aulas/store', [App\Controllers\ELearningGestorController::class, 'storeAula']);
 $router->post('/elearning/gestor/aulas/delete', [App\Controllers\ELearningGestorController::class, 'deleteAula']);

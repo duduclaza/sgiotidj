@@ -84,8 +84,8 @@
         $sc = ['ativo'=>'green','rascunho'=>'yellow','inativo'=>'gray'][$c['status']] ?? 'gray';
       ?>
       <div class="el-card-hover bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
-        <?php if (!empty($c['thumbnail'])): ?>
-        <img src="<?= htmlspecialchars($c['thumbnail']) ?>" class="w-full h-32 object-cover" alt="">
+        <?php if (!empty($c['has_thumbnail'])): ?>
+        <img src="/elearning/gestor/cursos/thumbnail?id=<?= (int)$c['id'] ?>" class="w-full h-32 object-cover" alt="">
         <?php else: ?>
         <div class="el-thumb h-32 flex items-center justify-center"><span class="text-4xl text-white/80">🎓</span></div>
         <?php endif; ?>

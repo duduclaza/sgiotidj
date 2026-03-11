@@ -17,8 +17,8 @@
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     <?php foreach ($cursos as $c): ?>
     <div class="bg-white rounded-xl shadow overflow-hidden flex flex-col hover:shadow-lg transition">
-      <?php if (!empty($c['thumbnail'])): ?>
-      <img src="<?= htmlspecialchars($c['thumbnail']) ?>" alt="Thumbnail" class="w-full h-40 object-cover">
+      <?php if (!empty($c['has_thumbnail'])): ?>
+      <img src="/elearning/gestor/cursos/thumbnail?id=<?= (int)$c['id'] ?>" alt="Thumbnail" class="w-full h-40 object-cover">
       <?php else: ?>
       <div class="w-full h-40 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-5xl">🎓</div>
       <?php endif; ?>

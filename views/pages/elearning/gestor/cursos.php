@@ -276,9 +276,9 @@
     <div class="el-card curso-card bg-white rounded-2xl shadow-md overflow-hidden flex flex-col border border-gray-100"
          data-titulo="<?= htmlspecialchars(mb_strtolower($c['titulo'])) ?>"
          data-status="<?= htmlspecialchars($c['status']) ?>">
-      <?php if (!empty($c['thumbnail'])): ?>
+      <?php if (!empty($c['has_thumbnail'])): ?>
       <div class="h-40 overflow-hidden">
-        <img src="<?= htmlspecialchars($c['thumbnail']) ?>" alt="<?= htmlspecialchars($c['titulo']) ?>"
+        <img src="/elearning/gestor/cursos/thumbnail?id=<?= (int)$c['id'] ?>" alt="<?= htmlspecialchars($c['titulo']) ?>"
           class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
       </div>
       <?php else: ?>

@@ -62,9 +62,9 @@
          data-matricula="<?= $matriculado ? 'matriculado' : 'nao_matriculado' ?>">
 
       <!-- Thumbnail -->
-      <?php if (!empty($c['thumbnail'])): ?>
+      <?php if (!empty($c['has_thumbnail'])): ?>
       <div class="h-44 overflow-hidden relative">
-        <img src="<?= htmlspecialchars($c['thumbnail']) ?>" alt="<?= htmlspecialchars($c['titulo']) ?>"
+        <img src="/elearning/gestor/cursos/thumbnail?id=<?= (int)$c['id'] ?>" alt="<?= htmlspecialchars($c['titulo']) ?>"
           class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
         <?php if ($concluido): ?>
         <div class="absolute top-3 right-3 bg-green-500 text-white text-[10px] px-2 py-1 rounded-full font-bold shadow">✓ CONCLUÍDO</div>

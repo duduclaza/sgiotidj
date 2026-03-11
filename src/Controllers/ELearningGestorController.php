@@ -51,7 +51,9 @@ class ELearningGestorController
             $totalMatriculas = $this->db->query("SELECT COUNT(*) FROM elearning_matriculas")->fetchColumn();
             $totalConc       = $this->db->query("SELECT COUNT(*) FROM elearning_matriculas WHERE status='concluido'")->fetchColumn();
             $cursos          = $this->db->query("
-                SELECT c.*, u.name AS gestor_nome,
+                SELECT c.id, c.titulo, c.descricao, c.status, c.carga_horaria, c.criado_em,
+                       CASE WHEN c.thumbnail IS NOT NULL THEN 1 ELSE 0 END AS has_thumbnail,
+                       u.name AS gestor_nome,
                        COUNT(m.id) AS total_matriculas
                 FROM elearning_cursos c
                 LEFT JOIN users u ON u.id = c.id_gestor
@@ -75,7 +77,9 @@ class ELearningGestorController
         $this->requireGestor();
         try {
             $cursos = $this->db->query("
-                SELECT c.*, u.name AS gestor_nome,
+                SELECT c.id, c.titulo, c.descricao, c.status, c.carga_horaria, c.id_gestor, c.criado_em,
+                       CASE WHEN c.thumbnail IS NOT NULL THEN 1 ELSE 0 END AS has_thumbnail,
+                       u.name AS gestor_nome,
                        COUNT(DISTINCT a.id) AS total_aulas,
                        COUNT(DISTINCT m.id) AS total_matriculas
                 FROM elearning_cursos c
@@ -141,31 +145,61 @@ class ELearningGestorController
         $desc   = trim($_POST['descricao'] ?? '');
         $ch     = max(0, (int)($_POST['carga_horaria'] ?? 0));
         $status = in_array($_POST['status'] ?? '', ['ativo','inativo','rascunho']) ? $_POST['status'] : 'rascunho';
-        // Thumbnail: URL da biblioteca > upload de arquivo
+
+        // Thumbnail como BLOB
+        $thumbData = null;
+        $thumbTipo = null;
+        $hasNewThumb = false;
         $thumbUrl = trim($_POST['thumbnail_url'] ?? '');
-        $thumb = null;
+
         if ($thumbUrl && filter_var($thumbUrl, FILTER_VALIDATE_URL)) {
-            $thumb = $thumbUrl;
-        } elseif (!empty($_FILES['thumbnail']['tmp_name'])) {
+            $imgData = @file_get_contents($thumbUrl);
+            if ($imgData && strlen($imgData) > 0) {
+                $thumbData = $imgData;
+                $finfo = new \finfo(FILEINFO_MIME_TYPE);
+                $thumbTipo = $finfo->buffer($imgData) ?: 'image/jpeg';
+                $hasNewThumb = true;
+            }
+        } elseif (!empty($_FILES['thumbnail']['tmp_name']) && $_FILES['thumbnail']['error'] === UPLOAD_ERR_OK) {
             $ext = strtolower(pathinfo($_FILES['thumbnail']['name'], PATHINFO_EXTENSION));
-            if (in_array($ext, ['jpg','jpeg','png','webp']) && $_FILES['thumbnail']['size'] <= 10*1024*1024) {
-                $dir = __DIR__ . '/../../../uploads/elearning/thumbnails/';
-                if (!is_dir($dir)) mkdir($dir, 0755, true);
-                $fn = uniqid('thumb_') . '.' . $ext;
-                if (move_uploaded_file($_FILES['thumbnail']['tmp_name'], $dir . $fn))
-                    $thumb = '/uploads/elearning/thumbnails/' . $fn;
+            $allowed = ['jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp'];
+            if (isset($allowed[$ext]) && $_FILES['thumbnail']['size'] <= 10*1024*1024) {
+                $thumbData = file_get_contents($_FILES['thumbnail']['tmp_name']);
+                $thumbTipo = $allowed[$ext];
+                $hasNewThumb = true;
             }
         }
+
         try {
-            if ($thumb) {
-                $this->db->prepare("UPDATE elearning_cursos SET titulo=?,descricao=?,status=?,carga_horaria=?,thumbnail=? WHERE id=?")
-                    ->execute([$titulo, $desc, $status, $ch, $thumb, $id]);
+            if ($hasNewThumb) {
+                $this->db->prepare("UPDATE elearning_cursos SET titulo=?,descricao=?,status=?,carga_horaria=?,thumbnail=?,thumbnail_tipo=? WHERE id=?")
+                    ->execute([$titulo, $desc, $status, $ch, $thumbData, $thumbTipo, $id]);
             } else {
                 $this->db->prepare("UPDATE elearning_cursos SET titulo=?,descricao=?,status=?,carga_horaria=? WHERE id=?")
                     ->execute([$titulo, $desc, $status, $ch, $id]);
             }
             $this->json(['success' => true, 'message' => 'Curso atualizado!']);
         } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
+    }
+
+    // ---------- SERVIR THUMBNAIL (BLOB) ----------
+    public function thumbnailCurso(): void
+    {
+        $id = (int)($_GET['id'] ?? 0);
+        if (!$id) { http_response_code(404); exit; }
+        try {
+            $st = $this->db->prepare("SELECT thumbnail, thumbnail_tipo FROM elearning_cursos WHERE id=? AND thumbnail IS NOT NULL");
+            $st->execute([$id]);
+            $row = $st->fetch(\PDO::FETCH_ASSOC);
+            if (!$row || !$row['thumbnail']) { http_response_code(404); exit; }
+            $tipo = $row['thumbnail_tipo'] ?: 'image/jpeg';
+            header('Content-Type: ' . $tipo);
+            header('Content-Length: ' . strlen($row['thumbnail']));
+            header('Cache-Control: public, max-age=86400');
+            header('ETag: "thumb-' . $id . '-' . md5(substr($row['thumbnail'], 0, 256)) . '"');
+            echo $row['thumbnail'];
+            exit;
+        } catch (\PDOException $e) { http_response_code(500); exit; }
     }
 
     public function deleteCurso(): void

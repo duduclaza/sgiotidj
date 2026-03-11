@@ -150,6 +150,7 @@ $router->get('/elearning/gestor/cursos',                     [ELearningGestorCon
 $router->post('/elearning/gestor/cursos/store',              [ELearningGestorController::class, 'storeCurso']);
 $router->post('/elearning/gestor/cursos/update',             [ELearningGestorController::class, 'updateCurso']);
 $router->post('/elearning/gestor/cursos/delete',             [ELearningGestorController::class, 'deleteCurso']);
+$router->get('/elearning/gestor/cursos/thumbnail',           [ELearningGestorController::class, 'thumbnailCurso']);
 $router->get('/elearning/gestor/cursos/{id}/aulas',          [ELearningGestorController::class, 'aulas']);
 $router->post('/elearning/gestor/aulas/store',               [ELearningGestorController::class, 'storeAula']);
 $router->post('/elearning/gestor/aulas/delete',              [ELearningGestorController::class, 'deleteAula']);
