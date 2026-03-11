@@ -308,7 +308,20 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       </div>
       <div class="chart-wrapper flex justify-center" style="height:320px"><canvas id="chartFaixas"></canvas></div>
     </div>
-
+    <!-- Chart 4: Evolução Mensal -->
+    <div class="dash-card dash-card-glow p-5 dash-animate" style="animation-delay:0.35s">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-sm font-semibold text-white">Evolução Mensal de Reprovação</h3>
+          <p class="text-xs text-slate-400 mt-0.5">% de garantias (reprovados) por mês · clique no ponto para detalhes</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="kpi-badge bg-rose-400/15 text-rose-300 border border-rose-400/20">Linha</span>
+          <button class="chart-expand-btn" onclick="expandirGrafico('evolucao','Evolução Mensal de Reprovação','% de garantias (reprovados) por mês')" title="Expandir">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+          </button>
+        </div>
+      </div>
       <div class="chart-wrapper" style="height:320px"><canvas id="chartEvolucao"></canvas></div>
     </div>
 
@@ -333,7 +346,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   <!-- Bottom: Destino Distribution + Recent Records -->
   <div class="grid grid-cols-1 xl:grid-cols-5 gap-5 mb-6">
     <!-- Donut Destino -->
-    <div class="xl:col-span-2 dash-card dash-card-glow p-5 dash-animate" style="animation-delay:0.38s">
+    <div class="xl:col-span-2 dash-card dash-card-glow p-5 dash-animate" style="animation-delay:0.41s">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-sm font-semibold text-white">Distribuição por Destino</h3>
         <button class="chart-expand-btn" onclick="expandirGrafico('destino','Distribuição por Destino','Proporção de cada destino')" title="Expandir">
@@ -345,7 +358,7 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
     </div>
 
     <!-- Triagens -->
-    <div class="xl:col-span-3 dash-card dash-card-glow p-5 dash-animate" style="animation-delay:0.41s">
+    <div class="xl:col-span-3 dash-card dash-card-glow p-5 dash-animate" style="animation-delay:0.44s">
       <h3 class="text-sm font-semibold text-white mb-4">Triagens</h3>
       <div class="overflow-auto rounded-xl border border-white/5" style="max-height:380px">
         <table class="w-full dash-table">
