@@ -1,7 +1,13 @@
 <?php
 // views/pages/elearning/gestor/diploma_config.php
 ?>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;600;800&family=Great+Vibes&display=swap" rel="stylesheet">
+
 <style>
+  :root {
+    --diploma-width: 800px;
+    --diploma-ratio: 1.414; /* A4 Ratio */
+  }
   .el-fade-in { animation: elFadeIn .4s ease; }
   @keyframes elFadeIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
   
@@ -11,39 +17,79 @@
   .layout-card.selected { border-color: #6366f1; box-shadow: 0 0 0 4px rgba(99,102,241,.1); }
   .layout-preview-small { aspect-ratio: 1.414/1; background: #f8fafc; position: relative; overflow: hidden; }
 
-  /* Diploma Layouts - Common */
-  .diploma-container { aspect-ratio: 1.414/1; background: white; width: 100%; max-width: 800px; margin: 0 auto; box-shadow: 0 20px 50px rgba(0,0,0,0.15); border-radius: 4px; position: relative; z-index: 1; overflow: hidden; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
+  /* DIPLOMA CONTAINER */
+  .diploma-container { 
+    width: 100%; 
+    max-width: var(--diploma-width); 
+    aspect-ratio: var(--diploma-ratio) / 1; 
+    margin: 0 auto; 
+    background: white; 
+    box-shadow: 0 30px 60px rgba(0,0,0,0.2); 
+    position: relative; 
+    overflow: hidden; 
+    user-select: none;
+  }
   
-  /* Template 1: Classic Professional */
-  .tpl-1 { border: 15px double #1e293b; padding: 60px; }
-  .tpl-1 .title { font-family: 'serif'; font-size: 42px; color: #1e293b; margin-bottom: 20px; }
-  .tpl-1 .label { text-transform: uppercase; letter-spacing: 2px; color: #64748b; font-size: 14px; margin-bottom: 30px; }
-  .tpl-1 .name { font-size: 32px; font-weight: 800; border-bottom: 2px solid #1e293b; padding-bottom: 5px; margin-bottom: 20px; color: #0f172a; }
+  .diploma-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px;
+    text-align: center;
+    z-index: 10;
+  }
 
-  /* Template 2: Modern Minimal */
-  .tpl-2 { border-left: 20px solid #6366f1; padding: 40px 60px; }
-  .tpl-2 .bg-accent { position: absolute; top: -100px; right: -100px; width: 300px; height: 300px; background: #6366f1; opacity: 0.05; border-radius: 50%; }
-  .tpl-2 .title { font-size: 38px; font-weight: 900; color: #1e1b4b; background: linear-gradient(to right, #6366f1, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .tpl-2 .name { font-size: 36px; font-weight: 700; color: #1e1b4b; margin: 25px 0; }
+  /* DRAGGABLE LOGO */
+  #prevLogo {
+    position: absolute;
+    cursor: move;
+    z-index: 50;
+    transition: outline 0.2s;
+    user-drag: none;
+    -webkit-user-drag: none;
+  }
+  #prevLogo:hover { outline: 2px dashed #6366f1; }
+  #prevLogo.dragging { opacity: 0.8; outline: 2px solid #6366f1; }
 
-  /* Template 3: Gold Premium */
-  .tpl-3 { background: #fffdf5; border: 12px solid #d4af37; outline: 3px solid #d4af37; outline-offset: -20px; color: #45321d; }
-  .tpl-3 .title { font-family: 'serif'; font-size: 46px; color: #856404; font-variant: small-caps; }
-  .tpl-3 .seal { position: absolute; bottom: 40px; right: 40px; width: 80px; height: 80px; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%23d4af37" opacity="0.8"/><path d="M50 20 L55 40 L70 45 L55 50 L50 70 L45 50 L30 45 L45 40 Z" fill="white"/></svg>'); }
+  /* PREMIUM LAYOUTS */
+  
+  /* Template 1: Classic Imperial */
+  .tpl-1 { background: #fffcf0; color: #1a1a1a; border: 20px solid #c5a059; }
+  .tpl-1::before { content: ''; position: absolute; inset: 10px; border: 2px solid #c5a059; pointer-events: none; }
+  .tpl-1 .title { font-family: 'Playfair Display', serif; font-size: 48px; font-weight: 900; color: #8a6d3b; margin-bottom: 10px; }
+  .tpl-1 .name { font-family: 'Great Vibes', cursive; font-size: 52px; color: #1a1a1a; margin: 20px 0; }
+  .tpl-1 .line { width: 80%; height: 1px; background: #c5a059; margin: 20px 0; }
 
-  /* Template 4: Corporate Blue */
-  .tpl-4 { background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); color: white; border: 20px solid white; outline: 1px solid #e2e8f0; }
-  .tpl-4 .title { font-size: 40px; font-weight: 900; text-transform: uppercase; margin-bottom: 10px; }
-  .tpl-4 .line { height: 4px; width: 60px; background: #60a5fa; margin: 20px 0; }
-  .tpl-4 .name { font-size: 34px; font-weight: 600; color: #eff6ff; }
+  /* Template 2: Modern Azure */
+  .tpl-2 { background: #ffffff; color: #0f172a; }
+  .tpl-2::after { content: ''; position: absolute; top: 0; right: 0; width: 40%; height: 100%; background: linear-gradient(135deg, rgba(99,102,241,0.1) 0%, rgba(99,102,241,0) 100%); clip-path: polygon(100% 0, 0 0, 100% 100%); pointer-events: none; }
+  .tpl-2 .title { font-family: 'Montserrat', sans-serif; font-size: 42px; font-weight: 800; text-transform: uppercase; letter-spacing: 4px; color: #4338ca; }
+  .tpl-2 .name { font-family: 'Montserrat', sans-serif; font-size: 38px; font-weight: 600; color: #1e1b4b; border-bottom: 4px solid #4338ca; padding-bottom: 5px; }
 
-  /* Template 5: Creative Soft */
-  .tpl-5 { background: #faf5ff; border-radius: 30px; border: 1px solid #e9d5ff; }
-  .tpl-5 .border-inner { position: absolute; inset: 20px; border: 2px dashed #d8b4fe; border-radius: 20px; pointer-events: none; }
-  .tpl-5 .title { color: #581c87; font-size: 34px; font-weight: 800; }
-  .tpl-5 .name { font-size: 32px; font-weight: 700; color: #7e22ce; background: #f3e8ff; padding: 5px 20px; border-radius: 12px; }
+  /* Template 3: Royal Knight */
+  .tpl-3 { background: #0f172a; color: #f8fafc; border: 2px solid #334155; }
+  .tpl-3::before { content: ''; position: absolute; top:0; left:0; width:100%; height:80px; background: #1e293b; }
+  .tpl-3 .title { font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 700; color: #c5a059; text-transform: uppercase; margin-top: 40px; }
+  .tpl-3 .name { font-family: 'Montserrat', sans-serif; font-size: 34px; font-weight: 800; color: #ffffff; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+  .tpl-3 .footer-line { border-top: 1px solid #334155; width: 100%; margin-top: 40px; padding-top: 20px; }
 
-  /* Upload Zone */
+  /* Template 4: Vintage Scroll */
+  .tpl-4 { background: #fdf6e3; color: #5d4037; padding: 40px; }
+  .tpl-4::before { content: ''; position: absolute; inset: 30px; border: 8px double #8d6e63; border-radius: 4px; pointer-events: none; }
+  .tpl-4 .title { font-family: 'Playfair Display', serif; font-size: 44px; font-style: italic; }
+  .tpl-4 .name { font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 700; text-decoration: underline; }
+
+  /* Template 5: Creative Flow */
+  .tpl-5 { background: linear-gradient(45deg, #f3f4f6 0%, #ffffff 100%); }
+  .tpl-5::before { content: ''; position: absolute; bottom: 0; left: 0; width: 200px; height: 200px; background: #fbbf24; opacity: 0.1; border-radius: 50%; transform: translate(-50%, 50%); }
+  .tpl-5 .title { font-family: 'Montserrat', sans-serif; font-size: 36px; font-weight: 300; color: #1f2937; }
+  .tpl-5 b { font-weight: 800; color: #d97706; }
+  .tpl-5 .name { font-family: 'Montserrat', sans-serif; font-size: 32px; color: #d97706; background: rgba(251, 191, 36, 0.1); padding: 5px 30px; border-radius: 999px; }
+
+  /* Controls */
   .upload-logo-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; transition: all .2s; cursor: pointer; }
   .upload-logo-zone:hover { border-color: #6366f1; background: #f1f5f9; }
 </style>
@@ -55,188 +101,211 @@
     <div>
       <a href="/elearning/gestor/cursos" class="text-indigo-300 hover:text-white text-sm transition">← Voltar aos Cursos</a>
       <h1 class="text-2xl font-bold mt-2 flex items-center gap-2">
-        <span class="text-2xl">⚙️</span> Configuração de Diploma
+        <span class="text-2xl">🎓</span> Diplomas Premium
       </h1>
-      <p class="text-indigo-100 text-sm mt-1">Configure a identidade visual dos certificados emitidos pela plataforma</p>
+      <p class="text-indigo-100 text-sm mt-1">Personalize o layout e posicione livremente a sua marca</p>
     </div>
-    <button onclick="salvarConfig()" id="btnSalvarGeral" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg transition flex items-center gap-2">
-      <span id="saveLabel">💾 Salvar Alterações</span>
-    </button>
+    <div class="flex gap-3">
+      <button onclick="salvarConfig()" id="btnSalvarGeral" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg transition flex items-center gap-2">
+        <span id="saveLabel">💾 Salvar Alterações</span>
+      </button>
+    </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
-    <!-- LEFT: Settings -->
+    <!-- LEFT: Settings (Col 1) -->
     <div class="space-y-6">
       
-      <!-- Logo Settings -->
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 class="text-sm font-bold text-gray-800 uppercase tracking-widest mb-4 flex items-center gap-2">
-          <span class="bg-indigo-100 p-1.5 rounded-lg">🖼️</span> Logomarca do Diploma
-        </h3>
+      <!-- Logo Upload & Size -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">🖼️ Logomarca</h3>
         <input type="file" id="logoInput" class="hidden" onchange="handleLogoSelect(this)" accept="image/*">
-        <div class="upload-logo-zone text-center" onclick="document.getElementById('logoInput').click()">
-          <div id="logoPreviewWrapper" class="<?= ($config['logo_diploma'] ?? false) ? '' : 'hidden' ?> mb-3">
-             <img id="logoPreviewImg" src="<?= ($config['logo_diploma'] ?? false) ? '/elearning/gestor/diploma/logo' : '' ?>" class="max-h-24 mx-auto object-contain">
+        
+        <div class="upload-logo-zone text-center mb-4" onclick="document.getElementById('logoInput').click()">
+          <div id="logoSelectPrompt">
+            <div class="text-3xl mb-1 text-gray-300">🏢</div>
+            <p class="text-[10px] font-bold text-gray-500">Subir Logo</p>
           </div>
-          <div id="logoSelectPrompt" class="<?= ($config['logo_diploma'] ?? false) ? 'hidden' : '' ?>">
-            <div class="text-3xl mb-1 text-gray-400">🏢</div>
-            <p class="text-xs font-bold text-gray-600">Clique para subir sua logo</p>
-            <p class="text-[10px] text-gray-400 mt-1">PNG transparente recomendado</p>
-          </div>
-          <?php if($config['logo_diploma'] ?? false): ?>
-            <p class="text-[10px] text-indigo-600 font-bold mt-2">Clique para alterar</p>
-          <?php endif; ?>
+        </div>
+
+        <div class="space-y-3">
+          <label class="block text-[10px] font-bold text-gray-400 uppercase">Tamanho do Logo</label>
+          <input type="range" id="logoWidthRange" min="50" max="400" value="<?= $config['logo_width'] ?? 150 ?>" 
+                 class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                 oninput="updateLogoSize(this.value)">
+          <div class="text-[10px] text-right text-gray-400 mt-1"><span id="widthValue"><?= $config['logo_width'] ?? 150 ?></span>px</div>
         </div>
       </div>
 
-      <!-- General Settings -->
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 class="text-sm font-bold text-gray-800 uppercase tracking-widest mb-4 flex items-center gap-2">
-          <span class="bg-amber-100 p-1.5 rounded-lg">✍️</span> Assinatura e Textos
-        </h3>
-        <div class="space-y-4">
-          <div>
-            <label class="block text-xs font-semibold text-gray-500 mb-1">Texto da Assinatura</label>
-            <input type="text" id="assinaturaTexto" value="<?= htmlspecialchars($config['assinatura_texto'] ?? 'Diretoria SGQDJ') ?>" 
-                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition"
-                   oninput="updatePreviewText()">
-            <p class="text-[10px] text-gray-400 mt-1">Ex: Diretor Executivo, Nome do Responsável, etc.</p>
-          </div>
-        </div>
+      <!-- Signature -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">✍️ Assinatura</h3>
+        <input type="text" id="assinaturaTexto" value="<?= htmlspecialchars($config['assinatura_texto'] ?? 'Diretoria SGQDJ') ?>" 
+               class="w-full border border-gray-100 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition"
+               oninput="updatePreviewText()">
       </div>
 
-      <!-- Help info -->
-      <div class="bg-indigo-50 rounded-2xl p-5 border border-indigo-100">
-        <p class="text-xs text-indigo-700 leading-relaxed font-medium">
-          💡 <b>Dica:</b> O diploma é gerado automaticamente quando o aluno atinge a nota mínima na prova final do curso. 
-          O layout escolhido será aplicado a todos os certificados.
-        </p>
+      <!-- Positioning Info -->
+      <div class="bg-amber-50 rounded-2xl p-4 border border-amber-100">
+          <p class="text-[10px] text-amber-800 leading-relaxed">
+            ✨ <b>Dica PRO:</b> No preview ao lado, você pode <b>clicar e arrastar</b> o logo para onde quiser! A posição será salva automaticamente em percentagem.
+          </p>
       </div>
 
     </div>
 
-    <!-- RIGHT: Templates -->
-    <div class="lg:col-span-2 space-y-6">
+    <!-- MAIN: Editor (Col 2-4) -->
+    <div class="lg:col-span-3 space-y-6">
       
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-         <h3 class="text-sm font-bold text-gray-800 uppercase tracking-widest mb-6 flex items-center gap-2">
-          <span class="bg-purple-100 p-1.5 rounded-lg">🎨</span> Escolha seu Modelo
-        </h3>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
-          <?php for($i=1; $i<=5; $i++): ?>
-          <div id="layoutBtn_<?= $i ?>" class="layout-card <?= ($config['layout_ativo'] ?? 1) == $i ? 'selected' : '' ?>" onclick="selectLayout(<?= $i ?>)">
-            <div class="layout-preview-small flex items-center justify-center">
-               <span class="text-xs font-bold text-gray-400">Modelo <?= $i ?></span>
-               <div id="mini_preview_<?= $i ?>" class="absolute inset-2 border group-hover:scale-105 transition scale-90 opacity-60 pointer-events-none"></div>
-            </div>
-            <div class="p-3 bg-gray-50 border-t flex items-center justify-between">
-              <span class="text-xs font-bold text-gray-700">LAYOUT <?= $i ?></span>
-              <div class="w-4 h-4 rounded-full border-2 border-gray-300 flex items-center justify-center">
-                <div class="w-2 h-2 rounded-full bg-indigo-600 hidden check-inner"></div>
-              </div>
-            </div>
-          </div>
-          <?php endfor; ?>
+      <!-- Layout Selector Pills -->
+      <div class="bg-white rounded-2xl p-2 shadow-sm border border-gray-100 overflow-x-auto">
+        <div class="flex gap-2 min-w-max">
+          <?php 
+          $layouts = [
+            '1' => '🏆 Imperial Gold',
+            '2' => '🌊 Modern Azure',
+            '3' => '🌑 Royal Knight',
+            '4' => '📜 Vintage Scroll',
+            '5' => '🎨 Creative Flow'
+          ];
+          foreach($layouts as $id => $name): ?>
+          <button onclick="selectLayout(<?= $id ?>)" id="layoutBtn_<?= $id ?>" 
+                  class="layout-pill px-4 py-2 rounded-xl text-xs font-bold transition-all <?= ($config['layout_ativo'] ?? 1) == $id ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-500 hover:bg-gray-100' ?>">
+            <?= $name ?>
+          </button>
+          <?php endforeach; ?>
         </div>
+      </div>
 
-        <h3 class="text-sm font-bold text-gray-400 text-center uppercase tracking-widest mb-4 italic">Pré-visualização do Layout Selecionado</h3>
-        
-        <!-- DIPLOMA PREVIEW CANVAS -->
+      <!-- DIPLOMA PREVIEW CANVAS -->
+      <div class="flex items-center justify-center p-8 bg-gray-100 rounded-3xl border border-gray-200 shadow-inner">
         <div id="diplomaPreview" class="diploma-container tpl-<?= $config['layout_ativo'] ?? 1 ?>">
           
-          <!-- Template Extras Area (dashed borders, shapes etc) -->
-          <div id="tplExtras"></div>
-
-          <div class="relative z-10 w-full flex flex-col items-center">
-            <!-- Logo -->
-            <img id="prevLogo" src="<?= ($config['logo_diploma'] ?? false) ? '/elearning/gestor/diploma/logo' : '' ?>" 
-                 class="max-h-20 mb-8 max-w-[200px] object-contain <?= ($config['logo_diploma'] ?? false) ? '' : 'hidden' ?>">
+          <!-- Draggable Logo -->
+          <img id="prevLogo" 
+               src="<?= ($config['logo_diploma'] ?? false) ? '/elearning/gestor/diploma/logo' : 'https://placehold.co/400x200?text=Sua+Logo' ?>" 
+               style="left: <?= $config['logo_x'] ?? 50 ?>%; top: <?= $config['logo_y'] ?? 10 ?>%; width: <?= $config['logo_width'] ?? 150 ?>px; transform: translate(-50%, 0);">
+          
+          <div class="diploma-content">
+            <div class="title">Certificado de Conclusão</div>
+            <div class="label text-gray-500 text-xs uppercase tracking-[0.3em] my-4">Certificamos com honra que</div>
+            <div class="name">Nome do Aluno Exemplo</div>
             
-            <div class="title leading-tight">Certificado de Conclusão</div>
-            
-            <div class="label mt-2">Certificamos que para os devidos fins</div>
-            
-            <div class="name mt-4 mb-4 font-bold tracking-tight">Nome Completo do Aluno</div>
-            
-            <p class="text-gray-600 max-w-lg mx-auto text-sm leading-relaxed mb-8 conclusion-text">
-              concluiu com êxito o treinamento de capacitação profissional no curso de<br>
-              <span class="font-bold text-gray-800">TÍTULO DO CURSO EXEMPLO</span><br>
-              com carga horária total de 40 horas.
+            <p class="text-sm max-w-lg mx-auto leading-relaxed mt-6">
+              concluiu com aproveitamento excepcional o treinamento de<br>
+              <b class="text-lg">GESTÃO DE QUALIDADE E PROCESSOS</b><br>
+              com carga horária de 80 horas de conteúdo programático.
             </p>
 
-            <div class="flex items-end justify-between w-full mt-10 px-10">
+            <div class="w-full mt-auto flex justify-between items-end px-10 pb-4">
               <div class="text-left">
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Emitido em:</p>
-                <p class="text-sm font-bold text-gray-800"><?= date('d/m/Y') ?></p>
+                <p class="text-[9px] text-gray-400 uppercase font-bold">Data de Emissão</p>
+                <p class="text-xs font-bold"><?= date('d/m/Y') ?></p>
               </div>
               
-              <div class="text-center">
-                <div class="w-48 border-b-2 border-gray-900 mx-auto mb-1"></div>
-                <p id="prevAssinatura" class="text-sm font-bold text-gray-800 tracking-tight"><?= htmlspecialchars($config['assinatura_texto'] ?? 'Diretoria SGQDJ') ?></p>
+              <div class="text-center group">
+                <div class="w-40 border-b border-gray-400 mb-1 group-hover:w-48 transition-all"></div>
+                <p id="prevAssinatura" class="text-xs font-bold"><?= htmlspecialchars($config['assinatura_texto'] ?? 'Diretoria SGQDJ') ?></p>
               </div>
 
               <div class="text-right">
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Código:</p>
-                <p class="text-[10px] font-mono font-bold text-gray-600">A1B2-C3D4-E5F6-G7H8</p>
+                <p class="text-[9px] text-gray-400 uppercase font-bold">Autenticidade</p>
+                <p class="text-[8px] font-mono">CODE: PREMIUM-PLATINUM-V3</p>
               </div>
             </div>
           </div>
-
-          <div id="tplDecorativeSeal"></div>
         </div>
-
       </div>
 
     </div>
 
   </div>
-
 </div>
 
 <script>
 let currentLayout = <?= $config['layout_ativo'] ?? 1 ?>;
+let logoX = <?= $config['logo_x'] ?? 50 ?>;
+let logoY = <?= $config['logo_y'] ?? 10 ?>;
+let logoWidth = <?= $config['logo_width'] ?? 150 ?>;
 
-function selectLayout(id) {
-  currentLayout = id;
-  document.querySelectorAll('.layout-card').forEach(c => c.classList.remove('selected'));
-  document.getElementById('layoutBtn_' + id).classList.add('selected');
-  
-  const prev = document.getElementById('diplomaPreview');
-  prev.className = 'diploma-container tpl-' + id;
-  
-  // Decorative logic
-  const extras = document.getElementById('tplExtras');
-  extras.innerHTML = '';
-  const seal = document.getElementById('tplDecorativeSeal');
-  seal.className = '';
-  
-  if (id == 5) extras.innerHTML = '<div class="border-inner"></div>';
-  if (id == 2) extras.innerHTML = '<div class="bg-accent"></div>';
-  if (id == 3) seal.className = 'seal';
+// --- Drag & Drop Logic ---
+const logo = document.getElementById('prevLogo');
+const container = document.getElementById('diplomaPreview');
+let isDragging = false;
+
+logo.addEventListener('mousedown', startDrag);
+window.addEventListener('mousemove', drag);
+window.addEventListener('mouseup', stopDrag);
+
+function startDrag(e) {
+  isDragging = true;
+  logo.classList.add('dragging');
+  e.preventDefault();
 }
 
+function drag(e) {
+  if (!isDragging) return;
+  
+  const rect = container.getBoundingClientRect();
+  let x = ((e.clientX - rect.left) / rect.width) * 100;
+  let y = ((e.clientY - rect.top) / rect.height) * 100;
+  
+  // Constrain
+  x = Math.max(0, Math.min(100, x));
+  y = Math.max(0, Math.min(100, y));
+  
+  logoX = x.toFixed(2);
+  logoY = y.toFixed(2);
+  
+  logo.style.left = logoX + '%';
+  logo.style.top = logoY + '%';
+}
+
+function stopDrag() {
+  isDragging = false;
+  logo.classList.remove('dragging');
+}
+
+// --- Layout Selection ---
+function selectLayout(id) {
+  currentLayout = id;
+  const pills = document.querySelectorAll('.layout-pill');
+  pills.forEach(p => {
+    p.classList.remove('bg-indigo-600', 'text-white', 'shadow-md');
+    p.classList.add('text-gray-500', 'hover:bg-gray-100');
+  });
+  
+  const active = document.getElementById('layoutBtn_' + id);
+  active.classList.add('bg-indigo-600', 'text-white', 'shadow-md');
+  active.classList.remove('text-gray-500', 'hover:bg-gray-100');
+  
+  document.getElementById('diplomaPreview').className = 'diploma-container tpl-' + id;
+}
+
+// --- Logo Handling ---
 function handleLogoSelect(input) {
   if (input.files && input.files[0]) {
-    const file = input.files[0];
     const reader = new FileReader();
     reader.onload = e => {
-      document.getElementById('logoPreviewImg').src = e.target.result;
       document.getElementById('prevLogo').src = e.target.result;
-      document.getElementById('logoPreviewWrapper').classList.remove('hidden');
-      document.getElementById('prevLogo').classList.remove('hidden');
-      document.getElementById('logoSelectPrompt').classList.add('hidden');
+      document.getElementById('logoSelectPrompt').innerHTML = '<div class="text-green-500 text-3xl">✓</div><p class="text-[10px] font-bold">Logo Trocado</p>';
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(input.files[0]);
   }
 }
 
-function updatePreviewText() {
-  const v = document.getElementById('assinaturaTexto').value;
-  document.getElementById('prevAssinatura').textContent = v || 'Diretoria SGQDJ';
+function updateLogoSize(val) {
+  logoWidth = val;
+  document.getElementById('widthValue').textContent = val;
+  logo.style.width = val + 'px';
 }
 
+function updatePreviewText() {
+  document.getElementById('prevAssinatura').textContent = document.getElementById('assinaturaTexto').value || 'Diretoria';
+}
+
+// --- Save ---
 async function salvarConfig() {
   const btn = document.getElementById('btnSalvarGeral');
   const label = document.getElementById('saveLabel');
@@ -245,6 +314,9 @@ async function salvarConfig() {
   const fd = new FormData();
   fd.append('layout_ativo', currentLayout);
   fd.append('assinatura_texto', document.getElementById('assinaturaTexto').value);
+  fd.append('logo_x', logoX);
+  fd.append('logo_y', logoY);
+  fd.append('logo_width', logoWidth);
   
   const logoInput = document.getElementById('logoInput');
   if (logoInput.files && logoInput.files[0]) {
@@ -255,27 +327,20 @@ async function salvarConfig() {
     const res = await fetch('/elearning/gestor/diploma/save', { method: 'POST', body: fd });
     const d = await res.json();
     if (d.success) {
-      showToast('Configuração salva com sucesso! 🎉', 'success');
+      showToast('Design salvo com sucesso! 💎', 'success');
       setTimeout(() => location.href = '/elearning/gestor/cursos', 1500);
     } else {
-      showToast('Erro ao salvar: ' + d.message, 'error');
+      showToast('Erro: ' + d.message, 'error');
     }
-  } catch(e) {
-    showToast('Erro de conexão', 'error');
-  } finally {
-    btn.disabled = false; label.textContent = '💾 Salvar Alterações';
-  }
+  } catch(e) { showToast('Erro de conexão', 'error'); } 
+  finally { btn.disabled = false; label.textContent = '💾 Salvar Alterações'; }
 }
 
 function showToast(msg, type) {
-  const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-indigo-600' };
   const div = document.createElement('div');
-  div.className = `fixed bottom-6 right-6 z-[100] ${colors[type] || colors.info} text-white px-5 py-3 rounded-xl shadow-2xl text-sm font-medium el-fade-in`;
+  div.className = `fixed bottom-6 right-6 z-[100] px-6 py-3 rounded-2xl shadow-2xl text-white font-bold el-fade-in ${type==='success'?'bg-emerald-600':'bg-rose-600'}`;
   div.textContent = msg;
   document.body.appendChild(div);
   setTimeout(() => div.remove(), 3500);
 }
-
-// Init decorators
-selectLayout(currentLayout);
 </script>

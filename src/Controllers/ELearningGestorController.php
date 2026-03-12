@@ -522,16 +522,19 @@ class ELearningGestorController
         
         $layout = (int)($_POST['layout_ativo'] ?? 1);
         $assinatura = trim($_POST['assinatura_texto'] ?? 'Diretoria SGQDJ');
+        $logoX = (int)($_POST['logo_x'] ?? 50);
+        $logoY = (int)($_POST['logo_y'] ?? 10);
+        $logoW = (int)($_POST['logo_width'] ?? 150);
         
         try {
             if (!empty($_FILES['logo']['tmp_name']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
                 $type = $_FILES['logo']['type'];
                 $blob = file_get_contents($_FILES['logo']['tmp_name']);
-                $this->db->prepare("UPDATE elearning_config_diploma SET logo_diploma = ?, logo_tipo = ?, layout_ativo = ?, assinatura_texto = ? WHERE id = 1")
-                    ->execute([$blob, $type, $layout, $assinatura]);
+                $this->db->prepare("UPDATE elearning_config_diploma SET logo_diploma = ?, logo_tipo = ?, layout_ativo = ?, assinatura_texto = ?, logo_x = ?, logo_y = ?, logo_width = ? WHERE id = 1")
+                    ->execute([$blob, $type, $layout, $assinatura, $logoX, $logoY, $logoW]);
             } else {
-                $this->db->prepare("UPDATE elearning_config_diploma SET layout_ativo = ?, assinatura_texto = ? WHERE id = 1")
-                    ->execute([$layout, $assinatura]);
+                $this->db->prepare("UPDATE elearning_config_diploma SET layout_ativo = ?, assinatura_texto = ?, logo_x = ?, logo_y = ?, logo_width = ? WHERE id = 1")
+                    ->execute([$layout, $assinatura, $logoX, $logoY, $logoW]);
             }
             $this->json(['success' => true, 'message' => 'Configuração salva!']);
         } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }

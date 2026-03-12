@@ -341,6 +341,11 @@ class ELearningColaboradorController
             $cert = $st->fetch(\PDO::FETCH_ASSOC);
             if (!$cert) { http_response_code(404); echo 'Certificado não encontrado.'; exit; }
 
+            // Fetch template configuration
+            $stTpl = $this->db->prepare("SELECT * FROM elearning_config_diploma WHERE id = 1");
+            $stTpl->execute();
+            $tplConfig = $stTpl->fetch(\PDO::FETCH_ASSOC);
+
             // Gerar PDF simples inline se TCPDF não disponível
             // Se TCPDF disponível: usar biblioteca. Caso contrário: HTML para impressão.
             header('Content-Type: text/html; charset=utf-8');

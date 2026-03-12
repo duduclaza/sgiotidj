@@ -4,99 +4,122 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Certificado — <?= htmlspecialchars($cert['titulo_curso'] ?? '') ?></title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;600;800&family=Great+Vibes&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap');
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #f5f0e8; font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
-    .cert {
-      background: white;
-      width: 800px;
-      padding: 60px;
-      border: 8px solid #d4af37;
-      border-radius: 12px;
-      position: relative;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    body { background: #f1f5f9; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 40px; }
+    
+    .diploma-container { 
+      width: 1123px; /* A4 Landscape at 96dpi approx */
+      height: 794px;
+      background: white; 
+      box-shadow: 0 40px 80px rgba(0,0,0,0.1); 
+      position: relative; 
+      overflow: hidden; 
     }
-    .cert::before {
-      content: '';
+    
+    .diploma-content {
       position: absolute;
-      inset: 12px;
-      border: 2px solid #d4af37;
-      border-radius: 6px;
-      opacity: 0.4;
-      pointer-events: none;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px;
+      text-align: center;
+      z-index: 10;
     }
-    .header { text-align: center; margin-bottom: 40px; }
-    .logo { font-size: 48px; margin-bottom: 12px; }
-    .org { font-family: 'Inter', sans-serif; font-size: 13px; letter-spacing: 4px; text-transform: uppercase; color: #8b7355; font-weight: 600; }
-    .title { font-family: 'Playfair Display', serif; font-size: 14px; letter-spacing: 6px; text-transform: uppercase; color: #8b7355; margin: 30px 0 10px; }
-    .certifica { font-family: 'Playfair Display', serif; font-size: 42px; color: #1a1a2e; margin-bottom: 16px; }
-    .recipient { font-family: 'Playfair Display', serif; font-size: 32px; color: #d4af37; font-weight: 700; border-bottom: 2px solid #d4af37; padding-bottom: 8px; display: inline-block; margin-bottom: 16px; }
-    .description { font-size: 14px; color: #555; line-height: 1.8; margin: 20px 0; text-align: center; max-width: 580px; margin-left: auto; margin-right: auto; }
-    .course { font-weight: 700; color: #1a1a2e; font-size: 16px; }
-    .details { display: flex; gap: 40px; justify-content: center; margin: 30px 0; }
-    .detail-item { text-align: center; }
-    .detail-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #8b7355; margin-bottom: 4px; }
-    .detail-value { font-size: 14px; font-weight: 600; color: #1a1a2e; }
-    .footer { display: flex; justify-content: space-between; margin-top: 40px; align-items: flex-end; }
-    .signature { text-align: center; }
-    .sig-line { width: 180px; border-bottom: 1px solid #333; margin-bottom: 8px; }
-    .sig-name { font-size: 12px; font-weight: 600; color: #333; }
-    .sig-role { font-size: 10px; color: #888; }
-    .validation { text-align: right; font-size: 10px; color: #aaa; }
-    .print-btn { position: fixed; bottom: 20px; right: 20px; background: #d4af37; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; box-shadow: 0 4px 12px rgba(212,175,55,0.4); }
+
+    .logo-img {
+      position: absolute;
+      z-index: 50;
+      transform: translate(-50%, 0);
+    }
+
+    /* PREMIUM LAYOUTS (Same as config) */
+    .tpl-1 { background: #fffcf0; color: #1a1a1a; border: 30px solid #c5a059; }
+    .tpl-1::before { content: ''; position: absolute; inset: 15px; border: 3px solid #c5a059; pointer-events: none; }
+    .tpl-1 .title { font-family: 'Playfair Display', serif; font-size: 64px; font-weight: 900; color: #8a6d3b; margin-bottom: 20px; }
+    .tpl-1 .name { font-family: 'Great Vibes', cursive; font-size: 72px; color: #1a1a1a; margin: 30px 0; }
+    .tpl-1 .label { color: #8a6d3b; letter-spacing: 5px; text-transform: uppercase; font-size: 14px; }
+
+    .tpl-2 { background: #ffffff; color: #0f172a; }
+    .tpl-2::after { content: ''; position: absolute; top:0; right:0; width:45%; height:100%; background: linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(99,102,241,0) 100%); clip-path: polygon(100% 0, 0 0, 100% 100%); }
+    .tpl-2 .title { font-family: 'Montserrat', sans-serif; font-size: 56px; font-weight: 800; text-transform: uppercase; letter-spacing: 6px; color: #4338ca; }
+    .tpl-2 .name { font-family: 'Montserrat', sans-serif; font-size: 48px; font-weight: 600; color: #1e1b4b; border-bottom: 6px solid #4338ca; padding-bottom: 10px; }
+
+    .tpl-3 { background: #0f172a; color: #f8fafc; border: 4px solid #334155; }
+    .tpl-3::before { content: ''; position: absolute; top:0; left:0; width:100%; height:120px; background: #1e293b; }
+    .tpl-3 .title { font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 700; color: #c5a059; text-transform: uppercase; margin-top: 60px; }
+    .tpl-3 .name { font-family: 'Montserrat', sans-serif; font-size: 44px; font-weight: 800; color: #ffffff; }
+
+    .tpl-4 { background: #fdf6e3; color: #5d4037; padding: 60px; }
+    .tpl-4::before { content: ''; position: absolute; inset: 40px; border: 12px double #8d6e63; border-radius: 6px; }
+    .tpl-4 .title { font-family: 'Playfair Display', serif; font-size: 58px; font-style: italic; }
+    .tpl-4 .name { font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 700; text-decoration: underline; }
+
+    .tpl-5 { background: linear-gradient(45deg, #f3f4f6 0%, #ffffff 100%); }
+    .tpl-5::before { content: ''; position: absolute; bottom:-50px; left:-50px; width:300px; height:300px; background: #fbbf24; opacity: 0.1; border-radius: 50%; }
+    .tpl-5 .title { font-family: 'Montserrat', sans-serif; font-size: 48px; font-weight: 300; color: #1f2937; }
+    .tpl-5 .name { font-family: 'Montserrat', sans-serif; font-size: 42px; color: #d97706; background: rgba(251, 191, 36, 0.1); padding: 10px 40px; border-radius: 999px; }
+
+    .footer { width: 100%; margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; padding: 0 40px 20px; }
+    .sig-block { text-align: center; }
+    .sig-line { width: 220px; border-bottom: 2px solid currentColor; margin-bottom: 10px; opacity: 0.6; }
+    .sig-text { font-size: 14px; font-weight: 700; }
+    
+    .print-btn { position: fixed; bottom: 30px; right: 30px; background: #6366f1; color: white; padding: 15px 30px; border-radius: 12px; font-weight: 800; border: none; cursor: pointer; box-shadow: 0 10px 20px rgba(99,102,241,0.3); z-index: 100; transition: all 0.2s; }
+    .print-btn:hover { transform: scale(1.05); background: #4f46e5; }
+
     @media print {
       body { background: white; padding: 0; }
-      .cert { box-shadow: none; width: 100%; }
+      .diploma-container { box-shadow: none; width: 100%; height: 100vh; }
       .print-btn { display: none; }
     }
   </style>
 </head>
 <body>
-  <div class="cert">
-    <div class="header">
-      <div class="logo">🎓</div>
-      <div class="org">OTI — Organização Tecnológica Integrada</div>
-    </div>
 
-    <div style="text-align:center">
+  <div class="diploma-container tpl-<?= $tplConfig['layout_ativo'] ?? 1 ?>">
+    
+    <!-- Logo -->
+    <?php if ($tplConfig['logo_diploma']): ?>
+      <img class="logo-img" 
+           src="data:<?= $tplConfig['logo_tipo'] ?>;base64,<?= base64_encode($tplConfig['logo_diploma']) ?>" 
+           style="left: <?= $tplConfig['logo_x'] ?? 50 ?>%; top: <?= $tplConfig['logo_y'] ?? 10 ?>%; width: <?= $tplConfig['logo_width'] ?? 150 ?>px;">
+    <?php endif; ?>
+
+    <div class="diploma-content">
       <div class="title">Certificado de Conclusão</div>
-      <div class="certifica">Certifica que</div>
-      <div class="recipient"><?= htmlspecialchars($cert['nome_usuario'] ?? '') ?></div>
-      <div class="description">
-        concluiu com êxito o curso<br>
-        <span class="course"><?= htmlspecialchars($cert['titulo_curso'] ?? '') ?></span><br>
-        cumprindo todos os requisitos e aprovação na avaliação.
-      </div>
+      <div class="label" style="margin: 30px 0;">Certificamos com honra que</div>
+      <div class="name"><?= htmlspecialchars($cert['nome_usuario'] ?? 'NOME DO ALUNO') ?></div>
+      
+      <p style="font-size: 18px; max-width: 700px; line-height: 1.8; margin-top: 40px;">
+        concluiu com aproveitamento excepcional o treinamento de<br>
+        <b style="font-size: 24px; color: inherit;"><?= htmlspecialchars($cert['titulo_curso'] ?? 'O CURSO') ?></b><br>
+        com carga horária de <?= round(($cert['carga_horaria'] ?? 0) / 60, 1) ?> horas de conteúdo programático.
+      </p>
 
-      <div class="details">
-        <div class="detail-item">
-          <div class="detail-label">Carga Horária</div>
-          <div class="detail-value"><?= (int)($cert['carga_horaria'] ?? 0) ?> min</div>
+      <div class="footer">
+        <div style="text-align: left;">
+          <p style="font-size: 10px; opacity: 0.6; text-transform: uppercase; font-weight: 800;">Data de Emissão</p>
+          <p style="font-size: 16px; font-weight: 700;"><?= date('d/m/Y', strtotime($cert['emitido_em'])) ?></p>
         </div>
-        <div class="detail-item">
-          <div class="detail-label">Data de Conclusão</div>
-          <div class="detail-value"><?= isset($cert['emitido_em']) ? date('d/m/Y', strtotime($cert['emitido_em'])) : date('d/m/Y') ?></div>
-        </div>
-      </div>
-    </div>
 
-    <div class="footer">
-      <div class="signature">
-        <div class="sig-line" style="margin:0 auto 8px"></div>
-        <div class="sig-name"><?= htmlspecialchars($cert['gestor_nome'] ?? 'Gestor') ?></div>
-        <div class="sig-role">Responsável pelo Curso</div>
-      </div>
-      <div style="text-align:center">
-        <div style="font-size:36px">⭐</div>
-      </div>
-      <div class="validation">
-        Código de Validação:<br>
-        <strong style="font-family:monospace; font-size:9px"><?= htmlspecialchars($cert['codigo_validacao'] ?? '') ?></strong>
+        <div class="sig-block">
+          <div class="sig-line"></div>
+          <p class="sig-text"><?= htmlspecialchars($tplConfig['assinatura_texto'] ?? 'Diretoria') ?></p>
+        </div>
+
+        <div style="text-align: right;">
+          <p style="font-size: 10px; opacity: 0.6; text-transform: uppercase; font-weight: 800;">Validação</p>
+          <p style="font-size: 10px; font-family: monospace; font-weight: bold;"><?= $cert['codigo_validacao'] ?></p>
+        </div>
       </div>
     </div>
   </div>
 
-  <button class="print-btn" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+  <button class="print-btn" onclick="window.print()">🖨️ Imprimir Certificado</button>
+
 </body>
 </html>
