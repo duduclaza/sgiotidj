@@ -203,7 +203,20 @@
               </div>
               <div id="fileField_<?= (int)$a['id'] ?>">
                 <label class="block text-xs font-semibold text-gray-500 mb-1">Arquivo *</label>
-                <input type="file" name="arquivo" class="w-full text-sm file:mr-2 file:rounded-lg file:border-0 file:bg-purple-600 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-purple-700 file:cursor-pointer">
+                <div id="pasteZone_<?= (int)$a['id'] ?>" class="paste-zone border-2 border-dashed border-gray-300 rounded-xl p-3 text-center cursor-pointer hover:border-purple-400 hover:bg-purple-50/30 transition relative"
+                     onclick="document.getElementById('fileInput_<?= (int)$a['id'] ?>').click()"
+                     tabindex="0">
+                  <input type="file" name="arquivo" id="fileInput_<?= (int)$a['id'] ?>" class="hidden" onchange="onFileSelected(<?= (int)$a['id'] ?>, this)">
+                  <div id="pasteHint_<?= (int)$a['id'] ?>" class="text-xs text-gray-400">
+                    <span class="text-lg">📋</span><br>
+                    <span class="font-medium text-gray-500">Ctrl+V</span> para colar · arrastar · ou <span class="text-purple-600 font-semibold underline">clique aqui</span>
+                  </div>
+                  <div id="pastePreview_<?= (int)$a['id'] ?>" style="display:none;" class="flex items-center gap-3">
+                    <img id="pasteImg_<?= (int)$a['id'] ?>" class="w-12 h-12 object-cover rounded-lg border" src="" alt="">
+                    <span id="pasteName_<?= (int)$a['id'] ?>" class="text-xs text-gray-600 truncate flex-1"></span>
+                    <button type="button" onclick="event.stopPropagation(); clearPaste(<?= (int)$a['id'] ?>)" class="text-red-400 hover:text-red-600 text-sm">✕</button>
+                  </div>
+                </div>
               </div>
             </div>
             <!-- Textarea para tipo texto (hidden por padrão) -->
@@ -338,15 +351,109 @@ function toggleTipoMaterial(aulaId, tipo) {
   if (tipo === 'texto') {
     fileField.style.display = 'none';
     textoField.style.display = '';
-    // Limpar file input para não enviar arquivo junto com texto
-    const fi = fileField.querySelector('input[type="file"]');
-    if (fi) fi.value = '';
+    clearPaste(aulaId);
   } else {
     fileField.style.display = '';
     textoField.style.display = 'none';
-    // Limpar textarea
     const ta = textoField.querySelector('textarea');
     if (ta) ta.value = '';
   }
 }
+
+// === PASTE / DROP / FILE HANDLING ===
+
+function showPastePreview(aulaId, file) {
+  const hint = document.getElementById('pasteHint_' + aulaId);
+  const preview = document.getElementById('pastePreview_' + aulaId);
+  const img = document.getElementById('pasteImg_' + aulaId);
+  const name = document.getElementById('pasteName_' + aulaId);
+  if (!hint || !preview) return;
+  // Se for imagem, mostrar thumbnail
+  if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = e => { img.src = e.target.result; img.style.display = ''; };
+    reader.readAsDataURL(file);
+  } else {
+    img.style.display = 'none';
+  }
+  const sizeKB = (file.size / 1024).toFixed(0);
+  name.textContent = `${file.name} (${sizeKB} KB)`;
+  hint.style.display = 'none';
+  preview.style.display = 'flex';
+}
+
+function clearPaste(aulaId) {
+  const hint = document.getElementById('pasteHint_' + aulaId);
+  const preview = document.getElementById('pastePreview_' + aulaId);
+  const fi = document.getElementById('fileInput_' + aulaId);
+  if (hint) hint.style.display = '';
+  if (preview) preview.style.display = 'none';
+  if (fi) fi.value = '';
+}
+
+function onFileSelected(aulaId, input) {
+  if (input.files && input.files[0]) {
+    showPastePreview(aulaId, input.files[0]);
+  }
+}
+
+function setFileOnInput(aulaId, file) {
+  const fi = document.getElementById('fileInput_' + aulaId);
+  if (!fi) return;
+  const dt = new DataTransfer();
+  dt.items.add(file);
+  fi.files = dt.files;
+  showPastePreview(aulaId, file);
+}
+
+// Encontrar o aulaId do painel de upload aberto
+function findOpenUploadAulaId() {
+  const panels = document.querySelectorAll('.el-upload-panel.open');
+  for (const p of panels) {
+    const id = p.id.replace('upload_', '');
+    if (id) return parseInt(id);
+  }
+  return null;
+}
+
+// Global paste listener
+document.addEventListener('paste', function(e) {
+  const aulaId = findOpenUploadAulaId();
+  if (!aulaId) return;
+  // Verificar se tipo é imagem ou arquivo
+  const fileField = document.getElementById('fileField_' + aulaId);
+  if (!fileField || fileField.style.display === 'none') return;
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  for (const item of items) {
+    if (item.kind === 'file') {
+      e.preventDefault();
+      const file = item.getAsFile();
+      if (file) {
+        // Renomear se não tem nome decente
+        const ext = file.type.split('/')[1] || 'png';
+        const named = new File([file], `colado_${Date.now()}.${ext}`, { type: file.type });
+        setFileOnInput(aulaId, named);
+        showToast('Imagem colada! ✅', 'success');
+      }
+      return;
+    }
+  }
+});
+
+// Drag and drop nos paste zones
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.paste-zone').forEach(zone => {
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('border-purple-500','bg-purple-50'); });
+    zone.addEventListener('dragleave', e => { zone.classList.remove('border-purple-500','bg-purple-50'); });
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('border-purple-500','bg-purple-50');
+      const aulaId = zone.id.replace('pasteZone_', '');
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        setFileOnInput(parseInt(aulaId), e.dataTransfer.files[0]);
+      }
+    });
+  });
+});
 </script>
