@@ -114,16 +114,7 @@ class HomologacoesController
             return false;
         }
 
-        // Verificar se é do departamento Compras ou Admin
-        $stmt = $this->db->prepare("
-            SELECT u.department 
-            FROM users u 
-            WHERE u.id = ?
-        ");
-        $stmt->execute([$userId]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        return in_array(strtolower($user['department'] ?? ''), ['compras', 'administrativo', 'admin']);
+        return PermissionService::hasPermission($userId, 'homologacoes', 'edit');
     }
 
     /**

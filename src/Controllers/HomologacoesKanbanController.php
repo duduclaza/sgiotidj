@@ -124,8 +124,8 @@ class HomologacoesKanbanController
                 error_log("Erro ao buscar departamentos: " . $e->getMessage());
             }
 
-            // Verificar se pode criar (sempre true para Master User)
-            $canCreate = true;
+            // Verificar se pode criar (com base na permissão do perfil ou privilégios de admin)
+            $canCreate = $this->canCreateHomologacao($_SESSION['user_id']);
 
             // Renderizar via layout principal
             $title = 'Homologações - SGQ OTI DJ';
@@ -207,9 +207,8 @@ class HomologacoesKanbanController
                 return true;
             }
 
-            // Verificar se é do departamento Compras
-            $department = strtolower($user['department'] ?? '');
-            return in_array($department, ['compras', 'administrativo']);
+            // Verificar se tem permissão de 'edit' no módulo 'homologacoes'
+            return PermissionService::hasPermission($userId, 'homologacoes', 'edit');
 
         } catch (\Exception $e) {
             error_log("Erro ao verificar permissão de criação: " . $e->getMessage());
