@@ -24,6 +24,7 @@ $router->get('/garantias/{id}', [GarantiasController::class, 'show']);
 
 $router->post('/garantias/{id}/update', [GarantiasController::class, 'update']);
 $router->post('/garantias/{id}/update-status', [GarantiasController::class, 'updateStatus']);
+$router->post('/garantias/{id}/update-tratativa', [GarantiasController::class, 'updateTratativa']);
 $router->post('/garantias/{id}/delete', [GarantiasController::class, 'delete']);
 
 // ===== ANEXOS =====
