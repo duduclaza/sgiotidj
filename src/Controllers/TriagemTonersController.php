@@ -866,7 +866,7 @@ class TriagemTonersController
         ob_clean();
         header('Content-Type: application/json');
 
-        if (!PermissionService::hasPermission($_SESSION['user_id'], 'triagem_toners', 'create')) {
+        if (!PermissionService::hasPermission($_SESSION['user_id'], 'triagem_toners', 'edit')) {
             echo json_encode(['success' => false, 'message' => 'Sem permissão para criar.']);
             return;
         }
