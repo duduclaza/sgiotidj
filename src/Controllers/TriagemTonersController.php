@@ -477,6 +477,9 @@ class TriagemTonersController
                         $createdAtImport,
                     ]);
 
+                    // Sincronizar devolutiva
+                    $this->syncDevolutiva($codigoRequisicao !== '' ? $codigoRequisicao : null, $destino, $parecer, $_SESSION['user_id']);
+
                     $importedDetails[] = sprintf(
                         'Linha %d: Cliente %s | Toner %s | Filial %s | Colaborador %s',
                         $line,
@@ -955,6 +958,8 @@ class TriagemTonersController
                 $_SESSION['user_id'],
             ]);
 
+            $this->syncDevolutiva($codigoRequisicao !== '' ? $codigoRequisicao : null, $destino, $parecer, $_SESSION['user_id']);
+
             echo json_encode(['success' => true, 'message' => 'Triagem registrada com sucesso!', 'id' => $this->db->lastInsertId()]);
         } catch (\Exception $e) {
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
@@ -1080,9 +1085,11 @@ class TriagemTonersController
                 $defeitoId, $defeitoNome, $modo,
                 $peso_ret, $percentualParaSalvar,
                 $gramatura_restante, $percentual_calculado,
-                $parecer, $destino, $valor_recuperado,
                 $observacoes, $_SESSION['user_id'], $id,
             ]);
+
+            // Sync since we update triage
+            $this->syncDevolutiva($codigoRequisicao !== '' ? $codigoRequisicao : null, $destino, $parecer, $_SESSION['user_id']);
 
             echo json_encode(['success' => true, 'message' => 'Registro atualizado com sucesso!']);
         } catch (\Exception $e) {
@@ -1164,11 +1171,12 @@ class TriagemTonersController
                 $original['gramatura_restante'],
                 $original['percentual_calculado'],
                 $original['parecer'],
-                $original['destino'],
                 $original['valor_recuperado'],
                 $observacoes,
                 $_SESSION['user_id'],
             ]);
+
+            $this->syncDevolutiva($original['codigo_requisicao'] ?? null, $original['destino'], $original['parecer'], $_SESSION['user_id']);
 
             echo json_encode([
                 'success' => true,
@@ -1336,5 +1344,55 @@ class TriagemTonersController
         unset($spreadsheet);
 
         return $rows;
+    }
+
+    /**
+     * Sincroniza o resultado da triagem com a devolutiva do Toner com Defeito correspondente
+     */
+    private function syncDevolutiva(?string $codigoRequisicao, ?string $destino, string $parecer, int $userId): void
+    {
+        if (empty($codigoRequisicao)) {
+            return;
+        }
+
+        try {
+            // Verifica se existe um toner com defeito com este número de pedido
+            $stmt = $this->db->prepare("SELECT id FROM toners_defeitos WHERE numero_pedido = ? LIMIT 1");
+            $stmt->execute([$codigoRequisicao]);
+            $defeito = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($defeito) {
+                $destinoTexto = $destino ?: 'Não informado';
+                $descricao = "Preenchido automaticamente via Triagem. Destino: {$destinoTexto}. Parecer: {$parecer}";
+                $resultado = 'DEFEITO_PROCEDENTE'; // We can map this or just set a standard automatic result.
+                
+                // If it goes to "Uso Interno" or "Estoque", maybe it wasn't a defect? But usually if it's in this list, they treat it.
+                // Let's use a clear dynamic text for the result if needed or stick to a generic one.
+                if (in_array($destinoTexto, ['Uso Interno', 'Estoque'])) {
+                    $resultado = 'TONER_SEM_DEFEITO'; // If it's good, then it had no defect
+                } elseif ($destinoTexto === 'Descarte' || $destinoTexto === 'Garantia') {
+                    $resultado = 'DEFEITO_PROCEDENTE';
+                } else {
+                    $resultado = 'TRIAGEM_FINALIZADA';
+                }
+
+                $upd = $this->db->prepare("
+                    UPDATE toners_defeitos SET 
+                        devolutiva_descricao = ?, 
+                        devolutiva_resultado = ?,
+                        devolutiva_at = NOW(),
+                        devolutiva_uid = ?
+                    WHERE id = ?
+                ");
+                $upd->execute([
+                    $descricao,
+                    $resultado,
+                    $userId,
+                    $defeito['id']
+                ]);
+            }
+        } catch (\Exception $e) {
+            error_log('Erro ao sincronizar devolutiva do toner com defeito: ' . $e->getMessage());
+        }
     }
 }

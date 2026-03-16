@@ -1648,6 +1648,14 @@ class TonersController
             $filiais_lista = [];
         }
 
+        // Cadastro de Defeitos para a Devolutiva
+        try {
+            $stmt = $this->db->query('SELECT id, nome_defeito FROM cadastro_defeitos ORDER BY nome_defeito ASC');
+            $defeitos_lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            $defeitos_lista = [];
+        }
+
         $this->render('toners/defeitos', [
             'title'               => 'Toners com Defeito',
             'toners_lista'        => $toners_lista,
@@ -1655,6 +1663,7 @@ class TonersController
             'defeitos_historico'  => $defeitos_historico,
             'departamentos_lista' => $departamentos_lista,
             'filiais_lista'       => $filiais_lista,
+            'defeitos_lista'      => $defeitos_lista,
             'canEdit'             => $canEdit,
             'canDelete'           => $canDelete,
         ]);
@@ -1991,9 +2000,9 @@ class TonersController
         try {
             $id = (int)($_POST['defeito_id'] ?? 0);
             $descricao = trim($_POST['devolutiva_descricao'] ?? '');
-            $resultado_raw = trim($_POST['devolutiva_resultado'] ?? '');
-            $allowedResultados = ['DEFEITO_PROCEDENTE', 'TONER_SEM_DEFEITO', 'TONER_NAO_RETORNOU'];
-            $resultado = in_array($resultado_raw, $allowedResultados) ? $resultado_raw : null;
+            
+            // Allow any string since it now comes from dynamic dropdown.
+            $resultado = trim($_POST['devolutiva_resultado'] ?? '');
             
             if ($id <= 0) {
                 echo json_encode(['success' => false, 'message' => 'ID inválido.']);
@@ -2001,6 +2010,10 @@ class TonersController
             }
             if (empty($descricao)) {
                 echo json_encode(['success' => false, 'message' => 'Descrição obrigatória.']);
+                return;
+            }
+            if (empty($resultado)) {
+                echo json_encode(['success' => false, 'message' => 'Classificação/Resultado obrigatório.']);
                 return;
             }
             

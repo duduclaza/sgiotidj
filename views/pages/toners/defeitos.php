@@ -337,20 +337,12 @@ else: ?>
                   </span>
                   <?php
     $res = $d['devolutiva_resultado'] ?? '';
-    if ($res === 'DEFEITO_PROCEDENTE'): ?>
-                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 border border-red-200">
-                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-                    DEFEITO PROCEDENTE
-                  </span>
-                  <?php elseif ($res === 'TONER_SEM_DEFEITO'): ?>
-                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
+    // Let's render the text since $res now stores the dynamic string
+    if ($res !== ''):
+?>
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200">
                     <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                    TONER SEM DEFEITO
-                  </span>
-                  <?php elseif ($res === 'TONER_NAO_RETORNOU'): ?>
-                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-100 text-orange-700 border border-orange-200">
-                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
-                    NÃO RETORNOU P/ QUALIDADE
+                    <?php echo htmlspecialchars($res); ?>
                   </span>
                   <?php endif; ?>
 
@@ -775,30 +767,19 @@ function showToast(type, titulo, msg) {
                 <div class="space-y-6">
                     <!-- Classificação do Resultado -->
                     <div id="devolutivaResultadoDiv">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Classificação <span class="text-red-500" id="devolutivaResultadoObr">*</span></label>
-                        <div class="flex flex-wrap gap-2" id="devolutivaResultadoBtns">
-                            <button type="button" data-valor="DEFEITO_PROCEDENTE"
-                                onclick="selectResultado('DEFEITO_PROCEDENTE')"
-                                class="resultado-btn flex-1 min-w-[140px] flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border-2 border-gray-200 bg-gray-50 text-gray-600 font-semibold text-xs transition-all hover:border-red-400 hover:bg-red-50 hover:text-red-700">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-                                DEFEITO PROCEDENTE
-                            </button>
-                            <button type="button" data-valor="TONER_SEM_DEFEITO"
-                                onclick="selectResultado('TONER_SEM_DEFEITO')"
-                                class="resultado-btn flex-1 min-w-[140px] flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border-2 border-gray-200 bg-gray-50 text-gray-600 font-semibold text-xs transition-all hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-700">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                                TONER SEM DEFEITO
-                            </button>
-                            <button type="button" data-valor="TONER_NAO_RETORNOU"
-                                onclick="selectResultado('TONER_NAO_RETORNOU')"
-                                class="resultado-btn flex-1 min-w-[140px] flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border-2 border-gray-200 bg-gray-50 text-gray-600 font-semibold text-xs transition-all hover:border-orange-400 hover:bg-orange-50 hover:text-orange-700">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
-                                NÃO RETORNOU P/ QUALIDADE
-                            </button>
-                        </div>
-                        <input type="hidden" name="devolutiva_resultado" id="devolutivaResultadoInput" value="">
-                        <!-- Modo view: badge só leitura -->
-                        <div id="devolutivaResultadoView" class="hidden mt-2"></div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2" for="devolutivaResultadoInput">Classificação (Defeito) <span class="text-red-500" id="devolutivaResultadoObr">*</span></label>
+                        <select name="devolutiva_resultado" id="devolutivaResultadoInput"
+                            class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-sm font-medium text-gray-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+                            <option value="">— Selecione a classificação —</option>
+                            <!-- Hardcoded fallback defaults from before, so old ones work logically -->
+                            <option value="DEFEITO_PROCEDENTE">DEFEITO PROCEDENTE (Antigo)</option>
+                            <option value="TONER_SEM_DEFEITO">TONER SEM DEFEITO / USO INTERNO</option>
+                            <!-- List from DB -->
+                            <?php foreach ($defeitos_lista ?? [] as $def): ?>
+                                <option value="<?php echo htmlspecialchars($def['nome_defeito']); ?>"><?php echo htmlspecialchars($def['nome_defeito']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <span id="devolutivaResultadoBadge" style="display:none;" class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-xs font-bold border"></span>
                     </div>
 
                     <div>
@@ -866,9 +847,8 @@ function openDevolutiva(id, mode, btn) {
     const linksDiv = document.getElementById('devolutivaLinks');
     const btnSave = document.getElementById('btnSaveDevolutiva');
     const modeText = document.getElementById('devolutivaModeText');
-    const resultadoBtns = document.getElementById('devolutivaResultadoBtns');
-    const resultadoView = document.getElementById('devolutivaResultadoView');
     const resultadoInput = document.getElementById('devolutivaResultadoInput');
+    const resultadoBadge = document.getElementById('devolutivaResultadoBadge');
     
     // Move modal to body to escape sidebar stacking context
     if (modal.parentElement !== document.body) {
@@ -883,10 +863,6 @@ function openDevolutiva(id, mode, btn) {
     const desc = btn.getAttribute('data-desc') || '';
     const resultado = btn.getAttribute('data-resultado') || '';
     descInput.value = desc;
-    
-    // Reset resultado
-    resultadoInput.value = '';
-    selectResultado(resultado, true); // pre-select silently
     
     // Reset Photos
     for(let i=1; i<=3; i++) {
@@ -903,17 +879,19 @@ function openDevolutiva(id, mode, btn) {
         descInput.disabled = true;
         uploadDiv.classList.add('hidden');
         btnSave.classList.add('hidden');
-        resultadoBtns.classList.add('hidden');
-        resultadoView.classList.remove('hidden');
-        // Render resultado badge
-        if (resultado === 'DEFEITO_PROCEDENTE') {
-            resultadoView.innerHTML = '<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold bg-red-100 text-red-700 border border-red-200"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>DEFEITO PROCEDENTE</span>';
-        } else if (resultado === 'TONER_SEM_DEFEITO') {
-            resultadoView.innerHTML = '<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold bg-emerald-100 text-emerald-700 border border-emerald-200"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>TONER SEM DEFEITO</span>';
-        } else if (resultado === 'TONER_NAO_RETORNOU') {
-            resultadoView.innerHTML = '<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold bg-orange-100 text-orange-700 border border-orange-200"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>NÃO RETORNOU P/ QUALIDADE</span>';
+        
+        // Hide select, show badge
+        resultadoInput.style.display = 'none';
+        resultadoInput.disabled = true;
+        resultadoBadge.style.display = 'inline-flex';
+        
+        // Render resultado badge with dynamic text
+        if (resultado) {
+            resultadoBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold bg-blue-100 text-blue-700 border border-blue-200';
+            resultadoBadge.innerHTML = `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>${resultado}`;
         } else {
-            resultadoView.innerHTML = '<span class="text-xs text-gray-400 italic">Não classificado</span>';
+            resultadoBadge.className = 'text-xs text-gray-400 italic';
+            resultadoBadge.innerHTML = 'Não classificado';
         }
         
         const hasDev = btn.getAttribute('data-has-devolutiva') === '1';
@@ -949,8 +927,32 @@ function openDevolutiva(id, mode, btn) {
         uploadDiv.classList.remove('hidden');
         linksDiv.classList.add('hidden');
         btnSave.classList.remove('hidden');
-        resultadoBtns.classList.remove('hidden');
-        resultadoView.classList.add('hidden');
+        
+        // Show select, hide badge
+        resultadoInput.style.display = 'block';
+        resultadoInput.disabled = false;
+        
+        // Find exact or nearest match in the options
+        let matched = false;
+        for (let idx = 0; idx < resultadoInput.options.length; idx++) {
+            if (resultadoInput.options[idx].value === resultado) {
+                resultadoInput.selectedIndex = idx;
+                matched = true;
+                break;
+            }
+        }
+        if (!matched && resultado !== '') {
+            // fallback if it's an old string no longer in DB
+            const opt = document.createElement('option');
+            opt.value = resultado;
+            opt.textContent = resultado;
+            resultadoInput.appendChild(opt);
+            resultadoInput.value = resultado;
+        } else if (!matched) {
+            resultadoInput.value = '';
+        }
+        
+        resultadoBadge.style.display = 'none';
         
         if (mode === 'edit') {
              modeText.querySelector('span').innerText = 'Editando devolutiva existente. Faça upload de novas fotos para substituir as antigas.';
@@ -958,26 +960,6 @@ function openDevolutiva(id, mode, btn) {
              modeText.querySelector('span').innerText = 'Insira a análise técnica e evidências.';
         }
     }
-}
-
-function selectResultado(valor, silent) {
-    const resultadoInput = document.getElementById('devolutivaResultadoInput');
-    if (resultadoInput) resultadoInput.value = valor || '';
-    document.querySelectorAll('.resultado-btn').forEach(btn => {
-        const isActive = btn.getAttribute('data-valor') === valor;
-        btn.classList.toggle('border-red-500', isActive && valor === 'DEFEITO_PROCEDENTE');
-        btn.classList.toggle('bg-red-100', isActive && valor === 'DEFEITO_PROCEDENTE');
-        btn.classList.toggle('text-red-700', isActive && valor === 'DEFEITO_PROCEDENTE');
-        btn.classList.toggle('border-emerald-500', isActive && valor === 'TONER_SEM_DEFEITO');
-        btn.classList.toggle('bg-emerald-100', isActive && valor === 'TONER_SEM_DEFEITO');
-        btn.classList.toggle('text-emerald-700', isActive && valor === 'TONER_SEM_DEFEITO');
-        btn.classList.toggle('border-orange-500', isActive && valor === 'TONER_NAO_RETORNOU');
-        btn.classList.toggle('bg-orange-100', isActive && valor === 'TONER_NAO_RETORNOU');
-        btn.classList.toggle('text-orange-700', isActive && valor === 'TONER_NAO_RETORNOU');
-        btn.classList.toggle('border-gray-200', !isActive);
-        btn.classList.toggle('bg-gray-50', !isActive);
-        btn.classList.toggle('text-gray-600', !isActive);
-    });
 }
 
 function closeDevolutiva() {
