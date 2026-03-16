@@ -1075,6 +1075,11 @@ function buscarDefeitosPorCodigo() {
   if (!codigo) {
     container.classList.add('hidden');
     lista.innerHTML = '';
+    // Unlock fields
+    document.getElementById('t-cliente-id').disabled = false;
+    document.getElementById('t-cliente-search').disabled = false;
+    document.getElementById('t-toner-id').disabled = false;
+    document.getElementById('t-toner-search').disabled = false;
     return;
   }
   
@@ -1158,6 +1163,12 @@ function onSelectDefectiveToner(radioInput) {
     sincronizarSelectComInput('t-toner-id', 't-toner-search');
     onTonerChange();
   }
+
+  // Lock fields to prevent errors as requested
+  clienteDropdown.disabled = true;
+  document.getElementById('t-cliente-search').disabled = true;
+  tonerDropdown.disabled = true;
+  document.getElementById('t-toner-search').disabled = true;
 }
 
 function sincronizarSelectComInput(selectId, inputId) {

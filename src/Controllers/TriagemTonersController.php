@@ -1158,6 +1158,7 @@ class TriagemTonersController
                 $defeitoId, $defeitoNome, $modo,
                 $peso_ret, $percentualParaSalvar,
                 $gramatura_restante, $percentual_calculado,
+                $parecer, $destino, $valor_recuperado,
                 $observacoes, $_SESSION['user_id'], $id,
             ]);
 
