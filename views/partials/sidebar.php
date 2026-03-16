@@ -93,6 +93,7 @@ $menu = [
       ['label' => 'Calculadora de Envio', 'href' => '/atendimento/calculadora-toners', 'icon' => '🧮', 'module' => 'calculadora_toners'],
     ]
   ],
+/*
   [
     'label' => 'eLearning',
     'href'  => '#',
@@ -104,6 +105,7 @@ $menu = [
       ['label' => 'eLearning Colaborador',  'href' => '/elearning/colaborador',  'icon' => '🎒', 'module' => 'elearning_colaborador'],
     ]
   ],
+*/
   [
     'label' => 'Administrativo', 
     'href' => '#', 
