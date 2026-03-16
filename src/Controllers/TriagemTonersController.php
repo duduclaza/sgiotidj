@@ -1484,7 +1484,7 @@ class TriagemTonersController
                             devolutiva_at = NOW(),
                             devolutiva_uid = ?
                         WHERE id IN ($inQuery) AND numero_pedido = ?";
-                $params = array_merge([$descricao, $resultado, $userId], $tonersDefeitosIds, [$codigoRequisicao]);
+                $params = array_merge([$descricao, $resultado, $userId], array_values($tonersDefeitosIds), [$codigoRequisicao]);
                 $upd = $this->db->prepare($sql);
                 $upd->execute($params);
             } else {
@@ -1505,7 +1505,7 @@ class TriagemTonersController
                 ]);
             }
         } catch (\Exception $e) {
-            error_log('Erro ao sincronizar devolutiva do toner com defeito: ' . $e->getMessage());
+            error_log('Erro ao sincronizar devolutiva do toner com defeito: ' . $e->getMessage() . ' - Stack Trace: ' . $e->getTraceAsString());
         }
     }
 }
