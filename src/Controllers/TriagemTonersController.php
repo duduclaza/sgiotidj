@@ -1012,7 +1012,7 @@ class TriagemTonersController
                 $_SESSION['user_id'],
             ]);
 
-            $this->syncDevolutiva($codigoRequisicao !== '' ? $codigoRequisicao : null, $destino, $parecer, $_SESSION['user_id'], $defeitoNome, $tonersDefeitosIds);
+            $this->syncDevolutiva($codigoRequisicao !== '' ? $codigoRequisicao : null, $destino, $parecer, $_SESSION['user_id'], $defeitoNome, $tonersDefeitosIds, $observacoes);
 
             echo json_encode(['success' => true, 'message' => 'Triagem registrada com sucesso!', 'id' => $this->db->lastInsertId()]);
         } catch (\Exception $e) {
@@ -1163,7 +1163,7 @@ class TriagemTonersController
             ]);
 
             // Sync since we update triage
-            $this->syncDevolutiva($codigoRequisicao !== '' ? $codigoRequisicao : null, $destino, $parecer, $_SESSION['user_id'], $defeitoNome, $tonersDefeitosIds);
+            $this->syncDevolutiva($codigoRequisicao !== '' ? $codigoRequisicao : null, $destino, $parecer, $_SESSION['user_id'], $defeitoNome, $tonersDefeitosIds, $observacoes);
 
             echo json_encode(['success' => true, 'message' => 'Registro atualizado com sucesso!']);
         } catch (\Exception $e) {
@@ -1250,7 +1250,7 @@ class TriagemTonersController
                 $_SESSION['user_id'],
             ]);
 
-            $this->syncDevolutiva($original['codigo_requisicao'] ?? null, $original['destino'], $original['parecer'], $_SESSION['user_id']);
+            $this->syncDevolutiva($original['codigo_requisicao'] ?? null, $original['destino'], $original['parecer'], $_SESSION['user_id'], $original['defeito_nome'] ?? null, [], $observacoes);
 
             echo json_encode([
                 'success' => true,
@@ -1456,7 +1456,7 @@ class TriagemTonersController
     /**
      * Sincroniza o resultado da triagem com a devolutiva do Toner com Defeito correspondente
      */
-    private function syncDevolutiva(?string $codigoRequisicao, ?string $destino, string $parecer, int $userId, ?string $defeitoNome = null, array $tonersDefeitosIds = []): void
+    private function syncDevolutiva(?string $codigoRequisicao, ?string $destino, string $parecer, int $userId, ?string $defeitoNome = null, array $tonersDefeitosIds = [], ?string $observacoes = null): void
     {
         if (empty($codigoRequisicao)) {
             return;
@@ -1464,7 +1464,8 @@ class TriagemTonersController
 
         try {
             $destinoTexto = $destino ?: 'Não informado';
-            $descricao = "Preenchido automaticamente via Triagem. Destino: {$destinoTexto}. Parecer: {$parecer}";
+            // User requested that the description matches the triage observations
+            $descricao = !empty($observacoes) ? trim($observacoes) : "Preenchido automaticamente via Triagem. Destino: {$destinoTexto}. Parecer: {$parecer}";
             
             // Allow exact defect name from Triage if set, else fallback
             $resultado = $defeitoNome ?: 'DEFEITO_PROCEDENTE'; 
