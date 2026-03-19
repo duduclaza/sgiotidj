@@ -35,6 +35,18 @@ $statusColors = [
         </div>
     </div>
 
+    <!-- Faixa de atualização do módulo -->
+    <div id="homologUpdateBanner" class="mb-6 rounded-lg p-3 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="w-3 h-3 rounded-full bg-yellow-500 animate-ping"></div>
+            <div>
+                <strong>Atualização em andamento:</strong>
+                <span class="block text-sm">Este módulo está sendo atualizado — podem ocorrer bugs ou instabilidades.</span>
+            </div>
+        </div>
+        <button id="closeBannerBtn" class="text-yellow-800 hover:text-yellow-900">Fechar ✖</button>
+    </div>
+
     <?php if ($canCreate): ?>
     <!-- Formulário Inline de Criação -->
     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -139,7 +151,8 @@ $statusColors = [
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
-                    Solicitar Homologação
+                    <span>Solicitar Homologação</span>
+                    <span class="ml-3 renovation-badge" title="Módulo em reformulação">🚧 Em reforma</span>
                 </button>
             </div>
         </form>
@@ -386,6 +399,23 @@ document.getElementById('modalDetalhes')?.addEventListener('click', function(e) 
         fecharModal();
     }
 });
+
+// Banner: fechar e persistir preferência
+document.getElementById('closeBannerBtn')?.addEventListener('click', function() {
+    const b = document.getElementById('homologUpdateBanner');
+    if (b) {
+        b.style.display = 'none';
+        try { localStorage.setItem('homologBannerClosed', '1'); } catch (e) {}
+    }
+});
+
+// Esconder banner se usuário já fechou antes
+try {
+    if (localStorage.getItem('homologBannerClosed') === '1') {
+        const b = document.getElementById('homologUpdateBanner');
+        if (b) b.style.display = 'none';
+    }
+} catch (e) {}
 </script>
 
 <style>
@@ -402,6 +432,23 @@ document.getElementById('modalDetalhes')?.addEventListener('click', function(e) 
 
 .kanban-card:hover {
     transform: translateY(-2px);
+}
+
+.renovation-badge {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(90deg, rgba(255,200,0,0.12), rgba(255,200,0,0.02));
+    color: #92400e;
+    padding: 0.15rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.85rem;
+    animation: pulse 1.8s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: translateY(0); opacity: 1; }
+    50% { transform: translateY(-2px); opacity: 0.85; }
+    100% { transform: translateY(0); opacity: 1; }
 }
 </style>
 
