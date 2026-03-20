@@ -51,7 +51,7 @@ $menu = [
     'modules' => ['triagem_toners', 'toners_retornados', 'amostragens_2', 'garantias', 'controle_descartes', 'precificacao_coleta_descartes', 'homologacoes', 'certificados', 'fmea', 'pops_its_visualizacao', 'pops_its_cadastro_titulos', 'pops_its_meus_registros', 'pops_its_pendente_aprovacao', 'fluxogramas', 'auditorias', 'nao_conformidades', 'melhoria_continua', 'melhoria_continua_2', 'controle_rc', 'nps'],
     'submenu' => [
       ['label' => 'Triagem de Toners', 'href' => '/triagem-toners', 'icon' => '🔍', 'module' => 'triagem_toners'],
-      ['label' => 'Registro de Retornados', 'href' => '/toners/retornados', 'icon' => '📋', 'module' => 'toners_retornados', 'roles' => ['super_admin', 'superadmin']],
+      // ['label' => 'Registro de Retornados', 'href' => '/toners/retornados', 'icon' => '📋', 'module' => 'toners_retornados', 'roles' => ['super_admin', 'superadmin']],
       ['label' => 'Amostragens 2.0', 'href' => '/amostragens-2', 'icon' => '🔬', 'module' => 'amostragens_2'],
       ['label' => 'Controle de Descartes', 'href' => '/controle-descartes', 'icon' => '♻️', 'module' => 'controle_descartes'],
       ['label' => 'Precificação de Coleta', 'href' => '/precificacao-coleta-descartes', 'icon' => '💰', 'module' => 'precificacao_coleta_descartes'],
