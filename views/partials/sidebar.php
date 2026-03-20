@@ -316,8 +316,8 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
                     if (!$hasAnyPermission) continue;
                     $subActive = false; // Submenu pai não é ativo diretamente
                   } else {
-                    // Só mostrar submenu se o usuário tiver permissão
-                    if (!isset($sub['module']) || !hasPermission($sub['module'])) continue;
+                    // Só mostrar submenu se o usuário tiver permissão ou for público
+                    if (!((isset($sub['module']) && hasPermission($sub['module'])) || (isset($sub['is_public']) && $sub['is_public']))) continue;
                     $subActive = rtrim($sub['href'], '/') === $current;
                   }
                   
