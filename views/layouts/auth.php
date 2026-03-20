@@ -155,8 +155,8 @@ $title = $title ?? 'OTI - Login';
         <!-- Logo OTI com efeitos premium -->
         <div class="oti-logo-container">
           <h1 class="oti-logo">
-            <span class="oti-letter" data-letter="O">O</span>
-            <span class="oti-letter" data-letter="T">T</span>
+            <span class="oti-letter" data-letter="S">S</span>
+            <span class="oti-letter" data-letter="G">G</span>
             <span class="oti-letter" data-letter="I">I</span>
           </h1>
           <div class="oti-glow"></div>
@@ -360,7 +360,7 @@ $title = $title ?? 'OTI - Login';
   
   <script>
     // Efeito de digitação
-    const text = 'Organização Tecnológica Integrada';
+    const text = 'Sistema de Gestão Integrada';
     const typingElement = document.getElementById('typingText');
     let index = 0;
     let isDeleting = false;
