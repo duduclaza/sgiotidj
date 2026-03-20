@@ -46,6 +46,11 @@ class Amostragens2Controller
             $params = [];
 
             // Filtros
+            if (!empty($_GET['numero_nf'])) {
+                $where[] = "a.numero_nf LIKE :numero_nf";
+                $params[':numero_nf'] = '%' . $_GET['numero_nf'] . '%';
+            }
+
             if (!empty($_GET['codigo_produto'])) {
                 $where[] = "a.codigo_produto LIKE :codigo";
                 $params[':codigo'] = '%' . $_GET['codigo_produto'] . '%';

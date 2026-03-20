@@ -265,7 +265,12 @@ function construirUrlPaginacao($pagina) {
   <!-- Filtros -->
   <div class="bg-white border rounded-lg p-4 mb-6">
     <h3 class="font-semibold text-gray-900 mb-4">🔍 Filtros</h3>
-    <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <form method="GET" class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Número da NF</label>
+        <input type="text" name="numero_nf" value="<?= $_GET['numero_nf'] ?? '' ?>" placeholder="Digite a NF..." class="w-full border border-gray-300 rounded-lg px-3 py-2">
+      </div>
+
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Código do Produto</label>
         <input type="text" name="codigo_produto" value="<?= $_GET['codigo_produto'] ?? '' ?>" placeholder="Digite o código..." class="w-full border border-gray-300 rounded-lg px-3 py-2">

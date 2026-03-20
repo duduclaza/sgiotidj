@@ -620,6 +620,9 @@ $router->post('/homologacoes/{id}/status', [App\Controllers\HomologacoesKanbanCo
 $router->post('/homologacoes/{id}/contadores', [App\Controllers\HomologacoesKanbanController::class , 'updateContadores']);
 $router->get('/homologacoes/{id}/details', [App\Controllers\HomologacoesKanbanController::class , 'details']);
 
+// ===== MÓDULO HOMOLOGAÇÕES 2.0 =====
+$router->get('/homologacoes-2', [App\Controllers\Homologacoes2Controller::class , 'index']);
+
 // Rotas de Checklists
 $router->post('/homologacoes/checklists/create', [App\Controllers\ChecklistsController::class , 'create']);
 $router->get('/homologacoes/checklists/list', [App\Controllers\ChecklistsController::class , 'list']);
