@@ -202,6 +202,10 @@
             <?php endif; ?>
             
             <?php if ($isAdmin || $isSuperAdmin): ?>
+            <a href="/homologacoes/tipos" class="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition flex items-center gap-2">
+                <span>⚙️</span>
+                <span>Tipos de Produto</span>
+            </a>
             <button onclick="openModalChecklists()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2">
                 <span>📋</span>
                 <span>Cadastros de Checklist</span>
@@ -344,6 +348,18 @@
                             <span>🏢</span><span><?= e($h['departamento_resp_nome']) ?></span>
                         </div>
                         <?php endif; ?>
+                        
+                        <?php if (!empty($h['tipo_produto_nome'])): ?>
+                        <div class="text-xs text-blue-700 font-medium mb-1 flex items-center gap-1">
+                            <span>📦</span><span><?= e($h['tipo_produto_nome']) ?></span>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($h['fornecedor_nome'])): ?>
+                        <div class="text-xs text-emerald-700 font-medium mb-1 flex items-center gap-1">
+                            <span>🤝</span><span><?= e($h['fornecedor_nome']) ?></span>
+                        </div>
+                        <?php endif; ?>
                         <?php if (!empty($h['data_vencimento'])): ?>
                         <?php
                             $diasR = (int)($h['dias_restantes'] ?? 99999);
@@ -405,6 +421,18 @@
                         <div class="text-xs text-slate-600 mb-2 line-clamp-2"><?= e($h['descricao']) ?></div>
                         <?php if (!empty($h['departamento_resp_nome'])): ?>
                         <div class="text-xs text-indigo-700 font-medium mb-1 flex items-center gap-1"><span>🏢</span><span><?= e($h['departamento_resp_nome']) ?></span></div>
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($h['tipo_produto_nome'])): ?>
+                        <div class="text-xs text-blue-700 font-medium mb-1 flex items-center gap-1">
+                            <span>📦</span><span><?= e($h['tipo_produto_nome']) ?></span>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($h['fornecedor_nome'])): ?>
+                        <div class="text-xs text-emerald-700 font-medium mb-1 flex items-center gap-1">
+                            <span>🤝</span><span><?= e($h['fornecedor_nome']) ?></span>
+                        </div>
                         <?php endif; ?>
                         <?php if (!empty($h['data_vencimento'])): ?>
                         <?php $dr2=(int)($h['dias_restantes']??99999);$da2=(int)($h['dias_aviso']??7); if($dr2<0){$vc='badge-venc-late';$vi='🔴';$vt='Vencido '.abs($dr2).'d';}elseif($dr2<=$da2){$vc='badge-venc-warn';$vi='🟡';$vt='Vence em '.$dr2.'d';}else{$vc='badge-venc-ok';$vi='🟢';$vt='Vence em '.$dr2.'d';} ?>
@@ -612,7 +640,27 @@
                         <option value="<?= $dept['id'] ?>"><?= e($dept['nome']) ?></option>
                         <?php endforeach; ?>
                     </select>
-                    <p class="text-xs text-slate-500 mt-1">Todos do departamento serão notificados</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">📦 Tipo de Produto</label>
+                    <select name="tipo_produto_id" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="">Selecione o tipo...</option>
+                        <?php foreach ($tiposProduto as $tipo): ?>
+                        <option value="<?= $tipo['id'] ?>"><?= e($tipo['nome']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">🤝 Fornecedor</label>
+                    <select name="fornecedor_id" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="">Selecione o fornecedor...</option>
+                        <?php foreach ($fornecedores as $forn): ?>
+                        <option value="<?= $forn['id'] ?>"><?= e($forn['nome']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
             </div>
 
@@ -1128,9 +1176,15 @@ function renderDetails(data) {
     let html = `
         <div class="space-y-4">
             <div class="bg-slate-50 p-4 rounded-lg">
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-3 mb-4">
                     <div><span class="text-sm text-slate-600">Código:</span><p class="font-bold">${h.cod_referencia}</p></div>
                     <div><span class="text-sm text-slate-600">Status:</span><span class="badge-status badge-${h.status}">${statusLabels[h.status]}</span></div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div><span class="text-sm text-slate-600">Tipo de Produto:</span><p class="font-medium text-blue-700">${h.tipo_produto_nome || 'Não informado'}</p></div>
+                    <div><span class="text-sm text-slate-600">Fornecedor:</span><p class="font-medium text-emerald-700">${h.fornecedor_nome || 'Não informado'}</p></div>
+                </div>
+                <div class="grid grid-cols-1 gap-3">
                     <div class="col-span-2"><span class="text-sm text-slate-600">Descrição:</span><p class="mt-1">${h.descricao}</p></div>
                 </div>
                 <div class="mt-4 grid grid-cols-2 gap-4">

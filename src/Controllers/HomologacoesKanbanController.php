@@ -52,6 +52,8 @@ class HomologacoesKanbanController
                            u.name as criador_nome,
                            d.nome as departamento_nome,
                            dr.nome as departamento_resp_nome,
+                           tp.nome as tipo_produto_nome,
+                           f.nome as fornecedor_nome,
                            GROUP_CONCAT(DISTINCT ur.name SEPARATOR ', ') as responsaveis_nomes,
                            COUNT(DISTINCT a.id) as total_anexos,
                            h.data_vencimento,
@@ -78,6 +80,8 @@ class HomologacoesKanbanController
                     LEFT JOIN users u ON h.created_by = u.id
                     LEFT JOIN departamentos d ON h.departamento_id = d.id
                     LEFT JOIN departamentos dr ON h.departamento_resp_id = dr.id
+                    LEFT JOIN homologacao_tipos_produto tp ON h.tipo_produto_id = tp.id
+                    LEFT JOIN fornecedores f ON h.fornecedor_id = f.id
                     LEFT JOIN homologacoes_responsaveis hr ON h.id = hr.homologacao_id
                     LEFT JOIN users ur ON hr.user_id = ur.id
                     LEFT JOIN homologacoes_anexos a ON h.id = a.homologacao_id
@@ -122,6 +126,24 @@ class HomologacoesKanbanController
                 $departamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             } catch (\Exception $e) {
                 error_log("Erro ao buscar departamentos: " . $e->getMessage());
+            }
+
+            // Buscar fornecedores
+            $fornecedores = [];
+            try {
+                $stmt = $this->db->query("SELECT id, nome FROM fornecedores ORDER BY nome ASC");
+                $fornecedores = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } catch (\Exception $e) {
+                error_log("Erro ao buscar fornecedores: " . $e->getMessage());
+            }
+
+            // Buscar tipos de produto
+            $tiposProduto = [];
+            try {
+                $stmt = $this->db->query("SELECT id, nome FROM homologacao_tipos_produto WHERE ativo = 1 ORDER BY nome ASC");
+                $tiposProduto = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } catch (\Exception $e) {
+                error_log("Erro ao buscar tipos de produto: " . $e->getMessage());
             }
 
             // Verificar se pode criar (com base na permissão do perfil ou privilégios de admin)
@@ -404,6 +426,10 @@ class HomologacoesKanbanController
             $equipamentoAtendeuEspecificativas = trim($_POST['equipamento_atendeu_especificativas'] ?? '');
             $motivoNaoAtendeu               = trim($_POST['motivo_nao_atendeu'] ?? '');
             
+            // Novos campos v2
+            $tipoProdutoId                  = !empty($_POST['tipo_produto_id']) ? (int)$_POST['tipo_produto_id'] : null;
+            $fornecedorId                   = !empty($_POST['fornecedor_id']) ? (int)$_POST['fornecedor_id'] : null;
+            
             // Responsáveis (múltiplos)
             $responsaveis = $_POST['responsaveis'] ?? [];
             if (!is_array($responsaveis)) {
@@ -456,7 +482,6 @@ class HomologacoesKanbanController
 
             // Inserir homologação com status inicial
             $stmt = $this->db->prepare("
-                INSERT INTO homologacoes (
                     cod_referencia, 
                     descricao, 
                     avisar_logistica, 
@@ -470,10 +495,12 @@ class HomologacoesKanbanController
                     data_vencimento,
                     dias_aviso,
                     departamento_resp_id,
+                    tipo_produto_id,
+                    fornecedor_id,
                     status, 
                     created_by, 
                     created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'aguardando_recebimento', ?, NOW())
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'aguardando_recebimento', ?, NOW())
             ");
             $stmt->execute([
                 $codReferencia,
@@ -489,6 +516,8 @@ class HomologacoesKanbanController
                 $dataVencimento ?: null,
                 $diasAviso,
                 $departamentoRespId,
+                $tipoProdutoId,
+                $fornecedorId,
                 $_SESSION['user_id']
             ]);
 

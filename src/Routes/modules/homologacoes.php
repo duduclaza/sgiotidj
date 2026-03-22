@@ -7,6 +7,7 @@
 
 use App\Controllers\HomologacoesKanbanController;
 use App\Controllers\ChecklistsController;
+use App\Controllers\HomologacoesTiposController;
 
 // ===== HOMOLOGAÇÕES =====
 
@@ -23,6 +24,14 @@ $router->post('/homologacoes/registrar-dados-etapa', [HomologacoesKanbanControll
 $router->get('/homologacoes/{id}/relatorio', [HomologacoesKanbanController::class, 'gerarRelatorio']);
 $router->get('/homologacoes/{id}/logs', [HomologacoesKanbanController::class, 'buscarLogs']);
 $router->get('/homologacoes/{id}/logs/export', [HomologacoesKanbanController::class, 'exportarLogs']);
+
+// ===== TIPOS DE PRODUTO =====
+
+$router->get('/homologacoes/tipos', [HomologacoesTiposController::class, 'index']);
+$router->post('/homologacoes/tipos/store', [HomologacoesTiposController::class, 'store']);
+$router->post('/homologacoes/tipos/update', [HomologacoesTiposController::class, 'update']);
+$router->post('/homologacoes/tipos/delete', [HomologacoesTiposController::class, 'delete']);
+$router->get('/api/homologacoes/tipos', [HomologacoesTiposController::class, 'listApi']);
 
 // ===== CHECKLISTS =====
 
