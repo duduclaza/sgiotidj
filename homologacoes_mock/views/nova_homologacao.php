@@ -27,15 +27,9 @@ if ($u['perfil'] !== 'compras') {
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Tipo de Equipamento</label>
                 <select name="tipo_equipamento" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
                     <option value="">Selecione...</option>
-                    <option value="">Selecione...</option>
-                    <?php if (empty($tiposReais)): ?>
-                        <option value="Impressora">Impressora (Padrão)</option>
-                        <option value="Notebook">Notebook (Padrão)</option>
-                    <?php else: ?>
-                        <?php foreach ($tiposReais as $tr): ?>
-                            <option value="<?= htmlspecialchars($tr['nome']) ?>"><?= htmlspecialchars($tr['nome']) ?></option>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
+                    <?php foreach ($tiposReais as $tr): ?>
+                        <option value="<?= htmlspecialchars($tr['nome']) ?>"><?= htmlspecialchars($tr['nome']) ?></option>
+                    <?php endforeach; ?>
                 </select>
             </div>
             
@@ -53,7 +47,7 @@ if ($u['perfil'] !== 'compras') {
                         <select name="fornecedor" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
                             <option value="">Selecione...</option>
                             <?php foreach ($fornecedoresReais as $fr): ?>
-                                <option value="<?= htmlspecialchars($fr['nome']) ?>"><?= htmlspecialchars($fr['nome']) ?></option>
+                                <option value="<?= htmlspecialchars($fr) ?>"><?= htmlspecialchars($fr) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>

@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/init.php';
 
-// Tratar a troca de usuário no mock (Global para o módulo mock)
+// Tratar a troca de usuário no mock
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trocar_usuario'])) {
     $_SESSION['usuario_logado_id'] = (int)$_POST['usuario_logado_id'];
     header("Location: " . $_SERVER['REQUEST_URI']);
@@ -10,81 +10,90 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trocar_usuario'])) {
 
 $u = getUsuarioLogado();
 
-// Apenas Compras ou Admin podem gerenciar
-if ($u['perfil'] !== 'compras') {
-    $title = "Acesso Negado - Homologações 2.0";
-    $viewFile = __DIR__ . '/views/erro_acesso.php'; // Criaremos se não existir, ou tratamos na view
-    require_once __DIR__ . '/../views/layouts/main.php';
-    exit;
+// Inicializar dados mock de tipos e checklists na sessão
+if (!isset($_SESSION['mock_tipos_produto'])) {
+    $_SESSION['mock_tipos_produto'] = [
+        ['id' => 1, 'nome' => 'Impressora'],
+        ['id' => 2, 'nome' => 'Notebook'],
+        ['id' => 3, 'nome' => 'Suprimento de Impressora'],
+        ['id' => 4, 'nome' => 'Peça de Impressora'],
+        ['id' => 5, 'nome' => 'Coletor'],
+        ['id' => 6, 'nome' => 'TOTEM'],
+        ['id' => 7, 'nome' => 'Servidor'],
+    ];
 }
 
-use App\Config\Database;
-$db = Database::getInstance();
+if (!isset($_SESSION['mock_checklists_cadastrados'])) {
+    $_SESSION['mock_checklists_cadastrados'] = [];
+}
 
-// --- LÓGICA DE PRODUTOS ---
+// --- AÇÕES DE PRODUTOS ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_produto'])) {
     $nome = trim($_POST['nome_produto'] ?? '');
     if ($_POST['acao_produto'] === 'adicionar' && !empty($nome)) {
-        $stmt = $db->prepare("INSERT INTO homologacao_tipos_produto (nome) VALUES (?)");
-        $stmt->execute([$nome]);
+        $maxId = empty($_SESSION['mock_tipos_produto']) ? 0 : max(array_column($_SESSION['mock_tipos_produto'], 'id'));
+        $_SESSION['mock_tipos_produto'][] = ['id' => $maxId + 1, 'nome' => $nome];
+
+        // Também adicionar ao mock_checklists_por_tipo se não existir
+        if (!isset($_SESSION['mock_checklists_por_tipo'][$nome])) {
+            $_SESSION['mock_checklists_por_tipo'][$nome] = [];
+        }
+
         $_SESSION['flash_message'] = ['type' => 'success', 'text' => "Tipo de produto '$nome' adicionado!"];
     } elseif ($_POST['acao_produto'] === 'excluir' && !empty($_POST['id_produto'])) {
-        $stmt = $db->prepare("UPDATE homologacao_tipos_produto SET ativo = 0 WHERE id = ?");
-        $stmt->execute([$_POST['id_produto']]);
+        $_SESSION['mock_tipos_produto'] = array_values(array_filter(
+            $_SESSION['mock_tipos_produto'],
+            fn($t) => $t['id'] != $_POST['id_produto']
+        ));
         $_SESSION['flash_message'] = ['type' => 'success', 'text' => "Tipo de produto removido!"];
     }
     header("Location: gerenciar_cadastros.php");
     exit;
 }
 
-// --- LÓGICA DE CHECKLISTS ---
+// --- AÇÕES DE CHECKLISTS ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_checklist'])) {
     if ($_POST['acao_checklist'] === 'adicionar') {
         $titulo = trim($_POST['titulo'] ?? '');
-        $tipo_id = !empty($_POST['tipo_produto_id']) ? (int)$_POST['tipo_produto_id'] : null;
+        $tipo_nome = $_POST['tipo_produto_nome'] ?? '';
         $itens = $_POST['itens'] ?? [];
+        $itens = array_filter(array_map('trim', $itens));
 
         if (!empty($titulo) && !empty($itens)) {
-            $db->beginTransaction();
-            try {
-                $stmt = $db->prepare("INSERT INTO homologacao_checklists (titulo, tipo_produto_id, criado_por) VALUES (?, ?, ?)");
-                $stmt->execute([$titulo, $tipo_id, $_SESSION['user_id'] ?? 1]);
-                $checklist_id = $db->lastInsertId();
+            $maxId = empty($_SESSION['mock_checklists_cadastrados']) ? 0 : max(array_column($_SESSION['mock_checklists_cadastrados'], 'id'));
+            $_SESSION['mock_checklists_cadastrados'][] = [
+                'id' => $maxId + 1,
+                'titulo' => $titulo,
+                'tipo_produto_nome' => $tipo_nome,
+                'itens' => array_values($itens),
+                'criado_em' => date('Y-m-d H:i:s'),
+            ];
 
-                $stmtItem = $db->prepare("INSERT INTO homologacao_checklist_itens (checklist_id, titulo, ordem, tipo_resposta) VALUES (?, ?, ?, ?)");
-                foreach ($itens as $i => $item_titulo) {
-                    if (!empty($item_titulo)) {
-                        $stmtItem->execute([$checklist_id, $item_titulo, $i, 'sim_nao']);
-                    }
+            // Sincronizar com mock_checklists_por_tipo (usado na homologação)
+            if (!empty($tipo_nome)) {
+                $checklistForType = [];
+                foreach ($itens as $item) {
+                    $key = strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $item));
+                    $checklistForType[$key] = $item;
                 }
-                $db->commit();
-                $_SESSION['flash_message'] = ['type' => 'success', 'text' => "Checklist '$titulo' criado!"];
-            } catch (\Exception $e) {
-                $db->rollBack();
-                $_SESSION['flash_message'] = ['type' => 'danger', 'text' => "Erro ao criar checklist: " . $e->getMessage()];
+                $_SESSION['mock_checklists_por_tipo'][$tipo_nome] = $checklistForType;
             }
+
+            $_SESSION['flash_message'] = ['type' => 'success', 'text' => "Checklist '$titulo' criado!"];
         }
     } elseif ($_POST['acao_checklist'] === 'excluir' && !empty($_POST['id_checklist'])) {
-        $stmt = $db->prepare("UPDATE homologacao_checklists SET ativo = 0 WHERE id = ?");
-        $stmt->execute([$_POST['id_checklist']]);
+        $_SESSION['mock_checklists_cadastrados'] = array_values(array_filter(
+            $_SESSION['mock_checklists_cadastrados'],
+            fn($c) => $c['id'] != $_POST['id_checklist']
+        ));
         $_SESSION['flash_message'] = ['type' => 'success', 'text' => "Checklist removido!"];
     }
     header("Location: gerenciar_cadastros.php");
     exit;
 }
 
-// Buscar dados atuais do banco real
-$stmtTipos = $db->query("SELECT * FROM homologacao_tipos_produto WHERE ativo = 1 ORDER BY nome ASC");
-$tipos = $stmtTipos->fetchAll(PDO::FETCH_ASSOC);
-
-$stmtChecklists = $db->query("
-    SELECT c.*, tp.nome as tipo_produto_nome 
-    FROM homologacao_checklists c
-    LEFT JOIN homologacao_tipos_produto tp ON c.tipo_produto_id = tp.id
-    WHERE c.ativo = 1 
-    ORDER BY c.criado_em DESC
-");
-$checklists = $stmtChecklists->fetchAll(PDO::FETCH_ASSOC);
+$tipos = $_SESSION['mock_tipos_produto'];
+$checklists = $_SESSION['mock_checklists_cadastrados'];
 
 $title = "Gerenciar Produtos & Checklists - Homologações 2.0";
 $viewFile = __DIR__ . '/views/gerenciar_cadastros.php';

@@ -35,15 +35,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['criar_homologacao']))
 $data = getMockData();
 $responsaveis = array_filter($data['usuarios'], fn($u) => $u['perfil'] === 'responsavel');
 
-// Buscar tipos de produto reais do banco para o select
-use App\Config\Database;
-$db = Database::getInstance();
-$stmtTipos = $db->query("SELECT * FROM homologacao_tipos_produto WHERE ativo = 1 ORDER BY nome ASC");
-$tiposReais = $stmtTipos->fetchAll(PDO::FETCH_ASSOC);
+// Inicializar tipos mock se necessário
+if (!isset($_SESSION['mock_tipos_produto'])) {
+    $_SESSION['mock_tipos_produto'] = [
+        ['id' => 1, 'nome' => 'Impressora'],
+        ['id' => 2, 'nome' => 'Notebook'],
+        ['id' => 3, 'nome' => 'Suprimento de Impressora'],
+        ['id' => 4, 'nome' => 'Peça de Impressora'],
+    ];
+}
 
-// Buscar fornecedores reais do banco para o select
-$stmtFornecedores = $db->query("SELECT id, nome FROM fornecedores WHERE ativo = 1 ORDER BY nome ASC");
-$fornecedoresReais = $stmtFornecedores->fetchAll(PDO::FETCH_ASSOC);
+// Fornecedores mock
+$fornecedoresMock = [
+    'HP do Brasil Ltda',
+    'Dell Computadores do Brasil',
+    'Lenovo do Brasil',
+    'SupriMax Distribuidora',
+    'TecPeças Importações',
+];
+
+$tiposReais = $_SESSION['mock_tipos_produto'];
+$fornecedoresReais = $fornecedoresMock;
 
 $title = "Nova Homologação - Homologações 2.0";
 $viewFile = __DIR__ . '/views/nova_homologacao.php';

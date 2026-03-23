@@ -84,34 +84,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Reload data if modified
 $h = getHomologacaoById($id);
 
-// --- BUSCAR CHECKLIST DINÂMICO DO BANCO ---
-use App\Config\Database;
-$db = Database::getInstance();
-
-// 1. Tentar encontrar checklist pelo tipo_equipamento (nome)
-$stmtCheck = $db->prepare("
-    SELECT ci.* 
-    FROM homologacao_checklist_itens ci
-    JOIN homologacao_checklists c ON ci.checklist_id = c.id
-    JOIN homologacao_tipos_produto tp ON c.tipo_produto_id = tp.id
-    WHERE tp.nome = ? AND c.ativo = 1
-    ORDER BY ci.ordem ASC
-");
-$stmtCheck->execute([$h['tipo_equipamento']]);
-$dbItems = $stmtCheck->fetchAll(PDO::FETCH_ASSOC);
-
-if (!empty($dbItems)) {
-    $checklistItems = [];
-    foreach ($dbItems as $item) {
-        // Mapear para o formato que a view espera: 'chave' => 'label'
-        // Como o banco não tem 'chave', usamos o ID ou um slug do título
-        $chave = 'item_' . $item['id'];
-        $checklistItems[$chave] = $item['titulo'];
-    }
-} else {
-    // Fallback para mock data se não houver no banco
-    $checklistItems = $data['checklists'][$h['tipo_equipamento']] ?? [];
-}
+// Buscar checklist dos dados mock na sessão (sem banco de dados)
+$checklistItems = $data['checklists'][$h['tipo_equipamento']] ?? [];
 
 $respostas = $h['checklist_respostas'] ?? [];
 

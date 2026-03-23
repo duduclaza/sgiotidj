@@ -183,6 +183,59 @@
     50% { transform: translateY(-6px) scale(1.1); opacity: 0.9; }
     100% { transform: translateY(0) scale(1); opacity: 1; }
 }
+
+/* === DARK MODE === */
+@media (prefers-color-scheme: dark) {
+    .kanban-column {
+        background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.05);
+    }
+    .kanban-card {
+        background: #1e293b;
+        border-left-color: #475569;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    .kanban-card:hover {
+        box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+    }
+    .kanban-col h3 { color: #f1f5f9 !important; }
+    .kanban-col span.bg-yellow-600\/15,
+    .kanban-col span.bg-blue-600\/15,
+    .kanban-col span.bg-orange-600\/15,
+    .kanban-col span.bg-purple-600\/15,
+    .kanban-col span.bg-green-600\/15,
+    .kanban-col span.bg-red-600\/15 { color: #e2e8f0 !important; }
+    .status-aguardando_recebimento { border-left-color: #ca8a04; background: #422006; }
+    .status-recebido { border-left-color: #3b82f6; background: #172554; }
+    .status-em_analise { border-left-color: #f97316; background: #431407; }
+    .status-em_homologacao { border-left-color: #a855f7; background: #2e1065; }
+    .status-aprovado { border-left-color: #22c55e; background: #052e16; }
+    .status-reprovado { border-left-color: #ef4444; background: #450a0a; }
+}
+/* Suporte para classe .dark aplicada ao body/html */
+.dark .kanban-column {
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.05);
+}
+.dark .kanban-card {
+    background: #1e293b !important;
+    border-left-color: #475569;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+.dark .kanban-card:hover {
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+}
+.dark .kanban-col h3 { color: #f1f5f9 !important; }
+.dark .status-aguardando_recebimento { border-left-color: #ca8a04; background: #422006 !important; }
+.dark .status-recebido { border-left-color: #3b82f6; background: #172554 !important; }
+.dark .status-em_analise { border-left-color: #f97316; background: #431407 !important; }
+.dark .status-em_homologacao { border-left-color: #a855f7; background: #2e1065 !important; }
+.dark .status-aprovado { border-left-color: #22c55e; background: #052e16 !important; }
+.dark .status-reprovado { border-left-color: #ef4444; background: #450a0a !important; }
+.dark .kanban-card .text-slate-700 { color: #e2e8f0 !important; }
+.dark .kanban-card .text-slate-600 { color: #94a3b8 !important; }
+.dark .kanban-card .text-slate-500 { color: #94a3b8 !important; }
+.dark .kanban-card .text-slate-400 { color: #64748b !important; }
 </style>
 
 <div class="p-6">
