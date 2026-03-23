@@ -19,7 +19,7 @@ class HomologacoesKanbanController
         $this->db = Database::getInstance();
         
         // Configurar timezone de Brasília para Carbon
-        Carbon::setLocale('pt_BR');
+        \Carbon\Carbon::setLocale('pt_BR');
         date_default_timezone_set('America/Sao_Paulo');
     }
 
@@ -1972,7 +1972,7 @@ class HomologacoesKanbanController
                     try {
                         $dadosEtapa = json_decode($log['dados_etapa'], true);
                         $log['dados_etapa_decoded'] = $dadosEtapa;
-                    } catch (Exception $e) {
+                    } catch (\Exception $e) {
                         $log['dados_etapa_decoded'] = null;
                     }
                 }
@@ -2109,7 +2109,7 @@ class HomologacoesKanbanController
                             }
                         }
                     }
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                     // Ignorar erro de JSON
                 }
             }
@@ -2294,12 +2294,7 @@ SGQ OTI DJ - Gerenciamento de Homologações
             $emailService = new EmailService();
             foreach ($emailsDestino as $email => $nome) {
                 try {
-                    $emailService->enviar([
-                        'destinatario' => $email,
-                        'assunto' => $subject,
-                        'corpo' => $body,
-                        'tipo' => 'homologacao_finalizada'
-                    ]);
+                    $emailService->send($email, $subject, $body);
                 } catch (\Exception $e) {
                     error_log("Erro ao enviar email de finalização para {$email}: " . $e->getMessage());
                 }

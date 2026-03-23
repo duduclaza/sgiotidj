@@ -360,6 +360,17 @@
                             <span>🤝</span><span><?= e($h['fornecedor_nome']) ?></span>
                         </div>
                         <?php endif; ?>
+                        <?php if (!empty($h['tipo_produto_nome'])): ?>
+                        <div class="text-xs text-blue-700 font-medium mb-1 flex items-center gap-1">
+                            <span>📦</span><span><?= e($h['tipo_produto_nome']) ?></span>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($h['fornecedor_nome'])): ?>
+                        <div class="text-xs text-emerald-700 font-medium mb-1 flex items-center gap-1">
+                            <span>🤝</span><span><?= e($h['fornecedor_nome']) ?></span>
+                        </div>
+                        <?php endif; ?>
                         <?php if (!empty($h['data_vencimento'])): ?>
                         <?php
                             $diasR = (int)($h['dias_restantes'] ?? 99999);
@@ -434,6 +445,17 @@
                             <span>🤝</span><span><?= e($h['fornecedor_nome']) ?></span>
                         </div>
                         <?php endif; ?>
+                        <?php if (!empty($h['tipo_produto_nome'])): ?>
+                        <div class="text-xs text-blue-700 font-medium mb-1 flex items-center gap-1">
+                            <span>📦</span><span><?= e($h['tipo_produto_nome']) ?></span>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($h['fornecedor_nome'])): ?>
+                        <div class="text-xs text-emerald-700 font-medium mb-1 flex items-center gap-1">
+                            <span>🤝</span><span><?= e($h['fornecedor_nome']) ?></span>
+                        </div>
+                        <?php endif; ?>
                         <?php if (!empty($h['data_vencimento'])): ?>
                         <?php $dr2=(int)($h['dias_restantes']??99999);$da2=(int)($h['dias_aviso']??7); if($dr2<0){$vc='badge-venc-late';$vi='🔴';$vt='Vencido '.abs($dr2).'d';}elseif($dr2<=$da2){$vc='badge-venc-warn';$vi='🟡';$vt='Vence em '.$dr2.'d';}else{$vc='badge-venc-ok';$vi='🟢';$vt='Vence em '.$dr2.'d';} ?>
                         <span class="badge-vencimento <?= $vc ?> mb-2"><?= $vi ?> <?= $vt ?></span>
@@ -481,6 +503,17 @@
                         <?php elseif (!empty($h['departamento_nome'])): ?>
                         <div class="text-xs text-purple-700 font-medium mb-1 flex items-center gap-1"><span>📍</span><span><?= e($h['departamento_nome']) ?></span></div>
                         <?php endif; ?>
+                        <?php if (!empty($h['tipo_produto_nome'])): ?>
+                        <div class="text-xs text-blue-700 font-medium mb-1 flex items-center gap-1">
+                            <span>📦</span><span><?= e($h['tipo_produto_nome']) ?></span>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($h['fornecedor_nome'])): ?>
+                        <div class="text-xs text-emerald-700 font-medium mb-1 flex items-center gap-1">
+                            <span>🤝</span><span><?= e($h['fornecedor_nome']) ?></span>
+                        </div>
+                        <?php endif; ?>
                         <?php if (!empty($h['data_vencimento'])): ?>
                         <?php $drA=(int)($h['dias_restantes']??99999);$daA=(int)($h['dias_aviso']??7); if($drA<0){$vcA='badge-venc-late';$viA='🔴';$vtA='Vencido '.abs($drA).'d';}elseif($drA<=$daA){$vcA='badge-venc-warn';$viA='🟡';$vtA='Vence em '.$drA.'d';}else{$vcA='badge-venc-ok';$viA='🟢';$vtA='Vence em '.$drA.'d';} ?>
                         <span class="badge-vencimento <?= $vcA ?> mb-2"><?= $viA ?> <?= $vtA ?></span>
@@ -525,6 +558,17 @@
                         <div class="text-xs text-indigo-700 font-medium mb-1 flex items-center gap-1"><span>🏢</span><span><?= e($h['departamento_resp_nome']) ?></span></div>
                         <?php elseif (!empty($h['departamento_nome'])): ?>
                         <div class="text-xs text-purple-700 font-medium mb-1 flex items-center gap-1"><span>📍</span><span><?= e($h['departamento_nome']) ?></span></div>
+                        <?php endif; ?>
+                        <?php if (!empty($h['tipo_produto_nome'])): ?>
+                        <div class="text-xs text-blue-700 font-medium mb-1 flex items-center gap-1">
+                            <span>📦</span><span><?= e($h['tipo_produto_nome']) ?></span>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($h['fornecedor_nome'])): ?>
+                        <div class="text-xs text-emerald-700 font-medium mb-1 flex items-center gap-1">
+                            <span>🤝</span><span><?= e($h['fornecedor_nome']) ?></span>
+                        </div>
                         <?php endif; ?>
                         <?php if (!empty($h['data_vencimento'])): ?>
                         <?php $drH=(int)($h['dias_restantes']??99999);$daH=(int)($h['dias_aviso']??7); if($drH<0){$vcH='badge-venc-late';$viH='🔴';$vtH='Vencido '.abs($drH).'d';}elseif($drH<=$daH){$vcH='badge-venc-warn';$viH='🟡';$vtH='Vence em '.$drH.'d';}else{$vcH='badge-venc-ok';$viH='🟢';$vtH='Vence em '.$drH.'d';} ?>
@@ -608,8 +652,20 @@
                         <?php endif; ?>
                         <div class="flex items-center justify-between text-xs">
                             <?php if ($h['total_anexos'] > 0): ?><span class="text-slate-500">📎 <?= $h['total_anexos'] ?></span><?php else: ?><span></span><?php endif; ?>
-                            <span class="text-slate-400 text-[10px]"><?= date('d/m/y', strtotime($h['created_at'])) ?></span>
+                            <span class="text-slate-400 text-[10px]"><?= date('m/d/y', strtotime($h['created_at'])) ?></span>
                         </div>
+                        
+                        <?php if (!empty($h['tipo_produto_nome'])): ?>
+                        <div class="text-xs text-blue-700 font-medium mb-1 flex items-center gap-1">
+                            <span>📦</span><span><?= e($h['tipo_produto_nome']) ?></span>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($h['fornecedor_nome'])): ?>
+                        <div class="text-xs text-emerald-700 font-medium mb-1 flex items-center gap-1">
+                            <span>🤝</span><span><?= e($h['fornecedor_nome']) ?></span>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -723,11 +779,22 @@
         <!-- Tab: Novo Checklist -->
         <div id="checklistTabNovo">
             <form id="formNovoChecklist" onsubmit="salvarChecklist(event)" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Título do Checklist *</label>
-                    <input type="text" id="checklistTitulo" required 
-                           class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                           placeholder="Ex: Checklist de Homologação de Toners">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Título do Checklist *</label>
+                        <input type="text" id="checklistTitulo" required 
+                               class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                               placeholder="Ex: Checklist de Homologação de Toners">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Tipo de Produto Relacionado</label>
+                        <select id="checklistTipoProdutoId" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="">-- Todos os Tipos --</option>
+                            <?php foreach ($tiposProduto as $tipo): ?>
+                                <option value="<?= $tipo['id'] ?>"><?= htmlspecialchars($tipo['nome']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                 </div>
 
                 <div>
@@ -1406,7 +1473,7 @@ function renderDetails(data) {
     
     // Se está em homologação, carregar dropdown de checklists
     if (h.status === 'em_homologacao') {
-        carregarChecklistsDropdown(h.id);
+        carregarChecklistsDropdown(h.id, h.tipo_produto_id);
     }
     
     // Garantir exibição do campo de Departamento quando necessário
@@ -1585,6 +1652,7 @@ async function salvarChecklist(event) {
     event.preventDefault();
     
     const titulo = document.getElementById('checklistTitulo').value;
+    const tipo_produto_id = document.getElementById('checklistTipoProdutoId').value;
     const descricao = document.getElementById('checklistDescricao').value;
     
     // Coletar itens
@@ -1627,7 +1695,7 @@ async function salvarChecklist(event) {
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ titulo, descricao, itens })
+            body: JSON.stringify({ titulo, tipo_produto_id, descricao, itens })
         });
         
         const result = await response.json();
@@ -1735,6 +1803,7 @@ async function editarChecklist(id) {
             
             // Preencher campos do formulário
             document.getElementById('checklistTitulo').value = checklist.titulo || '';
+            document.getElementById('checklistTipoProdutoId').value = checklist.tipo_produto_id || '';
             document.getElementById('checklistDescricao').value = checklist.descricao || '';
             
             // Limpar itens existentes
@@ -1814,7 +1883,7 @@ async function carregarChecklistsNoCard(homologacaoId) {
 }
 
 // Carregar checklists disponíveis no dropdown
-async function carregarChecklistsDropdown(homologacaoId) {
+async function carregarChecklistsDropdown(homologacaoId, tipoProdutoId = null) {
     try {
         const response = await fetch('/homologacoes/checklists/list');
         const result = await response.json();
@@ -1823,10 +1892,15 @@ async function carregarChecklistsDropdown(homologacaoId) {
             const select = document.getElementById(`selectChecklist${homologacaoId}`);
             if (select) {
                 result.data.forEach(checklist => {
-                    const option = document.createElement('option');
-                    option.value = checklist.id;
-                    option.textContent = `${checklist.titulo} (${checklist.total_itens} itens)`;
-                    select.appendChild(option);
+                    // Mostrar se o tipo de produto bater ou se o checklist for genérico (null)
+                    // Ou se não tivermos filtro de tipo de produto para a homologação
+                    if (!tipoProdutoId || !checklist.tipo_produto_id || checklist.tipo_produto_id == tipoProdutoId) {
+                        const option = document.createElement('option');
+                        option.value = checklist.id;
+                        let prefix = (checklist.tipo_produto_id && checklist.tipo_produto_id == tipoProdutoId) ? '⭐ ' : '';
+                        option.textContent = `${prefix}${checklist.titulo} (${checklist.total_itens} itens)`;
+                        select.appendChild(option);
+                    }
                 });
             }
         }

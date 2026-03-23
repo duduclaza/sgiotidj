@@ -60,6 +60,7 @@ class ChecklistsController
             }
             
             $titulo = trim($data['titulo'] ?? '');
+            $tipo_produto_id = !empty($data['tipo_produto_id']) ? (int)$data['tipo_produto_id'] : null;
             $descricao = trim($data['descricao'] ?? '');
             $itens = $data['itens'] ?? [];
 
@@ -78,10 +79,10 @@ class ChecklistsController
 
             // Inserir checklist
             $stmt = $this->db->prepare("
-                INSERT INTO homologacao_checklists (titulo, descricao, criado_por)
-                VALUES (?, ?, ?)
+                INSERT INTO homologacao_checklists (titulo, tipo_produto_id, descricao, criado_por)
+                VALUES (?, ?, ?, ?)
             ");
-            $stmt->execute([$titulo, $descricao, $user_id]);
+            $stmt->execute([$titulo, $tipo_produto_id, $descricao, $user_id]);
             $checklist_id = $this->db->lastInsertId();
 
             // Inserir itens
@@ -131,6 +132,8 @@ class ChecklistsController
                 SELECT 
                     c.id,
                     c.titulo,
+                    c.tipo_produto_id,
+                    tp.nome as tipo_produto_nome,
                     c.descricao,
                     c.criado_em,
                     u.name as criado_por_nome,
@@ -138,6 +141,7 @@ class ChecklistsController
                 FROM homologacao_checklists c
                 LEFT JOIN users u ON c.criado_por = u.id
                 LEFT JOIN homologacao_checklist_itens i ON c.id = i.checklist_id
+                LEFT JOIN homologacao_tipos_produto tp ON c.tipo_produto_id = tp.id
                 WHERE c.ativo = 1
                 GROUP BY c.id
                 ORDER BY c.criado_em DESC
@@ -161,7 +165,10 @@ class ChecklistsController
         try {
             // Buscar checklist
             $stmt = $this->db->prepare("
-                SELECT * FROM homologacao_checklists WHERE id = ? AND ativo = 1
+                SELECT c.*, tp.nome as tipo_produto_nome 
+                FROM homologacao_checklists c
+                LEFT JOIN homologacao_tipos_produto tp ON c.tipo_produto_id = tp.id
+                WHERE c.id = ? AND c.ativo = 1
             ");
             $stmt->execute([$id]);
             $checklist = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -345,6 +352,7 @@ class ChecklistsController
             $data = json_decode(file_get_contents('php://input'), true);
             
             $titulo = trim($data['titulo'] ?? '');
+            $tipo_produto_id = !empty($data['tipo_produto_id']) ? (int)$data['tipo_produto_id'] : null;
             $descricao = trim($data['descricao'] ?? '');
             $itens = $data['itens'] ?? [];
 
@@ -372,10 +380,10 @@ class ChecklistsController
             // Atualizar checklist
             $stmt = $this->db->prepare("
                 UPDATE homologacao_checklists 
-                SET titulo = ?, descricao = ?, atualizado_em = NOW()
+                SET titulo = ?, tipo_produto_id = ?, descricao = ?, atualizado_em = NOW()
                 WHERE id = ?
             ");
-            $stmt->execute([$titulo, $descricao, $id]);
+            $stmt->execute([$titulo, $tipo_produto_id, $descricao, $id]);
 
             // Remover itens antigos
             $stmt = $this->db->prepare("DELETE FROM homologacao_checklist_itens WHERE checklist_id = ?");
