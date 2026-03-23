@@ -34,7 +34,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_produto'])) {
         $maxId = empty($_SESSION['mock_tipos_produto']) ? 0 : max(array_column($_SESSION['mock_tipos_produto'], 'id'));
         $_SESSION['mock_tipos_produto'][] = ['id' => $maxId + 1, 'nome' => $nome];
 
-        // Também adicionar ao mock_checklists_por_tipo se não existir
         if (!isset($_SESSION['mock_checklists_por_tipo'][$nome])) {
             $_SESSION['mock_checklists_por_tipo'][$nome] = [];
         }
@@ -53,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_produto'])) {
 
 // --- AÇÕES DE CHECKLISTS ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_checklist'])) {
+
     if ($_POST['acao_checklist'] === 'adicionar') {
         $titulo = trim($_POST['titulo'] ?? '');
         $tipo_nome = $_POST['tipo_produto_nome'] ?? '';
@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_checklist'])) {
                 'criado_em' => date('Y-m-d H:i:s'),
             ];
 
-            // Sincronizar com mock_checklists_por_tipo (usado na homologação)
+            // Sincronizar com mock_checklists_por_tipo
             if (!empty($tipo_nome)) {
                 $checklistForType = [];
                 foreach ($itens as $item) {
@@ -81,13 +81,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_checklist'])) {
 
             $_SESSION['flash_message'] = ['type' => 'success', 'text' => "Checklist '$titulo' criado!"];
         }
+
+    } elseif ($_POST['acao_checklist'] === 'editar_existente') {
+        // Editar um checklist pré-existente (mock_checklists_por_tipo)
+        $tipo_nome = $_POST['tipo_produto_nome'] ?? '';
+        $itens = $_POST['itens'] ?? [];
+        $itens = array_filter(array_map('trim', $itens));
+
+        if (!empty($tipo_nome) && !empty($itens)) {
+            $checklistForType = [];
+            foreach ($itens as $item) {
+                $key = strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $item));
+                $checklistForType[$key] = $item;
+            }
+            $_SESSION['mock_checklists_por_tipo'][$tipo_nome] = $checklistForType;
+            $_SESSION['flash_message'] = ['type' => 'success', 'text' => "Checklist de '$tipo_nome' atualizado!"];
+        }
+
+    } elseif ($_POST['acao_checklist'] === 'editar_custom') {
+        // Editar um checklist criado pelo usuário (mock_checklists_cadastrados)
+        $id = (int)($_POST['id_checklist'] ?? 0);
+        $titulo = trim($_POST['titulo'] ?? '');
+        $tipo_nome = $_POST['tipo_produto_nome'] ?? '';
+        $itens = $_POST['itens'] ?? [];
+        $itens = array_filter(array_map('trim', $itens));
+
+        if ($id > 0 && !empty($titulo) && !empty($itens)) {
+            foreach ($_SESSION['mock_checklists_cadastrados'] as &$ch) {
+                if ($ch['id'] === $id) {
+                    $ch['titulo'] = $titulo;
+                    $ch['tipo_produto_nome'] = $tipo_nome;
+                    $ch['itens'] = array_values($itens);
+                    break;
+                }
+            }
+            unset($ch);
+
+            // Sincronizar com mock_checklists_por_tipo
+            if (!empty($tipo_nome)) {
+                $checklistForType = [];
+                foreach ($itens as $item) {
+                    $key = strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $item));
+                    $checklistForType[$key] = $item;
+                }
+                $_SESSION['mock_checklists_por_tipo'][$tipo_nome] = $checklistForType;
+            }
+
+            $_SESSION['flash_message'] = ['type' => 'success', 'text' => "Checklist '$titulo' atualizado!"];
+        }
+
     } elseif ($_POST['acao_checklist'] === 'excluir' && !empty($_POST['id_checklist'])) {
         $_SESSION['mock_checklists_cadastrados'] = array_values(array_filter(
             $_SESSION['mock_checklists_cadastrados'],
             fn($c) => $c['id'] != $_POST['id_checklist']
         ));
         $_SESSION['flash_message'] = ['type' => 'success', 'text' => "Checklist removido!"];
+
+    } elseif ($_POST['acao_checklist'] === 'excluir_existente') {
+        $tipo_nome = $_POST['tipo_produto_nome'] ?? '';
+        if (!empty($tipo_nome) && isset($_SESSION['mock_checklists_por_tipo'][$tipo_nome])) {
+            $_SESSION['mock_checklists_por_tipo'][$tipo_nome] = [];
+            $_SESSION['flash_message'] = ['type' => 'success', 'text' => "Checklist de '$tipo_nome' limpo!"];
+        }
     }
+
     header("Location: gerenciar_cadastros.php");
     exit;
 }
