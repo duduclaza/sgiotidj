@@ -272,19 +272,7 @@ function construirUrlPaginacao($pagina) {
         Filtros de Busca
       </h3>
       
-      <!-- Controle de Zoom do Grid -->
-      <div class="flex items-center gap-3 bg-gray-50 dark:bg-slate-900/50 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm">
-        <div class="flex items-center gap-2">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Zoom</span>
-          <input type="range" id="gridZoom" min="50" max="130" value="100" oninput="updateZoom(this.value)" 
-                 class="w-24 h-1.5 bg-gray-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600">
-          <span id="zoomValue" class="text-xs font-mono font-bold text-blue-600 dark:text-blue-400 min-w-[36px]">100%</span>
-        </div>
-        <div class="w-px h-4 bg-gray-300 dark:bg-slate-700"></div>
-        <button onclick="resetZoom()" class="text-gray-400 hover:text-blue-500 transition-colors" title="Resetar Zoom">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-        </button>
-      </div>
+      <!-- Controle de Zoom do Grid (Removido daqui e movido para o Grid abaixo) -->
     </div>
     <form method="GET" class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
       <div>
@@ -357,6 +345,9 @@ function construirUrlPaginacao($pagina) {
       <div class="flex items-end gap-1.5 col-span-1">
         <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg transition-colors whitespace-nowrap font-medium shadow-md text-sm">
           Filtrar
+        </button>
+        <button type="button" onclick="abrirModalColunas()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg transition-colors whitespace-nowrap font-medium shadow-md text-sm">
+          Colunas
         </button>
         <a href="/amostragens-2" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-center transition-colors whitespace-nowrap font-medium shadow-md text-sm">
           Limpar
@@ -453,7 +444,25 @@ function construirUrlPaginacao($pagina) {
 
   <!-- Grid de Amostragens -->
   <div class="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg overflow-hidden transition-colors shadow-sm grid-wrapper">
-    <div class="overflow-x-auto">
+    <!-- Zoom Control no Cabeçalho do Grid -->
+    <div class="px-4 py-2 bg-gray-50 dark:bg-slate-900/30 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">🔍 Zoom</span>
+          <input type="range" id="gridZoom" min="50" max="130" value="100" oninput="updateZoom(this.value)" 
+                 class="w-32 h-1.5 bg-gray-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600">
+          <span id="zoomValue" class="text-xs font-mono font-bold text-blue-600 dark:text-blue-400 min-w-[36px]">100%</span>
+        </div>
+        <div class="w-px h-4 bg-gray-300 dark:bg-slate-700"></div>
+        <button onclick="resetZoom()" class="text-gray-400 hover:text-blue-500 transition-colors" title="Resetar Zoom">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        </button>
+      </div>
+      <div id="grid-top-scroll" class="flex-1 overflow-x-auto" style="overflow-y:hidden;height:12px;">
+        <div id="grid-top-scroll-inner" style="height:1px;"></div>
+      </div>
+    </div>
+    <div id="grid-scroll" class="overflow-x-auto">
       <table id="amostragensTable" class="min-w-full text-sm">
         <thead class="bg-gray-50 dark:bg-slate-900/50">
           <tr>
@@ -712,6 +721,32 @@ function construirUrlPaginacao($pagina) {
   </div>
   <?php endif; ?>
 </section>
+
+</div>
+
+<!-- ========== MODAL: PERSONALIZAR COLUNAS ========== -->
+<div id="modal-colunas" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
+  <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-xl transition-colors">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700">
+      <div>
+        <h2 class="text-lg font-bold text-gray-900 dark:text-white">Personalizar colunas</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Escolha quais colunas exibir no grid.</p>
+      </div>
+      <button onclick="fecharModalColunas()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="px-6 py-4">
+      <div id="colunas-lista" class="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-80 overflow-y-auto pr-2">
+        <!-- JS irá popular isso -->
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 px-6 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50">
+      <button onclick="resetColunasPadrao()" class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700">Padrão</button>
+      <button onclick="salvarPreferenciasColunas()" class="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg">Salvar</button>
+    </div>
+  </div>
+</div>
 
 <!-- Modal de Loading para Downloads -->
 <div id="loadingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
@@ -1676,6 +1711,26 @@ async function alterarStatus(id, novoStatus) {
 
 const ZOOM_KEY = 'amostragens2_zoom';
 const COL_WIDTHS_KEY = 'amostragens2_col_widths';
+const COL_VISIBILITY_KEY = 'amostragens2_col_visibility';
+
+const ALL_COLUMNS = [
+  { id: 0, name: 'Data' },
+  { id: 1, name: 'NF' },
+  { id: 2, name: 'Usuário' },
+  { id: 3, name: 'Filial' },
+  { id: 4, name: 'Tipo' },
+  { id: 5, name: 'Código' },
+  { id: 6, name: 'Fornecedor' },
+  { id: 7, name: 'Qtd Recebida' },
+  { id: 8, name: 'Qtd Testada' },
+  { id: 9, name: 'Aprovada' },
+  { id: 10, name: 'Reprovada' },
+  { id: 11, name: 'Status' },
+  { id: 12, name: 'Aprovado Por' },
+  { id: 13, name: 'Anexo NF' },
+  { id: 14, name: 'Evidências' },
+  { id: 15, name: 'Ações' }
+];
 
 // Inicializar Zoom e Colunas
 document.addEventListener('DOMContentLoaded', function() {
@@ -1702,9 +1757,109 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
+  // Carregar Visibilidade das Colunas
+  const savedVisibility = JSON.parse(localStorage.getItem(COL_VISIBILITY_KEY) || '[]');
+  if (savedVisibility.length > 0) {
+    applyColumnVisibility(savedVisibility);
+  }
+
   // Ajustar layout da tabela para suportar redimensionamento
   table.style.tableLayout = 'fixed';
+
+  // Configurar Sincronização de Scroll
+  setupScrollSync();
 });
+
+// Lógica de Scroll Sincronizado
+function setupScrollSync() {
+  const topScroll = document.getElementById('grid-top-scroll');
+  const bottomScroll = document.getElementById('grid-scroll');
+  const inner = document.getElementById('grid-top-scroll-inner');
+  const table = document.getElementById('amostragensTable');
+
+  if (!topScroll || !bottomScroll || !inner || !table) return;
+
+  // Ajustar largura do conteúdo do scroll superior
+  const resizeObserver = new ResizeObserver(() => {
+    inner.style.width = table.offsetWidth + 'px';
+  });
+  resizeObserver.observe(table);
+
+  topScroll.addEventListener('scroll', () => {
+    bottomScroll.scrollLeft = topScroll.scrollLeft;
+  });
+
+  bottomScroll.addEventListener('scroll', () => {
+    topScroll.scrollLeft = bottomScroll.scrollLeft;
+  });
+}
+
+// Lógica de Personalização de Colunas
+function abrirModalColunas() {
+  const container = document.getElementById('colunas-lista');
+  const savedVisibility = JSON.parse(localStorage.getItem(COL_VISIBILITY_KEY) || '[]');
+  
+  container.innerHTML = '';
+  
+  ALL_COLUMNS.forEach(col => {
+    const isHidden = savedVisibility.includes(col.id);
+    const div = document.createElement('div');
+    div.className = 'flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-900 shadow-sm rounded-xl border border-gray-100 dark:border-slate-700/50 hover:border-blue-300 transition-all';
+    div.innerHTML = `
+      <label class="flex items-center gap-3 w-full cursor-pointer group">
+        <div class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" value="${col.id}" ${!isHidden ? 'checked' : ''} class="sr-only peer">
+          <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+        </div>
+        <span class="text-sm font-semibold text-gray-700 dark:text-gray-300 group-hover:text-blue-500 transition-colors uppercase tracking-wider">${col.name}</span>
+      </label>
+    `;
+    container.appendChild(div);
+  });
+  
+  document.getElementById('modal-colunas').classList.remove('hidden');
+}
+
+function fecharModalColunas() {
+  document.getElementById('modal-colunas').classList.add('hidden');
+}
+
+function salvarPreferenciasColunas() {
+  const checkboxes = document.getElementById('colunas-lista').querySelectorAll('input[type="checkbox"]');
+  const hiddenColumns = [];
+  
+  checkboxes.forEach(cb => {
+    if (!cb.checked) {
+      hiddenColumns.push(parseInt(cb.value));
+    }
+  });
+  
+  localStorage.setItem(COL_VISIBILITY_KEY, JSON.stringify(hiddenColumns));
+  applyColumnVisibility(hiddenColumns);
+  fecharModalColunas();
+}
+
+function resetColunasPadrao() {
+  localStorage.removeItem(COL_VISIBILITY_KEY);
+  applyColumnVisibility([]);
+  fecharModalColunas();
+}
+
+function applyColumnVisibility(hiddenIds) {
+  const table = document.getElementById('amostragensTable');
+  const rows = table.rows;
+  
+  for (let i = 0; i < rows.length; i++) {
+    const cells = rows[i].cells;
+    for (let j = 0; j < cells.length; j++) {
+      if (hiddenIds.includes(j)) {
+        cells[j].style.display = 'none';
+      } else {
+        cells[j].style.display = '';
+      }
+    }
+  }
+}
 
 // Lógica de Zoom
 function updateZoom(value, save = true) {
