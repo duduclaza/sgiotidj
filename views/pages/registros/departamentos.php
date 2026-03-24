@@ -1,45 +1,62 @@
 <section class="space-y-6">
-  <h1 class="text-2xl font-semibold">Departamentos</h1>
+  <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Departamentos</h1>
   
   <!-- Formulário de Cadastro -->
-  <div class="bg-white border rounded-lg p-4">
-    <h2 class="text-lg font-medium mb-3">Cadastrar Novo Departamento</h2>
-    <form method="post" action="/registros/departamentos/store" class="flex flex-col sm:flex-row gap-3 items-start">
-      <input type="text" name="nome" placeholder="Nome do departamento" class="border rounded px-3 py-2 w-full sm:w-80" required>
-      <button class="px-4 py-2 rounded bg-primary-600 text-white hover:bg-primary-700">Salvar</button>
+  <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700/50 p-6 transition-colors">
+    <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Cadastrar Novo Departamento</h2>
+    <form method="post" action="/registros/departamentos/store" class="flex flex-col sm:flex-row gap-4 items-end">
+      <div class="flex-1 w-full">
+        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Nome do Departamento</label>
+        <input type="text" name="nome" placeholder="Ex: Manutenção, Produção..." 
+               class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" required>
+      </div>
+      <button class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all shadow-lg hover:shadow-blue-500/20 flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+        Salvar
+      </button>
     </form>
   </div>
 
   <!-- Lista/Grid -->
-  <div class="bg-white border rounded-lg">
-    <div class="px-4 py-3 border-b">
-      <h2 class="text-lg font-medium">Departamentos Cadastrados</h2>
+  <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700/50 overflow-hidden transition-colors">
+    <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/50">
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Departamentos Cadastrados</h2>
     </div>
     <div class="overflow-x-auto">
-      <table class="min-w-full">
-        <thead class="bg-gray-50">
+      <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
+        <thead class="bg-gray-50 dark:bg-slate-900/50">
           <tr>
-            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Nome</th>
-            <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Ações</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nome</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ações</th>
           </tr>
         </thead>
-        <tbody class="divide-y">
+        <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-100 dark:divide-slate-700">
           <?php if (empty($departamentos)): ?>
             <tr>
-              <td colspan="2" class="px-4 py-8 text-center text-gray-500">Nenhum departamento cadastrado</td>
+              <td colspan="2" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400 italic">Nenhum departamento cadastrado</td>
             </tr>
           <?php else: ?>
             <?php foreach ($departamentos as $d): ?>
-              <tr>
-                <td class="px-4 py-3">
-                  <span class="edit-display-<?= $d['id'] ?>"><?= e($d['nome']) ?></span>
-                  <input type="text" class="edit-input-<?= $d['id'] ?> border rounded px-2 py-1 hidden" value="<?= e($d['nome']) ?>">
+              <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="edit-display-<?= $d['id'] ?> text-sm text-gray-900 dark:text-white font-medium"><?= e($d['nome']) ?></span>
+                  <input type="text" class="edit-input-<?= $d['id'] ?> bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-1 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none hidden w-full max-w-xs" value="<?= e($d['nome']) ?>">
                 </td>
-                <td class="px-4 py-3 text-right space-x-2">
-                  <button onclick="editRow(<?= $d['id'] ?>)" class="edit-btn-<?= $d['id'] ?> text-blue-600 hover:text-blue-800 text-sm">Editar</button>
-                  <button onclick="saveRow(<?= $d['id'] ?>)" class="save-btn-<?= $d['id'] ?> text-green-600 hover:text-green-800 text-sm hidden">Salvar</button>
-                  <button onclick="cancelEdit(<?= $d['id'] ?>)" class="cancel-btn-<?= $d['id'] ?> text-gray-600 hover:text-gray-800 text-sm hidden">Cancelar</button>
-                  <button onclick="deleteRow(<?= $d['id'] ?>)" class="text-red-600 hover:text-red-800 text-sm">Excluir</button>
+                <td class="px-6 py-4 whitespace-nowrap text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <button onclick="editRow(<?= $d['id'] ?>)" class="edit-btn-<?= $d['id'] ?> p-1.5 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors" title="Editar">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    </button>
+                    <button onclick="saveRow(<?= $d['id'] ?>)" class="save-btn-<?= $d['id'] ?> p-1.5 bg-green-50 dark:bg-green-900/40 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/60 transition-colors hidden" title="Salvar">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    </button>
+                    <button onclick="cancelEdit(<?= $d['id'] ?>)" class="cancel-btn-<?= $d['id'] ?> p-1.5 bg-gray-50 dark:bg-slate-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors hidden" title="Cancelar">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                    <button onclick="deleteRow(<?= $d['id'] ?>)" class="p-1.5 bg-red-50 dark:bg-red-900/40 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors" title="Excluir">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                  </div>
                 </td>
               </tr>
             <?php endforeach; ?>

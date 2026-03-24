@@ -7,8 +7,8 @@ $isAdmin = $_SESSION['user_role'] === 'admin';
   <!-- Header -->
   <div class="flex justify-between items-center mb-6">
     <div>
-      <h1 class="text-3xl font-bold text-gray-900">🔧 Cadastro de Peças</h1>
-      <p class="text-gray-600 mt-1">Gerenciamento de peças cadastradas</p>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">🔧 Cadastro de Peças</h1>
+      <p class="text-gray-600 dark:text-gray-400 mt-1">Gerenciamento de peças cadastradas</p>
     </div>
     <div class="flex gap-3">
       <button onclick="openImportModal()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg flex items-center gap-2">
@@ -22,7 +22,7 @@ $isAdmin = $_SESSION['user_role'] === 'admin';
   </div>
 
   <!-- Barra de Busca -->
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+  <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700/50 p-4 mb-6 transition-colors">
     <div class="flex gap-4">
       <div class="flex-1 relative">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -33,15 +33,15 @@ $isAdmin = $_SESSION['user_role'] === 'admin';
         <input type="text" 
                id="searchPecaInput"
                onkeyup="filterPecas()"
-               class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-shadow duration-200" 
+               class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-xl bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all sm:text-sm" 
                placeholder="Pesquisar por código de referência ou descrição...">
       </div>
     </div>
   </div>
-  <div id="formContainer" class="hidden bg-gray-800 border border-gray-600 rounded-lg p-6 mb-6">
+  <div id="formContainer" class="hidden bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700/50 p-6 mb-6 transition-all">
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-lg font-semibold text-gray-100" id="formTitle">Nova Peça</h2>
-      <button onclick="closeFormModal()" class="text-gray-400 hover:text-gray-200">
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white" id="formTitle">Nova Peça</h2>
+      <button onclick="closeFormModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
@@ -52,20 +52,20 @@ $isAdmin = $_SESSION['user_role'] === 'admin';
       <input type="hidden" name="id" id="pecaId">
       
       <div>
-        <label class="block text-sm font-medium text-gray-200 mb-1">Código de Referência *</label>
-        <input type="text" name="codigo_referencia" id="codigoReferencia" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500">
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Código de Referência *</label>
+        <input type="text" name="codigo_referencia" id="codigoReferencia" required class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-colors">
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-200 mb-1">Descrição *</label>
-        <textarea name="descricao" id="descricao" required rows="3" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500"></textarea>
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Descrição *</label>
+        <textarea name="descricao" id="descricao" required rows="3" class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-colors"></textarea>
       </div>
 
-      <div class="flex justify-end space-x-3 pt-4">
-        <button type="button" onclick="closeFormModal()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+      <div class="flex justify-end space-x-3 pt-4 border-t dark:border-slate-700 mt-6">
+        <button type="button" onclick="closeFormModal()" class="px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors">
           Cancelar
         </button>
-        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md">
           💾 Salvar
         </button>
       </div>
@@ -73,34 +73,40 @@ $isAdmin = $_SESSION['user_role'] === 'admin';
   </div>
 
   <!-- Grid -->
-  <div class="bg-white border rounded-lg overflow-hidden">
+  <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700/50 overflow-hidden transition-colors">
     <div class="overflow-x-auto">
-      <table class="min-w-full text-sm">
-        <thead class="bg-gray-50">
+      <table class="min-w-full text-sm divide-y divide-gray-200 dark:divide-slate-700">
+        <thead class="bg-gray-50 dark:bg-slate-900/50">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código Referência</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descrição</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Criado por</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ações</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">ID</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Código Referência</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Descrição</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Criado por</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Data</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ações</th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-100 dark:divide-slate-700">
           <?php foreach ($pecas as $peca): ?>
-          <tr class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm"><?= $peca['id'] ?></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium"><?= e($peca['codigo_referencia']) ?></td>
-            <td class="px-6 py-4 text-sm"><?= e($peca['descricao']) ?></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm"><?= e($peca['criador_nome'] ?? 'N/A') ?></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm"><?= date('d/m/Y', strtotime($peca['created_at'])) ?></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-              <button onclick='editPeca(<?= json_encode($peca) ?>)' class="text-blue-600 hover:text-blue-800">
-                ✏️ Editar
-              </button>
-              <button onclick="deletePeca(<?= $peca['id'] ?>)" class="text-red-600 hover:text-red-800">
-                🗑️ Excluir
-              </button>
+          <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300"><?= $peca['id'] ?></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white"><?= e($peca['codigo_referencia']) ?></td>
+            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300"><?= e($peca['descricao']) ?></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300"><?= e($peca['criador_nome'] ?? 'N/A') ?></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?= date('d/m/Y', strtotime($peca['created_at'])) ?></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+              <div class="flex items-center gap-2">
+                <button onclick='editPeca(<?= json_encode($peca) ?>)' 
+                        class="p-1.5 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors"
+                        title="Editar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                </button>
+                <button onclick="deletePeca(<?= $peca['id'] ?>)" 
+                        class="p-1.5 bg-red-50 dark:bg-red-900/40 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors"
+                        title="Excluir">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
             </td>
           </tr>
           <?php endforeach; ?>
@@ -111,24 +117,24 @@ $isAdmin = $_SESSION['user_role'] === 'admin';
 </section>
 
 <!-- Modal de Importação -->
-<div id="importModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-80 items-center justify-center p-4" style="z-index: 999999; display: none; visibility: hidden;" onclick="closeImportModal()">
-  <div class="bg-white rounded-lg shadow-xl w-full max-w-md" onclick="event.stopPropagation()">
+<div id="importModal" class="modal-overlay fixed inset-0 bg-slate-900/80 backdrop-blur-sm items-center justify-center p-4 transition-all duration-300" style="z-index: 999999; display: none; visibility: hidden;" onclick="closeImportModal()">
+  <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all" onclick="event.stopPropagation()">
     <!-- Header -->
-    <div class="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white rounded-t-lg">
+    <div class="px-6 py-5 border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50">
       <div class="flex items-center justify-between">
         <div class="flex items-center">
-          <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mr-3">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="flex-shrink-0 w-10 h-10 bg-blue-100 dark:bg-blue-900/40 rounded-xl flex items-center justify-center mr-3">
+            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
             </svg>
           </div>
           <div>
-            <h3 class="text-xl font-bold text-gray-900">📊 Importar Peças</h3>
-            <p class="text-sm text-gray-600 mt-1">Faça upload de um arquivo Excel com as peças</p>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white">📊 Importar Peças</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Upload de planilha Excel</p>
           </div>
         </div>
-        <button onclick="closeImportModal()" class="flex-shrink-0 w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors duration-200 group">
-          <svg class="w-5 h-5 text-gray-500 group-hover:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button onclick="closeImportModal()" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </button>
@@ -136,38 +142,41 @@ $isAdmin = $_SESSION['user_role'] === 'admin';
     </div>
     
     <!-- Content -->
-    <div class="px-6 py-4 space-y-4">
+    <div class="px-6 py-6 space-y-6">
       <!-- File Input -->
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-3">
-          📁 Selecione o arquivo Excel:
+        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">
+          📁 Selecione o arquivo Excel
         </label>
         <div class="relative group">
           <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" 
-                 class="w-full border-2 border-dashed border-gray-300 rounded-xl px-4 py-4 text-sm focus:ring-3 focus:ring-green-200 focus:border-green-400 hover:border-gray-400 transition-all duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
+                 class="w-full border-2 border-dashed border-gray-200 dark:border-slate-600 rounded-2xl px-4 py-8 text-sm text-gray-500 dark:text-gray-400
+                        hover:border-blue-400 dark:hover:border-blue-500 transition-all cursor-pointer bg-gray-50/50 dark:bg-slate-900/30
+                        file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold 
+                        file:bg-blue-600 file:text-white hover:file:bg-blue-700">
         </div>
-        <div class="flex items-center mt-2 text-xs text-gray-500">
-          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex items-center mt-3 text-xs text-gray-500 dark:text-gray-400 bg-blue-50/50 dark:bg-blue-900/20 p-2 rounded-lg">
+          <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
-          Formatos: <span class="font-medium">.xlsx, .xls, .csv</span> • Máx: <span class="font-medium">10MB</span>
+          Formatos: <span class="font-bold text-gray-700 dark:text-gray-200 ml-1">.xlsx, .xls, .csv</span>
         </div>
       </div>
       
       <!-- Progress Bar -->
       <div id="progressContainer" class="hidden">
-        <div class="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-4">
+        <div class="bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700 rounded-2xl p-4">
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center">
-              <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-green-600 mr-2"></div>
-              <span class="text-sm font-semibold text-gray-700">⚡ Progresso da Importação</span>
+              <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+              <span class="text-xs font-bold text-gray-700 dark:text-gray-300 tracking-wider uppercase">⚡ Importando</span>
             </div>
-            <span id="progressText" class="text-sm font-bold text-green-600">0%</span>
+            <span id="progressText" class="text-sm font-black text-blue-600">0%</span>
           </div>
-          <div class="w-full bg-gray-200 rounded-full h-4 shadow-inner">
-            <div id="progressBar" class="bg-gradient-to-r from-green-500 to-green-600 h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
+          <div class="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden">
+            <div id="progressBar" class="bg-blue-600 h-full transition-all duration-500 ease-out" style="width: 0%"></div>
           </div>
-          <div id="importStatus" class="text-sm text-gray-700 bg-white rounded-lg p-3 mt-3 border border-gray-200">
+          <div id="importStatus" class="text-xs text-gray-500 dark:text-gray-400 mt-3 text-center italic">
             Preparando importação...
           </div>
         </div>
@@ -175,31 +184,20 @@ $isAdmin = $_SESSION['user_role'] === 'admin';
     </div>
     
     <!-- Footer -->
-    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">
-      <!-- Template Download -->
-      <div class="mb-3">
-        <button onclick="downloadTemplatePecas()" 
-                class="w-full flex items-center justify-center px-3 py-2 text-sm font-medium text-blue-700 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg hover:from-blue-100 hover:to-blue-200 hover:border-blue-300 transition-all duration-200 shadow-sm hover:shadow">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-          </svg>
-          📥 Baixar Template Excel
-        </button>
-      </div>
+    <div class="px-6 py-4 bg-gray-50 dark:bg-slate-900 border-t border-gray-100 dark:border-slate-700 flex flex-col gap-3">
+      <button onclick="importExcelPecas()" id="importBtn"
+              class="w-full flex items-center justify-center px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-blue-500/20">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+        📤 Importar Agora
+      </button>
       
-      <!-- Import Button -->
-      <div>
-        <button id="importBtn" onclick="importExcelPecas()" 
-                class="w-full px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg">
-          <span class="flex items-center justify-center">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-            </svg>
-            📤 Importar Dados
-          </span>
-        </button>
-      </div>
+      <button onclick="downloadTemplatePecas()" 
+              class="w-full flex items-center justify-center px-4 py-2 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
+        📥 Baixar Planilha Exemplo
+      </button>
     </div>
+  </div>
+</div>
   </div>
 </div>
 
