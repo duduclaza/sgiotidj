@@ -7,8 +7,8 @@ if ($u['perfil'] !== 'logistica' && $u['perfil'] !== 'admin' && $u['perfil'] !==
 ?>
 
 <div class="mb-6">
-    <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">Guarita & Recebimento (Logística)</h2>
-    <p class="text-slate-500 dark:text-slate-400 text-sm">Registre a chegada dos pacotes de teste no prédio alertando automaticamente a TI responsável.</p>
+    <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">Recebimento (Logística)</h2>
+    <p class="text-slate-500 dark:text-slate-400 text-sm">Registre a chegada dos itens de homologações alertando automaticamente a TI responsável.</p>
 </div>
 
 <div class="mb-10">
@@ -65,12 +65,22 @@ if ($u['perfil'] !== 'logistica' && $u['perfil'] !== 'admin' && $u['perfil'] !==
                     </div>
                     
                     <div class="mb-4">
-                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Data da Guarita</label>
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Data do Recebimento</label>
                         <input type="date" name="data_recebimento" value="<?= date('Y-m-d') ?>" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-amber-500 focus:border-amber-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
                     </div>
-                    <div class="mb-6">
-                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Anotações Relevantes do Motorista</label>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Anotações Relevantes</label>
                         <textarea name="observacoes" rows="2" placeholder="Caixa rasgada? Entregue via sedex?" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-amber-500 focus:border-amber-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white"></textarea>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Anexar Fotos</label>
+                        <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-slate-300 border-dashed rounded-lg cursor-pointer bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:border-slate-600 dark:hover:bg-slate-800 transition-colors">
+                            <div class="flex flex-col items-center justify-center pt-3 pb-3">
+                                <i class="ph ph-camera text-2xl text-slate-400 dark:text-slate-500 mb-1"></i>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Clique para anexar fotos da entrega</p>
+                            </div>
+                            <input type="file" name="fotos[]" multiple accept="image/*" class="hidden">
+                        </label>
                     </div>
                     
                     <div class="flex justify-end gap-3">
@@ -84,38 +94,61 @@ if ($u['perfil'] !== 'logistica' && $u['perfil'] !== 'admin' && $u['perfil'] !==
     </div>
 </div>
 
-<div>
-    <h3 class="text-lg font-bold flex items-center gap-2 text-slate-800 dark:text-white mb-4">
-        <i class="ph-fill ph-check-square-offset text-cyan-500 text-2xl"></i> Caixas no Quarto / Pilha da Computação
-    </h3>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <?php if (empty($recebidos)): ?>
-            <div class="col-span-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 border-dashed rounded-xl p-8 text-center text-slate-500 dark:text-slate-400">
-                A ilha de expedição interna está limpa! A TI levou tudo pendente.
-            </div>
-        <?php endif; ?>
-        
-        <?php foreach ($recebidos as $h): ?>
-        <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 border-l-4 border-l-cyan-500 p-5 flex flex-col justify-between">
-            <div class="mb-4">
-                <div class="flex justify-between items-start mb-1">
-                    <h5 class="font-bold text-slate-800 dark:text-white truncate"><?= $h['codigo'] ?></h5>
-                    <span class="bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Na Fila TI</span>
-                </div>
-                <p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-1"><?= $h['titulo'] ?></p>
-            </div>
-            <div class="flex items-center justify-between mt-auto">
-                <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                    <div class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300">
-                        <i class="ph-fill ph-user text-xs"></i>
-                    </div>
-                    Recebido por <?= explode(' ', getUserById($h['recebido_por'])['nome'])[0] ?><br>em <?= date('d/m', strtotime($h['data_recebimento'])) ?>
-                </div>
-                <a href="detalhe_homologacao.php?id=<?= $h['id'] ?>" class="text-xs font-semibold text-cyan-600 hover:text-cyan-800 dark:text-cyan-400 dark:hover:text-cyan-300">Resumo Completo</a>
-            </div>
-        </div>
-        <?php endforeach; ?>
+<!-- Grid de Itens -->
+<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700/50 overflow-hidden">
+    <div class="p-5 border-b border-slate-200 dark:border-slate-700/50">
+        <h3 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+            <i class="ph-fill ph-list-dashes text-primary-500"></i> Histórico de Recebimentos
+        </h3>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left text-slate-600 dark:text-slate-300">
+            <thead class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700/50 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700/50">
+                <tr>
+                    <th class="px-5 py-3">Código</th>
+                    <th class="px-5 py-3">Item</th>
+                    <th class="px-5 py-3">Fornecedor</th>
+                    <th class="px-5 py-3">Prev. Chegada</th>
+                    <th class="px-5 py-3">Data Recebimento</th>
+                    <th class="px-5 py-3">Recebido por</th>
+                    <th class="px-5 py-3">Status</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 dark:divide-slate-700/50">
+                <?php
+                $todosItens = array_merge(array_values($aguardando), array_values($recebidos));
+                // Incluir também itens já em homologação ou concluídos que passaram pela logística
+                foreach ($homologacoes as $hh) {
+                    if (!in_array($hh['status'], ['aguardando_chegada', 'item_recebido']) && $hh['data_recebimento']) {
+                        $todosItens[] = $hh;
+                    }
+                }
+                ?>
+                <?php if (empty($todosItens)): ?>
+                    <tr><td colspan="7" class="px-5 py-8 text-center text-slate-500 dark:text-slate-400">Nenhum item registrado.</td></tr>
+                <?php endif; ?>
+                <?php foreach ($todosItens as $h): ?>
+                <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                    <td class="px-5 py-3 font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap"><?= $h['codigo'] ?></td>
+                    <td class="px-5 py-3">
+                        <div class="font-medium text-slate-800 dark:text-slate-200"><?= $h['modelo'] ?></div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1"><?= $h['titulo'] ?></div>
+                    </td>
+                    <td class="px-5 py-3 whitespace-nowrap"><?= $h['fornecedor'] ?></td>
+                    <td class="px-5 py-3 whitespace-nowrap"><?= $h['data_prevista_chegada'] ? date('d/m/Y', strtotime($h['data_prevista_chegada'])) : '-' ?></td>
+                    <td class="px-5 py-3 whitespace-nowrap"><?= $h['data_recebimento'] ? date('d/m/Y', strtotime($h['data_recebimento'])) : '-' ?></td>
+                    <td class="px-5 py-3 whitespace-nowrap"><?= $h['recebido_por'] ? getUserById($h['recebido_por'])['nome'] : '-' ?></td>
+                    <td class="px-5 py-3">
+                        <?php if ($h['status'] === 'aguardando_chegada'): ?>
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">Pendente</span>
+                        <?php else: ?>
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">Recebido</span>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
 </div>
 

@@ -34,13 +34,13 @@ if ($u['perfil'] !== 'compras') {
             </div>
             
             <div class="col-span-12">
-                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Descrição do Contexto</label>
+                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Descrição</label>
                 <textarea name="descricao" rows="3" required placeholder="Descreva por que este item está sendo homologado..."
                     class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white"></textarea>
             </div>
             
             <div class="col-span-12 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-                <h3 class="text-md font-bold flex items-center gap-2 text-slate-700 dark:text-slate-300 mb-4"><i class="ph-fill ph-cpu text-primary-500 text-lg"></i> Detalhes Técnicos</h3>
+                <h3 class="text-md font-bold flex items-center gap-2 text-slate-700 dark:text-slate-300 mb-4"><i class="ph-fill ph-cpu text-primary-500 text-lg"></i> Detalhes</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Fornecedor</label>
@@ -52,7 +52,7 @@ if ($u['perfil'] !== 'compras') {
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Modelo</label>
+                        <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Cód de Referência</label>
                         <input type="text" name="modelo" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
                     </div>
                     <div>
@@ -70,7 +70,7 @@ if ($u['perfil'] !== 'compras') {
                         <input type="date" name="data_prevista_chegada" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Informar X dias antes do vencimento</label>
+                        <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Informar X dias antes do vencimento da homologação</label>
                         <div class="flex items-center gap-3">
                             <input type="number" name="dias_antecedencia_notif" value="3" min="1" max="15" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-24 p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
                             <span class="text-sm text-slate-500 dark:text-slate-400">dias antes da data prevista</span>
@@ -79,14 +79,14 @@ if ($u['perfil'] !== 'compras') {
                     <div class="flex items-end pb-2.5">
                         <label class="flex items-center gap-3 cursor-pointer group">
                             <input type="checkbox" name="notificar_envolvidos" value="1" checked class="w-5 h-5 border border-slate-300 rounded bg-slate-50 text-primary-600 focus:ring-primary-500 dark:bg-slate-700 dark:border-slate-600">
-                            <span class="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-primary-600 transition-colors">Enviar notificações para todos os envolvidos</span>
+                            <span class="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-primary-600 transition-colors">Enviar notificações para Logística</span>
                         </label>
                     </div>
                 </div>
             </div>
             
             <div class="col-span-12 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-                <h3 class="text-md font-bold flex items-center gap-2 text-slate-700 dark:text-slate-300 mb-2"><i class="ph-fill ph-users text-cyan-500 text-lg"></i> Equipe Técnica Designada</h3>
+                <h3 class="text-md font-bold flex items-center gap-2 text-slate-700 dark:text-slate-300 mb-2"><i class="ph-fill ph-users text-cyan-500 text-lg"></i> Equipe Técnica Responsável pela Homologação</h3>
                 <p class="text-slate-500 dark:text-slate-400 text-xs mb-4">Selecione quem fará o recebimento e execução do checklist técnico (mínimo 1).</p>
                 <div class="flex flex-wrap gap-4">
                     <?php foreach ($responsaveis as $resp): ?>

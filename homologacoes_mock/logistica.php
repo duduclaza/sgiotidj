@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_recebimento
         'data_recebimento' => $_POST['data_recebimento'],
         'recebido_por' => $u['id']
     ]);
-    $_SESSION['flash_message'] = ['type' => 'success', 'text' => "Recebimento físico confirmado! As peças agora estão disponíveis para a TI."];
+    $_SESSION['flash_message'] = ['type' => 'success', 'text' => "Recebimento físico confirmado! As peças agora estão disponíveis para a equipe técnica designada. Eles receberão um e-mail sobre a chegada e mensagens diretas no chat."];
     header("Location: logistica.php");
     exit;
 }

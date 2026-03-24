@@ -8,7 +8,6 @@ $perfisSidebar = [
         ['url' => 'gerenciar_cadastros.php', 'label' => 'Gerenciar', 'icon' => 'ph-gear'],
     ],
     'logistica' => [
-        ['url' => 'index.php', 'label' => 'Painel Geral', 'icon' => 'ph-chart-pie-slice'],
         ['url' => 'logistica.php', 'label' => 'Painel Logística', 'icon' => 'ph-truck'],
     ],
     'responsavel' => [

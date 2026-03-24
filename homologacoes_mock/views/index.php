@@ -1,16 +1,9 @@
 <?php require __DIR__ . '/_subnav.php'; ?>
 
 <!-- Header -->
-<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-    <div>
-        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">Painel Geral</h2>
-        <p class="text-slate-500 dark:text-slate-400 text-sm">Resumo e acompanhamento de todas as máquinas</p>
-    </div>
-    <?php if ($u['perfil'] === 'compras'): ?>
-        <a href="nova_homologacao.php" class="mt-4 sm:mt-0 flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-sm transition-colors text-sm">
-            <i class="ph ph-plus-circle text-lg"></i> Nova Homologação
-        </a>
-    <?php endif; ?>
+<div class="mb-6">
+    <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">Painel Geral</h2>
+    <p class="text-slate-500 dark:text-slate-400 text-sm">Resumo e acompanhamento de todas as máquinas</p>
 </div>
 
 <!-- Alertas -->
