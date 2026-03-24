@@ -523,7 +523,7 @@ function construirUrlPaginacao($pagina) {
             $precisaAtualizar = empty($amostra['quantidade_testada']) || $amostra['quantidade_testada'] == 0;
             $classeLinhaAmarela = $precisaAtualizar ? 'bg-yellow-50 hover:bg-yellow-100' : 'hover:bg-gray-50';
           ?>
-          <tr class="<?= $classeLinhaAmarela ?> dark:border-slate-700" <?php if($precisaAtualizar): ?>title="⚠️ Quantidade testada não informada - Precisa atualizar"<?php endif; ?>>
+          <tr class="<?= $classeLinhaAmarela ?> dark:border-slate-700 dark:<?= $precisaAtualizar ? 'bg-yellow-900/30 text-yellow-100 hover:bg-yellow-900/50' : 'hover:bg-slate-700/50' ?>" <?php if($precisaAtualizar): ?>title="⚠️ Quantidade testada não informada - Precisa atualizar"<?php endif; ?>>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">
               <?= date('d/m/Y', strtotime($amostra['created_at'])) ?>
             </td>
@@ -536,19 +536,19 @@ function construirUrlPaginacao($pagina) {
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400" title="<?= e($amostra['filial_nome']) ?>">
               <?= e($amostra['filial_nome']) ?>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
               <?= e($amostra['tipo_produto']) ?>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
               <?= e($amostra['codigo_produto']) ?>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
               <?= e($amostra['fornecedor_nome']) ?>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-600 dark:text-gray-300">
               <?= $amostra['quantidade_recebida'] ?? 0 ?>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-600 dark:text-gray-300">
               <?= $amostra['quantidade_testada'] ?? 0 ?>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-green-600 font-semibold">
