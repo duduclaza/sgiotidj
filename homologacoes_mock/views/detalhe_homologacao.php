@@ -448,7 +448,7 @@
     }
 
     function copiarLinkPublico(token) {
-        const url = window.location.origin + window.location.pathname.replace('/views/detalhe_homologacao.php', '/checklist_publico.php') + '?token=' + token;
+        const url = window.location.origin + window.location.pathname.replace('detalhe_homologacao.php', 'checklist_publico.php') + '?token=' + token;
         navigator.clipboard.writeText(url).then(() => {
             alert("Link público copiado para a área de transferência!\nEnvie este link para quem fará os testes em campo.");
         }).catch(err => {
