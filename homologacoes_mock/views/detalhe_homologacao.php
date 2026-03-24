@@ -316,26 +316,29 @@
                 </div>
             </div>
             
-            <?php if ($h['status'] === 'concluida'): ?>
-            <!-- Parecer Final (Somente Leitura) -->
-            <?php $successBorder = $h['resultado'] === 'aprovado' ? 'border-l-emerald-500' : ($h['resultado'] === 'reprovado' ? 'border-l-rose-500' : 'border-l-amber-500'); ?>
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow border border-slate-200 dark:border-slate-700/50 border-l-4 <?= $successBorder ?>">
+            <?php if ($h['status'] === 'concluida' || ($h['status'] === 'em_homologacao' && !empty($h['parecer_final']))): ?>
+            <!-- Parecer Final / Laudo Técnico (Somente Leitura) -->
+            <?php 
+                $resultado = $h['resultado'] ?? '';
+                $successBorder = $resultado === 'aprovado' ? 'border-l-emerald-500' : ($resultado === 'reprovado' ? 'border-l-rose-500' : 'border-l-amber-500'); 
+            ?>
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow border border-slate-200 dark:border-slate-700/50 border-l-4 <?= $successBorder ?> mb-6">
                 <div class="p-6">
                     <h5 class="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-                        <i class="ph-fill ph-certificate text-2xl text-slate-400"></i> Parecer Definitivo do Departamento
+                        <i class="ph-fill ph-certificate text-2xl text-slate-400"></i> Parecer do Departamento <?= $h['status'] === 'em_homologacao' ? '(Rascunho)' : 'Definitivo' ?>
                     </h5>
                     
                     <div class="flex flex-col md:flex-row gap-8">
                         <div class="md:w-1/3">
-                            <span class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Resultado Impct</span>
-                            <span class="inline-flex items-center px-3 py-1 rounded text-sm font-bold uppercase <?= $h['resultado'] === 'aprovado' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400' : ($h['resultado'] === 'reprovado' ? 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400') ?>">
-                                <?= $h['resultado'] ?>
+                            <span class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Resultado Atual</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded text-sm font-bold uppercase <?= $resultado === 'aprovado' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400' : ($resultado === 'reprovado' ? 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400') ?>">
+                                <?= $resultado ?: 'Pendente' ?>
                             </span>
                         </div>
                         <div class="md:w-2/3">
                             <span class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Relato Conclusivo / Laudo Final</span>
-                            <div class="bg-slate-50 dark:bg-slate-900/50 border-l-2 border-slate-300 dark:border-slate-600 p-4 rounded-r-lg text-slate-800 dark:text-slate-200 font-medium">
-                                <?= nl2br(e($h['parecer_final'])) ?>
+                            <div class="bg-slate-50 dark:bg-slate-900/50 border-l-2 border-slate-300 dark:border-slate-600 p-4 rounded-r-lg text-slate-800 dark:text-slate-200 font-medium whitespace-pre-wrap">
+                                <?= $h['parecer_final'] ?>
                             </div>
                         </div>
                     </div>
@@ -378,8 +381,13 @@
             </div>
             
             <div class="mb-6">
-                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Laudo Técnico (Texto Justificativo)</label>
-                <textarea name="parecer_final" rows="4" required placeholder="Disserte motivos práticos indicando a viabilidade de compra de lotes futuros dessa Spec." class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-3 dark:bg-slate-900 dark:border-slate-600 dark:text-white"><?= htmlspecialchars($h['parecer_final'] ?? '') ?></textarea>
+                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Histórico do Laudo Técnico (Texto Justificativo)</label>
+                
+                <?php if (!empty($h['parecer_final'])): ?>
+                    <div class="bg-indigo-50/50 dark:bg-slate-900/50 border-l-2 border-indigo-300 dark:border-indigo-600 p-4 rounded-r-lg text-slate-800 dark:text-slate-200 text-sm mb-3 max-h-40 overflow-y-auto whitespace-pre-wrap font-mono"><?= htmlspecialchars($h['parecer_final']) ?></div>
+                <?php endif; ?>
+
+                <textarea name="novo_parecer_final" rows="3" <?= empty($h['parecer_final']) ? 'required' : '' ?> placeholder="<?= empty($h['parecer_final']) ? 'Disserte motivos práticos indicando a viabilidade...' : 'Adicionar novo comentário ao laudo...' ?>" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-3 dark:bg-slate-900 dark:border-slate-600 dark:text-white"></textarea>
             </div>
             
             <div class="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">

@@ -97,11 +97,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $obs_atual = $obs_atual === '' ? $bloco : $obs_atual . "\n\n" . $bloco;
             }
 
+            $parecer_atual = $h['parecer_final'] ?? '';
+            $novo_parecer = trim($_POST['novo_parecer_final'] ?? '');
+            if ($novo_parecer !== '') {
+                $timestamp = date('d/m/Y \à\s H:i');
+                $nome_usuario = $u['nome'] ?? 'Usuário';
+                $bloco = "[$timestamp - $nome_usuario]\n$novo_parecer";
+                $parecer_atual = $parecer_atual === '' ? $bloco : $parecer_atual . "\n\n" . $bloco;
+            }
+
             atualizarHomologacaoMock($id, [
                 'status' => $novo_status,
                 'data_fim_homologacao' => $_POST['data_fim_homologacao'],
                 'resultado' => $resultado,
-                'parecer_final' => $_POST['parecer_final'],
+                'parecer_final' => $parecer_atual,
                 'checklist_respostas' => $booleadas,
                 'observacoes_checklist' => $obs_atual
             ]);
