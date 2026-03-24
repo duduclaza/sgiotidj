@@ -28,7 +28,7 @@ function getUsuarioLogado() {
 function getStatusLabel($status) {
     $labels = [
         'aguardando_chegada' => 'Aguardando Chegada',
-        'item_recebido'      => 'Item Recebido',
+        'item_recebido'      => 'Item Recebido - Aguardando Homologação',
         'em_homologacao'     => 'Em Homologação',
         'concluida'          => 'Concluída',
         'cancelada'          => 'Cancelada'
@@ -40,7 +40,7 @@ function getStatusLabel($status) {
 function getBadgeClass($status) {
     $classes = [
         'aguardando_chegada' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
-        'item_recebido'      => 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400',
+        'item_recebido'      => 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
         'em_homologacao'     => 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
         'concluida'          => 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
         'cancelada'          => 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400'
