@@ -28,6 +28,7 @@ if ($u['perfil'] !== 'responsavel' && $u['perfil'] !== 'admin' && $u['perfil'] !
                     <th class="px-5 py-3">Fornecedor</th>
                     <th class="px-5 py-3">Status</th>
                     <th class="px-5 py-3">Progresso</th>
+                    <th class="px-5 py-3">Parecer Final</th>
                     <th class="px-5 py-3 text-right">Ação</th>
                 </tr>
             </thead>
@@ -71,8 +72,17 @@ if ($u['perfil'] !== 'responsavel' && $u['perfil'] !== 'admin' && $u['perfil'] !
                                 </div>
                                 <span class="text-xs font-bold text-primary-600 dark:text-primary-400 whitespace-nowrap"><?= $perc ?>%</span>
                             </div>
+                        <?php endif; ?>
+                    </td>
+                    <td class="px-5 py-3">
+                        <?php if ($h['resultado'] === 'aprovado'): ?>
+                            <span class="inline-flex text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 px-2 py-1 rounded-md text-xs font-bold">Aprovado</span>
+                        <?php elseif ($h['resultado'] === 'reprovado'): ?>
+                            <span class="inline-flex text-rose-600 bg-rose-100 dark:bg-rose-900/30 dark:text-rose-400 px-2 py-1 rounded-md text-xs font-bold">Reprovado</span>
+                        <?php elseif ($h['resultado'] === 'aprovado_restricoes'): ?>
+                            <span class="inline-flex text-amber-600 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400 px-2 py-1 rounded-md text-xs font-bold">Aprov. c/ Restrições</span>
                         <?php else: ?>
-                            <span class="text-xs text-slate-400">—</span>
+                            <span class="text-slate-400 italic text-xs">Aguardando</span>
                         <?php endif; ?>
                     </td>
                     <td class="px-5 py-3 text-right">

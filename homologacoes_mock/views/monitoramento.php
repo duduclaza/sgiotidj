@@ -30,7 +30,8 @@ if ($u['perfil'] !== 'compras' && $u['perfil'] !== 'admin' && $u['perfil'] !== '
                     <th scope="col" class="px-6 py-4">Status Atual</th>
                     <th scope="col" class="px-6 py-4">Fase da Esteira</th>
                     <th scope="col" class="px-6 py-4">Vencimento / SLA</th>
-                    <th scope="col" class="px-6 py-4 text-right">Acões</th>
+                    <th scope="col" class="px-6 py-4">Parecer Final</th>
+                    <th scope="col" class="px-6 py-4 text-right">Ações</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-200 dark:divide-slate-700/50">
@@ -73,6 +74,17 @@ if ($u['perfil'] !== 'compras' && $u['perfil'] !== 'admin' && $u['perfil'] !== '
                                 echo "<span class='text-slate-400'>-</span>";
                             }
                         ?>
+                    </td>
+                    <td class="px-6 py-4">
+                        <?php if ($h['resultado'] === 'aprovado'): ?>
+                            <span class="inline-flex text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 px-2 py-1 rounded-md text-xs font-bold">Aprovado</span>
+                        <?php elseif ($h['resultado'] === 'reprovado'): ?>
+                            <span class="inline-flex text-rose-600 bg-rose-100 dark:bg-rose-900/30 dark:text-rose-400 px-2 py-1 rounded-md text-xs font-bold">Reprovado</span>
+                        <?php elseif ($h['resultado'] === 'aprovado_restricoes'): ?>
+                            <span class="inline-flex text-amber-600 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400 px-2 py-1 rounded-md text-xs font-bold">Aprov. c/ Restrições</span>
+                        <?php else: ?>
+                            <span class="text-slate-400 italic text-xs">Aguardando</span>
+                        <?php endif; ?>
                     </td>
                     <td class="px-6 py-4 text-right whitespace-nowrap">
                         <div class="flex items-center justify-end gap-2">

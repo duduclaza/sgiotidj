@@ -74,6 +74,7 @@
                     <th scope="col" class="px-6 py-4">Status</th>
                     <th scope="col" class="px-6 py-4">Prev. Chegada</th>
                     <th scope="col" class="px-6 py-4">Responsáveis</th>
+                    <th scope="col" class="px-6 py-4">Parecer Final</th>
                     <th scope="col" class="px-6 py-4 text-right">Ação</th>
                 </tr>
             </thead>
@@ -111,6 +112,17 @@
                                 </span>
                             <?php endforeach; ?>
                         </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <?php if ($h['resultado'] === 'aprovado'): ?>
+                            <span class="inline-flex text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 px-2 py-1 rounded-md text-xs font-bold">Aprovado</span>
+                        <?php elseif ($h['resultado'] === 'reprovado'): ?>
+                            <span class="inline-flex text-rose-600 bg-rose-100 dark:bg-rose-900/30 dark:text-rose-400 px-2 py-1 rounded-md text-xs font-bold">Reprovado</span>
+                        <?php elseif ($h['resultado'] === 'aprovado_restricoes'): ?>
+                            <span class="inline-flex text-amber-600 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400 px-2 py-1 rounded-md text-xs font-bold">Aprov. c/ Restrições</span>
+                        <?php else: ?>
+                            <span class="text-slate-400 italic text-xs">Aguardando</span>
+                        <?php endif; ?>
                     </td>
                     <td class="px-6 py-4 text-right whitespace-nowrap">
                         <a href="detalhe_homologacao.php?id=<?= $h['id'] ?>" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-lg transition-colors">
