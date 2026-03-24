@@ -620,6 +620,8 @@ let filtrosDebounce = null;
 let lastGridData = [];
 
 const GRID_COLUMNS_STORAGE_KEY = 'triagem_toners_grid_columns_v1';
+const FILTER_STORAGE_KEY = 'triagem_toners_filters_v1';
+const ZOOM_STORAGE_KEY = 'triagem_toners_zoom_v1';
 const GRID_COLUMNS_DEFAULT = [
   { key: 'id', label: '#', visible: true, locked: true, align: 'left' },
   { key: 'cliente', label: 'Cliente', visible: true },
@@ -639,6 +641,54 @@ const GRID_COLUMNS_DEFAULT = [
   { key: 'acoes', label: 'Ações', visible: true, locked: true, align: 'center' },
 ];
 let gridColumns = [];
+
+function updateGridZoom(val, save = true) {
+  const zoom = parseFloat(val);
+  document.documentElement.style.setProperty('--grid-zoom', zoom);
+  const valDisplay = document.getElementById('grid-zoom-val');
+  if (valDisplay) valDisplay.textContent = Math.round(zoom * 100) + '%';
+  const slider = document.getElementById('grid-zoom-slider');
+  if (slider) slider.value = zoom;
+  if (save) localStorage.setItem(ZOOM_STORAGE_KEY, zoom);
+  setTimeout(syncTopScrollWidth, 100);
+}
+
+function loadZoomPreference() {
+  const saved = localStorage.getItem(ZOOM_STORAGE_KEY);
+  if (saved) updateGridZoom(saved, false);
+}
+
+function saveFilters() {
+  const filters = {
+    search: document.getElementById('f-search').value,
+    filial: document.getElementById('f-filial').value,
+    modelo: document.getElementById('f-modelo').value,
+    cliente: document.getElementById('f-cliente').value,
+    colaborador: document.getElementById('f-colaborador').value,
+    defeito: document.getElementById('f-defeito').value,
+    fornecedor: document.getElementById('f-fornecedor').value,
+    'codigo-req': document.getElementById('f-codigo-req').value,
+    destino: document.getElementById('f-destino').value,
+    modo: document.getElementById('f-modo').value,
+    'percentual-min': document.getElementById('f-percentual-min').value,
+    'percentual-max': document.getElementById('f-percentual-max').value,
+    'data-inicio': document.getElementById('f-data-inicio').value,
+    'data-fim': document.getElementById('f-data-fim').value,
+  };
+  localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(filters));
+}
+
+function loadFilters() {
+  try {
+    const saved = localStorage.getItem(FILTER_STORAGE_KEY);
+    if (!saved) return;
+    const filters = JSON.parse(saved);
+    Object.keys(filters).forEach(id => {
+      const el = document.getElementById('f-' + id);
+      if (el) el.value = filters[id];
+    });
+  } catch (e) { console.error('Error loading filters', e); }
+}
 
 function cloneDefaultColumns() {
   return GRID_COLUMNS_DEFAULT.map(c => ({ ...c }));
@@ -801,7 +851,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const filtrarComDebounce = () => {
     clearTimeout(filtrosDebounce);
-    filtrosDebounce = setTimeout(() => carregarRegistros(1), 350);
+    filtrosDebounce = setTimeout(() => {
+      saveFilters();
+      carregarRegistros(1);
+    }, 350);
   };
 
   [searchInput, filialInput, modeloInput, clienteInput, colaboradorInput, defeitoInput, fornecedorInput, codigoReqInput].forEach((el) => {
@@ -820,6 +873,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   loadColumnPreferences();
+  loadFilters();
+  loadZoomPreference();
   renderGridHeader();
 
   // Sync top scrollbar with the main grid scroll
@@ -984,6 +1039,7 @@ function limparFiltros() {
   });
   document.getElementById('f-destino').value = '';
   document.getElementById('f-modo').value = '';
+  localStorage.removeItem(FILTER_STORAGE_KEY);
   carregarRegistros(1);
 }
 
