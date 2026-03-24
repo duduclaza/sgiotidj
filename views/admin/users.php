@@ -6,8 +6,8 @@
 
 <section class="space-y-6">
   <div class="flex justify-between items-center">
-    <h1 class="text-2xl font-semibold text-gray-900">Gerenciar Usuários</h1>
-    <button onclick="toggleUserForm()" id="toggleFormBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Gerenciar Usuários</h1>
+    <button onclick="toggleUserForm()" id="toggleFormBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors shadow-sm">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
       </svg>
@@ -16,10 +16,10 @@
   </div>
 
   <!-- User Form -->
-  <div id="userFormContainer" class="hidden bg-white rounded-lg shadow-lg border border-gray-200 p-6">
+  <div id="userFormContainer" class="hidden bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 p-6">
     <div class="flex justify-between items-center mb-6">
-      <h3 id="formTitle" class="text-lg font-semibold text-gray-900">Criar Novo Usuário</h3>
-      <button onclick="cancelUserForm()" class="text-gray-400 hover:text-gray-600 transition-colors">
+      <h3 id="formTitle" class="text-lg font-semibold text-gray-900 dark:text-white">Criar Novo Usuário</h3>
+      <button onclick="cancelUserForm()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
@@ -31,42 +31,42 @@
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Nome *</label>
-          <input type="text" id="userName" name="name" required class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+          <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Nome *</label>
+          <input type="text" id="userName" name="name" required class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white dark:bg-slate-900 dark:text-white">
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
-          <input type="email" id="userEmail" name="email" required class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+          <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Email *</label>
+          <input type="email" id="userEmail" name="email" required class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white dark:bg-slate-900 dark:text-white">
         </div>
       </div>
 
       <div id="passwordField">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Senha <span id="passwordRequired">*</span></label>
+        <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Senha <span id="passwordRequired">*</span></label>
         <div class="relative">
-          <input type="password" id="userPassword" name="password" class="w-full border border-gray-300 rounded-lg px-4 py-3 pr-12 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+          <input type="password" id="userPassword" name="password" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-4 py-3 pr-12 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white dark:bg-slate-900 dark:text-white">
           <button type="button" onclick="toggleUserPassword()" 
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors">
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors">
             <svg id="userPasswordEyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
             </svg>
           </button>
         </div>
-        <p id="passwordHelp" class="text-xs text-gray-500 mt-1 hidden">Deixe em branco para manter a senha atual</p>
+        <p id="passwordHelp" class="text-xs text-gray-500 dark:text-slate-400 mt-1 hidden">Deixe em branco para manter a senha atual</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Setor</label>
-          <select id="userSetor" name="setor" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+          <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Setor</label>
+          <select id="userSetor" name="setor" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white dark:bg-slate-900 dark:text-white">
             <option value="">Selecione um setor</option>
           </select>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Filial</label>
-          <select id="userFilial" name="filial" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+          <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Filial</label>
+          <select id="userFilial" name="filial" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white dark:bg-slate-900 dark:text-white">
             <option value="">Selecione uma filial</option>
           </select>
         </div>
@@ -74,16 +74,16 @@
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Função</label>
-          <select id="userRole" name="role" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+          <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Função</label>
+          <select id="userRole" name="role" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white dark:bg-slate-900 dark:text-white">
             <option value="user">Usuário</option>
             <option value="admin">Administrador</option>
           </select>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-          <select id="userStatus" name="status" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+          <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Status</label>
+          <select id="userStatus" name="status" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white dark:bg-slate-900 dark:text-white">
             <option value="active">Ativo</option>
             <option value="inactive">Inativo</option>
           </select>
@@ -91,21 +91,21 @@
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Perfil de Acesso *</label>
-        <select id="userProfile" name="profile_id" required class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+        <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Perfil de Acesso *</label>
+        <select id="userProfile" name="profile_id" required class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white dark:bg-slate-900 dark:text-white">
           <option value="">Selecione um perfil</option>
         </select>
       </div>
 
       <!-- Sistema de Notificações - Para todos os usuários -->
-      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+      <div class="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-700/30 rounded-lg p-4">
         <div class="flex items-start space-x-3">
-          <input type="checkbox" id="notificacoesAtivadas" name="notificacoes_ativadas" checked class="mt-1 h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded">
+          <input type="checkbox" id="notificacoesAtivadas" name="notificacoes_ativadas" checked class="mt-1 h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 dark:border-slate-600 rounded">
           <div>
-            <label for="notificacoesAtivadas" class="block text-sm font-medium text-gray-900 cursor-pointer">
+            <label for="notificacoesAtivadas" class="block text-sm font-medium text-gray-900 dark:text-yellow-100 cursor-pointer">
               🔔 Notificações do Sistema Ativadas
             </label>
-            <p class="text-xs text-gray-600 mt-1">
+            <p class="text-xs text-gray-600 dark:text-yellow-200/60 mt-1">
               Quando marcado, o usuário verá o sino de notificações no sistema e receberá alertas visuais e sonoros. Quando desmarcado, o sino não será exibido.
             </p>
           </div>
@@ -115,14 +115,14 @@
       <!-- Permissões específicas para aprovação de módulos -->
       <div id="permissoesAprovacaoContainer" class="hidden space-y-3">
         <!-- POPs e ITs -->
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div class="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-700/30 rounded-lg p-4">
           <div class="flex items-start space-x-3">
-            <input type="checkbox" id="podeAprovarPopsIts" name="pode_aprovar_pops_its" class="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+            <input type="checkbox" id="podeAprovarPopsIts" name="pode_aprovar_pops_its" class="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-slate-600 rounded">
             <div>
-              <label for="podeAprovarPopsIts" class="block text-sm font-medium text-gray-900 cursor-pointer">
+              <label for="podeAprovarPopsIts" class="block text-sm font-medium text-gray-900 dark:text-blue-100 cursor-pointer">
                 🔐 Pode Aprovar POPs e ITs
               </label>
-              <p class="text-xs text-gray-600 mt-1">
+              <p class="text-xs text-gray-600 dark:text-blue-200/60 mt-1">
                 Quando marcado, este administrador receberá emails automáticos sempre que houver POPs ou ITs pendentes de aprovação.
               </p>
             </div>
@@ -130,14 +130,14 @@
         </div>
 
         <!-- Fluxogramas -->
-        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+        <div class="bg-purple-50 dark:bg-purple-900/10 border border-purple-200 dark:border-purple-700/30 rounded-lg p-4">
           <div class="flex items-start space-x-3">
-            <input type="checkbox" id="podeAprovarFluxogramas" name="pode_aprovar_fluxogramas" class="mt-1 h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
+            <input type="checkbox" id="podeAprovarFluxogramas" name="pode_aprovar_fluxogramas" class="mt-1 h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 dark:border-slate-600 rounded">
             <div>
-              <label for="podeAprovarFluxogramas" class="block text-sm font-medium text-gray-900 cursor-pointer">
+              <label for="podeAprovarFluxogramas" class="block text-sm font-medium text-gray-900 dark:text-purple-100 cursor-pointer">
                 🔀 Pode Aprovar Fluxogramas
               </label>
-              <p class="text-xs text-gray-600 mt-1">
+              <p class="text-xs text-gray-600 dark:text-purple-200/60 mt-1">
                 Quando marcado, este administrador receberá emails automáticos sempre que houver Fluxogramas pendentes de aprovação.
               </p>
             </div>
@@ -145,14 +145,14 @@
         </div>
 
         <!-- Amostragens -->
-        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+        <div class="bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-700/30 rounded-lg p-4">
           <div class="flex items-start space-x-3">
-            <input type="checkbox" id="podeAprovarAmostragens" name="pode_aprovar_amostragens" class="mt-1 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+            <input type="checkbox" id="podeAprovarAmostragens" name="pode_aprovar_amostragens" class="mt-1 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 dark:border-slate-600 rounded">
             <div>
-              <label for="podeAprovarAmostragens" class="block text-sm font-medium text-gray-900 cursor-pointer">
+              <label for="podeAprovarAmostragens" class="block text-sm font-medium text-gray-900 dark:text-green-100 cursor-pointer">
                 🧪 Pode Aprovar Amostragens
               </label>
-              <p class="text-xs text-gray-600 mt-1">
+              <p class="text-xs text-gray-600 dark:text-green-200/60 mt-1">
                 Quando marcado, este administrador receberá emails automáticos sempre que houver Amostragens pendentes de aprovação.
               </p>
             </div>
@@ -160,11 +160,11 @@
         </div>
       </div>
 
-      <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
-        <button type="button" onclick="cancelUserForm()" class="px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+      <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200 dark:border-slate-700">
+        <button type="button" onclick="cancelUserForm()" class="px-6 py-3 text-sm font-medium text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">
           Cancelar
         </button>
-        <button type="button" onclick="submitUser()" id="submitBtn" class="px-6 py-3 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-colors">
+        <button type="button" onclick="submitUser()" id="submitBtn" class="px-6 py-3 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
           Criar Usuário
         </button>
       </div>
@@ -172,23 +172,23 @@
   </div>
 
   <!-- Users Table -->
-  <div class="bg-white rounded-lg shadow overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h3 class="text-lg font-medium text-gray-900">Lista de Usuários</h3>
+  <div class="bg-white dark:bg-slate-800 rounded-lg shadow overflow-hidden border border-gray-200 dark:border-slate-700">
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
+      <h3 class="text-lg font-medium text-gray-900 dark:text-white">Lista de Usuários</h3>
     </div>
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+      <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
+        <thead class="bg-gray-50 dark:bg-slate-700/50">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Perfil</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Criado em</th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Usuário</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Email</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Perfil</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Criado em</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Ações</th>
           </tr>
         </thead>
-        <tbody id="usersTableBody" class="bg-white divide-y divide-gray-200">
+        <tbody id="usersTableBody" class="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
           <!-- Users will be loaded here via JavaScript -->
         </tbody>
       </table>
@@ -199,30 +199,30 @@
 
 <!-- Permissions Modal -->
 <div id="permissionsModal" class="modal-overlay">
-  <div class="modal-container w-full max-w-4xl mx-4">
-    <div class="modal-header">
+  <div class="modal-container w-full max-w-4xl mx-4 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-xl">
+    <div class="modal-header border-b border-gray-200 dark:border-slate-700 p-6 flex justify-between items-center bg-gray-50 dark:bg-slate-700/50">
       <div>
-        <h3 class="modal-title">Gerenciar Permissões</h3>
-        <p class="text-sm text-gray-600 mt-1">Usuário: <span id="permissionsUserName"></span></p>
+        <h3 class="modal-title text-gray-900 dark:text-white font-bold text-xl">Gerenciar Permissões</h3>
+        <p class="text-sm text-gray-600 dark:text-slate-400 mt-1">Usuário: <span id="permissionsUserName" class="font-semibold text-blue-600 dark:text-blue-400"></span></p>
       </div>
-      <button class="modal-close" data-modal-close>
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <button class="modal-close text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" data-modal-close>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
       </button>
     </div>
     
-    <div class="modal-body max-h-96 overflow-y-auto">
+    <div class="modal-body p-6 max-h-[60vh] overflow-y-auto bg-white dark:bg-slate-800">
       <div id="permissionsContent" class="space-y-4">
         <!-- Permissions will be loaded here -->
       </div>
     </div>
 
-    <div class="modal-footer flex-col sm:flex-row gap-2 sm:gap-4">
-      <button onclick="closePermissionsModal()" class="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+    <div class="modal-footer p-6 border-t border-gray-200 dark:border-slate-700 flex-col sm:flex-row gap-2 sm:gap-4 bg-gray-50 dark:bg-slate-700/50 rounded-b-lg">
+      <button onclick="closePermissionsModal()" class="w-full sm:w-auto px-6 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">
         Cancelar
       </button>
-      <button onclick="savePermissions()" class="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-colors">
+      <button onclick="savePermissions()" class="w-full sm:w-auto px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
         Salvar Permissões
       </button>
     </div>
@@ -367,38 +367,38 @@ function displayUsers(users) {
             <span class="text-white text-sm font-medium">${user.name.charAt(0).toUpperCase()}</span>
           </div>
           <div class="ml-4">
-            <div class="text-sm font-medium text-gray-900">${user.name}</div>
-            <div class="text-sm text-gray-500">${user.setor || ''} ${user.filial ? '- ' + user.filial : ''}</div>
+            <div class="text-sm font-medium text-gray-900 dark:text-white">${user.name}</div>
+            <div class="text-sm text-gray-500 dark:text-slate-400">${user.setor || ''} ${user.filial ? '- ' + user.filial : ''}</div>
           </div>
         </div>
       </td>
-      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.email}</td>
+      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-slate-300">${user.email}</td>
       <td class="px-6 py-4 whitespace-nowrap">
-        <span class="px-2 py-1 text-xs font-medium rounded-full ${user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}" title="${user.profile_description || ''}">
+        <span class="px-2 py-1 text-xs font-medium rounded-full ${user.role === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'}" title="${user.profile_description || ''}">
           ${user.profile_name || 'Sem perfil'}
         </span>
       </td>
       <td class="px-6 py-4 whitespace-nowrap">
-        <span class="px-2 py-1 text-xs font-medium rounded-full ${user.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+        <span class="px-2 py-1 text-xs font-medium rounded-full ${user.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'}">
           ${user.status === 'active' ? 'Ativo' : 'Inativo'}
         </span>
       </td>
-      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-slate-400">
         ${new Date(user.created_at).toLocaleDateString('pt-BR')}
       </td>
       <td class="px-6 py-4 whitespace-nowrap text-left text-sm font-medium space-x-2">
         <div class="flex items-center space-x-3">
-          <button onclick="editUser(${user.id})" class="text-blue-600 hover:text-blue-900" title="Editar">Editar</button>
+          <button onclick="editUser(${user.id})" class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300" title="Editar">Editar</button>
           
           ${isMasterUser ? `
-            <div class="flex items-center space-x-2 border-l border-gray-200 pl-3">
-              <button onclick="viewUserPassword(${user.id}, '${user.password_plain || ''}')" class="text-amber-600 hover:text-amber-900" title="Ver Senha">
+            <div class="flex items-center space-x-2 border-l border-gray-200 dark:border-slate-700 pl-3">
+              <button onclick="viewUserPassword(${user.id}, '${user.password_plain || ''}')" class="text-amber-600 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-300" title="Ver Senha">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                 </svg>
               </button>
-              <button onclick="impersonateUser(${user.id}, '${user.name}')" class="text-emerald-600 hover:text-emerald-900" title="Logar como ${user.name}">
+              <button onclick="impersonateUser(${user.id}, '${user.name}')" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-300" title="Logar como ${user.name}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
                 </svg>
@@ -406,7 +406,7 @@ function displayUsers(users) {
             </div>
           ` : ''}
           
-          <button onclick="deleteUser(${user.id}, '${user.name}')" class="text-red-600 hover:text-red-900" title="Excluir">Excluir</button>
+          <button onclick="deleteUser(${user.id}, '${user.name}')" class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300" title="Excluir">Excluir</button>
         </div>
       </td>
     `;
@@ -731,44 +731,44 @@ function displayPermissions(permissions) {
   ];
   
   let html = `
-    <div class="bg-gray-50 p-4 sm:p-6 rounded-lg">
+    <div class="bg-gray-50 dark:bg-slate-900/50 p-4 sm:p-6 rounded-lg border border-gray-200 dark:border-slate-700">
       <div class="overflow-x-auto">
         <div class="min-w-full">
-          <div class="grid grid-cols-4 gap-2 sm:gap-4 mb-4 min-w-max">
-            <div class="font-semibold text-gray-700 text-sm sm:text-base">Módulo</div>
-            <div class="font-semibold text-gray-700 text-center text-sm sm:text-base">Visualizar</div>
-            <div class="font-semibold text-gray-700 text-center text-sm sm:text-base">Editar</div>
-            <div class="font-semibold text-gray-700 text-center text-sm sm:text-base">Excluir</div>
+          <div class="grid grid-cols-4 gap-2 sm:gap-4 mb-4 min-w-max pb-2 border-b-2 border-slate-200 dark:border-slate-700">
+            <div class="font-bold text-gray-700 dark:text-slate-200 text-sm sm:text-base">Módulo</div>
+            <div class="font-bold text-gray-700 dark:text-slate-200 text-center text-sm sm:text-base">Visualizar</div>
+            <div class="font-bold text-gray-700 dark:text-slate-200 text-center text-sm sm:text-base">Editar</div>
+            <div class="font-bold text-gray-700 dark:text-slate-200 text-center text-sm sm:text-base">Excluir</div>
           </div>
   `;
   
   modules.forEach(module => {
     const perm = permissions[module.key] || {};
     html += `
-      <div class="grid grid-cols-4 gap-2 sm:gap-4 py-3 border-b border-gray-200 items-center min-w-max">
-        <div class="font-medium text-gray-900 text-sm sm:text-base pr-2">${module.name}</div>
+      <div class="grid grid-cols-4 gap-2 sm:gap-4 py-4 border-b border-gray-200 dark:border-slate-700/50 items-center min-w-max hover:bg-slate-100/50 dark:hover:bg-slate-700/30 transition-colors">
+        <div class="font-medium text-gray-900 dark:text-white text-sm sm:text-base pr-2">${module.name}</div>
         <div class="text-center">
-          <label class="inline-flex items-center justify-center">
+          <label class="inline-flex items-center justify-center cursor-pointer">
             <input type="checkbox" 
                    name="permissions[${module.key}][view]" 
                    ${perm.can_view ? 'checked' : ''} 
-                   class="form-checkbox h-4 w-4 sm:h-5 sm:w-5 text-blue-600 rounded">
+                   class="form-checkbox h-5 w-5 text-blue-600 rounded bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-600 focus:ring-blue-500">
           </label>
         </div>
         <div class="text-center">
-          <label class="inline-flex items-center justify-center">
+          <label class="inline-flex items-center justify-center cursor-pointer">
             <input type="checkbox" 
                    name="permissions[${module.key}][edit]" 
                    ${perm.can_edit ? 'checked' : ''} 
-                   class="form-checkbox h-4 w-4 sm:h-5 sm:w-5 text-blue-600 rounded">
+                   class="form-checkbox h-5 w-5 text-blue-600 rounded bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-600 focus:ring-blue-500">
           </label>
         </div>
         <div class="text-center">
-          <label class="inline-flex items-center justify-center">
+          <label class="inline-flex items-center justify-center cursor-pointer">
             <input type="checkbox" 
                    name="permissions[${module.key}][delete]" 
                    ${perm.can_delete ? 'checked' : ''} 
-                   class="form-checkbox h-4 w-4 sm:h-5 sm:w-5 text-blue-600 rounded">
+                   class="form-checkbox h-5 w-5 text-blue-600 rounded bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-600 focus:ring-blue-500">
           </label>
         </div>
       </div>
