@@ -298,11 +298,13 @@
                         <?php if ($canEdit): ?>
                             <div class="bg-primary-50 border border-primary-200 dark:bg-primary-900/10 dark:border-primary-900/50 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm mt-8">
                                 <span class="text-primary-800 dark:text-primary-400 flex items-center gap-2 font-medium w-full lg:w-auto">
-                                    <i class="ph-fill ph-floppy-disk text-lg"></i> Salvar a qualquer momento sua progressão!
+                                    <i class="ph-fill ph-check-circle text-lg"></i> Finalize a avaliação com base no preenchimento do checklist
                                 </span>
                                 <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                                    <button type="submit" class="justify-center px-4 py-2 border border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white rounded-lg font-bold transition-colors dark:text-primary-400 dark:border-primary-500 dark:hover:bg-primary-500 dark:hover:text-white">Assinalar Progresso</button>
-                                    <button type="button" onclick="openModal('modalFinalizar')" class="justify-center px-4 py-2 bg-primary-600 text-white hover:bg-primary-700 rounded-lg font-bold transition-colors shadow-sm focus:ring-4 focus:ring-primary-300">Concluir Veredito</button>
+                                    <button type="button" onclick="copiarLinkPublico('<?= md5($h['id'] . 'token_seguro') ?>')" class="justify-center px-4 py-2 border border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white rounded-lg font-bold transition-colors shadow-sm focus:ring-4 focus:ring-primary-300 flex items-center gap-2">
+                                        <i class="ph-bold ph-link text-lg"></i> Link Público
+                                    </button>
+                                    <button type="button" onclick="calcularResultadoEAbrirModal()" class="justify-center px-6 py-2 bg-primary-600 text-white hover:bg-primary-700 rounded-lg font-bold transition-colors shadow-sm focus:ring-4 focus:ring-primary-300">Concluir Veredito</button>
                                 </div>
                             </div>
                         <?php endif; ?>
@@ -390,8 +392,34 @@
             </div>
         </form>
     </div>
-</div>
 <script>
+    function calcularResultadoEAbrirModal() {
+        const formChecklistInputs = document.querySelectorAll('input[name^="checklist"]:checked');
+        let hasPass = false;
+        let hasFail = false;
+        
+        formChecklistInputs.forEach(inp => {
+            if (inp.value === "1") hasPass = true;
+            if (inp.value === "0") hasFail = true;
+        });
+        
+        let resultado = '';
+        if (hasPass && !hasFail) {
+            resultado = 'aprovado';
+        } else if (!hasPass && hasFail) {
+            resultado = 'reprovado';
+        } else if (hasPass && hasFail) {
+            resultado = 'aprovado com ressalvas';
+        }
+        
+        const selectElement = document.querySelector('select[name="resultado"]');
+        if (selectElement) {
+            selectElement.value = resultado;
+        }
+        
+        openModal('modalFinalizar');
+    }
+
     function prepararFormularioFinal() {
         // Clonar inputs originais pro hidden
         const formChecklistInputs = document.querySelectorAll('input[name^="checklist"]');
@@ -417,6 +445,15 @@
             hiddenDiv.appendChild(hiddenObs);
         }
         return true;
+    }
+
+    function copiarLinkPublico(token) {
+        const url = window.location.origin + window.location.pathname.replace('detalhe_homologacao.php', 'checklist_publico.php') + '?token=' + token;
+        navigator.clipboard.writeText(url).then(() => {
+            alert("Link público copiado para a área de transferência!\nEnvie este link para quem fará os testes em campo.");
+        }).catch(err => {
+            alert("Erro ao copiar o link: " + url);
+        });
     }
 </script>
 <?php endif; ?>
