@@ -130,8 +130,8 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
       </div>
     </div>
     <div class="flex justify-end mt-3 gap-2">
-      <button onclick="abrirModalColunas()" class="px-4 py-2 text-sm text-indigo-700 bg-indigo-100 hover:bg-indigo-200 rounded-lg transition-colors">Colunas</button>
-      <button onclick="limparFiltros()" class="px-4 py-2 text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Limpar</button>
+      <button onclick="abrirModalColunas()" class="px-4 py-2 text-sm text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900/40 hover:bg-indigo-200 dark:hover:bg-indigo-800/50 rounded-lg transition-colors">Colunas</button>
+      <button onclick="limparFiltros()" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg transition-colors">Limpar</button>
       <button onclick="carregarRegistros(1)" class="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">Filtrar</button>
     </div>
   </div>
@@ -143,7 +143,7 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
         <thead class="bg-gray-50 dark:bg-slate-900/50">
           <tr id="grid-head"></tr>
         </thead>
-        <tbody id="grid-body" class="divide-y divide-gray-100">
+        <tbody id="grid-body" class="divide-y divide-gray-100 dark:divide-slate-700">
           <tr><td colspan="16" class="px-4 py-8 text-center text-gray-400">Carregando...</td></tr>
         </tbody>
       </table>
@@ -337,8 +337,8 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
 <div id="modal-triagem" class="fixed inset-0 flex items-center justify-center z-50 hidden p-4">
   <div class="triagem-modal-panel rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
     <div class="triagem-modal-header flex items-center justify-between px-6 py-4 border-b">
-      <h2 id="modal-titulo" class="text-lg font-bold text-gray-900">Nova Triagem</h2>
-      <button onclick="fecharModalTriagem()" class="text-gray-400 hover:text-gray-600 transition-colors">
+      <h2 id="modal-titulo" class="text-lg font-bold text-gray-900 dark:text-white">Nova Triagem</h2>
+      <button onclick="fecharModalTriagem()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
@@ -520,7 +520,7 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
       </div>
     </div>
     <div class="triagem-modal-footer flex justify-end gap-3 px-6 py-4 border-t">
-      <button onclick="fecharModalTriagem()" class="px-5 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Cancelar</button>
+      <button onclick="fecharModalTriagem()" class="px-5 py-2 text-sm text-gray-600 dark:text-gray-300 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">Cancelar</button>
       <button onclick="salvarTriagem()" id="btn-salvar" class="px-5 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors font-medium">Salvar</button>
     </div>
   </div>
@@ -657,7 +657,7 @@ function renderGridHeader() {
 
   head.innerHTML = getActiveColumns().map((col) => {
     const alignClass = col.align === 'center' ? 'text-center' : 'text-left';
-    return `<th class="px-4 py-3 ${alignClass} font-semibold text-gray-600">${col.label}</th>`;
+    return `<th class="px-4 py-3 ${alignClass} font-semibold text-gray-600 dark:text-gray-300">${col.label}</th>`;
   }).join('');
 }
 
@@ -686,30 +686,30 @@ function renderColunasLista() {
     const canMoveUp = !col.locked && index > 0 && !gridColumns[index - 1]?.locked;
     const canMoveDown = !col.locked && index < gridColumns.length - 1 && !gridColumns[index + 1]?.locked;
 
-    return `<div class="flex items-center justify-between gap-3 rounded-lg border border-gray-200 px-3 py-2">
-      <label class="flex items-center gap-3 text-sm text-gray-700">
+    return `<div class="flex items-center justify-between gap-3 rounded-lg border border-gray-200 dark:border-slate-600 px-3 py-2">
+      <label class="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-200">
         <input
           type="checkbox"
           ${col.visible || col.locked ? 'checked' : ''}
           ${col.locked ? 'disabled' : ''}
           onchange="toggleColunaVisivel('${col.key}', this.checked)"
-          class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          class="rounded border-gray-300 dark:border-slate-500 text-blue-600 focus:ring-blue-500"
         >
-        <span>${col.label}${col.locked ? ' <span class="text-xs text-gray-400">(fixa)</span>' : ''}</span>
+        <span>${col.label}${col.locked ? ' <span class="text-xs text-gray-400 dark:text-gray-500">(fixa)</span>' : ''}</span>
       </label>
       <div class="flex items-center gap-1">
         <button
           type="button"
           onclick="moveColumn('${col.key}', -1)"
           ${canMoveUp ? '' : 'disabled'}
-          class="px-2 py-1 text-xs rounded border ${canMoveUp ? 'border-gray-300 text-gray-700 hover:bg-gray-100' : 'border-gray-200 text-gray-300 cursor-not-allowed'}"
+          class="px-2 py-1 text-xs rounded border ${canMoveUp ? 'border-gray-300 dark:border-slate-500 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-600' : 'border-gray-200 dark:border-slate-700 text-gray-300 dark:text-slate-600 cursor-not-allowed'}"
           title="Mover para cima"
         >↑</button>
         <button
           type="button"
           onclick="moveColumn('${col.key}', 1)"
           ${canMoveDown ? '' : 'disabled'}
-          class="px-2 py-1 text-xs rounded border ${canMoveDown ? 'border-gray-300 text-gray-700 hover:bg-gray-100' : 'border-gray-200 text-gray-300 cursor-not-allowed'}"
+          class="px-2 py-1 text-xs rounded border ${canMoveDown ? 'border-gray-300 dark:border-slate-500 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-600' : 'border-gray-200 dark:border-slate-700 text-gray-300 dark:text-slate-600 cursor-not-allowed'}"
           title="Mover para baixo"
         >↓</button>
       </div>
@@ -842,24 +842,24 @@ function renderGrid(data) {
     const pctSalvo = parseFloat((r.percentual_informado ?? r.percentual_calculado) || 0);
     const barColor = pct <= 5 ? 'bg-red-500' : pct <= 40 ? 'bg-orange-400' : pct <= 80 ? 'bg-yellow-400' : 'bg-green-500';
     const destBadge = {
-      'Descarte':    'bg-red-100 text-red-800',
-      'Garantia':    'bg-purple-100 text-purple-800',
-      'Uso Interno': 'bg-blue-100 text-blue-800',
-      'Estoque':     'bg-green-100 text-green-800',
-    }[r.destino] || 'bg-gray-100 text-gray-800';
+      'Descarte':    'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
+      'Garantia':    'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300',
+      'Uso Interno': 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
+      'Estoque':     'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
+    }[r.destino] || 'bg-gray-100 text-gray-800 dark:bg-slate-700 dark:text-gray-300';
 
     const modoBadge = r.modo === 'peso'
-      ? '<span class="px-1.5 py-0.5 bg-cyan-100 text-cyan-800 rounded text-xs">⚖️ Peso</span>'
-      : '<span class="px-1.5 py-0.5 bg-violet-100 text-violet-800 rounded text-xs">📊 % Direto</span>';
+      ? '<span class="px-1.5 py-0.5 bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300 rounded text-xs">⚖️ Peso</span>'
+      : '<span class="px-1.5 py-0.5 bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-300 rounded text-xs">📊 % Direto</span>';
 
     const peso = r.modo === 'peso' && r.peso_retornado ? `${parseFloat(r.peso_retornado).toFixed(1)}g` : '—';
     const valorRecuperado = parseFloat(r.valor_recuperado || 0);
     const folhasEquivalentes = parseInt(r.folhas_equivalentes || 0, 10);
     let valor = '—';
     if (r.destino === 'Estoque' && valorRecuperado > 0) {
-      valor = `<div class="leading-tight"><span class="font-semibold text-green-700">R$ ${Math.abs(valorRecuperado).toLocaleString('pt-BR', {minimumFractionDigits:2})}</span>${folhasEquivalentes > 0 ? `<div class="text-[10px] text-green-700/80 mt-0.5">+ ${folhasEquivalentes.toLocaleString('pt-BR')} folhas</div>` : ''}</div>`;
+      valor = `<div class="leading-tight"><span class="font-semibold text-green-700 dark:text-green-400">R$ ${Math.abs(valorRecuperado).toLocaleString('pt-BR', {minimumFractionDigits:2})}</span>${folhasEquivalentes > 0 ? `<div class="text-[10px] text-green-700/80 dark:text-green-400/80 mt-0.5">+ ${folhasEquivalentes.toLocaleString('pt-BR')} folhas</div>` : ''}</div>`;
     } else if (r.destino === 'Descarte' && valorRecuperado < 0) {
-      valor = `<div class="leading-tight"><span class="font-semibold text-red-700">-R$ ${Math.abs(valorRecuperado).toLocaleString('pt-BR', {minimumFractionDigits:2})}</span>${folhasEquivalentes > 0 ? `<div class="text-[10px] text-red-700/80 mt-0.5">- ${folhasEquivalentes.toLocaleString('pt-BR')} folhas</div>` : ''}</div>`;
+      valor = `<div class="leading-tight"><span class="font-semibold text-red-700 dark:text-red-400">-R$ ${Math.abs(valorRecuperado).toLocaleString('pt-BR', {minimumFractionDigits:2})}</span>${folhasEquivalentes > 0 ? `<div class="text-[10px] text-red-700/80 dark:text-red-400/80 mt-0.5">- ${folhasEquivalentes.toLocaleString('pt-BR')} folhas</div>` : ''}</div>`;
     }
 
     const dt = new Date(r.created_at);
@@ -867,31 +867,31 @@ function renderGrid(data) {
 
     const parecerShort = r.parecer ? (r.parecer.length > 60 ? r.parecer.substring(0,60) + '...' : r.parecer) : '—';
 
-    const editBtn  = CAN_EDIT   ? `<button onclick='abrirModalEditar(${JSON.stringify(r)})' class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Editar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>` : '';
-    const dupBtn   = CAN_EDIT   ? `<button onclick="duplicarRegistro(${r.id}, ${r.cliente_id || 0})" class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="Duplicar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V4a1 1 0 011-1h11a1 1 0 011 1v11a1 1 0 01-1 1h-3m-9 4H4a1 1 0 01-1-1V8a1 1 0 011-1h11a1 1 0 011 1v11a1 1 0 01-1 1z"/></svg></button>` : '';
-    const delBtn   = CAN_DELETE ? `<button onclick="abrirModalDelete(${r.id})" class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Excluir"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>` : '';
+    const editBtn  = CAN_EDIT   ? `<button onclick='abrirModalEditar(${JSON.stringify(r)})' class="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors" title="Editar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>` : '';
+    const dupBtn   = CAN_EDIT   ? `<button onclick="duplicarRegistro(${r.id}, ${r.cliente_id || 0})" class="p-1.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors" title="Duplicar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V4a1 1 0 011-1h11a1 1 0 011 1v11a1 1 0 01-1 1h-3m-9 4H4a1 1 0 01-1-1V8a1 1 0 011-1h11a1 1 0 011 1v11a1 1 0 01-1 1z"/></svg></button>` : '';
+    const delBtn   = CAN_DELETE ? `<button onclick="abrirModalDelete(${r.id})" class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors" title="Excluir"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>` : '';
 
     const cellByColumn = {
-      id: `<td class="px-4 py-3 text-gray-500 text-xs">${r.id}</td>`,
-      cliente: `<td class="px-4 py-3 text-gray-700 text-xs">${escapeHtml(r.cliente_nome || '—')}</td>`,
-      codigo_requisicao: `<td class="px-4 py-3 text-gray-700 text-xs">${escapeHtml(r.codigo_requisicao || '—')}</td>`,
-      filial: `<td class="px-4 py-3 text-gray-700 text-xs">${escapeHtml(r.filial_registro_nome || r.filial_registro || '—')}</td>`,
-      colaborador: `<td class="px-4 py-3 text-gray-700 text-xs">${escapeHtml(r.colaborador_registro_nome || r.colaborador_registro || r.criado_por_nome || '—')}</td>`,
-      defeito: `<td class="px-4 py-3 text-gray-700 text-xs">${escapeHtml(r.defeito_nome || '—')}</td>`,
-      fornecedor: `<td class="px-4 py-3 text-gray-700 text-xs">${escapeHtml(r.fornecedor_nome || '—')}</td>`,
-      modelo: `<td class="px-4 py-3 font-medium text-gray-900 text-xs">${escapeHtml(r.toner_modelo || '—')}</td>`,
+      id: `<td class="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">${r.id}</td>`,
+      cliente: `<td class="px-4 py-3 text-gray-700 dark:text-gray-300 text-xs">${escapeHtml(r.cliente_nome || '—')}</td>`,
+      codigo_requisicao: `<td class="px-4 py-3 text-gray-700 dark:text-gray-300 text-xs">${escapeHtml(r.codigo_requisicao || '—')}</td>`,
+      filial: `<td class="px-4 py-3 text-gray-700 dark:text-gray-300 text-xs">${escapeHtml(r.filial_registro_nome || r.filial_registro || '—')}</td>`,
+      colaborador: `<td class="px-4 py-3 text-gray-700 dark:text-gray-300 text-xs">${escapeHtml(r.colaborador_registro_nome || r.colaborador_registro || r.criado_por_nome || '—')}</td>`,
+      defeito: `<td class="px-4 py-3 text-gray-700 dark:text-gray-300 text-xs">${escapeHtml(r.defeito_nome || '—')}</td>`,
+      fornecedor: `<td class="px-4 py-3 text-gray-700 dark:text-gray-300 text-xs">${escapeHtml(r.fornecedor_nome || '—')}</td>`,
+      modelo: `<td class="px-4 py-3 font-medium text-gray-900 dark:text-white text-xs">${escapeHtml(r.toner_modelo || '—')}</td>`,
       modo: `<td class="px-4 py-3">${modoBadge}</td>`,
-      peso: `<td class="px-4 py-3 text-gray-600 text-xs">${peso}</td>`,
-      percentual: `<td class="px-4 py-3"><div class="flex items-center gap-2"><div class="w-16 bg-gray-200 rounded-full h-1.5"><div class="${barColor} h-1.5 rounded-full" style="width:${pct}%"></div></div><span class="text-xs font-bold text-gray-800">${pctSalvo.toFixed(1)}%</span></div></td>`,
-      parecer: `<td class="px-4 py-3 text-xs text-gray-600 max-w-xs" title="${escapeHtml(r.parecer || '')}">${escapeHtml(parecerShort)}</td>`,
+      peso: `<td class="px-4 py-3 text-gray-600 dark:text-gray-400 text-xs">${peso}</td>`,
+      percentual: `<td class="px-4 py-3"><div class="flex items-center gap-2"><div class="w-16 bg-gray-200 dark:bg-slate-600 rounded-full h-1.5"><div class="${barColor} h-1.5 rounded-full" style="width:${pct}%"></div></div><span class="text-xs font-bold text-gray-800 dark:text-gray-200">${pctSalvo.toFixed(1)}%</span></div></td>`,
+      parecer: `<td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-400 max-w-xs" title="${escapeHtml(r.parecer || '')}">${escapeHtml(parecerShort)}</td>`,
       destino: `<td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium ${destBadge}">${escapeHtml(r.destino || '—')}</span></td>`,
       valor: `<td class="px-4 py-3 text-xs">${valor}</td>`,
-      datahora: `<td class="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">${dtStr}</td>`,
+      datahora: `<td class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">${dtStr}</td>`,
       acoes: `<td class="px-4 py-3 text-center"><div class="flex justify-center gap-1">${editBtn}${dupBtn}${delBtn}</div></td>`,
     };
 
-    const rowCells = activeCols.map((col) => cellByColumn[col.key] || '<td class="px-4 py-3 text-xs text-gray-400">—</td>').join('');
-    return `<tr class="hover:bg-gray-50 transition-colors">${rowCells}</tr>`;
+    const rowCells = activeCols.map((col) => cellByColumn[col.key] || '<td class="px-4 py-3 text-xs text-gray-400 dark:text-gray-500">—</td>').join('');
+    return `<tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">${rowCells}</tr>`;
   }).join('');
 }
 
@@ -905,8 +905,9 @@ function escapeHtml(value) {
 }
 
 function renderPaginacao(pag) {
-  document.getElementById('pag-info').textContent =
-    `Exibindo ${Math.min((pag.page-1)*pag.per_page+1, pag.total)}–${Math.min(pag.page*pag.per_page, pag.total)} de ${pag.total} registros`;
+  const pagInfo = document.getElementById('pag-info');
+  pagInfo.textContent = `Exibindo ${Math.min((pag.page-1)*pag.per_page+1, pag.total)}–${Math.min(pag.page*pag.per_page, pag.total)} de ${pag.total} registros`;
+  pagInfo.className = 'text-sm text-gray-500 dark:text-gray-400';
 
   const btns = document.getElementById('pag-buttons');
   btns.innerHTML = '';
@@ -914,7 +915,7 @@ function renderPaginacao(pag) {
     const active = i === pag.page;
     const btn = document.createElement('button');
     btn.textContent = i;
-    btn.className = `px-3 py-1 rounded text-sm ${active ? 'bg-blue-600 text-white' : 'bg-white border text-gray-600 hover:bg-gray-50'}`;
+    btn.className = `px-3 py-1 rounded text-sm ${active ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700'}`;
     btn.onclick = () => carregarRegistros(i);
     btns.appendChild(btn);
   }
