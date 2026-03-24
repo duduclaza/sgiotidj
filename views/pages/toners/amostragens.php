@@ -123,8 +123,11 @@
           <option value="reprovado">Reprovado</option>
         </select>
       </div>
-      <div class="flex items-end">
-        <button onclick="window.printAmostragens()" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors">
+      <div class="flex items-end space-x-2">
+        <button onclick="limparFiltros()" class="flex-1 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors">
+          <span>Limpar</span>
+        </button>
+        <button onclick="window.printAmostragens()" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
           </svg>
@@ -136,9 +139,22 @@
 
   <!-- Amostragens Grid -->
   <div class="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg overflow-hidden shadow-sm transition-colors">
-    <div class="overflow-x-auto">
+    <!-- Zoom and Barra de rolagem superior -->
+    <div class="px-4 py-2 bg-gray-50 dark:bg-slate-900/30 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">🔍 Ajustar Zoom:</span>
+        <input type="range" id="grid-zoom-slider" min="0.5" max="1.3" step="0.05" value="1.0" 
+               class="w-32 h-1.5 bg-gray-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
+               oninput="updateGridZoom(this.value)">
+        <span id="grid-zoom-val" class="text-xs font-bold text-gray-700 dark:text-gray-300 w-8">100%</span>
+      </div>
+      <div id="grid-top-scroll" class="flex-1 overflow-x-auto" style="overflow-y:hidden;height:12px;">
+        <div id="grid-top-scroll-inner" style="height:1px;"></div>
+      </div>
+    </div>
+    <div id="grid-scroll" class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
-        <thead class="bg-gray-50 dark:bg-slate-900/50">
+        <thead class="bg-gray-50 dark:bg-slate-900/50" id="amostragemTableHead">
           <tr>
             <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Número NF</th>
             <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Responsáveis</th>
@@ -149,96 +165,45 @@
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200" id="amostragemTableBody">
-          <?php if (isset($amostragens) && !empty($amostragens)): ?>
-            <?php foreach ($amostragens as $amostragem): ?>
-              <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
-                <td class="px-4 py-2 text-sm text-gray-900 dark:text-gray-100 font-medium"><?= e($amostragem['numero_nf']) ?></td>
-                <td class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
-                  <?php 
-                  if (!empty($amostragem['responsaveis_list'])) {
-                    $names = array_column($amostragem['responsaveis_list'], 'name');
-                    $names = array_filter($names); // Remove empty names
-                    if (!empty($names)) {
-                      echo implode(', ', array_slice($names, 0, 2));
-                      if (count($names) > 2) echo ' +' . (count($names) - 2);
-                    } else {
-                      echo '-';
-                    }
-                  } else {
-                    echo '-';
-                  }
-                  ?>
-                </td>
-                <td class="px-4 py-2">
-                  <select onchange="updateStatus(<?= $amostragem['id'] ?>, this.value, this)" class="text-xs font-semibold rounded-full px-2 py-1 border-0 focus:ring-2 focus:ring-blue-500 cursor-pointer <?php 
-                    echo $amostragem['status'] === 'aprovado' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 
-                         ($amostragem['status'] === 'pendente' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'); 
-                  ?>">
-                    <option value="pendente" <?= $amostragem['status'] === 'pendente' ? 'selected' : '' ?>>Pendente</option>
-                    <option value="aprovado" <?= $amostragem['status'] === 'aprovado' ? 'selected' : '' ?>>Aprovado</option>
-                    <option value="reprovado" <?= $amostragem['status'] === 'reprovado' ? 'selected' : '' ?>>Reprovado</option>
-                  </select>
-                </td>
-                <td class="px-4 py-2 text-sm text-gray-900 dark:text-gray-100"><?= date('d/m/Y', strtotime($amostragem['data_registro'])) ?></td>
-                <td class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
-                  <div class="flex items-center space-x-2">
-                    <span id="obs-text-<?= $amostragem['id'] ?>" class="flex-1 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors" onclick="editObservacao(<?= $amostragem['id'] ?>)" title="Clique para editar">
-                      <?php if (!empty($amostragem['observacao'])): ?>
-                        <?= e(substr($amostragem['observacao'], 0, 50)) ?><?= strlen($amostragem['observacao']) > 50 ? '...' : '' ?>
-                      <?php else: ?>
-                        <span class="text-gray-400 dark:text-gray-500 italic">Clique para adicionar</span>
-                      <?php endif; ?>
-                    </span>
-                    <textarea id="obs-input-<?= $amostragem['id'] ?>" class="hidden flex-1 text-xs border border-gray-300 dark:border-slate-600 rounded px-2 py-1 resize-none bg-white dark:bg-slate-900 text-gray-900 dark:text-white" rows="2" placeholder="Digite a observação..."><?= e($amostragem['observacao']) ?></textarea>
-                    <div id="obs-buttons-<?= $amostragem['id'] ?>" class="hidden flex space-x-1">
-                      <button onclick="saveObservacao(<?= $amostragem['id'] ?>)" class="text-green-600 hover:text-green-800 text-xs">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                      </button>
-                      <button onclick="cancelEditObservacao(<?= $amostragem['id'] ?>)" class="text-red-600 hover:text-red-800 text-xs">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-4 py-2 text-sm">
-                  <div class="flex items-center space-x-2">
-                    <?php if ($amostragem['has_pdf']): ?>
-                      <a href="/toners/amostragens/<?= $amostragem['id'] ?>/pdf" target="_blank" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-xs bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded transition-colors">
-                        <svg class="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
-                          <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
-                        </svg>
-                        PDF
-                      </a>
-                    <?php endif; ?>
-                    <?php if ($amostragem['total_evidencias'] > 0): ?>
-                      <button onclick="viewEvidencias(<?= $amostragem['id'] ?>)" class="text-green-600 dark:text-green-400 text-xs bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded hover:bg-green-100 dark:hover:bg-green-900/50 transition-colors border-none cursor-pointer">
-                        <svg class="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
-                          <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
-                        </svg>
-                        <?= $amostragem['total_evidencias'] ?> foto(s)
-                      </button>
-                    <?php endif; ?>
-                    <button onclick="excluirAmostragem(<?= $amostragem['id'] ?>, '<?= e($amostragem['numero_nf']) ?>')" 
-                            class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded-md font-medium transition-colors duration-200 shadow-sm hover:shadow-md">
-                      Excluir
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            <?php endforeach; ?>
-          <?php else: ?>
-            <tr>
-              <td colspan="6" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">Nenhuma amostragem encontrada</td>
-            </tr>
-          <?php endif; ?>
+          <tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">Carregando...</td></tr>
         </tbody>
       </table>
     </div>
   </div>
+  </style>
+
+  <style>
+  /* Grid Zoom & Resizer Styles */
+  #grid-scroll table {
+    font-size: calc(0.8125rem * var(--grid-zoom, 1));
+    transition: font-size 0.1s ease;
+  }
+  #grid-scroll th, #grid-scroll td {
+    padding-left: calc(1rem * var(--grid-zoom, 1));
+    padding-right: calc(1rem * var(--grid-zoom, 1));
+    padding-top: calc(0.75rem * var(--grid-zoom, 1));
+    padding-bottom: calc(0.75rem * var(--grid-zoom, 1));
+    transition: padding 0.1s ease;
+  }
+  .resizer {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 6px;
+    cursor: col-resize;
+    user-select: none;
+    z-index: 10;
+  }
+  .resizer:hover, .resizer.resizing {
+    background-color: rgba(59, 130, 246, 0.5);
+  }
+  th {
+    position: relative;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  </style>
 </section>
 
 <!-- Modal removido - usando formulário inline -->
@@ -246,6 +211,17 @@
 <script>
 let selectedStatus = '';
 let activityLog = [];
+let filtrosDebounce;
+let currentZoom = 1.0;
+let isResizing = false;
+let currentResizer = null;
+
+// Configurações de Persistência
+const STORAGE_KEYS = {
+  filters: 'amostragens_filters_v1',
+  zoom: 'amostragens_zoom_v1',
+  columns: 'amostragens_grid_columns_v1'
+};
 
 // Activity logging
 function logActivity(type, action, details = {}) {
@@ -253,6 +229,253 @@ function logActivity(type, action, details = {}) {
   activityLog.push({ timestamp, type, action, details });
   console.log(`[${type.toUpperCase()}] ${action}:`, details);
 }
+
+// ===== GRID & FILTROS =====
+
+const carregarRegistros = async () => {
+  const tbody = document.getElementById('amostragemTableBody');
+  tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">🔍 Buscando registros...</td></tr>';
+
+  const search = document.getElementById('searchInput').value;
+  const status = document.getElementById('statusFilter').value;
+
+  try {
+    const response = await fetch(`/toners/amostragens/list?search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}`);
+    const result = await response.json();
+
+    if (result.success) {
+      renderGrid(result.data);
+    } else {
+      tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-red-500">${result.message}</td></tr>`;
+    }
+  } catch (error) {
+    console.error('Erro ao carregar registros:', error);
+    tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-red-500">Erro de conexão ao carregar registros.</td></tr>';
+  }
+};
+
+const renderGrid = (data) => {
+  const tbody = document.getElementById('amostragemTableBody');
+  tbody.innerHTML = '';
+
+  if (data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500 italic">Nenhuma amostragem encontrada</td></tr>';
+    return;
+  }
+
+  data.forEach(item => {
+    const tr = document.createElement('tr');
+    tr.className = 'hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors';
+    
+    // Responsáveis formatados
+    let respHtml = '-';
+    if (item.responsaveis_list && item.responsaveis_list.length > 0) {
+      const names = item.responsaveis_list.map(r => r.name).filter(n => n);
+      if (names.length > 0) {
+        respHtml = names.slice(0, 2).join(', ');
+        if (names.length > 2) respHtml += ` +${names.length - 2}`;
+      }
+    }
+
+    const statusClasses = item.status === 'aprovado' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 
+                         (item.status === 'pendente' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400');
+
+    tr.innerHTML = `
+      <td class="px-4 py-2 text-sm text-gray-900 dark:text-gray-100 font-medium">${item.numero_nf}</td>
+      <td class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">${respHtml}</td>
+      <td class="px-4 py-2">
+        <select onchange="updateStatus(${item.id}, this.value, this)" class="text-xs font-semibold rounded-full px-2 py-1 border-0 focus:ring-2 focus:ring-blue-500 cursor-pointer ${statusClasses}">
+          <option value="pendente" ${item.status === 'pendente' ? 'selected' : ''}>Pendente</option>
+          <option value="aprovado" ${item.status === 'aprovado' ? 'selected' : ''}>Aprovado</option>
+          <option value="reprovado" ${item.status === 'reprovado' ? 'selected' : ''}>Reprovado</option>
+        </select>
+      </td>
+      <td class="px-4 py-2 text-sm text-gray-900 dark:text-gray-100">${new Date(item.data_registro).toLocaleDateString('pt-BR')}</td>
+      <td class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
+        <div class="flex items-center space-x-2">
+          <span id="obs-text-${item.id}" class="flex-1 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors" onclick="editObservacao(${item.id})" title="Clique para editar">
+            ${item.observacao ? (item.observacao.substring(0, 50) + (item.observacao.length > 50 ? '...' : '')) : '<span class="text-gray-400 dark:text-gray-500 italic">Clique para adicionar</span>'}
+          </span>
+          <textarea id="obs-input-${item.id}" class="hidden flex-1 text-xs border border-gray-300 dark:border-slate-600 rounded px-2 py-1 resize-none bg-white dark:bg-slate-900 text-gray-900 dark:text-white" rows="2" placeholder="Digite a observação...">${item.observacao || ''}</textarea>
+          <div id="obs-buttons-${item.id}" class="hidden flex space-x-1">
+            <button onclick="saveObservacao(${item.id})" class="text-green-600 hover:text-green-800 text-xs">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+            </button>
+            <button onclick="cancelEditObservacao(${item.id})" class="text-red-600 hover:text-red-800 text-xs">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            </button>
+          </div>
+        </div>
+      </td>
+      <td class="px-4 py-2 text-sm">
+        <div class="flex items-center space-x-2">
+          ${item.has_pdf ? `
+            <a href="/toners/amostragens/${item.id}/pdf" target="_blank" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-xs bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded transition-colors">
+              <svg class="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path></svg>
+              PDF
+            </a>
+          ` : ''}
+          ${item.total_evidencias > 0 ? `
+            <button onclick="viewEvidencias(${item.id})" class="text-green-600 dark:text-green-400 text-xs bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded hover:bg-green-100 dark:hover:bg-green-900/50 transition-colors border-none cursor-pointer">
+              <svg class="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path></svg>
+              ${item.total_evidencias} foto(s)
+            </button>
+          ` : ''}
+          <button onclick="excluirAmostragem(${item.id}, '${item.numero_nf}')" class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded-md font-medium transition-colors duration-200 shadow-sm hover:shadow-md">
+            Excluir
+          </button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+  
+  updateGridTopScroll();
+};
+
+const filtrarComDebounce = () => {
+  clearTimeout(filtrosDebounce);
+  filtrosDebounce = setTimeout(() => {
+    saveFilters();
+    carregarRegistros();
+  }, 350);
+};
+
+// ===== PERSISTÊNCIA =====
+
+const saveFilters = () => {
+  const filters = {
+    search: document.getElementById('searchInput').value,
+    status: document.getElementById('statusFilter').value
+  };
+  localStorage.setItem(STORAGE_KEYS.filters, JSON.stringify(filters));
+};
+
+const loadFilters = () => {
+  const saved = localStorage.getItem(STORAGE_KEYS.filters);
+  if (saved) {
+    const filters = JSON.parse(saved);
+    document.getElementById('searchInput').value = filters.search || '';
+    document.getElementById('statusFilter').value = filters.status || '';
+  }
+};
+
+const limparFiltros = () => {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('statusFilter').value = '';
+  saveFilters();
+  carregarRegistros();
+};
+
+// ===== ZOOM =====
+
+const updateGridZoom = (val) => {
+  currentZoom = val;
+  document.documentElement.style.setProperty('--grid-zoom', val);
+  document.getElementById('grid-zoom-val').innerText = `${Math.round(val * 100)}%`;
+  document.getElementById('grid-zoom-slider').value = val;
+  localStorage.setItem(STORAGE_KEYS.zoom, val);
+  updateGridTopScroll();
+};
+
+const loadZoomPreference = () => {
+  const saved = localStorage.getItem(STORAGE_KEYS.zoom);
+  if (saved) {
+    updateGridZoom(parseFloat(saved));
+  }
+};
+
+// ===== RESIZE COLUMNS =====
+
+const renderGridHeader = () => {
+  const savedWidths = JSON.parse(localStorage.getItem(STORAGE_KEYS.columns) || '{}');
+  const headers = [
+    { text: 'Número NF', id: 'numero_nf' },
+    { text: 'Responsáveis', id: 'responsaveis' },
+    { text: 'Status', id: 'status' },
+    { text: 'Data', id: 'data' },
+    { text: 'Observação', id: 'observacao' },
+    { text: 'Ações', id: 'acoes' }
+  ];
+
+  const thead = document.getElementById('amostragemTableHead');
+  thead.innerHTML = '';
+  const tr = document.createElement('tr');
+
+  headers.forEach((header, index) => {
+    const th = document.createElement('th');
+    th.className = 'px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 dark:bg-slate-900/50';
+    th.innerText = header.text;
+    th.dataset.colId = header.id;
+
+    if (savedWidths[header.id]) {
+      th.style.width = savedWidths[header.id];
+    }
+
+    const resizer = document.createElement('div');
+    resizer.className = 'resizer';
+    resizer.addEventListener('mousedown', (e) => initResize(e, th, header.id));
+    th.appendChild(resizer);
+    tr.appendChild(th);
+  });
+
+  thead.appendChild(tr);
+};
+
+const initResize = (e, th, colId) => {
+  isResizing = true;
+  currentResizer = {
+    th: th,
+    colId: colId,
+    startX: e.pageX,
+    startWidth: th.offsetWidth
+  };
+  th.querySelector('.resizer').classList.add('resizing');
+  document.body.style.cursor = 'col-resize';
+  
+  window.addEventListener('mousemove', onMouseMoveResize);
+  window.addEventListener('mouseup', onMouseUpResize);
+};
+
+const onMouseMoveResize = (e) => {
+  if (!isResizing || !currentResizer) return;
+  const diff = e.pageX - currentResizer.startX;
+  const newWidth = Math.max(50, currentResizer.startWidth + diff);
+  currentResizer.th.style.width = `${newWidth}px`;
+  updateGridTopScroll();
+};
+
+const onMouseUpResize = () => {
+  if (!isResizing || !currentResizer) return;
+  
+  const savedWidths = JSON.parse(localStorage.getItem(STORAGE_KEYS.columns) || '{}');
+  savedWidths[currentResizer.colId] = currentResizer.th.style.width;
+  localStorage.setItem(STORAGE_KEYS.columns, JSON.stringify(savedWidths));
+  
+  currentResizer.th.querySelector('.resizer').classList.remove('resizing');
+  isResizing = false;
+  currentResizer = null;
+  document.body.style.cursor = '';
+  
+  window.removeEventListener('mousemove', onMouseMoveResize);
+  window.removeEventListener('mouseup', onMouseUpResize);
+};
+
+// ===== SCROLL SYNCHRONIZATION =====
+
+const updateGridTopScroll = () => {
+  const gridScroll = document.getElementById('grid-scroll');
+  const topScroll = document.getElementById('grid-top-scroll');
+  const topScrollInner = document.getElementById('grid-top-scroll-inner');
+  
+  if (gridScroll && topScroll && topScrollInner) {
+    const table = gridScroll.querySelector('table');
+    if (table) {
+      topScrollInner.style.width = `${table.offsetWidth}px`;
+      topScroll.scrollLeft = gridScroll.scrollLeft;
+    }
+  }
+};
 
 // Modal functions
 function toggleAmostragemForm() {
@@ -487,7 +710,7 @@ function submitAmostragem() {
     if (result && result.success) {
       alert(result.message || 'Amostragem registrada com sucesso!');
       closeAmostragemForm();
-      location.reload();
+      carregarRegistros();
     } else {
       alert('Erro: ' + (result && result.message ? result.message : 'Falha desconhecida.'));
     }
@@ -511,7 +734,7 @@ function deleteAmostragem(id) {
     .then(result => {
       if (result.success) {
         alert('Amostragem excluída com sucesso!');
-        location.reload();
+        carregarRegistros();
       } else {
         alert('Erro: ' + result.message);
       }
@@ -550,6 +773,29 @@ document.addEventListener('DOMContentLoaded', function() {
   if (toggleBtn) toggleBtn.addEventListener('click', toggleAmostragemForm);
   const closeBtn = document.getElementById('closeAmostragemFormBtn');
   if (closeBtn) closeBtn.addEventListener('click', closeAmostragemForm);
+  
+  // Listeners para filtros
+  document.getElementById('searchInput').addEventListener('input', filtrarComDebounce);
+  document.getElementById('statusFilter').addEventListener('change', filtrarComDebounce);
+
+  // Sincronização de scroll
+  const gridScroll = document.getElementById('grid-scroll');
+  const topScroll = document.getElementById('grid-top-scroll');
+  if (gridScroll && topScroll) {
+    gridScroll.addEventListener('scroll', () => {
+      topScroll.scrollLeft = gridScroll.scrollLeft;
+    });
+    topScroll.addEventListener('scroll', () => {
+      gridScroll.scrollLeft = topScroll.scrollLeft;
+    });
+  }
+
+  // Inicialização
+  loadZoomPreference();
+  loadFilters();
+  renderGridHeader();
+  carregarRegistros();
+  
   logActivity('system', 'Page Loaded');
 });
 

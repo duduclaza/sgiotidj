@@ -39,6 +39,7 @@ $router->post('/toners/retornados/import', [TonersController::class , 'importRet
 // ===== AMOSTRAGENS (LEGADO) =====
 
 $router->get('/toners/amostragens', [AmostragemController::class , 'index']);
+$router->get('/toners/amostragens/list', [AmostragemController::class , 'list']);
 $router->post('/toners/amostragens', [AmostragemController::class , 'store']);
 $router->post('/toners/amostragens/test', [AmostragemController::class , 'testStore']);
 $router->post('/toners/amostragens/{id}/update', [AmostragemController::class , 'update']);

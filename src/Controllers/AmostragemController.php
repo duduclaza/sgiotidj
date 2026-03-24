@@ -16,49 +16,66 @@ class AmostragemController
     public function index()
     {
         $title = 'Amostragens - SGQ OTI DJ';
-        $amostragens = [];
-        $error = null;
+        $viewFile = __DIR__ . '/../../views/pages/toners/amostragens.php';
+        include __DIR__ . '/../../views/layouts/main.php';
+    }
+
+    public function list()
+    {
+        header('Content-Type: application/json');
         
         try {
-            // Verificar se as tabelas existem
-            $stmt = $this->db->prepare("SHOW TABLES LIKE 'amostragens'");
-            $stmt->execute();
+            $search = $_GET['search'] ?? '';
+            $status = $_GET['status'] ?? '';
             
-            if (!$stmt->fetch()) {
-                throw new \Exception("Tabela 'amostragens' não encontrada. Execute as migrations primeiro.");
-            }
-            
-            // Buscar amostragens com informações de evidências
-            $stmt = $this->db->prepare("
+            $sql = "
                 SELECT a.*, 
                        COALESCE(COUNT(e.id), 0) as total_evidencias
                 FROM amostragens a 
                 LEFT JOIN amostragens_evidencias e ON a.id = e.amostragem_id 
-                GROUP BY a.id 
-                ORDER BY a.data_registro DESC
-            ");
-            $stmt->execute();
+                WHERE 1=1
+            ";
+            $params = [];
+            
+            if (!empty($search)) {
+                $sql .= " AND (a.numero_nf LIKE ? OR a.observacao LIKE ? OR a.responsaveis LIKE ?)";
+                $params[] = "%$search%";
+                $params[] = "%$search%";
+                $params[] = "%$search%";
+            }
+            
+            if (!empty($status)) {
+                $sql .= " AND a.status = ?";
+                $params[] = $status;
+            }
+            
+            $sql .= " GROUP BY a.id ORDER BY a.data_registro DESC";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
             $amostragens = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-            // Processar dados para exibição
+            // Processar dados para JSON
             foreach ($amostragens as &$amostragem) {
-                // Decodificar responsáveis
                 if (!empty($amostragem['responsaveis'])) {
                     $amostragem['responsaveis_list'] = json_decode($amostragem['responsaveis'], true) ?: [];
                 } else {
                     $amostragem['responsaveis_list'] = [];
                 }
-                
-                // Verificar se tem PDF
                 $amostragem['has_pdf'] = !empty($amostragem['arquivo_nf_blob']) || !empty($amostragem['arquivo_nf']);
+                
+                // Clear blobs to keep JSON small
+                unset($amostragem['arquivo_nf_blob']);
             }
+            
+            echo json_encode(['success' => true, 'data' => $amostragens]);
+            exit;
 
         } catch (\Exception $e) {
-            $error = 'Erro ao carregar amostragens: ' . $e->getMessage();
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Erro ao listar amostragens: ' . $e->getMessage()]);
+            exit;
         }
-        
-        $viewFile = __DIR__ . '/../../views/pages/toners/amostragens.php';
-        include __DIR__ . '/../../views/layouts/main.php';
     }
 
     public function store()
