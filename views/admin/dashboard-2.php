@@ -37,6 +37,25 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
         Entrar no dashboard <span>→</span>
       </div>
     </a>
+
+    <!-- Novo Card: Toners com Defeito -->
+    <a href="#" class="group bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md hover:border-rose-300 transition-all">
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 class="text-base font-semibold text-gray-900">Toners com Defeito</h2>
+          <div class="text-xs text-gray-500 mt-2 space-y-1">
+            <p>• Quantidade por modelo (Gráfico de Barras)</p>
+            <p>• Quantidade por filial (Gráfico de Pizza)</p>
+            <p>• Quantidade por cliente (Gráfico de Barras)</p>
+            <p>• Devolutivas feitas X pendentes (Gráfico de Pizza)</p>
+          </div>
+        </div>
+        <span class="text-xl">⚠️</span>
+      </div>
+      <div class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-rose-600 group-hover:text-rose-700">
+        Em desenvolvimento <span>→</span>
+      </div>
+    </a>
   </div>
 </section>
 <?php else: ?>
