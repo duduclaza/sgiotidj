@@ -7,8 +7,8 @@ $isAdmin = $_SESSION['user_role'] === 'admin';
   <!-- Header -->
   <div class="flex justify-between items-center mb-6">
     <div>
-      <h1 class="text-3xl font-bold text-gray-900">🖨️ Cadastro de Máquinas</h1>
-      <p class="text-gray-600 mt-1">Gerenciamento de máquinas cadastradas</p>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">🖨️ Cadastro de Máquinas</h1>
+      <p class="text-gray-600 dark:text-gray-400 mt-1">Gerenciamento de máquinas cadastradas</p>
     </div>
     <div class="flex gap-2">
       <button onclick="openFormModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg">
@@ -24,10 +24,10 @@ $isAdmin = $_SESSION['user_role'] === 'admin';
   </div>
 
   <!-- Formulário Inline -->
-  <div id="formContainer" class="hidden bg-gray-800 border border-gray-600 rounded-lg p-6 mb-6">
+  <div id="formContainer" class="hidden bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700/50 p-6 mb-6 transition-all">
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-lg font-semibold text-gray-100" id="formTitle">Nova Máquina</h2>
-      <button onclick="closeFormModal()" class="text-gray-400 hover:text-gray-200">
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white" id="formTitle">Nova Máquina</h2>
+      <button onclick="closeFormModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
@@ -38,20 +38,20 @@ $isAdmin = $_SESSION['user_role'] === 'admin';
       <input type="hidden" name="id" id="maquinaId">
       
       <div>
-        <label class="block text-sm font-medium text-gray-200 mb-1">Modelo *</label>
-        <input type="text" name="modelo" id="modelo" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500">
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Modelo *</label>
+        <input type="text" name="modelo" id="modelo" required class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-colors">
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-200 mb-1">Código de Referência *</label>
-        <input type="text" name="cod_referencia" id="codReferencia" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500">
+        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Código de Referência *</label>
+        <input type="text" name="cod_referencia" id="codReferencia" required class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-colors">
       </div>
 
-      <div class="flex justify-end space-x-3 pt-4">
-        <button type="button" onclick="closeFormModal()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+      <div class="flex justify-end space-x-3 pt-4 border-t dark:border-slate-700 mt-6">
+        <button type="button" onclick="closeFormModal()" class="px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors">
           Cancelar
         </button>
-        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md">
           💾 Salvar
         </button>
       </div>
@@ -59,34 +59,40 @@ $isAdmin = $_SESSION['user_role'] === 'admin';
   </div>
 
   <!-- Grid -->
-  <div class="bg-white border rounded-lg overflow-hidden">
+  <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700/50 overflow-hidden transition-colors">
     <div class="overflow-x-auto">
-      <table class="min-w-full text-sm">
-        <thead class="bg-gray-50">
+      <table class="min-w-full text-sm divide-y divide-gray-200 dark:divide-slate-700">
+        <thead class="bg-gray-50 dark:bg-slate-900/50">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Modelo</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código Referência</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Criado por</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ações</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">ID</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Modelo</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Código Referência</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Criado por</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Data</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ações</th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-100 dark:divide-slate-700">
           <?php foreach ($maquinas as $maquina): ?>
-          <tr class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm"><?= $maquina['id'] ?></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium"><?= e($maquina['modelo']) ?></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm"><?= e($maquina['cod_referencia']) ?></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm"><?= e($maquina['criador_nome'] ?? 'N/A') ?></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm"><?= date('d/m/Y', strtotime($maquina['created_at'])) ?></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-              <button onclick='editMaquina(<?= json_encode($maquina) ?>)' class="text-blue-600 hover:text-blue-800">
-                ✏️ Editar
-              </button>
-              <button onclick="deleteMaquina(<?= $maquina['id'] ?>)" class="text-red-600 hover:text-red-800">
-                🗑️ Excluir
-              </button>
+          <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300"><?= $maquina['id'] ?></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white"><?= e($maquina['modelo']) ?></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300"><?= e($maquina['cod_referencia']) ?></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300"><?= e($maquina['criador_nome'] ?? 'N/A') ?></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?= date('d/m/Y', strtotime($maquina['created_at'])) ?></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+              <div class="flex items-center gap-2">
+                <button onclick='editMaquina(<?= json_encode($maquina) ?>)' 
+                        class="p-1.5 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors"
+                        title="Editar">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                </button>
+                <button onclick="deleteMaquina(<?= $maquina['id'] ?>)" 
+                        class="p-1.5 bg-red-50 dark:bg-red-900/40 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors"
+                        title="Excluir">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
             </td>
           </tr>
           <?php endforeach; ?>
