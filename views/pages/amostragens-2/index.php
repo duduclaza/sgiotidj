@@ -19,7 +19,7 @@ function construirUrlPaginacao($pagina) {
 <section class="mb-8">
   <!-- Header -->
   <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold text-gray-900">🔬 Amostragens 2.0</h1>
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">🔬 Amostragens 2.0</h1>
     <button onclick="novaAmostragem()" 
             class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
       <span>➕</span>
@@ -263,22 +263,43 @@ function construirUrlPaginacao($pagina) {
   </div>
 
   <!-- Filtros -->
-  <div class="bg-white border rounded-lg p-4 mb-6">
-    <h3 class="font-semibold text-gray-900 mb-4">🔍 Filtros</h3>
+  <div class="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg p-4 mb-6 transition-colors shadow-sm">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+      <h3 class="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+        <span class="p-1.5 bg-blue-100 dark:bg-blue-900/40 rounded-lg text-blue-600 dark:text-blue-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </span>
+        Filtros de Busca
+      </h3>
+      
+      <!-- Controle de Zoom do Grid -->
+      <div class="flex items-center gap-3 bg-gray-50 dark:bg-slate-900/50 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm">
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Zoom</span>
+          <input type="range" id="gridZoom" min="50" max="130" value="100" oninput="updateZoom(this.value)" 
+                 class="w-24 h-1.5 bg-gray-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600">
+          <span id="zoomValue" class="text-xs font-mono font-bold text-blue-600 dark:text-blue-400 min-w-[36px]">100%</span>
+        </div>
+        <div class="w-px h-4 bg-gray-300 dark:bg-slate-700"></div>
+        <button onclick="resetZoom()" class="text-gray-400 hover:text-blue-500 transition-colors" title="Resetar Zoom">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        </button>
+      </div>
+    </div>
     <form method="GET" class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Número da NF</label>
-        <input type="text" name="numero_nf" value="<?= $_GET['numero_nf'] ?? '' ?>" placeholder="Digite a NF..." class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Número da NF</label>
+        <input type="text" name="numero_nf" value="<?= $_GET['numero_nf'] ?? '' ?>" placeholder="Digite a NF..." class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Código do Produto</label>
-        <input type="text" name="codigo_produto" value="<?= $_GET['codigo_produto'] ?? '' ?>" placeholder="Digite o código..." class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Código do Produto</label>
+        <input type="text" name="codigo_produto" value="<?= $_GET['codigo_produto'] ?? '' ?>" placeholder="Digite o código..." class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Usuário</label>
-        <select name="user_id" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Usuário</label>
+        <select name="user_id" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
           <option value="">Todos</option>
           <?php foreach ($usuarios as $user): ?>
             <option value="<?= $user['id'] ?>" <?= ($_GET['user_id'] ?? '') == $user['id'] ? 'selected' : '' ?>>
@@ -289,8 +310,8 @@ function construirUrlPaginacao($pagina) {
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Filial</label>
-        <select name="filial_id" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Filial</label>
+        <select name="filial_id" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
           <option value="">Todas</option>
           <?php foreach ($filiais as $filial): ?>
             <option value="<?= $filial['id'] ?>" <?= ($_GET['filial_id'] ?? '') == $filial['id'] ? 'selected' : '' ?>>
@@ -301,8 +322,8 @@ function construirUrlPaginacao($pagina) {
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Fornecedor</label>
-        <select name="fornecedor_id" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fornecedor</label>
+        <select name="fornecedor_id" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
           <option value="">Todos</option>
           <?php foreach ($fornecedores as $forn): ?>
             <option value="<?= $forn['id'] ?>" <?= ($_GET['fornecedor_id'] ?? '') == $forn['id'] ? 'selected' : '' ?>>
@@ -313,8 +334,8 @@ function construirUrlPaginacao($pagina) {
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-        <select name="status" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+        <select name="status" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
           <option value="">Todos</option>
           <option value="Pendente" <?= ($_GET['status'] ?? '') == 'Pendente' ? 'selected' : '' ?>>Pendente</option>
           <option value="Aprovado" <?= ($_GET['status'] ?? '') == 'Aprovado' ? 'selected' : '' ?>>Aprovado</option>
@@ -324,13 +345,13 @@ function construirUrlPaginacao($pagina) {
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Data Início</label>
-        <input type="date" name="data_inicio" value="<?= $_GET['data_inicio'] ?? '' ?>" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Início</label>
+        <input type="date" name="data_inicio" value="<?= $_GET['data_inicio'] ?? '' ?>" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Data Fim</label>
-        <input type="date" name="data_fim" value="<?= $_GET['data_fim'] ?? '' ?>" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Fim</label>
+        <input type="date" name="data_fim" value="<?= $_GET['data_fim'] ?? '' ?>" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
       </div>
 
       <div class="flex items-end gap-1.5 col-span-1">
@@ -349,28 +370,28 @@ function construirUrlPaginacao($pagina) {
 
   <!-- Controles de Paginação -->
   <?php if (isset($paginacao)): ?>
-  <div class="bg-white border rounded-lg p-4 mb-4">
+  <div class="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg p-4 mb-4 transition-colors">
     <div class="flex flex-col md:flex-row justify-between items-center gap-4">
       <!-- Seletor de registros por página -->
       <div class="flex items-center gap-2">
-        <label class="text-sm font-medium text-gray-700">Mostrar:</label>
+        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Mostrar:</label>
         <select onchange="alterarPorPagina(this.value)" 
-                class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+                class="border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors">
           <option value="10" <?= $paginacao['por_pagina'] == 10 ? 'selected' : '' ?>>10</option>
           <option value="50" <?= $paginacao['por_pagina'] == 50 ? 'selected' : '' ?>>50</option>
           <option value="100" <?= $paginacao['por_pagina'] == 100 ? 'selected' : '' ?>>100</option>
         </select>
-        <span class="text-sm text-gray-600">registros por página</span>
+        <span class="text-sm text-gray-600 dark:text-gray-400">registros por página</span>
       </div>
 
       <!-- Informação de registros -->
-      <div class="text-sm text-gray-700">
+      <div class="text-sm text-gray-700 dark:text-gray-300">
         Mostrando 
-        <span class="font-semibold"><?= $paginacao['offset'] + 1 ?></span>
+        <span class="font-semibold text-gray-900 dark:text-white"><?= $paginacao['offset'] + 1 ?></span>
         até 
-        <span class="font-semibold"><?= min($paginacao['offset'] + $paginacao['por_pagina'], $paginacao['total_registros']) ?></span>
+        <span class="font-semibold text-gray-900 dark:text-white"><?= min($paginacao['offset'] + $paginacao['por_pagina'], $paginacao['total_registros']) ?></span>
         de 
-        <span class="font-semibold"><?= $paginacao['total_registros'] ?></span>
+        <span class="font-semibold text-gray-900 dark:text-white"><?= $paginacao['total_registros'] ?></span>
         registros
       </div>
 
@@ -380,7 +401,7 @@ function construirUrlPaginacao($pagina) {
         <!-- Botão Primeira -->
         <?php if ($paginacao['pagina_atual'] > 1): ?>
           <a href="<?= construirUrlPaginacao(1) ?>" 
-             class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+             class="px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
             « Primeira
           </a>
         <?php endif; ?>
@@ -388,7 +409,7 @@ function construirUrlPaginacao($pagina) {
         <!-- Botão Anterior -->
         <?php if ($paginacao['pagina_atual'] > 1): ?>
           <a href="<?= construirUrlPaginacao($paginacao['pagina_atual'] - 1) ?>" 
-             class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+             class="px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
             ‹ Anterior
           </a>
         <?php endif; ?>
@@ -404,7 +425,7 @@ function construirUrlPaginacao($pagina) {
              class="px-3 py-2 border rounded-lg text-sm font-medium transition-colors
                     <?= $i == $paginacao['pagina_atual'] 
                         ? 'bg-blue-600 text-white border-blue-600' 
-                        : 'border-gray-300 text-gray-700 hover:bg-gray-50' ?>">
+                        : 'border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800' ?>">
             <?= $i ?>
           </a>
         <?php endfor; ?>
@@ -412,7 +433,7 @@ function construirUrlPaginacao($pagina) {
         <!-- Botão Próxima -->
         <?php if ($paginacao['pagina_atual'] < $paginacao['total_paginas']): ?>
           <a href="<?= construirUrlPaginacao($paginacao['pagina_atual'] + 1) ?>" 
-             class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+             class="px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
             Próxima ›
           </a>
         <?php endif; ?>
@@ -420,7 +441,7 @@ function construirUrlPaginacao($pagina) {
         <!-- Botão Última -->
         <?php if ($paginacao['pagina_atual'] < $paginacao['total_paginas']): ?>
           <a href="<?= construirUrlPaginacao($paginacao['total_paginas']) ?>" 
-             class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+             class="px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
             Última »
           </a>
         <?php endif; ?>
@@ -431,47 +452,79 @@ function construirUrlPaginacao($pagina) {
   <?php endif; ?>
 
   <!-- Grid de Amostragens -->
-  <div class="bg-white border rounded-lg overflow-hidden">
+  <div class="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg overflow-hidden transition-colors shadow-sm grid-wrapper">
     <div class="overflow-x-auto">
-      <table class="min-w-full text-sm">
-        <thead class="bg-gray-50">
+      <table id="amostragensTable" class="min-w-full text-sm">
+        <thead class="bg-gray-50 dark:bg-slate-900/50">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">NF</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Usuário</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Filial</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fornecedor</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qtd Recebida</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qtd Testada</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aprovada</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reprovada</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aprovado Por</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Anexo NF</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Evidências</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ações</th>
+            <th class="relative px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Data <div class="resizer" data-col="0"></div>
+            </th>
+            <th class="relative px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              NF <div class="resizer" data-col="1"></div>
+            </th>
+            <th class="relative px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Usuário <div class="resizer" data-col="2"></div>
+            </th>
+            <th class="relative px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Filial <div class="resizer" data-col="3"></div>
+            </th>
+            <th class="relative px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Tipo <div class="resizer" data-col="4"></div>
+            </th>
+            <th class="relative px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Código <div class="resizer" data-col="5"></div>
+            </th>
+            <th class="relative px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Fornecedor <div class="resizer" data-col="6"></div>
+            </th>
+            <th class="relative px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Qtd Recebida <div class="resizer" data-col="7"></div>
+            </th>
+            <th class="relative px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Qtd Testada <div class="resizer" data-col="8"></div>
+            </th>
+            <th class="relative px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Aprovada <div class="resizer" data-col="9"></div>
+            </th>
+            <th class="relative px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Reprovada <div class="resizer" data-col="10"></div>
+            </th>
+            <th class="relative px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Status <div class="resizer" data-col="11"></div>
+            </th>
+            <th class="relative px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Aprovado Por <div class="resizer" data-col="12"></div>
+            </th>
+            <th class="relative px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Anexo NF <div class="resizer" data-col="13"></div>
+            </th>
+            <th class="relative px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Evidências <div class="resizer" data-col="14"></div>
+            </th>
+            <th class="relative px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Ações <div class="resizer" data-col="15"></div>
+            </th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
           <?php foreach ($amostragens as $amostra): ?>
           <?php 
             // Linha amarela se não tem quantidade testada preenchida (precisa atualizar)
             $precisaAtualizar = empty($amostra['quantidade_testada']) || $amostra['quantidade_testada'] == 0;
             $classeLinhaAmarela = $precisaAtualizar ? 'bg-yellow-50 hover:bg-yellow-100' : 'hover:bg-gray-50';
           ?>
-          <tr class="<?= $classeLinhaAmarela ?>" <?php if($precisaAtualizar): ?>title="⚠️ Quantidade testada não informada - Precisa atualizar"<?php endif; ?>>
-            <td class="px-6 py-4 whitespace-nowrap text-sm">
+          <tr class="<?= $classeLinhaAmarela ?> dark:border-slate-700" <?php if($precisaAtualizar): ?>title="⚠️ Quantidade testada não informada - Precisa atualizar"<?php endif; ?>>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">
               <?= date('d/m/Y', strtotime($amostra['created_at'])) ?>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
               <?= e($amostra['numero_nf']) ?>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
               <?= e($amostra['usuario_nome']) ?>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
               <?= e($amostra['filial_nome']) ?>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm">
@@ -524,18 +577,18 @@ function construirUrlPaginacao($pagina) {
             <td class="px-6 py-4 whitespace-nowrap text-sm">
               <?php if (!empty($amostra['aprovado_por_nome'])): ?>
                 <div class="flex flex-col">
-                  <span class="text-gray-900 font-medium"><?= e($amostra['aprovado_por_nome']) ?></span>
+                  <span class="text-gray-900 dark:text-white font-medium"><?= e($amostra['aprovado_por_nome']) ?></span>
                   <?php if (!empty($amostra['aprovado_em'])): ?>
                     <?php
                     // Converter para timezone do Brasil (América/São_Paulo = UTC-3)
                     $dt = new DateTime($amostra['aprovado_em'], new DateTimeZone('UTC'));
                     $dt->setTimezone(new DateTimeZone('America/Sao_Paulo'));
                     ?>
-                    <span class="text-xs text-gray-500"><?= $dt->format('d/m/Y H:i') ?></span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400"><?= $dt->format('d/m/Y H:i') ?></span>
                   <?php endif; ?>
                 </div>
               <?php else: ?>
-                <span class="text-gray-400 text-xs">-</span>
+                <span class="text-gray-400 dark:text-gray-500 text-xs">-</span>
               <?php endif; ?>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
@@ -592,16 +645,16 @@ function construirUrlPaginacao($pagina) {
 
   <!-- Controles de Paginação (Rodapé) -->
   <?php if (isset($paginacao) && $paginacao['total_paginas'] > 1): ?>
-  <div class="bg-white border rounded-lg p-4 mt-4">
+  <div class="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg p-4 mt-4 transition-colors">
     <div class="flex flex-col md:flex-row justify-between items-center gap-4">
       <!-- Informação de registros -->
-      <div class="text-sm text-gray-700">
+      <div class="text-sm text-gray-700 dark:text-gray-300">
         Mostrando 
-        <span class="font-semibold"><?= $paginacao['offset'] + 1 ?></span>
+        <span class="font-semibold text-gray-900 dark:text-white"><?= $paginacao['offset'] + 1 ?></span>
         até 
-        <span class="font-semibold"><?= min($paginacao['offset'] + $paginacao['por_pagina'], $paginacao['total_registros']) ?></span>
+        <span class="font-semibold text-gray-900 dark:text-white"><?= min($paginacao['offset'] + $paginacao['por_pagina'], $paginacao['total_registros']) ?></span>
         de 
-        <span class="font-semibold"><?= $paginacao['total_registros'] ?></span>
+        <span class="font-semibold text-gray-900 dark:text-white"><?= $paginacao['total_registros'] ?></span>
         registros
       </div>
 
@@ -610,7 +663,7 @@ function construirUrlPaginacao($pagina) {
         <!-- Botão Primeira -->
         <?php if ($paginacao['pagina_atual'] > 1): ?>
           <a href="<?= construirUrlPaginacao(1) ?>" 
-             class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+             class="px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
             « Primeira
           </a>
         <?php endif; ?>
@@ -618,7 +671,7 @@ function construirUrlPaginacao($pagina) {
         <!-- Botão Anterior -->
         <?php if ($paginacao['pagina_atual'] > 1): ?>
           <a href="<?= construirUrlPaginacao($paginacao['pagina_atual'] - 1) ?>" 
-             class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+             class="px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
             ‹ Anterior
           </a>
         <?php endif; ?>
@@ -634,7 +687,7 @@ function construirUrlPaginacao($pagina) {
              class="px-3 py-2 border rounded-lg text-sm font-medium transition-colors
                     <?= $i == $paginacao['pagina_atual'] 
                         ? 'bg-blue-600 text-white border-blue-600' 
-                        : 'border-gray-300 text-gray-700 hover:bg-gray-50' ?>">
+                        : 'border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800' ?>">
             <?= $i ?>
           </a>
         <?php endfor; ?>
@@ -642,7 +695,7 @@ function construirUrlPaginacao($pagina) {
         <!-- Botão Próxima -->
         <?php if ($paginacao['pagina_atual'] < $paginacao['total_paginas']): ?>
           <a href="<?= construirUrlPaginacao($paginacao['pagina_atual'] + 1) ?>" 
-             class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+             class="px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
             Próxima ›
           </a>
         <?php endif; ?>
@@ -650,7 +703,7 @@ function construirUrlPaginacao($pagina) {
         <!-- Botão Última -->
         <?php if ($paginacao['pagina_atual'] < $paginacao['total_paginas']): ?>
           <a href="<?= construirUrlPaginacao($paginacao['total_paginas']) ?>" 
-             class="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+             class="px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
             Última »
           </a>
         <?php endif; ?>
@@ -684,6 +737,41 @@ function construirUrlPaginacao($pagina) {
   border-radius: 12px;
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   animation: pulse 2s infinite;
+}
+
+/* --- Melhorias do Grid (Zoom e Resize) --- */
+:root {
+  --grid-zoom: 100%;
+}
+
+.grid-wrapper table {
+  zoom: var(--grid-zoom);
+  transform-origin: top left;
+  table-layout: fixed; /* Importante para o resize manual funcionar bem */
+  width: 100%;
+}
+
+/* Forçar larguras mínimas para evitar quebra de layout no zoom baixo */
+.grid-wrapper th, .grid-wrapper td {
+  min-width: 80px;
+}
+
+/* Estilos do Resizer (Drag Handle) */
+.resizer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 4px;
+    cursor: col-resize;
+    user-select: none;
+    height: 100%;
+    z-index: 10;
+    transition: background-color 0.2s;
+}
+
+.resizer:hover, .resizing {
+    background-color: #3b82f6; /* blue-500 */
+    width: 4px;
 }
 
 @keyframes pulse {
@@ -1583,5 +1671,95 @@ async function alterarStatus(id, novoStatus) {
     selectElement.value = oldValue;
     selectElement.disabled = false;
   }
+}
+// --- Funcionalidades Avançadas do Grid (Zoom e Resize) ---
+
+const ZOOM_KEY = 'amostragens2_zoom';
+const COL_WIDTHS_KEY = 'amostragens2_col_widths';
+
+// Inicializar Zoom e Colunas
+document.addEventListener('DOMContentLoaded', function() {
+  // Carregar Zoom
+  const savedZoom = localStorage.getItem(ZOOM_KEY);
+  if (savedZoom) {
+    updateZoom(savedZoom, false);
+    document.getElementById('gridZoom').value = savedZoom;
+  }
+
+  // Carregar Larguras das Colunas
+  const savedWidths = JSON.parse(localStorage.getItem(COL_WIDTHS_KEY) || '{}');
+  const table = document.getElementById('amostragensTable');
+  const headers = table.querySelectorAll('th');
+  
+  headers.forEach((th, index) => {
+    if (savedWidths[index]) {
+      th.style.width = savedWidths[index] + 'px';
+    }
+    
+    const resizer = th.querySelector('.resizer');
+    if (resizer) {
+      initResizer(resizer, th, index);
+    }
+  });
+
+  // Ajustar layout da tabela para suportar redimensionamento
+  table.style.tableLayout = 'fixed';
+});
+
+// Lógica de Zoom
+function updateZoom(value, save = true) {
+  document.documentElement.style.setProperty('--grid-zoom', value + '%');
+  document.getElementById('zoomValue').textContent = value + '%';
+  if (save) localStorage.setItem(ZOOM_KEY, value);
+}
+
+function resetZoom() {
+  document.getElementById('gridZoom').value = 100;
+  updateZoom(100);
+}
+
+// Lógica de Redimensionamento de Colunas
+function initResizer(resizer, th, colIndex) {
+  let x = 0;
+  let w = 0;
+
+  const mouseDownHandler = function(e) {
+    x = e.clientX;
+    const styles = window.getComputedStyle(th);
+    w = parseInt(styles.width, 10);
+
+    document.addEventListener('mousemove', mouseMoveHandler);
+    document.addEventListener('mouseup', mouseUpHandler);
+    resizer.classList.add('resizing');
+  };
+
+  const mouseMoveHandler = function(e) {
+    const dx = e.clientX - x;
+    const newWidth = Math.max(80, w + dx);
+    th.style.width = `${newWidth}px`;
+  };
+
+  const mouseUpHandler = function() {
+    document.removeEventListener('mousemove', mouseMoveHandler);
+    document.removeEventListener('mouseup', mouseUpHandler);
+    resizer.classList.remove('resizing');
+    
+    // Salvar no localStorage
+    saveColumnWidths();
+  };
+
+  resizer.addEventListener('mousedown', mouseDownHandler);
+}
+
+function saveColumnWidths() {
+  const table = document.getElementById('amostragensTable');
+  const headers = table.querySelectorAll('th');
+  const widths = {};
+  
+  headers.forEach((th, index) => {
+    widths[index] = th.offsetWidth;
+  });
+  
+  localStorage.setItem(COL_WIDTHS_KEY, JSON.stringify(widths));
 }
 </script>

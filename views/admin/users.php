@@ -1,5 +1,5 @@
 <?php if (isset($error)): ?>
-  <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+  <div class="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800/50 text-red-700 dark:text-red-400 px-4 py-3 rounded mb-4 transition-colors">
     <?= e($error) ?>
   </div>
 <?php endif; ?>

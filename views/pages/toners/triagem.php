@@ -397,32 +397,32 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Filial (automático)</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Filial (automático)</label>
           <input id="t-filial" type="text" value="<?= e($_SESSION['user_filial'] ?? 'Não informado') ?>" readonly
-                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-600">
+                 class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-gray-100 dark:bg-slate-900 text-gray-600 dark:text-gray-400">
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Colaborador que registrou</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Colaborador que registrou</label>
           <input id="t-colaborador" type="text" value="<?= e($_SESSION['user_name'] ?? 'Usuário') ?>" readonly
-                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-600">
+                 class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-gray-100 dark:bg-slate-900 text-gray-600 dark:text-gray-400">
         </div>
       </div>
 
       <!-- Código de Requisição (Opcional) - PRIMEIRO CAMPO -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Código de Requisição <span class="text-gray-400 text-xs">(opcional mas recomendado)</span></label>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Código de Requisição <span class="text-gray-400 dark:text-gray-500 text-xs">(opcional mas recomendado)</span></label>
         <div class="flex gap-2">
           <input id="t-codigo-req" type="text" maxlength="100" placeholder="Ex: REQ-2026-0001"
                  oninput="debouceBuscarDefeitos()" onchange="buscarDefeitosPorCodigo()"
-                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <button type="button" onclick="buscarDefeitosPorCodigo()" class="bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg px-3 py-2 text-gray-600 transition-colors" title="Buscar Defeitos">
+                 class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <button type="button" onclick="buscarDefeitosPorCodigo()" class="bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-gray-600 dark:text-gray-300 transition-colors" title="Buscar Defeitos">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           </button>
         </div>
         
         <!-- Lista dinâmica de defeitos localizados -->
-        <div id="defeitos-lista-container" class="hidden mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <div class="text-xs font-semibold text-blue-800 mb-2">Selecione o toner com defeito que corresponde a esta triagem:</div>
+        <div id="defeitos-lista-container" class="hidden mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-lg">
+          <div class="text-xs font-semibold text-blue-800 dark:text-blue-300 mb-2">Selecione o toner com defeito que corresponde a esta triagem:</div>
           <div id="defeitos-opcoes" class="space-y-2 max-h-40 overflow-y-auto">
             <!-- Radio options will be rendered here -->
           </div>
@@ -431,10 +431,10 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
 
       <!-- Seleção do Cliente -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Cliente <span class="text-red-500">*</span></label>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cliente <span class="text-red-500">*</span></label>
         <input id="t-cliente-search" type="text" placeholder="Digite nome/código do cliente (seleção automática)..." oninput="autoSelecionarInteligente('t-cliente-search','t-cliente-id')"
-               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <select id="t-cliente-id" onchange="sincronizarInputComSelect('t-cliente-id','t-cliente-search')" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+               class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm mb-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <select id="t-cliente-id" onchange="sincronizarInputComSelect('t-cliente-id','t-cliente-search')" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option value="">Selecione o cliente...</option>
           <?php foreach (($clientes ?? []) as $c): ?>
           <option value="<?= (int)$c['id'] ?>"><?= e(($c['codigo'] ?? '') . ' - ' . ($c['nome'] ?? '')) ?></option>
@@ -444,10 +444,10 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
 
       <!-- Seleção do Toner -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Modelo do Toner <span class="text-red-500">*</span></label>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Modelo do Toner <span class="text-red-500">*</span></label>
         <input id="t-toner-search" type="text" placeholder="Digite o modelo do toner (seleção automática)..." oninput="autoSelecionarInteligente('t-toner-search','t-toner-id', 'onTonerChange')"
-               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <select id="t-toner-id" onchange="onTonerChange(); sincronizarInputComSelect('t-toner-id','t-toner-search')" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+               class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm mb-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <select id="t-toner-id" onchange="onTonerChange(); sincronizarInputComSelect('t-toner-id','t-toner-search')" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option value="">Selecione o modelo...</option>
           <?php foreach ($toners as $t): ?>
           <option value="<?= $t['id'] ?>"
@@ -464,7 +464,7 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
           </option>
           <?php endforeach; ?>
         </select>
-        <div id="info-toner" class="mt-2 hidden bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800 space-y-1">
+        <div id="info-toner" class="mt-2 hidden bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-lg p-3 text-xs text-blue-800 dark:text-blue-300 space-y-1">
           <div>📊 Gramatura total: <strong id="info-gram"></strong>g</div>
           <div>⚖️ Peso cheio: <strong id="info-cheio"></strong>g &nbsp;|&nbsp; Peso vazio: <strong id="info-vazio"></strong>g</div>
         </div>
@@ -472,90 +472,90 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
 
       <!-- Modo de entrada -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Modo de Entrada <span class="text-red-500">*</span></label>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Modo de Entrada <span class="text-red-500">*</span></label>
         <div class="flex gap-4">
           <label class="flex items-center gap-2 cursor-pointer">
             <input type="radio" name="modo" value="peso" id="modo-peso" checked onchange="onModoChange()" class="accent-blue-600">
-            <span class="text-sm">Informar Peso (g)</span>
+            <span class="text-sm dark:text-gray-300">Informar Peso (g)</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer">
             <input type="radio" name="modo" value="percentual" id="modo-pct" onchange="onModoChange()" class="accent-blue-600">
-            <span class="text-sm">Informar % direto</span>
+            <span class="text-sm dark:text-gray-300">Informar % direto</span>
           </label>
         </div>
       </div>
 
       <!-- Campo Peso -->
       <div id="campo-peso">
-        <label class="block text-sm font-medium text-gray-700 mb-1">Peso do Toner Retornado (g) <span class="text-red-500">*</span></label>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Peso do Toner Retornado (g) <span class="text-red-500">*</span></label>
         <input type="number" id="t-peso" step="0.01" min="0" placeholder="Ex: 320.50"
                oninput="recalcular()" onchange="recalcular()"
-               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+               class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
       </div>
 
       <!-- Campo Percentual -->
       <div id="campo-pct" class="hidden">
-        <label class="block text-sm font-medium text-gray-700 mb-1">Percentual de Gramatura Restante (%) <span class="text-red-500">*</span></label>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Percentual de Gramatura Restante (%) <span class="text-red-500">*</span></label>
         <input type="number" id="t-pct" step="0.01" min="0" max="100" placeholder="Ex: 65.00"
                oninput="recalcular()" onchange="recalcular()"
-               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+               class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
       </div>
 
       <!-- Resultado do cálculo -->
-      <div id="resultado-calc" class="hidden bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3">
+      <div id="resultado-calc" class="hidden bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700 rounded-xl p-4 space-y-3 transition-colors">
         <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-gray-700">% de Gramatura Restante</span>
-          <span id="res-pct" class="text-2xl font-bold text-blue-700">—</span>
+          <span class="text-sm font-medium text-gray-700 dark:text-gray-300">% de Gramatura Restante</span>
+          <span id="res-pct" class="text-2xl font-bold text-blue-700 dark:text-blue-400">—</span>
         </div>
-        <div class="w-full bg-gray-200 rounded-full h-3">
+        <div class="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-3">
           <div id="res-barra" class="h-3 rounded-full transition-all duration-500 bg-green-500" style="width:0%"></div>
         </div>
-        <div class="flex items-center justify-between text-xs text-gray-500">
-          <span>Gramatura restante: <strong id="res-gram">—</strong>g</span>
-          <span id="res-folhas-wrap" class="hidden">📄 Folhas equivalentes: <strong id="res-folhas">—</strong></span>
-          <span id="res-valor-wrap" class="hidden"><span id="res-valor-label">💰 Impacto:</span> <strong id="res-valor" class="text-green-700">—</strong></span>
+        <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+          <span>Gramatura restante: <strong id="res-gram" class="dark:text-gray-300">—</strong>g</span>
+          <span id="res-folhas-wrap" class="hidden">📄 Folhas equivalentes: <strong id="res-folhas" class="dark:text-gray-300">—</strong></span>
+          <span id="res-valor-wrap" class="hidden"><span id="res-valor-label">💰 Impacto:</span> <strong id="res-valor" class="text-green-700 dark:text-green-400">—</strong></span>
         </div>
         <!-- Parecer -->
-        <div id="res-parecer-box" class="hidden rounded-lg p-3 border">
-          <div class="text-xs font-semibold uppercase tracking-wide mb-1 text-gray-500">📋 Parecer do Sistema</div>
-          <div id="res-parecer" class="text-sm font-medium"></div>
+        <div id="res-parecer-box" class="hidden rounded-lg p-3 border dark:border-slate-600">
+          <div class="text-xs font-semibold uppercase tracking-wide mb-1 text-gray-500 dark:text-gray-400">📋 Parecer do Sistema</div>
+          <div id="res-parecer" class="text-sm font-medium dark:text-white"></div>
         </div>
       </div>
 
       <!-- Destino Final -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Destino Final <span class="text-red-500">*</span></label>
-        <select id="t-destino" onchange="onDestinoChange()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Destino Final <span class="text-red-500">*</span></label>
+        <select id="t-destino" onchange="onDestinoChange()" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option value="">Selecione o destino...</option>
           <option value="Descarte">♻️ Descarte</option>
           <option value="Garantia">🛡️ Garantia</option>
           <option value="Uso Interno">🏢 Uso Interno</option>
           <option value="Estoque">📦 Estoque</option>
         </select>
-        <div id="info-estoque" class="hidden mt-2 bg-green-50 border border-green-200 rounded-lg p-3 text-xs text-green-800">
+        <div id="info-estoque" class="hidden mt-2 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800/50 rounded-lg p-3 text-xs text-green-800 dark:text-green-400">
           💰 Ao selecionar <strong>Estoque</strong>, o sistema calculará automaticamente o <strong>valor em R$ recuperado</strong> com base na capacidade de folhas e custo por folha do toner.
         </div>
-        <div id="info-descarte" class="hidden mt-2 bg-red-50 border border-red-200 rounded-lg p-3 text-xs text-red-800">
+        <div id="info-descarte" class="hidden mt-2 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800/50 rounded-lg p-3 text-xs text-red-800 dark:text-red-400">
           🗑️ Ao selecionar <strong>Descarte</strong>, o sistema calculará automaticamente as <strong>folhas descartadas</strong> e o <strong>valor em R$ perdido</strong> (negativo).
         </div>
       </div>
 
       <!-- Fornecedor (obrigatório para Garantia) -->
       <div id="wrap-fornecedor" class="hidden">
-        <label class="block text-sm font-medium text-gray-700 mb-1">Fornecedor <span id="fornecedor-required" class="text-red-500">*</span></label>
-        <select id="t-fornecedor-id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fornecedor <span id="fornecedor-required" class="text-red-500">*</span></label>
+        <select id="t-fornecedor-id" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option value="">Selecione o fornecedor...</option>
           <?php foreach (($fornecedores ?? []) as $f): ?>
             <option value="<?= (int)$f['id'] ?>"><?= e($f['nome'] ?? '') ?></option>
           <?php endforeach; ?>
         </select>
-        <div class="mt-1 text-xs text-gray-500">Obrigatório quando o destino for <strong>Garantia</strong>.</div>
+        <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">Obrigatório quando o destino for <strong>Garantia</strong>.</div>
       </div>
 
       <!-- Defeito (Opcional) -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Defeito <span class="text-gray-400 text-xs">(opcional)</span></label>
-        <select id="t-defeito-id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Defeito <span class="text-gray-400 dark:text-gray-500 text-xs">(opcional)</span></label>
+        <select id="t-defeito-id" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option value="">Sem defeito</option>
           <?php foreach (($defeitos ?? []) as $d): ?>
             <option value="<?= (int)$d['id'] ?>"><?= e($d['nome_defeito'] ?? '') ?></option>
@@ -565,8 +565,8 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
 
       <!-- Observações -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
-        <textarea id="t-obs" rows="2" placeholder="Observações adicionais..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observações</label>
+        <textarea id="t-obs" rows="2" placeholder="Observações adicionais..." class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
       </div>
     </div>
     <div class="triagem-modal-footer flex justify-end gap-3 px-6 py-4 border-t">
