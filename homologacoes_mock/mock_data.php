@@ -6,16 +6,19 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Inicializar os dados mockados na sessão, se ainda não existirem
-if (!isset($_SESSION['mock_usuarios'])) {
+// Versão dos dados mock - incrementar para forçar reset dos dados antigos
+$MOCK_DATA_VERSION = 2;
+
+// Inicializar os dados mockados na sessão, se ainda não existirem ou se a versão mudou
+if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $MOCK_DATA_VERSION) {
+    $_SESSION['mock_data_version'] = $MOCK_DATA_VERSION;
+
     $_SESSION['mock_usuarios'] = [
-        ['id' => 1, 'nome' => 'Ana Paula',    'setor' => 'Compras',   'perfil' => 'compras'],
-        ['id' => 2, 'nome' => 'Carlos Melo',  'setor' => 'Compras',   'perfil' => 'compras'],
-        ['id' => 3, 'nome' => 'Fernanda Lima','setor' => 'Logística', 'perfil' => 'logistica'],
-        ['id' => 4, 'nome' => 'Roberto Alves','setor' => 'Logística', 'perfil' => 'logistica'],
-        ['id' => 5, 'nome' => 'Thiago Ramos', 'setor' => 'TI',        'perfil' => 'responsavel'],
-        ['id' => 6, 'nome' => 'Juliana Costa','setor' => 'TI',        'perfil' => 'responsavel'],
-        ['id' => 7, 'nome' => 'Marcos Duarte','setor' => 'TI',        'perfil' => 'responsavel'],
+        ['id' => 1, 'nome' => 'Fernanda',  'setor' => 'Compras',   'perfil' => 'compras'],
+        ['id' => 2, 'nome' => 'Gustavo',   'setor' => 'Logística', 'perfil' => 'logistica'],
+        ['id' => 3, 'nome' => 'Rafael',    'setor' => 'TI',        'perfil' => 'responsavel'],
+        ['id' => 4, 'nome' => 'Camila',    'setor' => 'TI',        'perfil' => 'responsavel'],
+        ['id' => 5, 'nome' => 'Geison',    'setor' => 'TI',        'perfil' => 'responsavel'],
     ];
 
     $_SESSION['mock_homologacoes'] = [
@@ -30,12 +33,12 @@ if (!isset($_SESSION['mock_usuarios'])) {
             'numero_serie'          => 'SN-HP-2025-00123',
             'status'                => 'concluida',
             'criado_por'            => 1,
-            'responsaveis'          => [5, 6],
+            'responsaveis'          => [3, 4],
             'data_criacao'          => '2025-01-10',
             'data_prevista_chegada' => '2025-01-20',
             'dias_antecedencia_notif'=> 3,
             'data_recebimento'      => '2025-01-21',
-            'recebido_por'          => 3,
+            'recebido_por'          => 2,
             'local_homologacao'     => 'laboratorio',
             'data_inicio_homologacao'=> '2025-01-22',
             'data_fim_homologacao'  => '2025-01-25',
@@ -67,13 +70,13 @@ if (!isset($_SESSION['mock_usuarios'])) {
             'modelo'                => 'Latitude 5540 i5-1335U',
             'numero_serie'          => 'SN-DELL-2025-00456',
             'status'                => 'em_homologacao',
-            'criado_por'            => 2,
-            'responsaveis'          => [7],
+            'criado_por'            => 1,
+            'responsaveis'          => [5],
             'data_criacao'          => '2025-02-05',
             'data_prevista_chegada' => '2025-02-15',
             'dias_antecedencia_notif'=> 5,
             'data_recebimento'      => '2025-02-14',
-            'recebido_por'          => 4,
+            'recebido_por'          => 2,
             'local_homologacao'     => 'laboratorio',
             'data_inicio_homologacao'=> '2025-02-15',
             'data_fim_homologacao'  => null,
@@ -106,12 +109,12 @@ if (!isset($_SESSION['mock_usuarios'])) {
             'numero_serie'          => 'LOT-2025-NPG59-001',
             'status'                => 'em_homologacao',
             'criado_por'            => 1,
-            'responsaveis'          => [5, 7],
+            'responsaveis'          => [3, 5],
             'data_criacao'          => '2025-02-20',
             'data_prevista_chegada' => '2025-03-01',
             'dias_antecedencia_notif'=> 2,
             'data_recebimento'      => '2025-03-01',
-            'recebido_por'          => 3,
+            'recebido_por'          => 2,
             'local_homologacao'     => 'cliente',
             'data_inicio_homologacao'=> '2025-03-03',
             'data_fim_homologacao'  => null,
@@ -139,13 +142,13 @@ if (!isset($_SESSION['mock_usuarios'])) {
             'modelo'                => 'Fusor 40X9929 Compatível',
             'numero_serie'          => 'LOT-FUS-2025-0089',
             'status'                => 'item_recebido',
-            'criado_por'            => 2,
-            'responsaveis'          => [6],
+            'criado_por'            => 1,
+            'responsaveis'          => [4],
             'data_criacao'          => '2025-03-01',
             'data_prevista_chegada' => '2025-03-10',
             'dias_antecedencia_notif'=> 3,
             'data_recebimento'      => '2025-03-09',
-            'recebido_por'          => 4,
+            'recebido_por'          => 2,
             'local_homologacao'     => null,
             'data_inicio_homologacao'=> null,
             'data_fim_homologacao'  => null,
@@ -167,9 +170,9 @@ if (!isset($_SESSION['mock_usuarios'])) {
             'numero_serie'          => 'SN-LNV-2025-00789',
             'status'                => 'aguardando_chegada',
             'criado_por'            => 1,
-            'responsaveis'          => [5, 6, 7],
+            'responsaveis'          => [3, 4, 5],
             'data_criacao'          => '2025-03-15',
-            'data_prevista_chegada' => date('Y-m-d', strtotime('+2 days')), // Sempre alerta chegando em breve para demonstração
+            'data_prevista_chegada' => date('Y-m-d', strtotime('+2 days')),
             'dias_antecedencia_notif'=> 4,
             'data_recebimento'      => null,
             'recebido_por'          => null,
@@ -227,11 +230,14 @@ if (!isset($_SESSION['mock_usuarios'])) {
             'compatibilidade_firmware' => 'Compatibilidade com firmware atual',
         ]
     ];
+
+    // Reset do usuário logado para o padrão ao atualizar versão
+    $_SESSION['usuario_logado_id'] = 1;
 }
 
-// Inicializar um usuário logado padrao, se não houver um definido  (Simulação)
+// Inicializar um usuário logado padrão, se não houver um definido (Simulação)
 if (!isset($_SESSION['usuario_logado_id'])) {
-    $_SESSION['usuario_logado_id'] = 1; // Default: Ana Paula (Compras)
+    $_SESSION['usuario_logado_id'] = 1; // Default: Fernanda (Compras)
 }
 
 function getMockData() {
