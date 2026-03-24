@@ -200,7 +200,7 @@
 
                             <div class="flex">
                                 <button type="submit" class="bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-300 text-white font-bold rounded-lg text-sm px-6 py-3 transition-colors shadow-sm flex items-center gap-2">
-                                    <i class="ph-bold ph-play"></i> Destrancar Questionário de Certificação
+                                    <i class="ph-bold ph-play"></i> Preencher Check List de Homologação
                                 </button>
                             </div>
                         </form>
