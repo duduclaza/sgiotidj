@@ -412,6 +412,15 @@
         const selectElement = document.querySelector('select[name="resultado"]');
         if (selectElement) {
             selectElement.value = resultado;
+            
+            // Block other options if there are pending items
+            Array.from(selectElement.options).forEach(opt => {
+                if (hasPendente && opt.value !== 'pendente') {
+                    opt.disabled = true;
+                } else {
+                    opt.disabled = false;
+                }
+            });
         }
         
         openModal('modalFinalizar');

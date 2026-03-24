@@ -42,7 +42,7 @@ if ($u['perfil'] !== 'responsavel' && $u['perfil'] !== 'admin' && $u['perfil'] !
                 <?php foreach ($minha_fila as $h): ?>
                 <?php
                     $total_items = count($data['checklists'][$h['tipo_equipamento']] ?? []);
-                    $respondidos = count(array_filter($h['checklist_respostas'] ?? [], fn($r) => $r !== null));
+                    $respondidos = count(array_filter($h['checklist_respostas'] ?? [], fn($r) => $r !== null && $r !== 'pendente' && $r !== ''));
                     $perc = $total_items > 0 ? round(($respondidos / $total_items) * 100) : 0;
                 ?>
                 <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">

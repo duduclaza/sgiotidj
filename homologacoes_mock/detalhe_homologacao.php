@@ -74,6 +74,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $resultado = $_POST['resultado'];
+            if ($tem_pendente) {
+                $resultado = 'pendente';
+            }
             $novo_status = ($tem_pendente || $resultado === 'pendente') ? 'em_homologacao' : 'concluida';
 
             atualizarHomologacaoMock($id, [
@@ -85,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
             
             if ($novo_status === 'em_homologacao') {
-                $_SESSION['flash_message'] = ['type' => 'info', 'text' => 'Veredito salvo como rascunho. A homologação permanece em andamento (Pendente).'];
+                $_SESSION['flash_message'] = ['type' => 'info', 'text' => 'Veredito bloqueado para "Pendente" pois o checklist ainda não foi 100% finalizado.'];
             } else {
                 $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Processo de Homologação Assinado e Finalizado!'];
             }
