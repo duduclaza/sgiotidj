@@ -185,40 +185,40 @@ if ($isAdmin) {
     </div>
 
     <!-- Tabela de Descartes -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Lista de Descartes</h3>
+    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700/50 overflow-hidden transition-colors">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/50">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white">Lista de Descartes</h3>
         </div>
         <!-- Barra de rolagem superior -->
         <div id="scroll-top-container" class="overflow-x-auto" style="overflow-y: hidden;">
             <div id="scroll-top-content" style="height: 1px;"></div>
         </div>
         <div id="tabela-scroll-container" class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead class="bg-gray-50 dark:bg-gray-900 sticky top-0">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
+                <thead class="bg-gray-50 dark:bg-slate-900/80 sticky top-0">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Número de Série</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Filial</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Código Produto</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Descrição</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Data Descarte</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Responsável</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">OS</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Andamento</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Anexo</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ações</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Número de Série</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Filial</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Código</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Descrição</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Data Descarte</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Responsável</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">OS</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Andamento</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Anexo</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Ações</th>
                     </tr>
                 </thead>
-                <tbody id="tabela-descartes" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody id="tabela-descartes" class="bg-white dark:bg-slate-800 divide-y divide-gray-100 dark:divide-slate-700">
                     <!-- Dados carregados via JavaScript -->
                 </tbody>
             </table>
         </div>
         <!-- Paginação -->
-        <div id="paginacao-container" class="px-6 py-4 border-t border-gray-200 flex items-center justify-between hidden">
+        <div id="paginacao-container" class="px-6 py-4 border-t border-gray-200 dark:border-slate-700 flex items-center justify-between hidden bg-gray-50/50 dark:bg-slate-900/50">
             <div class="flex items-center space-x-2">
-                <label class="text-sm text-gray-600">Itens por página:</label>
-                <select id="per-page-select" onchange="alterarItensPorPagina()" class="border border-gray-300 rounded px-2 py-1 text-sm">
+                <label class="text-sm text-gray-600 dark:text-slate-400 font-medium">Itens por página:</label>
+                <select id="per-page-select" onchange="alterarItensPorPagina()" class="border border-gray-300 dark:border-slate-600 rounded-lg px-2 py-1 text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
                     <option value="10">10</option>
                     <option value="25">25</option>
                     <option value="50">50</option>
@@ -226,42 +226,45 @@ if ($isAdmin) {
                 </select>
             </div>
             <div class="flex items-center space-x-2">
-                <span id="paginacao-info" class="text-sm text-gray-600"></span>
+                <span id="paginacao-info" class="text-sm text-gray-600 dark:text-slate-400 font-medium"></span>
             </div>
-            <div class="flex items-center space-x-2">
-                <button onclick="irParaPagina(1)" id="btn-primeira" class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-100 disabled:opacity-50" disabled>
+            <div class="flex items-center space-x-2" id="pag-buttons">
+                <button onclick="irParaPagina(1)" id="btn-primeira" class="px-3 py-1 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 disabled:opacity-30 transition-colors" disabled>
                     ««
                 </button>
-                <button onclick="paginaAnterior()" id="btn-anterior" class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-100 disabled:opacity-50" disabled>
+                <button onclick="paginaAnterior()" id="btn-anterior" class="px-3 py-1 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 disabled:opacity-30 transition-colors" disabled>
                     « Anterior
                 </button>
                 <span id="paginacao-numeros" class="flex items-center space-x-1"></span>
-                <button onclick="proximaPagina()" id="btn-proximo" class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-100 disabled:opacity-50" disabled>
+                <button onclick="proximaPagina()" id="btn-proximo" class="px-3 py-1 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 disabled:opacity-30 transition-colors" disabled>
                     Próximo »
                 </button>
-                <button onclick="irParaPagina(paginacao.total_pages)" id="btn-ultima" class="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-100 disabled:opacity-50" disabled>
+                <button onclick="irParaPagina(paginacao.total_pages)" id="btn-ultima" class="px-3 py-1 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 disabled:opacity-30 transition-colors" disabled>
                     »»
                 </button>
             </div>
         </div>
-        <div id="no-data" class="text-center py-8 hidden">
-            <p class="text-gray-500">Nenhum descarte encontrado.</p>
+        <div id="no-data" class="text-center py-12 hidden">
+            <svg class="mx-auto h-12 w-12 text-gray-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <p class="mt-4 text-gray-500 dark:text-slate-400 font-medium">Nenhum descarte encontrado.</p>
         </div>
     </div>
 </div>
 
 <!-- Modal Importação -->
-<div id="modal-importacao" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-        <div class="mt-3">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white">Importar Descartes via Excel</h3>
-                <button onclick="fecharModalImportacao()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
+<div id="modal-importacao" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50 transition-all">
+    <div class="relative top-20 mx-auto border w-11/12 md:w-2/3 lg:w-1/2 shadow-2xl rounded-2xl bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50 flex justify-between items-center">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white">Importar Descartes via Excel</h3>
+            <button onclick="fecharModalImportacao()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="p-6">
             
             <div class="mb-6">
                 <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
@@ -799,6 +802,7 @@ function carregarDescartes(page = 1) {
         });
 }
 
+
 function renderizarTabela() {
     const tbody = document.getElementById('tabela-descartes');
     const noData = document.getElementById('no-data');
@@ -812,27 +816,27 @@ function renderizarTabela() {
     noData.classList.add('hidden');
     
     tbody.innerHTML = descartes.map(descarte => `
-        <tr class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-white">
                 ${escapeHtml(descarte.numero_serie)}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-slate-400">
                 ${escapeHtml(descarte.filial_nome || '')}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <span class="font-mono bg-gray-100 px-2 py-1 rounded">${escapeHtml(descarte.codigo_produto || '-')}</span>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-slate-400">
+                <span class="font-mono bg-gray-100 dark:bg-slate-900/60 border border-gray-200 dark:border-slate-700 px-2 py-1 rounded text-xs dark:text-slate-200">${escapeHtml(descarte.codigo_produto || '-')}</span>
             </td>
-            <td class="px-6 py-4 text-sm text-gray-500">
+            <td class="px-6 py-4 text-sm text-gray-600 dark:text-slate-400">
                 <div class="truncate max-w-xs" title="${escapeHtml(descarte.descricao_produto || '')}">${escapeHtml(descarte.descricao_produto || '-')}</div>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-slate-400">
                 ${formatarData(descarte.data_descarte)}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-slate-400">
                 ${escapeHtml(descarte.responsavel_tecnico)}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                ${descarte.numero_os ? escapeHtml(descarte.numero_os) : '-'}
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-slate-400">
+                ${descarte.numero_os ? `<span class="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded border border-blue-100 dark:border-blue-800/50">${escapeHtml(descarte.numero_os)}</span>` : '-'}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm">
                 <button onclick="abrirModalAlterarAndamento(${descarte.id}, '${escapeHtml(descarte.status_andamento || 'Em aberto')}')" 
@@ -841,31 +845,36 @@ function renderizarTabela() {
                     ${getStatusAndamentoBadge(descarte.status_andamento || 'Em aberto')}
                 </button>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
                 ${descarte.tem_anexo ? 
-                    `<a href="/controle-descartes/anexo/${descarte.id}" class="text-blue-600 hover:text-blue-800" title="Baixar anexo">
+                    `<a href="/controle-descartes/anexo/${descarte.id}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors" title="Baixar anexo">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
                     </a>` : '-'
-                }
+            }
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div class="flex space-x-2">
-                    <?php if ($canEdit): ?>
-                    <button onclick="editarDescarte(${descarte.id})" class="text-blue-600 hover:text-blue-800" title="Editar">
+                    ${canEdit ? `
+                    <button onclick="editarDescarte(${descarte.id})" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 transition-colors" title="Editar">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                         </svg>
-                    </button>
-                    <?php endif; ?>
-                    <?php if ($canDelete): ?>
-                    <button onclick="excluirDescarte(${descarte.id})" class="text-red-600 hover:text-red-800" title="Excluir">
+                    </button>` : ''}
+                    ${canDelete ? `
+                    <button onclick="excluirDescarte(${descarte.id})" class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors" title="Excluir">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
-                    </button>
-                    <?php endif; ?>
+                    </button>` : ''}
+                    ${podeAlterarStatusGlobal ? `
+                    <button onclick="abrirModalAlterarStatus(${descarte.id}, '${escapeHtml(descarte.status)}')" 
+                            class="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 transition-colors" title="Alterar Status Final">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </button>` : ''}
                 </div>
             </td>
         </tr>
@@ -1080,9 +1089,9 @@ function podeAlterarStatus() {
 // Obter badge de status colorido
 function getStatusBadge(status) {
     const badges = {
-        'Aguardando Descarte': '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">⏳ Aguardando</span>',
-        'Itens Descartados': '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">✅ Descartados</span>',
-        'Descartes Reprovados': '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">❌ Reprovados</span>'
+        'Aguardando Descarte': '<span class="px-2 py-1 text-xs font-bold rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border border-yellow-200 dark:border-yellow-800/50">⏳ Aguardando</span>',
+        'Itens Descartados': '<span class="px-2 py-1 text-xs font-bold rounded-full bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800/50">✅ Descartados</span>',
+        'Descartes Reprovados': '<span class="px-2 py-1 text-xs font-bold rounded-full bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800/50">❌ Reprovados</span>'
     };
     return badges[status] || badges['Aguardando Descarte'];
 }
@@ -1090,8 +1099,8 @@ function getStatusBadge(status) {
 // Obter badge de status de andamento (para área técnica)
 function getStatusAndamentoBadge(status) {
     const badges = {
-        'Em aberto': '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800 border border-orange-300">🔄 Em aberto</span>',
-        'Concluído': '<span class="px-2 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">✅ Concluído</span>'
+        'Em aberto': '<span class="px-2 py-1 text-xs font-bold rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-800 dark:text-orange-200 border border-orange-300 dark:border-orange-800/50">🔄 Em aberto</span>',
+        'Concluído': '<span class="px-2 py-1 text-xs font-bold rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800/50">✅ Concluído</span>'
     };
     return badges[status] || badges['Em aberto'];
 }
