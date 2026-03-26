@@ -512,7 +512,10 @@ function construirUrlPaginacao($pagina) {
               Evidências <div class="resizer" data-col="14"></div>
             </th>
             <th class="relative px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-              Ações <div class="resizer" data-col="15"></div>
+              Observações <div class="resizer" data-col="15"></div>
+            </th>
+            <th class="relative px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Ações <div class="resizer" data-col="16"></div>
             </th>
           </tr>
         </thead>
@@ -621,6 +624,9 @@ function construirUrlPaginacao($pagina) {
                 <span class="text-gray-400">Sem evidências</span>
               <?php endif; ?>
             </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400 max-w-xs truncate" title="<?= e($amostra['observacoes']) ?>">
+              <?= e($amostra['observacoes'] ?: '-') ?>
+            </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
               <div class="flex items-center gap-2">
                 <button onclick="editarAmostragem(<?= $amostra['id'] ?>)" 
@@ -640,7 +646,7 @@ function construirUrlPaginacao($pagina) {
           
           <?php if (empty($amostragens)): ?>
           <tr>
-            <td colspan="16" class="px-6 py-8 text-center text-gray-500">
+            <td colspan="17" class="px-6 py-8 text-center text-gray-500">
               <div class="flex flex-col items-center">
                 <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -1754,7 +1760,8 @@ const ALL_COLUMNS = [
   { id: 12, name: 'Aprovado Por' },
   { id: 13, name: 'Anexo NF' },
   { id: 14, name: 'Evidências' },
-  { id: 15, name: 'Ações' }
+  { id: 15, name: 'Observações' },
+  { id: 16, name: 'Ações' }
 ];
 
 // Inicializar Zoom e Colunas

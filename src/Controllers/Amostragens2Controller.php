@@ -875,7 +875,7 @@ class Amostragens2Controller
                     anexo_nf_nome, anexo_nf_tipo, anexo_nf_tamanho,
                     tipo_produto, produto_id, codigo_produto, nome_produto,
                     quantidade_recebida, quantidade_testada, quantidade_aprovada, quantidade_reprovada,
-                    fornecedor_id, responsaveis, status_final, created_at, updated_at
+                    fornecedor_id, responsaveis, status_final, observacoes, created_at, updated_at
                 FROM amostragens_2 
                 WHERE id = :id
             ');
