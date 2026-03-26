@@ -665,6 +665,9 @@ if ($isAdmin) {
 
 <script>
 const podeAlterarStatusGlobal = <?= $canAlterarStatus ? 'true' : 'false' ?>;
+const canEdit   = <?= $canEdit   ? 'true' : 'false' ?>;
+const canDelete = <?= $canDelete ? 'true' : 'false' ?>;
+const isAdmin   = <?= $isAdmin   ? 'true' : 'false' ?>;
 let descartes = [];
 let paginacao = { page: 1, per_page: 10, total: 0, total_pages: 0 };
 let logsPaginacao = { page: 1, per_page: 20, total: 0, total_pages: 0 };
@@ -1397,8 +1400,11 @@ function atualizarControlesPaginacao() {
     }
     
     for (let i = inicio_pg; i <= fim_pg; i++) {
-        const ativo = i === paginacao.page ? 'bg-blue-600 text-white' : 'hover:bg-gray-100';
-        html += `<button onclick="irParaPagina(${i})" class="px-3 py-1 border border-gray-300 rounded text-sm ${ativo}">${i}</button>`;
+        const isActive = i === paginacao.page;
+        const ativo = isActive
+            ? 'bg-blue-600 text-white border-blue-600'
+            : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700';
+        html += `<button onclick="irParaPagina(${i})" class="px-3 py-1 border rounded-lg text-sm transition-colors ${ativo}">${i}</button>`;
     }
     
     numerosContainer.innerHTML = html;
