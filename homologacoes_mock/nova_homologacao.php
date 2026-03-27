@@ -20,6 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['criar_homologacao']))
         'fornecedor' => $_POST['fornecedor'],
         'modelo' => $_POST['modelo'],
         'numero_serie' => $_POST['numero_serie'],
+        'quantidade' => (int)($_POST['quantidade'] ?? 1),
+        'tipo_aquisicao' => $_POST['tipo_aquisicao'] ?? 'comprado',
         'responsaveis' => array_map('intval', $responsaveis),
         'data_prevista_chegada' => $_POST['data_prevista_chegada'] ?: null,
         'dias_antecedencia_notif' => (int)$_POST['dias_antecedencia_notif'],

@@ -25,6 +25,7 @@ if ($u['perfil'] !== 'responsavel' && $u['perfil'] !== 'admin' && $u['perfil'] !
                 <tr>
                     <th class="px-5 py-3">Código</th>
                     <th class="px-5 py-3">Equipamento</th>
+                    <th class="px-5 py-3 text-center">Qtd / Tipo</th>
                     <th class="px-5 py-3">Fornecedor</th>
                     <th class="px-5 py-3">Status</th>
                     <th class="px-5 py-3">Progresso</th>
@@ -56,6 +57,12 @@ if ($u['perfil'] !== 'responsavel' && $u['perfil'] !== 'admin' && $u['perfil'] !
                                 <div class="font-medium text-slate-800 dark:text-slate-200"><?= $h['modelo'] ?></div>
                                 <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1"><?= $h['titulo'] ?></div>
                             </div>
+                        </div>
+                    </td>
+                    <td class="px-5 py-3 whitespace-nowrap text-center">
+                        <div class="text-xs font-bold text-slate-700 dark:text-slate-200"><?= $h['quantidade'] ?? 1 ?> un.</div>
+                        <div class="text-[10px] <?= ($h['tipo_aquisicao'] ?? 'comprado') === 'comprado' ? 'text-emerald-600' : 'text-amber-600' ?> font-semibold">
+                            <?= ($h['tipo_aquisicao'] ?? 'comprado') === 'comprado' ? 'Comprado' : 'Emprestado' ?>
                         </div>
                     </td>
                     <td class="px-5 py-3 whitespace-nowrap"><?= $h['fornecedor'] ?></td>

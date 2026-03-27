@@ -32,6 +32,14 @@
                         <tr class="flex justify-between py-2"><td class="text-slate-500 dark:text-slate-400 font-medium">Tipo</td><td class="font-bold text-slate-800 dark:text-white text-right"><?= $h['tipo_equipamento'] ?></td></tr>
                         <tr class="flex justify-between py-2"><td class="text-slate-500 dark:text-slate-400 font-medium">Fornecedor</td><td class="text-slate-800 dark:text-slate-200 text-right"><?= $h['fornecedor'] ?></td></tr>
                         <tr class="flex justify-between py-2"><td class="text-slate-500 dark:text-slate-400 font-medium">Modelo</td><td class="text-slate-800 dark:text-slate-200 text-right"><?= $h['modelo'] ?></td></tr>
+                        <tr class="flex justify-between py-2"><td class="text-slate-500 dark:text-slate-400 font-medium">Quantidade</td><td class="text-slate-800 dark:text-white font-bold text-right"><?= $h['quantidade'] ?? 1 ?> un.</td></tr>
+                        <tr class="flex justify-between py-2"><td class="text-slate-500 dark:text-slate-400 font-medium">Aquisição</td><td class="text-right">
+                            <?php if (($h['tipo_aquisicao'] ?? 'comprado') === 'comprado'): ?>
+                                <span class="text-emerald-600 dark:text-emerald-400 font-bold">💰 Comprado</span>
+                            <?php else: ?>
+                                <span class="text-amber-600 dark:text-amber-400 font-bold">🤝 Emprestado</span>
+                            <?php endif; ?>
+                        </td></tr>
                         <tr class="flex justify-between py-2"><td class="text-slate-500 dark:text-slate-400 font-medium">N/S Lote</td><td class="text-slate-800 dark:text-slate-200 text-right"><?= $h['numero_serie'] ?: '<span class="italic text-slate-400">Não informado</span>' ?></td></tr>
                     </tbody>
                 </table>

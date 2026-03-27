@@ -41,7 +41,7 @@ if ($u['perfil'] !== 'compras') {
             
             <div class="col-span-12 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
                 <h3 class="text-md font-bold flex items-center gap-2 text-slate-700 dark:text-slate-300 mb-4"><i class="ph-fill ph-cpu text-primary-500 text-lg"></i> Detalhes</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Fornecedor</label>
                         <select name="fornecedor" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
@@ -58,6 +58,41 @@ if ($u['perfil'] !== 'compras') {
                     <div>
                         <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Nº Série / Lote</label>
                         <input type="text" name="numero_serie" placeholder="Opcional" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white dark:placeholder-slate-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Quantidade <span class="text-red-500">*</span></label>
+                        <input type="number" name="quantidade" value="1" min="1" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white font-bold">
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">Tipo de Aquisição (Propriedade)</label>
+                    <div class="flex flex-wrap gap-4">
+                        <label class="relative flex-1 min-w-[140px] cursor-pointer group">
+                            <input type="radio" name="tipo_aquisicao" value="comprado" checked class="peer sr-only">
+                            <div class="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl transition-all peer-checked:border-primary-500 peer-checked:bg-primary-50/50 dark:peer-checked:bg-primary-900/20 peer-checked:ring-1 peer-checked:ring-primary-500">
+                                <div class="w-10 h-10 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-primary-500 transition-colors shadow-sm">
+                                    <i class="ph ph-money text-2xl"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-bold text-slate-700 dark:text-slate-200">Comprado</div>
+                                    <div class="text-[10px] text-slate-500">Patrimônio Próprio</div>
+                                </div>
+                            </div>
+                        </label>
+
+                        <label class="relative flex-1 min-w-[140px] cursor-pointer group">
+                            <input type="radio" name="tipo_aquisicao" value="emprestado" class="peer sr-only">
+                            <div class="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl transition-all peer-checked:border-amber-500 peer-checked:bg-amber-50/50 dark:peer-checked:bg-amber-900/20 peer-checked:ring-1 peer-checked:ring-amber-500">
+                                <div class="w-10 h-10 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-amber-500 transition-colors shadow-sm">
+                                    <i class="ph ph-handshake text-2xl"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-bold text-slate-700 dark:text-slate-200">Emprestado</div>
+                                    <div class="text-[10px] text-slate-500">Comodato / Teste</div>
+                                </div>
+                            </div>
+                        </label>
                     </div>
                 </div>
             </div>

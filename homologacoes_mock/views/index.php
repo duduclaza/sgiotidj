@@ -71,6 +71,7 @@
                 <tr>
                     <th scope="col" class="px-6 py-4">Código</th>
                     <th scope="col" class="px-6 py-4">Equipamento</th>
+                    <th scope="col" class="px-6 py-4">Qtd / Tipo</th>
                     <th scope="col" class="px-6 py-4">Status</th>
                     <th scope="col" class="px-6 py-4">Prev. Chegada</th>
                     <th scope="col" class="px-6 py-4">Responsáveis</th>
@@ -94,6 +95,12 @@
                                 <div class="font-bold text-slate-800 dark:text-slate-200"><?= $h['titulo'] ?></div>
                                 <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"><?= $h['fornecedor'] ?> | <?= $h['modelo'] ?></div>
                             </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-bold text-slate-700 dark:text-slate-200"><?= $h['quantidade'] ?? 1 ?> un.</div>
+                        <div class="text-[11px] <?= ($h['tipo_aquisicao'] ?? 'comprado') === 'comprado' ? 'text-emerald-600' : 'text-amber-600' ?> font-semibold">
+                            <?= ($h['tipo_aquisicao'] ?? 'comprado') === 'comprado' ? 'Comprado' : 'Emprestado' ?>
                         </div>
                     </td>
                     <td class="px-6 py-4">

@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Versão dos dados mock - incrementar para forçar reset dos dados antigos
-$MOCK_DATA_VERSION = 3;
+$MOCK_DATA_VERSION = 4;
 
 // Inicializar os dados mockados na sessão, se ainda não existirem ou se a versão mudou
 if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $MOCK_DATA_VERSION) {
@@ -31,6 +31,8 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'fornecedor'            => 'HP do Brasil Ltda',
             'modelo'                => 'LaserJet M404dn',
             'numero_serie'          => 'SN-HP-2025-00123',
+            'quantidade'            => 1,
+            'tipo_aquisicao'        => 'comprado',
             'status'                => 'concluida',
             'criado_por'            => 1,
             'responsaveis'          => [3, 4],
@@ -69,6 +71,8 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'fornecedor'            => 'Dell Computadores do Brasil',
             'modelo'                => 'Latitude 5540 i5-1335U',
             'numero_serie'          => 'SN-DELL-2025-00456',
+            'quantidade'            => 1,
+            'tipo_aquisicao'        => 'comprado',
             'status'                => 'concluida',
             'criado_por'            => 1,
             'responsaveis'          => [5],
@@ -107,6 +111,8 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'fornecedor'            => 'SupriMax Distribuidora',
             'modelo'                => 'Toner NPG-59 Compatível',
             'numero_serie'          => 'LOT-2025-NPG59-001',
+            'quantidade'            => 5,
+            'tipo_aquisicao'        => 'emprestado',
             'status'                => 'concluida',
             'criado_por'            => 1,
             'responsaveis'          => [3, 5],
@@ -141,6 +147,8 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'fornecedor'            => 'TecPeças Importações',
             'modelo'                => 'Fusor 40X9929 Compatível',
             'numero_serie'          => 'LOT-FUS-2025-0089',
+            'quantidade'            => 2,
+            'tipo_aquisicao'        => 'comprado',
             'status'                => 'item_recebido',
             'criado_por'            => 1,
             'responsaveis'          => [4],
@@ -168,6 +176,8 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'fornecedor'            => 'Lenovo do Brasil',
             'modelo'                => 'ThinkPad E14 Gen 5 AMD',
             'numero_serie'          => 'SN-LNV-2025-00789',
+            'quantidade'            => 1,
+            'tipo_aquisicao'        => 'comprado',
             'status'                => 'aguardando_chegada',
             'criado_por'            => 1,
             'responsaveis'          => [3, 4, 5],

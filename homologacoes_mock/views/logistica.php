@@ -37,7 +37,22 @@ if ($u['perfil'] !== 'logistica' && $u['perfil'] !== 'admin' && $u['perfil'] !==
                 <div class="text-sm text-slate-500 dark:text-slate-400 mb-4">
                     <div class="flex flex-col gap-1 mt-3">
                         <span class="flex items-center gap-2"><i class="ph-fill ph-factory text-slate-400"></i> <strong class="text-slate-700 dark:text-slate-300">Fornecedor:</strong> <?= $h['fornecedor'] ?></span>
-                        <span class="flex items-center gap-2"><i class="ph-fill ph-calendar text-slate-400"></i> <strong class="text-slate-700 dark:text-slate-300">Data Limite:</strong> <?= $h['data_prevista_chegada'] ? date('d/m/Y', strtotime($h['data_prevista_chegada'])) : '-' ?></span>
+                        <span class="flex items-center gap-2"><i class="ph-fill ph-calendar text-slate-400"></i> <strong class="text-slate-700 dark:text-slate-300">Previsão:</strong> <?= $h['data_prevista_chegada'] ? date('d/m/Y', strtotime($h['data_prevista_chegada'])) : '-' ?></span>
+                        <span class="flex items-center gap-2 mt-1">
+                            <i class="ph-fill ph-stack text-slate-400"></i> 
+                            <strong class="text-slate-700 dark:text-slate-300">Qtd:</strong> <?= $h['quantidade'] ?? 1 ?>
+                            <span class="mx-1 text-slate-300">|</span>
+                            <?php if (($h['tipo_aquisicao'] ?? 'comprado') === 'comprado'): ?>
+                                <span class="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1"><i class="ph-bold ph-money"></i> Comprado</span>
+                            <?php else: ?>
+                                <span class="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1"><i class="ph-bold ph-handshake"></i> Emprestado</span>
+                            <?php endif; ?>
+                        </span>
+                        <?php if(!empty($h['numero_serie'])): ?>
+                            <span class="flex items-center gap-2 mt-1 text-[11px] bg-slate-100 dark:bg-slate-700/50 px-2 py-1 rounded w-fit">
+                                <i class="ph ph-barcode text-slate-500"></i> <strong class="text-slate-600 dark:text-slate-400">S/N:</strong> <?= $h['numero_serie'] ?>
+                            </span>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>

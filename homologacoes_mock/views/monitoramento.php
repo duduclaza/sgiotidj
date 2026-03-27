@@ -27,6 +27,7 @@ if ($u['perfil'] !== 'compras' && $u['perfil'] !== 'admin' && $u['perfil'] !== '
                 <tr>
                     <th scope="col" class="px-6 py-4">Código</th>
                     <th scope="col" class="px-6 py-4">Equipamento</th>
+                    <th scope="col" class="px-6 py-4">Qtd / Tipo</th>
                     <th scope="col" class="px-6 py-4">Status Atual</th>
                     <th scope="col" class="px-6 py-4">Fase da Esteira</th>
                     <th scope="col" class="px-6 py-4">Vencimento / SLA</th>
@@ -43,6 +44,12 @@ if ($u['perfil'] !== 'compras' && $u['perfil'] !== 'admin' && $u['perfil'] !== '
                             <i class="ph <?= getIconForTipo($h['tipo_equipamento']) ?> text-slate-400"></i> <?= $h['tipo_equipamento'] ?>
                         </div>
                         <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"><?= $h['fornecedor'] ?> | <?= $h['modelo'] ?></div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <div class="text-xs font-bold text-slate-700 dark:text-slate-200"><?= $h['quantidade'] ?? 1 ?> un.</div>
+                        <div class="text-[10px] <?= ($h['tipo_aquisicao'] ?? 'comprado') === 'comprado' ? 'text-emerald-500 font-bold' : 'text-amber-500 font-bold' ?>">
+                            <?= ($h['tipo_aquisicao'] ?? 'comprado') === 'comprado' ? '<i class="ph-bold ph-money"></i> Comprado' : '<i class="ph-bold ph-handshake"></i> Emprestado' ?>
+                        </div>
                     </td>
                     <td class="px-6 py-4">
                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold <?= getBadgeClass($h['status']) ?>">
