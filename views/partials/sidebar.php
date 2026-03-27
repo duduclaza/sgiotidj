@@ -124,41 +124,31 @@ $menu = [
     ]
   ],
 
-  [
-    'label' => 'Ecossistema SAP (Premium)', 
-    'href' => '#', 
-    'icon' => '<i class="ph ph-squares-four text-blue-500"></i>', 
-    'category' => true,
-    'modules' => [], 
-    'is_public' => true,
-    'submenu' => [
-      ['label' => 'CRM', 'href' => '/premium-locked?module=CRM', 'icon' => '<i class="ph ph-users-three"></i>', 'is_public' => true, 'badge' => 'PRO'],
-      ['label' => 'Financeiro', 'href' => '/premium-locked?module=Financeiro', 'icon' => '<i class="ph ph-currency-dollar"></i>', 'is_public' => true, 'badge' => 'PRO'],
-      ['label' => 'Contratos', 'href' => '/premium-locked?module=Contratos', 'icon' => '<i class="ph ph-file-text"></i>', 'is_public' => true, 'badge' => 'PRO'],
-      ['label' => 'RH', 'href' => '/premium-locked?module=RH', 'icon' => '<i class="ph ph-user-focus"></i>', 'is_public' => true, 'badge' => 'PRO'],
-      ['label' => 'Estoque', 'href' => '/premium-locked?module=Estoque', 'icon' => '<i class="ph ph-package"></i>', 'is_public' => true, 'badge' => 'PRO'],
-      ['label' => 'Logística', 'href' => '/premium-locked?module=Logística', 'icon' => '<i class="ph ph-truck"></i>', 'is_public' => true, 'badge' => 'PRO'],
-      ['label' => 'Frotas', 'href' => '/premium-locked?module=Frotas', 'icon' => '<i class="ph ph-car"></i>', 'is_public' => true, 'badge' => 'PRO'],
-      ['label' => 'Deptº Técnico', 'href' => '/premium-locked?module=Departamento+Técnico', 'icon' => '<i class="ph ph-wrench"></i>', 'is_public' => true, 'badge' => 'PRO'],
-      ['label' => 'Suprimentos', 'href' => '/premium-locked?module=Suprimentos', 'icon' => '<i class="ph ph-dribbble-logo"></i>', 'is_public' => true, 'badge' => 'PRO'],
-      ['label' => 'Compras', 'href' => '/premium-locked?module=Compras', 'icon' => '<i class="ph ph-shopping-cart"></i>', 'is_public' => true, 'badge' => 'PRO'],
-    ]
-  ]
+  ['label' => 'CRM', 'href' => '/premium-locked?module=CRM', 'icon' => '<i class="ph ph-users-three"></i>', 'is_public' => true, 'badge' => 'PRO'],
+  ['label' => 'Financeiro', 'href' => '/premium-locked?module=Financeiro', 'icon' => '<i class="ph ph-currency-dollar"></i>', 'is_public' => true, 'badge' => 'PRO'],
+  ['label' => 'Contratos', 'href' => '/premium-locked?module=Contratos', 'icon' => '<i class="ph ph-file-text"></i>', 'is_public' => true, 'badge' => 'PRO'],
+  ['label' => 'RH', 'href' => '/premium-locked?module=RH', 'icon' => '<i class="ph ph-user-focus"></i>', 'is_public' => true, 'badge' => 'PRO'],
+  ['label' => 'Estoque', 'href' => '/premium-locked?module=Estoque', 'icon' => '<i class="ph ph-package"></i>', 'is_public' => true, 'badge' => 'PRO'],
+  ['label' => 'Logística', 'href' => '/premium-locked?module=Logística', 'icon' => '<i class="ph ph-truck"></i>', 'is_public' => true, 'badge' => 'PRO'],
+  ['label' => 'Frotas', 'href' => '/premium-locked?module=Frotas', 'icon' => '<i class="ph ph-car"></i>', 'is_public' => true, 'badge' => 'PRO'],
+  ['label' => 'Deptº Técnico', 'href' => '/premium-locked?module=Departamento+Técnico', 'icon' => '<i class="ph ph-wrench"></i>', 'is_public' => true, 'badge' => 'PRO'],
+  ['label' => 'Suprimentos', 'href' => '/premium-locked?module=Suprimentos', 'icon' => '<i class="ph ph-dribbble-logo"></i>', 'is_public' => true, 'badge' => 'PRO'],
+  ['label' => 'Compras', 'href' => '/premium-locked?module=Compras', 'icon' => '<i class="ph ph-shopping-cart"></i>', 'is_public' => true, 'badge' => 'PRO']
 ];
 $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/', '/') ?: '/';
 ?>
-<aside id="sidebar" class="hidden lg:flex lg:w-72 flex-col bg-white border-r border-slate-200 shadow-sm transition-[width] duration-300 relative z-40">
+<aside id="sidebar" class="hidden lg:flex lg:w-72 flex-col bg-[#0b0f19]/95 backdrop-blur-xl border-r border-slate-800/80 shadow-[4px_0_24px_-4px_rgba(0,0,0,0.5)] transition-[width] duration-300 relative z-40">
   <!-- Botão Ocultar/Expandir -->
-  <button id="sidebarToggleBtn" class="hidden lg:flex absolute -right-3.5 top-5 bg-slate-800 hover:bg-slate-900 border-2 border-white text-white rounded-full w-7 h-7 items-center justify-center z-50 transition-colors shadow-md group">
+  <button id="sidebarToggleBtn" class="hidden lg:flex absolute -right-3.5 top-5 bg-blue-600 hover:bg-blue-500 border-2 border-[#0b0f19] text-white rounded-full w-7 h-7 items-center justify-center z-50 transition-colors shadow-lg shadow-blue-500/30 group">
     <svg id="sidebarToggleIcon" class="w-4 h-4 transition-transform duration-300 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
     </svg>
   </button>
 
-  <div class="h-16 flex items-center justify-center px-6 border-b border-slate-100 relative">
+  <div class="h-20 flex items-center justify-center px-6 border-b border-slate-800/60 relative">
     <div class="text-center sidebar-header-text transition-all duration-300">
-      <div class="text-xl font-extrabold tracking-widest text-slate-900">SGI</div>
-      <div class="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mt-0.5">OTI</div>
+      <div class="text-2xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 drop-shadow-[0_2px_10px_rgba(59,130,246,0.3)]">SGI</div>
+      <div class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-0.5">Gestão OTI</div>
     </div>
     <div class="text-center sidebar-header-icon absolute transition-all duration-300 hidden">
       <div class="text-xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-emerald-600 dark:from-blue-400 dark:to-emerald-400">SGI</div>
@@ -168,8 +158,8 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
     <ul class="space-y-1 px-3">
       <!-- Início - acessível a todos os usuários autenticados -->
       <li>
-        <a href="/inicio" title="Início" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-100 hover:text-slate-900 <?php echo $current==='/inicio'?'!bg-slate-900 !text-white hover:!bg-slate-800 hover:!text-white font-semibold shadow':'text-slate-600'; ?>">
-          <span class="text-lg flex-shrink-0"><i class="ph ph-house"></i></span>
+        <a href="/inicio" title="Início" class="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 hover:bg-slate-800/50 hover:text-white <?php echo $current==='/inicio'?'bg-blue-600/10 text-blue-400 font-semibold shadow-[0_0_15px_rgba(59,130,246,0.1)] border border-blue-500/20':'text-slate-400 border border-transparent'; ?>">
+          <span class="text-lg flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/40 group-hover:bg-blue-500/20 group-hover:text-blue-400 transition-colors <?php echo $current==='/inicio'?'!bg-blue-500/30 !text-blue-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]':''; ?>"><i class="ph ph-house"></i></span>
           <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300">Início</span>
         </a>
       </li>
@@ -177,14 +167,14 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
       <!-- Dashboard só visível se tiver permissão -->
       <?php if (hasPermission('dashboard')): ?>
       <li>
-        <a href="/dashboard" title="Dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-100 hover:text-slate-900 <?php echo $current==='/dashboard'?'!bg-slate-900 !text-white hover:!bg-slate-800 hover:!text-white font-semibold shadow':'text-slate-600'; ?>">
-          <span class="text-lg flex-shrink-0"><i class="ph ph-chart-bar"></i></span>
+        <a href="/dashboard" title="Dashboard" class="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 hover:bg-slate-800/50 hover:text-white <?php echo $current==='/dashboard'?'bg-blue-600/10 text-blue-400 font-semibold shadow-[0_0_15px_rgba(59,130,246,0.1)] border border-blue-500/20':'text-slate-400 border border-transparent'; ?>">
+          <span class="text-lg flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/40 group-hover:bg-blue-500/20 group-hover:text-blue-400 transition-colors <?php echo $current==='/dashboard'?'!bg-blue-500/30 !text-blue-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]':''; ?>"><i class="ph ph-chart-bar"></i></span>
           <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300">Dashboard</span>
         </a>
       </li>
       <li>
-        <a href="/dashboard-2" title="Dashboard 2.0" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-100 hover:text-slate-900 <?php echo $current==='/dashboard-2'?'!bg-slate-900 !text-white hover:!bg-slate-800 hover:!text-white font-semibold shadow':'text-slate-600'; ?>">
-          <span class="text-lg flex-shrink-0"><i class="ph ph-compass"></i></span>
+        <a href="/dashboard-2" title="Dashboard 2.0" class="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 hover:bg-slate-800/50 hover:text-white <?php echo $current==='/dashboard-2'?'bg-blue-600/10 text-blue-400 font-semibold shadow-[0_0_15px_rgba(59,130,246,0.1)] border border-blue-500/20':'text-slate-400 border border-transparent'; ?>">
+          <span class="text-lg flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/40 group-hover:bg-blue-500/20 group-hover:text-blue-400 transition-colors <?php echo $current==='/dashboard-2'?'!bg-blue-500/30 !text-blue-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]':''; ?>"><i class="ph ph-compass"></i></span>
           <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300">Dashboard 2.0</span>
         </a>
       </li>
@@ -404,9 +394,14 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
               </ul>
             </div>
           <?php else: ?>
-            <a href="<?= e($item['href']) ?>" title="<?= e($item['label']) ?>" class="page-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-100 hover:text-slate-900 <?php echo $active?'!bg-slate-900 !text-white hover:!bg-slate-800 hover:!text-white font-semibold shadow-md':'text-slate-600'; ?>">
-              <span class="text-lg flex-shrink-0"><?= $item['icon'] ?></span>
-              <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300"><?= e($item['label']) ?></span>
+            <a href="<?= e($item['href']) ?>" title="<?= e($item['label']) ?>" class="page-link group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 hover:bg-slate-800/50 hover:text-white <?php echo $active?'bg-blue-600/10 text-blue-400 font-semibold shadow-[0_0_15px_rgba(59,130,246,0.1)] border border-blue-500/20':'text-slate-400 border border-transparent'; ?>">
+              <span class="text-lg flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/40 group-hover:bg-blue-500/20 group-hover:text-blue-400 transition-colors <?php echo $active?'!bg-blue-500/30 !text-blue-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]':''; ?>"><?= $item['icon'] ?></span>
+              <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300 flex items-center justify-between w-full">
+                <span><?= e($item['label']) ?></span>
+                <?php if (isset($item['badge'])): ?>
+                <span class="px-1.5 py-0.5 bg-gradient-to-r from-amber-500/20 to-yellow-500/10 text-amber-500 border border-amber-500/30 text-[9px] font-extrabold rounded-full shadow-[0_0_10px_rgba(245,158,11,0.2)] ml-2 uppercase tracking-wider backdrop-blur-sm"><?= e($item['badge']) ?></span>
+                <?php endif; ?>
+              </span>
             </a>
           <?php endif; ?>
         </li>
@@ -415,8 +410,8 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
       <!-- <i class="ph ph-chart-bar"></i> Usabilidade - Exclusivo para Super Admin -->
       <?php if (isSuperAdmin()): ?>
       <li class="mt-4 pt-4 border-t border-slate-700/50">
-        <a href="/usabilidade" title="Usabilidade" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-100 hover:text-slate-900 <?php echo $current==='/usabilidade'?'!bg-slate-900 !text-white hover:!bg-slate-800 hover:!text-white font-semibold shadow':'text-slate-600'; ?>">
-          <span class="text-lg flex-shrink-0"><i class="ph ph-chart-bar"></i></span>
+        <a href="/usabilidade" title="Usabilidade" class="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 hover:bg-slate-800/50 hover:text-white <?php echo $current==='/usabilidade'?'bg-blue-600/10 text-blue-400 font-semibold shadow-[0_0_15px_rgba(59,130,246,0.1)] border border-blue-500/20':'text-slate-400 border border-transparent'; ?>">
+          <span class="text-lg flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/40 group-hover:bg-blue-500/20 group-hover:text-blue-400 transition-colors <?php echo $current==='/usabilidade'?'!bg-blue-500/30 !text-blue-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]':''; ?>"><i class="ph ph-chart-bar"></i></span>
           <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300">Usabilidade</span>
         </a>
       </li>
@@ -425,10 +420,10 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
   </nav>
   
   <!-- User Menu at bottom -->
-  <div class="p-4 border-t border-slate-700/50">
+  <div class="p-4 border-t border-slate-800/60 bg-[#0b0f19]">
     <div class="flex items-center justify-between">
       <div class="flex-1 overflow-hidden pr-2">
-        <a href="/profile" class="flex items-center gap-3 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg p-1 transition-colors">
+        <a href="/profile" class="flex items-center gap-3 hover:bg-slate-800/80 rounded-xl p-1.5 transition-colors">
           <div class="w-8 h-8 flex-shrink-0 bg-blue-600 rounded-full flex items-center justify-center overflow-hidden">
             <img id="sidebarUserPhoto" src="" alt="Foto de Perfil" class="w-full h-full object-cover hidden">
             <span id="sidebarUserInitial" class="text-white text-sm font-medium">
