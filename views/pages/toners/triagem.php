@@ -363,6 +363,37 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  /* Wizard Styles */
+  .triagem-step {
+    transition: all 0.3s ease-in-out;
+  }
+  .triagem-step:not(.active) {
+    display: none;
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  .triagem-step.active {
+    display: block;
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .step-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: #e0f2fe;
+    color: #0369a1;
+    margin-bottom: 1rem;
+  }
+  .dark .step-badge {
+    background: #0c4a6e;
+    color: #7dd3fc;
+  }
 </style>
 
 <!-- ========== MODAL: NOVA / EDITAR TRIAGEM ========== -->
@@ -374,187 +405,193 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
-    <div class="triagem-modal-body px-6 py-5 space-y-5">
+    <div class="triagem-modal-body px-6 py-5">
       <input type="hidden" id="t-id">
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Filial (automático)</label>
-          <input id="t-filial" type="text" value="<?= e($_SESSION['user_filial'] ?? 'Não informado') ?>" readonly
-                 class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-gray-100 dark:bg-slate-900 text-gray-600 dark:text-gray-400">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Colaborador que registrou</label>
-          <input id="t-colaborador" type="text" value="<?= e($_SESSION['user_name'] ?? 'Usuário') ?>" readonly
-                 class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-gray-100 dark:bg-slate-900 text-gray-600 dark:text-gray-400">
-        </div>
-      </div>
-
-      <!-- Código de Requisição (Opcional) - PRIMEIRO CAMPO -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Código de Requisição <span class="text-gray-400 dark:text-gray-500 text-xs">(opcional mas recomendado)</span></label>
-        <div class="flex gap-2">
-          <input id="t-codigo-req" type="text" maxlength="100" placeholder="Ex: REQ-2026-0001"
-                 oninput="debouceBuscarDefeitos()" onchange="buscarDefeitosPorCodigo()"
-                 class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <button type="button" onclick="buscarDefeitosPorCodigo()" class="bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-gray-600 dark:text-gray-300 transition-colors" title="Buscar Defeitos">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          </button>
-        </div>
+      <!-- ETAPA 1 -->
+      <div id="step-1" class="triagem-step active space-y-5">
+        <div class="step-badge">Etapa 1: Identificação</div>
         
-        <!-- Lista dinâmica de defeitos localizados -->
-        <div id="defeitos-lista-container" class="hidden mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-lg">
-          <div class="text-xs font-semibold text-blue-800 dark:text-blue-300 mb-2">Selecione o toner com defeito que corresponde a esta triagem:</div>
-          <div id="defeitos-opcoes" class="space-y-2 max-h-40 overflow-y-auto">
-            <!-- Radio options will be rendered here -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Filial (automático)</label>
+            <input id="t-filial" type="text" value="<?= e($_SESSION['user_filial'] ?? 'Não informado') ?>" readonly
+                   class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-gray-100 dark:bg-slate-900 text-gray-600 dark:text-gray-400">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Colaborador que registrou</label>
+            <input id="t-colaborador" type="text" value="<?= e($_SESSION['user_name'] ?? 'Usuário') ?>" readonly
+                   class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-gray-100 dark:bg-slate-900 text-gray-600 dark:text-gray-400">
           </div>
         </div>
-      </div>
 
-      <!-- Seleção do Cliente -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cliente <span class="text-red-500">*</span></label>
-        <input id="t-cliente-search" type="text" placeholder="Digite nome/código do cliente (seleção automática)..." oninput="autoSelecionarInteligente('t-cliente-search','t-cliente-id')"
-               class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm mb-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <select id="t-cliente-id" onchange="sincronizarInputComSelect('t-cliente-id','t-cliente-search')" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option value="">Selecione o cliente...</option>
-          <?php foreach (($clientes ?? []) as $c): ?>
-          <option value="<?= (int)$c['id'] ?>"><?= e(($c['codigo'] ?? '') . ' - ' . ($c['nome'] ?? '')) ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Código de Requisição <span class="text-gray-400 dark:text-gray-500 text-xs">(opcional mas recomendado)</span></label>
+          <div class="flex gap-2">
+            <input id="t-codigo-req" type="text" maxlength="100" placeholder="Ex: REQ-2026-0001"
+                   oninput="debouceBuscarDefeitos()" onchange="buscarDefeitosPorCodigo()"
+                   class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button type="button" onclick="buscarDefeitosPorCodigo()" class="bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-gray-600 dark:text-gray-300 transition-colors" title="Buscar Defeitos">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </button>
+          </div>
+          
+          <div id="defeitos-lista-container" class="hidden mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-lg">
+            <div class="text-xs font-semibold text-blue-800 dark:text-blue-300 mb-2">Selecione o toner com defeito que corresponde a esta triagem:</div>
+            <div id="defeitos-opcoes" class="space-y-2 max-h-40 overflow-y-auto"></div>
+          </div>
+        </div>
 
-      <!-- Seleção do Toner -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Modelo do Toner <span class="text-red-500">*</span></label>
-        <input id="t-toner-search" type="text" placeholder="Digite o modelo do toner (seleção automática)..." oninput="autoSelecionarInteligente('t-toner-search','t-toner-id', 'onTonerChange')"
-               class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm mb-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <select id="t-toner-id" onchange="onTonerChange(); sincronizarInputComSelect('t-toner-id','t-toner-search')" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option value="">Selecione o modelo...</option>
-          <?php foreach ($toners as $t): ?>
-          <option value="<?= $t['id'] ?>"
-            data-peso-cheio="<?= $t['peso_cheio'] ?>"
-            data-peso-vazio="<?= $t['peso_vazio'] ?>"
-            data-gramatura="<?= $t['gramatura'] ?: (($t['peso_cheio'] ?? 0) - ($t['peso_vazio'] ?? 0)) ?>"
-            data-capacidade="<?= $t['capacidade_folhas'] ?>"
-            data-custo-folha="<?= $t['custo_por_folha'] ?>"
-            data-preco="<?= $t['preco_toner'] ?>">
-            <?= e($t['modelo']) ?>
-            <?php if ($t['peso_cheio']): ?>
-              (Cheio: <?= number_format($t['peso_cheio'],1) ?>g / Vazio: <?= number_format($t['peso_vazio'],1) ?>g)
-            <?php endif; ?>
-          </option>
-          <?php endforeach; ?>
-        </select>
-        <div id="info-toner" class="mt-2 hidden bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-lg p-3 text-xs text-blue-800 dark:text-blue-300 space-y-1">
-          <div>📊 Gramatura total: <strong id="info-gram"></strong>g</div>
-          <div>⚖️ Peso cheio: <strong id="info-cheio"></strong>g &nbsp;|&nbsp; Peso vazio: <strong id="info-vazio"></strong>g</div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cliente <span class="text-red-500">*</span></label>
+          <input id="t-cliente-search" type="text" placeholder="Digite nome/código do cliente (seleção automática)..." oninput="autoSelecionarInteligente('t-cliente-search','t-cliente-id')"
+                 class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm mb-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <select id="t-cliente-id" onchange="sincronizarInputComSelect('t-cliente-id','t-cliente-search')" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Selecione o cliente...</option>
+            <?php foreach (($clientes ?? []) as $c): ?>
+            <option value="<?= (int)$c['id'] ?>"><?= e(($c['codigo'] ?? '') . ' - ' . ($c['nome'] ?? '')) ?></option>
+            <?php endforeach; ?>
+          </select>
         </div>
       </div>
 
-      <!-- Modo de entrada -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Modo de Entrada <span class="text-red-500">*</span></label>
-        <div class="flex gap-4">
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="modo" value="peso" id="modo-peso" checked onchange="onModoChange()" class="accent-blue-600">
-            <span class="text-sm dark:text-gray-300">Informar Peso (g)</span>
-          </label>
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="modo" value="percentual" id="modo-pct" onchange="onModoChange()" class="accent-blue-600">
-            <span class="text-sm dark:text-gray-300">Informar % direto</span>
-          </label>
+      <!-- ETAPA 2 -->
+      <div id="step-2" class="triagem-step space-y-5">
+        <div class="step-badge">Etapa 2: Dados do Toner</div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Modelo do Toner <span class="text-red-500">*</span></label>
+          <input id="t-toner-search" type="text" placeholder="Digite o modelo do toner (seleção automática)..." oninput="autoSelecionarInteligente('t-toner-search','t-toner-id', 'onTonerChange')"
+                 class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm mb-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <select id="t-toner-id" onchange="onTonerChange(); sincronizarInputComSelect('t-toner-id','t-toner-search')" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Selecione o modelo...</option>
+            <?php foreach ($toners as $t): ?>
+            <option value="<?= $t['id'] ?>"
+              data-peso-cheio="<?= $t['peso_cheio'] ?>"
+              data-peso-vazio="<?= $t['peso_vazio'] ?>"
+              data-gramatura="<?= $t['gramatura'] ?: (($t['peso_cheio'] ?? 0) - ($t['peso_vazio'] ?? 0)) ?>"
+              data-capacidade="<?= $t['capacidade_folhas'] ?>"
+              data-custo-folha="<?= $t['custo_por_folha'] ?>"
+              data-preco="<?= $t['preco_toner'] ?>">
+              <?= e($t['modelo']) ?>
+              <?php if ($t['peso_cheio']): ?>
+                (Cheio: <?= number_format($t['peso_cheio'],1) ?>g / Vazio: <?= number_format($t['peso_vazio'],1) ?>g)
+              <?php endif; ?>
+            </option>
+            <?php endforeach; ?>
+          </select>
+          <div id="info-toner" class="mt-2 hidden bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-lg p-3 text-xs text-blue-800 dark:text-blue-300 space-y-1">
+            <div>📊 Gramatura total: <strong id="info-gram"></strong>g</div>
+            <div>⚖️ Peso cheio: <strong id="info-cheio"></strong>g &nbsp;|&nbsp; Peso vazio: <strong id="info-vazio"></strong>g</div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Modo de Entrada <span class="text-red-500">*</span></label>
+          <div class="flex gap-4">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="modo" value="peso" id="modo-peso" checked onchange="onModoChange()" class="accent-blue-600">
+              <span class="text-sm dark:text-gray-300">Informar Peso (g)</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="modo" value="percentual" id="modo-pct" onchange="onModoChange()" class="accent-blue-600">
+              <span class="text-sm dark:text-gray-300">Informar % direto</span>
+            </label>
+          </div>
+        </div>
+
+        <div id="campo-peso">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Peso do Toner Retornado (g) <span class="text-red-500">*</span></label>
+          <input type="number" id="t-peso" step="0.01" min="0" placeholder="Ex: 320.50"
+                 oninput="recalcular()" onchange="recalcular()"
+                 class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div id="campo-pct" class="hidden">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Percentual de Gramatura Restante (%) <span class="text-red-500">*</span></label>
+          <input type="number" id="t-pct" step="0.01" min="0" max="100" placeholder="Ex: 65.00"
+                 oninput="recalcular()" onchange="recalcular()"
+                 class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
       </div>
 
-      <!-- Campo Peso -->
-      <div id="campo-peso">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Peso do Toner Retornado (g) <span class="text-red-500">*</span></label>
-        <input type="number" id="t-peso" step="0.01" min="0" placeholder="Ex: 320.50"
-               oninput="recalcular()" onchange="recalcular()"
-               class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-      </div>
-
-      <!-- Campo Percentual -->
-      <div id="campo-pct" class="hidden">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Percentual de Gramatura Restante (%) <span class="text-red-500">*</span></label>
-        <input type="number" id="t-pct" step="0.01" min="0" max="100" placeholder="Ex: 65.00"
-               oninput="recalcular()" onchange="recalcular()"
-               class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-      </div>
-
-      <!-- Resultado do cálculo -->
-      <div id="resultado-calc" class="hidden bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700 rounded-xl p-4 space-y-3 transition-colors">
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-gray-700 dark:text-gray-300">% de Gramatura Restante</span>
-          <span id="res-pct" class="text-2xl font-bold text-blue-700 dark:text-blue-400">—</span>
+      <!-- ETAPA 3 -->
+      <div id="step-3" class="triagem-step space-y-5">
+        <div class="step-badge">Etapa 3: Resultados e Destino</div>
+        
+        <div id="resultado-calc" class="hidden bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700 rounded-xl p-4 space-y-3 transition-colors">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">% de Gramatura Restante</span>
+            <span id="res-pct" class="text-2xl font-bold text-blue-700 dark:text-blue-400">—</span>
+          </div>
+          <div class="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-3">
+            <div id="res-barra" class="h-3 rounded-full transition-all duration-500 bg-green-500" style="width:0%"></div>
+          </div>
+          <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+            <span>Gramatura restante: <strong id="res-gram" class="dark:text-gray-300">—</strong>g</span>
+            <span id="res-folhas-wrap" class="hidden">📄 Folhas equivalentes: <strong id="res-folhas" class="dark:text-gray-300">—</strong></span>
+            <span id="res-valor-wrap" class="hidden"><span id="res-valor-label">💰 Impacto:</span> <strong id="res-valor" class="text-green-700 dark:text-green-400">—</strong></span>
+          </div>
+          <div id="res-parecer-box" class="hidden rounded-lg p-3 border dark:border-slate-600">
+            <div class="text-xs font-semibold uppercase tracking-wide mb-1 text-gray-500 dark:text-gray-400">📋 Parecer do Sistema</div>
+            <div id="res-parecer" class="text-sm font-medium dark:text-white"></div>
+          </div>
         </div>
-        <div class="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-3">
-          <div id="res-barra" class="h-3 rounded-full transition-all duration-500 bg-green-500" style="width:0%"></div>
-        </div>
-        <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-          <span>Gramatura restante: <strong id="res-gram" class="dark:text-gray-300">—</strong>g</span>
-          <span id="res-folhas-wrap" class="hidden">📄 Folhas equivalentes: <strong id="res-folhas" class="dark:text-gray-300">—</strong></span>
-          <span id="res-valor-wrap" class="hidden"><span id="res-valor-label">💰 Impacto:</span> <strong id="res-valor" class="text-green-700 dark:text-green-400">—</strong></span>
-        </div>
-        <!-- Parecer -->
-        <div id="res-parecer-box" class="hidden rounded-lg p-3 border dark:border-slate-600">
-          <div class="text-xs font-semibold uppercase tracking-wide mb-1 text-gray-500 dark:text-gray-400">📋 Parecer do Sistema</div>
-          <div id="res-parecer" class="text-sm font-medium dark:text-white"></div>
-        </div>
-      </div>
 
-      <!-- Destino Final -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Destino Final <span class="text-red-500">*</span></label>
-        <select id="t-destino" onchange="onDestinoChange()" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option value="">Selecione o destino...</option>
-          <option value="Descarte">♻️ Descarte</option>
-          <option value="Garantia">🛡️ Garantia</option>
-          <option value="Uso Interno">🏢 Uso Interno</option>
-          <option value="Estoque">📦 Estoque</option>
-        </select>
-        <div id="info-estoque" class="hidden mt-2 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800/50 rounded-lg p-3 text-xs text-green-800 dark:text-green-400">
-          💰 Ao selecionar <strong>Estoque</strong>, o sistema calculará automaticamente o <strong>valor em R$ recuperado</strong> com base na capacidade de folhas e custo por folha do toner.
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Destino Final <span class="text-red-500">*</span></label>
+          <select id="t-destino" onchange="onDestinoChange()" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Selecione o destino...</option>
+            <option value="Descarte">♻️ Descarte</option>
+            <option value="Garantia">🛡️ Garantia</option>
+            <option value="Uso Interno">🏢 Uso Interno</option>
+            <option value="Estoque">📦 Estoque</option>
+          </select>
+          <div id="info-estoque" class="hidden mt-2 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800/50 rounded-lg p-3 text-xs text-green-800 dark:text-green-400">
+            💰 Valor recuperado calculado automaticamente.
+          </div>
+          <div id="info-descarte" class="hidden mt-2 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800/50 rounded-lg p-3 text-xs text-red-800 dark:text-red-400">
+            🗑️ Folhas descartadas calculadas automaticamente.
+          </div>
         </div>
-        <div id="info-descarte" class="hidden mt-2 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800/50 rounded-lg p-3 text-xs text-red-800 dark:text-red-400">
-          🗑️ Ao selecionar <strong>Descarte</strong>, o sistema calculará automaticamente as <strong>folhas descartadas</strong> e o <strong>valor em R$ perdido</strong> (negativo).
+
+        <div id="wrap-fornecedor" class="hidden">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fornecedor <span id="fornecedor-required" class="text-red-500">*</span></label>
+          <select id="t-fornecedor-id" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Selecione o fornecedor...</option>
+            <?php foreach (($fornecedores ?? []) as $f): ?>
+              <option value="<?= (int)$f['id'] ?>"><?= e($f['nome'] ?? '') ?></option>
+            <?php endforeach; ?>
+          </select>
         </div>
-      </div>
 
-      <!-- Fornecedor (obrigatório para Garantia) -->
-      <div id="wrap-fornecedor" class="hidden">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fornecedor <span id="fornecedor-required" class="text-red-500">*</span></label>
-        <select id="t-fornecedor-id" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option value="">Selecione o fornecedor...</option>
-          <?php foreach (($fornecedores ?? []) as $f): ?>
-            <option value="<?= (int)$f['id'] ?>"><?= e($f['nome'] ?? '') ?></option>
-          <?php endforeach; ?>
-        </select>
-        <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">Obrigatório quando o destino for <strong>Garantia</strong>.</div>
-      </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Defeito <span class="text-gray-400 dark:text-gray-500 text-xs">(opcional)</span></label>
+          <select id="t-defeito-id" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Sem defeito</option>
+            <?php foreach (($defeitos ?? []) as $d): ?>
+              <option value="<?= (int)$d['id'] ?>"><?= e($d['nome_defeito'] ?? '') ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
 
-      <!-- Defeito (Opcional) -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Defeito <span class="text-gray-400 dark:text-gray-500 text-xs">(opcional)</span></label>
-        <select id="t-defeito-id" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option value="">Sem defeito</option>
-          <?php foreach (($defeitos ?? []) as $d): ?>
-            <option value="<?= (int)$d['id'] ?>"><?= e($d['nome_defeito'] ?? '') ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-
-      <!-- Observações -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observações</label>
-        <textarea id="t-obs" rows="2" placeholder="Observações adicionais..." class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observações</label>
+          <textarea id="t-obs" rows="2" placeholder="Observações adicionais..." class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+        </div>
       </div>
     </div>
-    <div class="triagem-modal-footer flex justify-end gap-3 px-6 py-4 border-t">
+    <div class="triagem-modal-footer flex justify-between items-center px-6 py-4 border-t">
       <button onclick="fecharModalTriagem()" class="px-5 py-2 text-sm text-gray-600 dark:text-gray-300 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">Cancelar</button>
-      <button onclick="salvarTriagem()" id="btn-salvar" class="px-5 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors font-medium">Salvar</button>
+      
+      <div class="flex gap-3">
+        <button id="btn-prev" onclick="changeStep(-1)" class="hidden px-5 py-2 text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800/50 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors font-medium">Anterior</button>
+        <button id="btn-next" onclick="changeStep(1)" class="px-8 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors font-medium shadow-lg shadow-blue-500/20">Próximo</button>
+        <button id="btn-salvar" onclick="salvarTriagem()" class="hidden px-8 py-2 text-sm text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors font-medium shadow-lg shadow-emerald-500/20">Salvar Triagem</button>
+      </div>
     </div>
+  </div>
+</div>
   </div>
 </div>
 
@@ -1187,10 +1224,97 @@ function importarPlanilha() {
     });
 }
 
-// ===== MODAL TRIAGEM =====
+// ===== MODAL TRIAGEM (WIZARD 3 ETAPAS) =====
+let currentTriagemStep = 1;
+
+function changeStep(n) {
+  const nextStep = currentTriagemStep + n;
+  
+  // Se estiver tentando avançar, validar a etapa atual
+  if (n > 0 && !validarEtapa(currentTriagemStep)) {
+    return;
+  }
+
+  if (nextStep < 1 || nextStep > 3) return;
+
+  irParaEtapa(nextStep);
+}
+
+function irParaEtapa(etapa) {
+  // Esconder todas as etapas
+  document.querySelectorAll('.triagem-step').forEach(el => {
+    el.classList.remove('active');
+  });
+
+  // Mostrar a etapa alvo
+  const target = document.getElementById(`step-${etapa}`);
+  if (target) {
+    target.classList.add('active');
+    currentTriagemStep = etapa;
+  }
+
+  // Atualizar botões no rodapé
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  const btnSalvar = document.getElementById('btn-salvar');
+
+  if (currentTriagemStep === 1) {
+    btnPrev.classList.add('hidden');
+    btnNext.classList.remove('hidden');
+    btnSalvar.classList.add('hidden');
+  } else if (currentTriagemStep === 2) {
+    btnPrev.classList.remove('hidden');
+    btnNext.classList.remove('hidden');
+    btnSalvar.classList.add('hidden');
+  } else if (currentTriagemStep === 3) {
+    btnPrev.classList.remove('hidden');
+    btnNext.classList.add('hidden');
+    btnSalvar.classList.remove('hidden');
+    
+    // Na etapa 3, garantir que o cálculo esteja atualizado
+    recalcular();
+  }
+}
+
+function validarEtapa(etapa) {
+  if (etapa === 1) {
+    const clienteId = document.getElementById('t-cliente-id').value;
+    if (!clienteId) {
+      showToast('Por favor, selecione um cliente para prosseguir.', 'warning');
+      document.getElementById('t-cliente-search').focus();
+      return false;
+    }
+  } else if (etapa === 2) {
+    const tonerId = document.getElementById('t-toner-id').value;
+    if (!tonerId) {
+      showToast('Por favor, selecione o modelo do toner.', 'warning');
+      document.getElementById('t-toner-search').focus();
+      return false;
+    }
+
+    const modo = document.querySelector('input[name="modo"]:checked').value;
+    if (modo === 'peso') {
+      const peso = document.getElementById('t-peso').value;
+      if (!peso || parseFloat(peso) <= 0) {
+        showToast('Informe o peso do toner retornado.', 'warning');
+        document.getElementById('t-peso').focus();
+        return false;
+      }
+    } else {
+      const pct = document.getElementById('t-pct').value;
+      if (pct === '' || parseFloat(pct) < 0 || parseFloat(pct) > 100) {
+        showToast('Informe um percentual válido (0-100%).', 'warning');
+        document.getElementById('t-pct').focus();
+        return false;
+      }
+    }
+  }
+  return true;
+}
 function abrirModalNova() {
   resetModalTriagem();
   document.getElementById('modal-titulo').textContent = 'Nova Triagem';
+  irParaEtapa(1);
   document.getElementById('modal-triagem').classList.remove('hidden');
 }
 
@@ -1236,6 +1360,7 @@ function abrirModalEditar(r) {
     buscarDefeitosPorCodigo(); // Attempt to load if there's a requirement code
   }
   
+  irParaEtapa(1);
   document.getElementById('modal-triagem').classList.remove('hidden');
 }
 
@@ -1271,6 +1396,7 @@ function resetModalTriagem() {
   
   onModoChange();
   lastCalcResult = null;
+  currentTriagemStep = 1;
 }
 
 function onTonerChange() {
