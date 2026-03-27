@@ -134,10 +134,10 @@ if ($userRole === 'super_admin' || $userRole === 'admin') {
     /* Loading overlay removido - causava problemas globais */
   </style>
 </head>
-<body class="bg-slate-950 text-slate-200 min-h-screen selection:bg-blue-500/30 selection:text-white font-sans antialiased">
-  <!-- Textura de fundo sutil (Neural grid for ERP 2025 vibe) -->
-  <div class="fixed inset-0 z-0 pointer-events-none opacity-20" style="background-color:#020617;
-    background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+<body class="bg-slate-50 text-slate-800 min-h-screen selection:bg-blue-500/30 selection:text-white font-sans antialiased">
+  <!-- Textura de fundo sutil (Grid for ERP 2025 vibe - Light Mode) -->
+  <div class="fixed inset-0 z-0 pointer-events-none opacity-60" style="background-color:#f8fafc;
+    background-image: linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
     background-size: 40px 40px;"></div>
 
   <div class="flex h-screen bg-transparent relative z-10">
