@@ -129,11 +129,11 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
                oninput="updateGridZoom(this.value)">
         <span id="grid-zoom-val" class="text-xs font-bold text-blue-600 dark:text-blue-400 w-10">100%</span>
       </div>
-      <div id="grid-top-scroll" class="flex-1 overflow-x-auto" style="overflow-y:hidden;height:8px;">
+      <div id="grid-top-scroll" class="flex-1 overflow-x-auto custom-scrollbar" style="overflow-y:hidden;height:12px;">
         <div id="grid-top-scroll-inner" style="height:1px;"></div>
       </div>
     </div>
-    <div id="grid-scroll" class="overflow-x-auto">
+    <div id="grid-scroll" class="overflow-x-auto custom-scrollbar">
       <table class="min-w-full divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
         <thead class="bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-md">
           <tr id="grid-head" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider"></tr>
@@ -393,6 +393,41 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
   .dark .step-badge {
     background: #0c4a6e;
     color: #7dd3fc;
+  }
+  /* Custom Scrollbar for Grid */
+  .custom-scrollbar::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 20px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+    background-clip: content-box;
+  }
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #475569;
+    background-clip: content-box;
+  }
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+    background-clip: content-box;
+  }
+
+  /* Ajuste no container do grid */
+  #grid-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+  .dark #grid-scroll {
+    scrollbar-color: #475569 transparent;
   }
 </style>
 
