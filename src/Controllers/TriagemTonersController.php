@@ -603,12 +603,12 @@ class TriagemTonersController
         ob_clean();
         header('Content-Type: application/json');
 
-        if (!PermissionService::hasPermission($_SESSION['user_id'], 'triagem_toners', 'view')) {
-            echo json_encode(['success' => false, 'message' => 'Sem permissão']);
-            return;
-        }
-
         try {
+            if (!PermissionService::hasPermission($_SESSION['user_id'] ?? 0, 'triagem_toners', 'view')) {
+                echo json_encode(['success' => false, 'message' => 'Sem permissão']);
+                return;
+            }
+
             $page     = max(1, (int)($_GET['page'] ?? 1));
             $perPage  = max(1, min(100, (int)($_GET['per_page'] ?? 15)));
             $offset   = ($page - 1) * $perPage;
@@ -785,8 +785,8 @@ class TriagemTonersController
                     'total_pages' => $totalPages,
                 ],
             ]);
-        } catch (\Exception $e) {
-            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        } catch (\Throwable $e) {
+            echo json_encode(['success' => false, 'message' => 'PHP Error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine()]);
         }
     }
 
