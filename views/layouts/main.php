@@ -49,35 +49,32 @@ if ($userRole === 'super_admin' || $userRole === 'admin') {
   <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
   <style>
-    /* TomSelect dark mode overrides */
-    .dark .ts-wrapper .ts-control {
-      background-color: rgb(30,41,59) !important;
-      border-color: rgb(71,85,105) !important;
-      color: rgb(241,245,249) !important;
+    /* TomSelect — tema único monochromático */
+    .ts-wrapper .ts-control {
+      background-color: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+      color: #1e293b !important;
+      border-radius: 10px !important;
     }
-    .dark .ts-dropdown {
-      background-color: rgb(30,41,59) !important;
-      border-color: rgb(71,85,105) !important;
-      color: rgb(241,245,249) !important;
+    .ts-dropdown {
+      background-color: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      color: #1e293b !important;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08) !important;
+      border-radius: 10px !important;
     }
-    .dark .ts-dropdown .option:hover,
-    .dark .ts-dropdown .option.active {
-      background-color: rgb(51,65,85) !important;
+    .ts-dropdown .option:hover,
+    .ts-dropdown .option.active {
+      background-color: #f1f5f9 !important;
+      color: #0f172a !important;
     }
-    .dark .ts-wrapper.multi .ts-control .item {
-      background-color: rgb(37,99,235) !important;
-      color: #fff !important;
+    .ts-wrapper.multi .ts-control .item {
+      background-color: #e2e8f0 !important;
+      color: #334155 !important;
       border-color: transparent !important;
+      border-radius: 6px !important;
     }
   </style>
-  <script>
-    // Configurar tema inicial
-    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  </script>
   <link rel="stylesheet" href="/src/Support/modal-styles.css?v=<?= urlencode($assetVersion) ?>">
   <script src="/src/Support/modal-utils.js?v=<?= urlencode($assetVersion) ?>"></script>
   <script>
@@ -101,18 +98,9 @@ if ($userRole === 'super_admin' || $userRole === 'admin') {
     window.userPermissions = <?= json_encode($_SESSION['user_permissions'] ?? []) ?>;
   </script>
   <script>
-    // Tailwind config with dark theme
     tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            primary: {
-              50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 800: '#3730a3', 900: '#312e81'
-            },
-          }
-        }
-      }
+      darkMode: false,
+      theme: { extend: {} }
     }
   </script>
   <style>
@@ -135,19 +123,20 @@ if ($userRole === 'super_admin' || $userRole === 'admin') {
     /* Loading overlay removido - causava problemas globais */
   </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300 min-h-screen">
-  <!-- Fundo Dinâmico IA -->
-  <div class="fixed inset-0 z-0 opacity-[0.03] dark:opacity-[0.06] pointer-events-none transition-all duration-700" 
-       style="background-image: url('<?= $bgImage ?>'); background-size: cover; background-position: center; background-attachment: fixed;"></div>
+<body class="bg-slate-100 text-slate-900 min-h-screen">
+  <!-- Textura de fundo sutil -->
+  <div class="fixed inset-0 z-0 pointer-events-none" style="background-color:#f1f4f8;
+    background-image: linear-gradient(rgba(15,23,42,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.025) 1px, transparent 1px);
+    background-size: 40px 40px;"></div>
 
-  <div class="flex h-screen bg-transparent relative z-10 transition-colors duration-300">
+  <div class="flex h-screen bg-transparent relative z-10">
     <!-- Sidebar -->
     <?php include __DIR__ . '/../partials/sidebar.php'; ?>
     
     <!-- Main Content -->
     <div class="flex-1 flex flex-col overflow-hidden">
       <!-- Header/Navbar com Breadcrumb -->
-      <header class="bg-white dark:bg-slate-800 shadow-sm border-b border-gray-200 dark:border-slate-700/50 transition-colors duration-300">
+      <header class="bg-white shadow-sm border-b border-slate-200/80">
         <div class="flex items-center justify-between px-6 py-3">
 
           <!-- Breadcrumb -->
@@ -194,14 +183,14 @@ if ($userRole === 'super_admin' || $userRole === 'admin') {
             $module  = $routeMap[$fullKey] ?? $routeMap[$segments[0] ?? ''] ?? null;
           ?>
           <div class="flex items-center gap-2 text-sm">
-            <a href="/inicio" class="flex items-center gap-1.5 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+            <a href="/inicio" class="flex items-center gap-1.5 text-slate-400 hover:text-slate-700 transition-colors">
               <i class="ph ph-house text-base"></i>
               <span class="hidden sm:inline">Início</span>
             </a>
             <?php if ($module): ?>
-              <i class="ph ph-caret-right text-slate-300 dark:text-slate-600 text-xs"></i>
-              <span class="flex items-center gap-1.5 text-slate-700 dark:text-slate-200 font-semibold">
-                <i class="ph <?= e($module['icon']) ?> text-base text-blue-500 dark:text-blue-400"></i>
+              <i class="ph ph-caret-right text-slate-300 text-xs"></i>
+              <span class="flex items-center gap-1.5 text-slate-700 font-semibold">
+                <i class="ph <?= e($module['icon']) ?> text-base text-slate-500"></i>
                 <?= e($module['label']) ?>
               </span>
             <?php endif; ?>
@@ -209,8 +198,8 @@ if ($userRole === 'super_admin' || $userRole === 'admin') {
 
           <!-- Lado direito: usuário logado -->
           <div class="flex items-center gap-3">
-            <a href="/profile" class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors">
-              <div class="w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+            <a href="/profile" class="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 transition-colors group">
+              <div class="w-7 h-7 bg-slate-700 group-hover:bg-slate-900 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 transition-colors">
                 <?= strtoupper(substr($_SESSION['user_name'] ?? 'U', 0, 1)) ?>
               </div>
               <span class="hidden md:inline font-medium"><?= e(explode(' ', $_SESSION['user_name'] ?? 'Usuário')[0]) ?></span>
@@ -221,7 +210,7 @@ if ($userRole === 'super_admin' || $userRole === 'admin') {
       </header>
       
       <!-- Content -->
-      <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-slate-900 p-6 transition-colors duration-300">
+      <main class="flex-1 overflow-x-hidden overflow-y-auto bg-slate-100 p-6">
         <!-- Aviso de migração de email removido - Resend API ativo -->
         
         <?php if ($msg = flash('success')): ?>
@@ -244,20 +233,20 @@ if ($userRole === 'super_admin' || $userRole === 'admin') {
   <div id="global-toast-stack" class="fixed top-5 right-5 z-[99999] flex flex-col gap-2 pointer-events-none" style="max-width:380px;"></div>
 
   <!-- ===== GLOBAL CONFIRM MODAL ===== -->
-  <div id="global-confirm-overlay" class="hidden fixed inset-0 z-[99998] flex items-center justify-center p-4" style="background:rgba(15,23,42,0.65);backdrop-filter:blur(4px);">
-    <div id="global-confirm-box" class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-700 w-full max-w-sm p-6 text-center transform transition-all scale-95 opacity-0" style="transition:transform .2s ease,opacity .2s ease;">
-      <div id="global-confirm-icon" class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 bg-red-100 dark:bg-red-900/30">
-        <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <div id="global-confirm-overlay" class="hidden fixed inset-0 z-[99998] flex items-center justify-center p-4" style="background:rgba(15,23,42,0.5);backdrop-filter:blur(6px);">
+    <div id="global-confirm-box" class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-sm p-6 text-center transform transition-all scale-95 opacity-0" style="transition:transform .2s ease,opacity .2s ease;">
+      <div id="global-confirm-icon" class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 bg-slate-100">
+        <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
         </svg>
       </div>
-      <h3 id="global-confirm-title" class="text-lg font-bold text-gray-900 dark:text-white mb-2">Confirmar ação</h3>
-      <p id="global-confirm-msg" class="text-sm text-gray-500 dark:text-gray-400 mb-6">Tem certeza que deseja continuar?</p>
+      <h3 id="global-confirm-title" class="text-lg font-bold text-slate-900 mb-2">Confirmar ação</h3>
+      <p id="global-confirm-msg" class="text-sm text-slate-500 mb-6">Tem certeza que deseja continuar?</p>
       <div class="flex gap-3 justify-center">
-        <button id="global-confirm-cancel" class="flex-1 px-4 py-2.5 text-sm font-bold bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-200 dark:hover:bg-slate-600 transition-all">
+        <button id="global-confirm-cancel" class="flex-1 px-4 py-2.5 text-sm font-bold bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 transition-all">
           Cancelar
         </button>
-        <button id="global-confirm-ok" class="flex-1 px-4 py-2.5 text-sm font-bold bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all shadow-lg hover:shadow-red-500/20">
+        <button id="global-confirm-ok" class="flex-1 px-4 py-2.5 text-sm font-bold bg-slate-900 text-white rounded-xl hover:bg-slate-700 transition-all">
           Confirmar
         </button>
       </div>

@@ -126,9 +126,9 @@ $menu = [
 ];
 $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/', '/') ?: '/';
 ?>
-<aside id="sidebar" class="hidden lg:flex lg:w-72 flex-col bg-slate-50 dark:bg-[#0f172a] border-r border-slate-200 dark:border-slate-700/50 shadow-[4px_0_24px_-4px_rgba(0,0,0,0.3)] transition-[width] duration-300 relative z-40">
+<aside id="sidebar" class="hidden lg:flex lg:w-72 flex-col bg-white border-r border-slate-200 shadow-sm transition-[width] duration-300 relative z-40">
   <!-- Botão Ocultar/Expandir -->
-  <button id="sidebarToggleBtn" class="hidden lg:flex absolute -right-3.5 top-5 bg-blue-600 hover:bg-blue-500 border-2 border-slate-50 dark:border-[#0f172a] text-white rounded-full w-7 h-7 items-center justify-center z-50 transition-colors shadow-lg group">
+  <button id="sidebarToggleBtn" class="hidden lg:flex absolute -right-3.5 top-5 bg-slate-800 hover:bg-slate-900 border-2 border-white text-white rounded-full w-7 h-7 items-center justify-center z-50 transition-colors shadow-md group">
     <svg id="sidebarToggleIcon" class="w-4 h-4 transition-transform duration-300 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
     </svg>
@@ -278,7 +278,7 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
           <?php if ($hasSubmenu): ?>
             <?php $isCategory = isset($item['category']) && $item['category']; ?>
             <div class="submenu-container">
-              <button onclick="toggleSubmenu(this)" title="<?= e($item['label']) ?>" class="flex items-center justify-between w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-800 <?php echo $submenuActive?'bg-blue-100 dark:bg-blue-600/90 text-blue-800 dark:text-white font-semibold shadow':($isCategory ? 'text-slate-700 hover:text-slate-900 bg-slate-200/50 dark:text-slate-200 dark:hover:text-white dark:bg-slate-800/30' : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'); ?>">
+              <button onclick="toggleSubmenu(this)" title="<?= e($item['label']) ?>" class="flex items-center justify-between w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-100 <?php echo $submenuActive?'bg-slate-900 text-white font-semibold shadow':($isCategory ? 'text-slate-700 hover:text-slate-900 bg-slate-100/60 font-semibold tracking-wide' : 'text-slate-600 hover:text-slate-900'); ?>">
                 <div class="flex items-center gap-3">
                   <span class="text-lg flex-shrink-0"><?= $item['icon'] ?></span>
                   <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300 <?php echo $isCategory ? 'font-semibold tracking-wide' : ''; ?>"><?= e($item['label']) ?></span>
@@ -352,7 +352,7 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
                             $nestedActive = rtrim($nestedSub['href'], '/') === $current;
                           ?>
                             <li>
-                              <a href="<?= e($nestedSub['href']) ?>" title="<?= e($nestedSub['label']) ?>" class="page-link flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-800 <?php echo $nestedActive?'bg-blue-100 dark:bg-blue-500/90 text-blue-800 dark:text-white font-semibold shadow-sm':'text-slate-400 dark:text-slate-500 hover:text-white'; ?>">
+                              <a href="<?= e($nestedSub['href']) ?>" title="<?= e($nestedSub['label']) ?>" class="page-link flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 hover:bg-slate-100 <?php echo $nestedActive?'bg-slate-900 text-white font-semibold shadow-sm':'text-slate-400 hover:text-slate-800'; ?>">
                                 <span class="flex-shrink-0"><?= $nestedSub['icon'] ?></span>
                                 <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300"><?= e($nestedSub['label']) ?></span>
                               </a>
@@ -363,7 +363,7 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
                     <?php else: ?>
                       <!-- Link normal do submenu -->
                       <?php $isMustardHighlight = isset($sub['highlight']) && $sub['highlight'] === 'mustard'; ?>
-                      <a href="<?= e($sub['href']) ?>" title="<?= e($sub['label']) ?>" class="page-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-200 dark:hover:bg-slate-800 <?php echo $isMustardHighlight ? 'bg-yellow-500/90 text-black shadow-md hover:bg-yellow-600 hover:text-black' : ($subActive?'bg-blue-100 dark:bg-blue-500/90 text-blue-800 dark:text-white font-semibold shadow-sm':'text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'); ?> <?php echo isset($sub['beta']) && $sub['beta'] ? 'beta-menu' : ''; ?> <?php echo $isRetornadosDeprecated ? 'retornados-warning' : ''; ?>">
+                      <a href="<?= e($sub['href']) ?>" title="<?= e($sub['label']) ?>" class="page-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-slate-100 <?php echo $isMustardHighlight ? 'bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200 hover:text-amber-900' : ($subActive?'bg-slate-900 text-white font-semibold shadow-sm':'text-slate-500 hover:text-slate-800'); ?> <?php echo isset($sub['beta']) && $sub['beta'] ? 'beta-menu' : ''; ?> <?php echo $isRetornadosDeprecated ? 'retornados-warning' : ''; ?>">
                         <span class="text-base flex-shrink-0 <?php echo $isRetornadosDeprecated ? 'bomb-icon' : ''; ?>"><?= $isRetornadosDeprecated ? '<i class="ph-fill ph-warning"></i>' : $sub['icon'] ?></span>
                         <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300 flex items-center gap-2 <?php echo $isRetornadosDeprecated ? 'flex-col items-start gap-0.5' : ''; ?>">
                           <?= e($sub['label']) ?>
