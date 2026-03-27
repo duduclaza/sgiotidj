@@ -206,6 +206,7 @@
 </section>
 
 <script>
+const isMasterUser = <?= (isset($_SESSION['user_role']) && in_array(strtolower($_SESSION['user_role']), ['super_admin', 'superadmin'])) ? 'true' : 'false' ?>;
 let currentProfileId = null;
 const modulesByCategory = {
   'Ecossistema Geral': [

@@ -99,7 +99,7 @@ if ($userRole === 'super_admin' || $userRole === 'admin') {
   </script>
   <script>
     tailwind.config = {
-      darkMode: false,
+      darkMode: 'class',
       theme: { extend: {} }
     }
   </script>
