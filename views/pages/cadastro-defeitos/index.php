@@ -73,7 +73,7 @@ $defeitos = $defeitos ?? [];
                   class="flex-1 px-6 py-2.5 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-slate-600 transition-all">
             Cancelar
           </button>
-          <button type="submit" 
+          <button type="submit" id="btnSalvarDefeito"
                   class="flex-1 px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg hover:shadow-blue-500/20">
             Salvar Registro
           </button>

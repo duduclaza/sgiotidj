@@ -11,19 +11,25 @@ $title = $title ?? 'OTI - Login';
   <meta http-equiv="Expires" content="0">
   <title><?= e($title) ?></title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      overflow-y: auto;
-    }
     .btn-primary {
-      background: #2563eb;
-      transition: all 0.3s ease;
+      background: #1d4ed8;
+      box-shadow: 0 4px 14px 0 rgba(29, 78, 216, 0.39);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .btn-primary:hover {
-      background: #1d4ed8;
-      transform: scale(1.02);
+      background: #1e40af;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(29, 78, 216, 0.23);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    }
+    .text-shadow-premium {
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .typing-effect {
       border-right: 2px solid #6b7280;
@@ -142,9 +148,15 @@ $title = $title ?? 'OTI - Login';
 </head>
 <body class="min-h-screen">
   <div class="flex min-h-screen">
-    <!-- Painel Esquerdo - Azul com efeito roxo/lilás -->
-    <div class="left-panel w-full md:w-1/2 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-800 flex items-center justify-center p-4 md:p-8" style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #6366f1 100%);">
-      <div class="w-full max-w-md my-8">
+    <!-- Painel Esquerdo - Background IA + Glassmorphism -->
+    <div class="left-panel w-full md:w-1/2 relative flex items-center justify-center p-4 md:p-8 overflow-hidden">
+      <!-- Background Image -->
+      <div class="absolute inset-0 z-0">
+        <img src="/assets/auth-bg.png" alt="Background" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-brightness-75"></div>
+      </div>
+      
+      <div class="w-full max-w-md my-8 relative z-10">
         <?php include $viewFile; ?>
       </div>
     </div>
@@ -358,6 +370,10 @@ $title = $title ?? 'OTI - Login';
   
   <?php endif; // Fim do tema de Natal ?>
   
+  
+  <?php include __DIR__ . '/../partials/ui-feedback.php'; ?>
+  <?php include __DIR__ . '/../partials/ui-scripts.php'; ?>
+
   <script>
     // Efeito de digitação
     const text = 'Sistema de Gestão Integrada';
@@ -366,6 +382,7 @@ $title = $title ?? 'OTI - Login';
     let isDeleting = false;
     
     function typeWriter() {
+      if (!typingElement) return;
       if (!isDeleting && index <= text.length) {
         typingElement.textContent = text.substring(0, index);
         index++;

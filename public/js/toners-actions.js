@@ -2,38 +2,18 @@
 
 // Função para exibir alertas
 function showAlert(type, message) {
-    // Remover alertas existentes
-    const existingAlert = document.querySelector('.toner-alert');
-    if (existingAlert) {
-        existingAlert.remove();
+    if (window.showToast) {
+        window.showToast(message, type);
+    } else {
+        // Fallback para o comportamento original se o partial não estiver carregado
+        const existingAlert = document.querySelector('.toner-alert');
+        if (existingAlert) existingAlert.remove();
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `toner-alert fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg text-white font-medium flex items-center ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+        alertDiv.innerHTML = message;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 5000);
     }
-    
-    // Criar elemento de alerta
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `toner-alert fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg text-white font-medium flex items-center ${
-        type === 'success' ? 'bg-green-500' : 'bg-red-500'
-    }`;
-    
-    // Ícone baseado no tipo
-    const icon = type === 'success' ? 
-        '<svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' :
-        '<svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
-    
-    alertDiv.innerHTML = `${icon}${message}`;
-    
-    // Adicionar ao corpo do documento
-    document.body.appendChild(alertDiv);
-    
-    // Remover após 5 segundos
-    setTimeout(() => {
-        alertDiv.style.opacity = '0';
-        alertDiv.style.transition = 'opacity 0.5s';
-        setTimeout(() => {
-            if (alertDiv.parentNode) {
-                alertDiv.parentNode.removeChild(alertDiv);
-            }
-        }, 500);
-    }, 5000);
 }
 
 // Adicionar estilos para os botões de ação
@@ -190,8 +170,7 @@ function saveToner(id) {
     const saveBtn = document.querySelector(`.save-btn-${id}`);
     const originalSaveText = saveBtn ? saveBtn.innerHTML : '';
     if (saveBtn) {
-        saveBtn.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Salvando...';
-        saveBtn.disabled = true;
+        setButtonLoading(saveBtn, true, 'Salvando...');
     }
     
     // Coletar dados do formulário
@@ -299,84 +278,56 @@ function saveToner(id) {
 // Função para excluir um toner
 function deleteToner(id, event) {
     // Evitar múltiplos cliques
-    if (event && event.target.getAttribute('data-deleting') === 'true') {
-        return;
-    }
-    
-    // Mostrar confirmação personalizada
-    const confirmed = window.confirm('Tem certeza que deseja excluir este toner? Esta ação não pode ser desfeita.');
-    if (!confirmed) return;
-    
-    // Mostrar indicador de carregamento
-    const deleteBtn = event ? event.target : document.querySelector(`[onclick*="deleteToner(${id})"]`);
-    const originalText = deleteBtn ? deleteBtn.innerHTML : '';
-    
-    if (deleteBtn) {
-        deleteBtn.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Excluindo...';
-        deleteBtn.setAttribute('data-deleting', 'true');
-        deleteBtn.disabled = true;
-    }
-    
-    // Obter token CSRF
-    const token = document.querySelector('meta[name="csrf-token"]')?.content;
-    
-    // Enviar requisição DELETE via AJAX
-    fetch(`/toners/${id}`, {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': token || '',
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json'
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(err => { throw err; });
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Resposta da exclusão:', data);
-        
-        if (data.success) {
-            // Mostrar mensagem de sucesso
-            showAlert('success', 'Toner excluído com sucesso!');
-            
-            // Remover a linha da tabela
-            const row = document.querySelector(`tr[data-toner-id="${id}"]`) || 
-                        document.querySelector(`[onclick*="editToner(${id})"]`).closest('tr');
-            
-            if (row) {
-                // Adicionar animação de fade out
-                row.style.transition = 'opacity 0.5s';
-                row.style.opacity = '0';
-                
-                // Remover após a animação
-                setTimeout(() => {
-                    row.remove();
-                    
-                    // Atualizar contagem de resultados
-                    updateResultsCount();
-                }, 500);
-            }
-        } else {
-            throw new Error(data.message || 'Erro ao excluir o toner');
-        }
-    })
-    .catch(error => {
-        console.error('Erro ao excluir toner:', error);
-        showAlert('error', error.message || 'Erro ao excluir o toner. Por favor, tente novamente.');
-    })
-    .finally(() => {
-        // Restaurar botão de exclusão
+    showConfirm('Tem certeza que deseja excluir este toner? Esta ação não pode ser desfeita.', () => {
+        const deleteBtn = event ? (event.currentTarget || event.target) : document.querySelector(`[onclick*="deleteToner(${id})"]`);
         if (deleteBtn) {
-            deleteBtn.innerHTML = originalText;
-            deleteBtn.removeAttribute('data-deleting');
-            deleteBtn.disabled = false;
+            setButtonLoading(deleteBtn, true, 'Excluindo...');
+            deleteBtn.setAttribute('data-deleting', 'true');
         }
-    });
+
+        const token = document.querySelector('meta[name="csrf-token"]')?.content;
+
+        fetch(`/toners/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token || '',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) return response.json().then(err => { throw err; });
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showAlert('success', 'Toner excluído com sucesso!');
+                const row = document.querySelector(`tr[data-toner-id="${id}"]`);
+                if (row) {
+                    row.style.transition = 'all 0.5s ease';
+                    row.style.opacity = '0';
+                    row.style.transform = 'translateX(20px)';
+                    setTimeout(() => {
+                        row.remove();
+                        if (document.updateResultsCount) document.updateResultsCount();
+                    }, 500);
+                }
+            } else {
+                throw new Error(data.message || 'Erro ao excluir o toner');
+            }
+        })
+        .catch(error => {
+            showAlert('error', error.message || 'Erro ao excluir o toner.');
+            if (deleteBtn) {
+                setButtonLoading(deleteBtn, false);
+                deleteBtn.removeAttribute('data-deleting');
+            }
+        });
+    }, { title: 'Excluir Toner', danger: true });
 }
+/*
+function deleteToner_old(id, event) {
 
 // Função para atualizar a contagem de resultados
 document.updateResultsCount = function() {

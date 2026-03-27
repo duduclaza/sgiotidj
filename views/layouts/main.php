@@ -17,6 +17,18 @@ if (!function_exists('e')) {
 if (!function_exists('flash')) {
   function flash($key) { return null; }
 }
+
+// Background Dinâmico por Perfil
+$userRole = $_SESSION['user_role'] ?? 'guest';
+$bgImage = 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop'; // Default
+
+if ($userRole === 'super_admin' || $userRole === 'admin') {
+    $bgImage = 'file:///C:/Users/djkyk/.gemini/antigravity/brain/807ab793-0c7d-4d15-b4e1-8ad010530f9d/neural_admin_bg_1774541701240.png';
+} elseif ($userRole === 'tecnico' || $userRole === 'producao') {
+    $bgImage = 'file:///C:/Users/djkyk/.gemini/antigravity/brain/807ab793-0c7d-4d15-b4e1-8ad010530f9d/neural_operation_bg_1774541723584.png';
+} else {
+    $bgImage = 'file:///C:/Users/djkyk/.gemini/antigravity/brain/807ab793-0c7d-4d15-b4e1-8ad010530f9d/auth_bg_1774540185692.png';
+}
 ?>
 <!doctype html>
 <html lang="pt-br">
@@ -123,8 +135,12 @@ if (!function_exists('flash')) {
     /* Loading overlay removido - causava problemas globais */
   </style>
 </head>
-<body class="bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
-  <div class="flex h-screen bg-gray-100 dark:bg-slate-900 transition-colors duration-300">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300 min-h-screen">
+  <!-- Fundo Dinâmico IA -->
+  <div class="fixed inset-0 z-0 opacity-[0.03] dark:opacity-[0.06] pointer-events-none transition-all duration-700" 
+       style="background-image: url('<?= $bgImage ?>'); background-size: cover; background-position: center; background-attachment: fixed;"></div>
+
+  <div class="flex h-screen bg-transparent relative z-10 transition-colors duration-300">
     <!-- Sidebar -->
     <?php include __DIR__ . '/../partials/sidebar.php'; ?>
     
@@ -249,165 +265,23 @@ if (!function_exists('flash')) {
   </div>
 
   <style>
-    /* Toast animations */
-    @keyframes toastIn {
-      from { opacity:0; transform:translateX(100%); }
-      to   { opacity:1; transform:translateX(0); }
-    }
-    @keyframes toastOut {
-      from { opacity:1; transform:translateX(0); }
-      to   { opacity:0; transform:translateX(110%); }
-    }
-    .toast-item { animation: toastIn .3s cubic-bezier(.16,1,.3,1) forwards; pointer-events:all; }
-    .toast-item.removing { animation: toastOut .25s ease-in forwards; }
-
-    /* Button loading state */
-    .btn-loading { position:relative; pointer-events:none; opacity:.85; }
-    .btn-loading .btn-text { opacity:0; }
-    .btn-loading::after {
-      content:'';
-      position:absolute;
-      width:16px; height:16px;
-      top:50%; left:50%;
-      margin:-8px 0 0 -8px;
-      border:2px solid rgba(255,255,255,.4);
-      border-top-color:#fff;
-      border-radius:50%;
-      animation:spin .7s linear infinite;
-    }
-    @keyframes spin { to { transform:rotate(360deg); } }
+    /* Page transition */
+    .page-transition { opacity: 0; transform: translateY(10px); transition: all 0.4s ease-out; }
+    .page-transition.loaded { opacity: 1; transform: translateY(0); }
   </style>
 
+  <?php include __DIR__ . '/../partials/ui-feedback.php'; ?>
+
   <script>
-    // ========== GLOBAL TOAST ==========
-    window.showToast = function(message, type = 'success', duration = 4000) {
-      const stack = document.getElementById('global-toast-stack');
-      if (!stack) return;
+  <?php include __DIR__ . '/../partials/ui-scripts.php'; ?>
 
-      const colors = {
-        success: { bg: 'bg-emerald-600', icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>` },
-        error:   { bg: 'bg-red-600',     icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>` },
-        warning: { bg: 'bg-amber-500',   icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>` },
-        info:    { bg: 'bg-blue-600',    icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>` },
-      };
-      const c = colors[type] || colors.info;
-
-      const el = document.createElement('div');
-      el.className = `toast-item flex items-center gap-3 px-4 py-3 rounded-xl text-white text-sm font-medium shadow-2xl ${c.bg}`;
-      el.innerHTML = `
-        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><${c.icon}</svg>
-        <span class="flex-1">${message}</span>
-        <button onclick="this.parentElement.classList.add('removing');setTimeout(()=>this.parentElement.remove(),250)" class="opacity-60 hover:opacity-100 flex-shrink-0 transition-opacity">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>`;
-      stack.appendChild(el);
-
-      setTimeout(() => {
-        if (el.parentElement) {
-          el.classList.add('removing');
-          setTimeout(() => el.remove(), 250);
-        }
-      }, duration);
-    };
-
-    // ========== GLOBAL CONFIRM ==========
-    window.showConfirm = function(message, onConfirm, options = {}) {
-      const overlay = document.getElementById('global-confirm-overlay');
-      const box     = document.getElementById('global-confirm-box');
-      const msgEl   = document.getElementById('global-confirm-msg');
-      const titleEl = document.getElementById('global-confirm-title');
-      const okBtn   = document.getElementById('global-confirm-ok');
-      const cancelBtn = document.getElementById('global-confirm-cancel');
-
-      msgEl.textContent   = message;
-      titleEl.textContent = options.title   || 'Confirmar ação';
-      okBtn.textContent   = options.okText  || 'Confirmar';
-      okBtn.className     = `flex-1 px-4 py-2.5 text-sm font-bold text-white rounded-xl transition-all shadow-lg ${options.danger !== false ? 'bg-red-600 hover:bg-red-700 hover:shadow-red-500/20' : 'bg-blue-600 hover:bg-blue-700 hover:shadow-blue-500/20'}`;
-
-      overlay.classList.remove('hidden');
-      requestAnimationFrame(() => { box.style.transform='scale(1)'; box.style.opacity='1'; });
-
-      const close = () => {
-        box.style.transform='scale(.95)'; box.style.opacity='0';
-        setTimeout(() => overlay.classList.add('hidden'), 200);
-      };
-
-      const newOk = okBtn.cloneNode(true);
-      const newCancel = cancelBtn.cloneNode(true);
-      okBtn.replaceWith(newOk);
-      cancelBtn.replaceWith(newCancel);
-
-      document.getElementById('global-confirm-ok').textContent = options.okText || 'Confirmar';
-      document.getElementById('global-confirm-ok').className = okBtn.className;
-      document.getElementById('global-confirm-ok').addEventListener('click', () => { close(); onConfirm(); });
-      document.getElementById('global-confirm-cancel').addEventListener('click', close);
-      overlay.addEventListener('click', e => { if (e.target === overlay) close(); }, { once: true });
-    };
-
-    // ========== BUTTON LOADING HELPER ==========
-    window.setButtonLoading = function(btn, loading, text) {
-      if (!btn) return;
-      if (loading) {
-        btn._originalHTML = btn.innerHTML;
-        btn.classList.add('btn-loading');
-        btn.innerHTML = `<span class="btn-text">${btn.textContent}</span>`;
-        btn.disabled = true;
-      } else {
-        btn.classList.remove('btn-loading');
-        if (btn._originalHTML) btn.innerHTML = btn._originalHTML;
-        if (text) btn.textContent = text;
-        btn.disabled = false;
-      }
-    };
-
-    // ========== GLOBAL KEYBOARD LISTENERS ==========
-    document.addEventListener('keydown', function(e) {
-      // Tecla ESC para fechar modais
-      if (e.key === 'Escape') {
-        const confirmOverlay = document.getElementById('global-confirm-overlay');
-        if (confirmOverlay && !confirmOverlay.classList.contains('hidden')) {
-          document.getElementById('global-confirm-cancel')?.click();
-          return;
-        }
-
-        // Tentar encontrar o modal ativo no módulo
-        // Procurar por DIVs que são overlays e estão visíveis
-        const moduleModals = document.querySelectorAll('div[id*="modal-"], div[id*="formContainer"], div[id*="form-container"]');
-        moduleModals.forEach(m => {
-          if (!m.classList.contains('hidden')) {
-            // Tentar encontrar botão fechar ou cancelar dentro do modal
-            const closeBtn = m.querySelector('button[onclick*="fechar"], button[onclick*="close"], button[id*="cancel"]');
-            if (closeBtn) closeBtn.click();
-            else m.classList.add('hidden'); // Fallback: apenas esconde
-          }
-        });
-        // Tecla ENTER para salvar modais simples
-        if (e.key === 'Enter') {
-            // Não disparar se estiver em um textarea
-            if (e.target.tagName === 'TEXTAREA') return;
-
-            // Procurar modal ativo
-            const moduleModals = document.querySelectorAll('div[id*="modal-"], div[id*="formContainer"], div[id*="form-container"]');
-            moduleModals.forEach(m => {
-                if (!m.classList.contains('hidden')) {
-                    // Tentar encontrar o botão principal de salvar/confirmar
-                    // Prioridade para botões com texto "Salvar", "Atualizar", "Confirmar" ou "Enviar"
-                    const saveBtn = m.querySelector('button.bg-blue-600, button[type="submit"], button[onclick*="salvar"], button[onclick*="save"]');
-                    if (saveBtn && !saveBtn.disabled) {
-                        e.preventDefault();
-                        saveBtn.click();
-                    }
-                }
-            });
-        }
-      }
-    });
-
+  <script>
     // Page transition
     document.addEventListener('DOMContentLoaded', function() {
       const pageContent = document.querySelector('.page-transition');
       if (pageContent) setTimeout(() => pageContent.classList.add('loaded'), 100);
     });
+  </script>
   </script>
   
   <!-- Debug Panel (só se debug estiver ativo) -->

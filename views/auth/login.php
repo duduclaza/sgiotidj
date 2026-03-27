@@ -1,25 +1,43 @@
-<!-- Card Branco -->
-<div class="bg-white rounded-2xl shadow-2xl p-8 relative">
+<!-- Card Glassmorphism -->
+<div class="glass-card p-10 relative overflow-hidden">
+  <!-- Brilho decorativo -->
+  <div class="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl"></div>
+  <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl"></div>
+
   <!-- Logo DJ no topo -->
-  <div class="text-center mb-8">
-    <img src="/assets/logodj.png" alt="DJ Logo" class="mx-auto h-12 object-contain mb-4">
+  <div class="text-center mb-10 relative z-10">
+    <div class="bg-white/80 backdrop-blur-md p-4 rounded-2xl inline-block shadow-lg border border-white/50 mb-4">
+      <img src="/assets/logodj.png" alt="DJ Logo" class="h-10 object-contain">
+    </div>
+    <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Bem-vindo ao SGQ</h2>
+    <p class="text-slate-500 text-sm mt-1">Acesse sua conta para continuar</p>
   </div>
 
   <!-- Login Form -->
-  <form id="loginForm" class="space-y-6">
+  <form id="loginForm" class="space-y-5 relative z-10">
     <div>
-      <input type="email" name="email" required 
-             class="w-full px-4 py-3 border-2 border-blue-300 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-             placeholder="Seu Email">
+      <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 ml-1">Email Corporativo</label>
+      <div class="relative group">
+        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206"/></svg>
+        </span>
+        <input type="email" name="email" required 
+               class="w-full pl-12 pr-4 py-3.5 bg-white/50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+               placeholder="nome@empresa.com.br">
+      </div>
     </div>
 
     <div>
-      <div class="relative">
+      <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 ml-1">Senha de Acesso</label>
+      <div class="relative group">
+        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        </span>
         <input type="password" name="password" id="loginPassword" required 
-               class="w-full px-4 py-3 pr-12 border-2 border-blue-300 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-               placeholder="Sua Senha">
+               class="w-full pl-12 pr-12 py-3.5 bg-white/50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+               placeholder="••••••••">
         <button type="button" onclick="toggleLoginPassword()" 
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors">
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 transition-colors p-2">
           <svg id="loginEyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
@@ -28,35 +46,25 @@
       </div>
     </div>
 
-    <button type="submit" 
-            class="w-full btn-primary text-white font-semibold py-3 px-6 rounded-lg">
-      Entrar
+    <button type="submit" id="btnLogin"
+            class="w-full btn-primary text-white font-bold py-4 px-6 rounded-xl text-lg flex items-center justify-center gap-2 mt-2">
+      <span class="btn-text">Entrar no Sistema</span>
     </button>
   </form>
 
   <!-- Links -->
-  <div class="mt-4 text-center space-y-2">
-    <div>
-      <a href="/password-reset/request" class="text-sm text-gray-600 hover:text-blue-600 transition-colors inline-flex items-center gap-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-        </svg>
-        Esqueci minha senha?
-      </a>
+  <div class="mt-8 text-center space-y-4 pt-6 border-t border-slate-200/50">
+    <a href="/password-reset/request" class="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors inline-flex items-center gap-2">
+      Esqueci minha senha?
+    </a>
+    <div class="flex items-center justify-center gap-3">
+      <span class="h-px w-8 bg-slate-200"></span>
+      <span class="text-xs text-slate-400 uppercase font-bold tracking-widest">ou</span>
+      <span class="h-px w-8 bg-slate-200"></span>
     </div>
-    <div>
-      <a href="/request-access" class="text-sm bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors inline-block">
-        Solicitar Acesso
-      </a>
-    </div>
-  </div>
-
-  <!-- Loading Overlay -->
-  <div id="loginLoading" class="hidden absolute inset-0 bg-white bg-opacity-90 rounded-2xl flex items-center justify-center">
-    <div class="text-center">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600 mx-auto mb-4"></div>
-      <div class="text-gray-700 font-semibold">Entrando...</div>
-    </div>
+    <a href="/request-access" class="w-full py-3 px-4 rounded-xl border-2 border-slate-200 text-slate-700 font-bold hover:bg-slate-50 hover:border-slate-300 transition-all inline-block">
+      Solicitar Acesso
+    </a>
   </div>
 </div>
 
@@ -82,10 +90,10 @@ function toggleLoginPassword() {
 document.getElementById('loginForm').addEventListener('submit', function(e) {
   e.preventDefault();
   
-  const loading = document.getElementById('loginLoading');
+  const btn = document.getElementById('btnLogin');
   const formData = new FormData(this);
   
-  loading.classList.remove('hidden');
+  setButtonLoading(btn, true);
   
   fetch('/auth/login', {
     method: 'POST',
@@ -93,18 +101,19 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
   })
   .then(response => response.json())
   .then(result => {
-    loading.classList.add('hidden');
-    
     if (result.success) {
-      // Usar a URL de redirecionamento retornada pelo servidor
-      window.location.href = result.redirect || '/';
+      showToast(result.message || 'Login realizado!', 'success');
+      setTimeout(() => {
+        window.location.href = result.redirect || '/';
+      }, 800);
     } else {
-      alert(result.message || 'Erro ao fazer login');
+      setButtonLoading(btn, false);
+      showToast(result.message || 'Erro ao fazer login', 'error');
     }
   })
   .catch(error => {
-    loading.classList.add('hidden');
-    alert('Erro de conexão. Tente novamente.');
+    setButtonLoading(btn, false);
+    showToast('Erro de conexão. Tente novamente.', 'error');
   });
 });
 </script>

@@ -202,13 +202,15 @@ $router->post('/toners/update', [App\Controllers\TonersController::class , 'upda
 $router->post('/toners/delete', [App\Controllers\TonersController::class , 'delete']);
 $router->delete('/toners/{id}', [App\Controllers\TonersController::class , 'deleteAjax']);
 $router->get('/toners/template', [App\Controllers\TonersController::class , 'downloadTemplate']);
-$router->get('/toners/retornados', [App\Controllers\TonersController::class , 'retornados']);
-$router->post('/toners/retornados', [App\Controllers\TonersController::class , 'storeRetornado']);
-$router->delete('/toners/retornados/delete/{id}', [App\Controllers\TonersController::class , 'deleteRetornado']);
-$router->get('/toners/retornados/export', [App\Controllers\TonersController::class , 'exportRetornados']);
-$router->post('/toners/retornados/import', [App\Controllers\TonersController::class , 'importRetornados']);
-$router->get('/toners/retornados/{id}', [App\Controllers\TonersController::class , 'getRetornado']);
-$router->post('/toners/retornados/update', [App\Controllers\TonersController::class , 'updateRetornado']);
+/* MODULO LEGADO - DESATIVADO 
+205: $router->get('/toners/retornados', [App\Controllers\TonersController::class , 'retornados']);
+206: $router->post('/toners/retornados', [App\Controllers\TonersController::class , 'storeRetornado']);
+207: $router->delete('/toners/retornados/delete/{id}', [App\Controllers\TonersController::class , 'deleteRetornado']);
+208: $router->get('/toners/retornados/export', [App\Controllers\TonersController::class , 'exportRetornados']);
+209: $router->post('/toners/retornados/import', [App\Controllers\TonersController::class , 'importRetornados']);
+210: $router->get('/toners/retornados/{id}', [App\Controllers\TonersController::class , 'getRetornado']);
+211: $router->post('/toners/retornados/update', [App\Controllers\TonersController::class , 'updateRetornado']);
+*/
 $router->post('/toners/import', [App\Controllers\TonersController::class , 'import']);
 $router->get('/toners/export', [App\Controllers\TonersController::class , 'exportExcelAdvanced']);
 // Toners com Defeito
@@ -321,15 +323,17 @@ $router->get('/controle-rc/{id}', [App\Controllers\ControleRcController::class ,
 $router->get('/controle-rc/{id}/print', [App\Controllers\ControleRcController::class , 'print']);
 $router->post('/controle-rc/export', [App\Controllers\ControleRcController::class , 'exportReport']);
 $router->get('/controle-rc/evidencia/{id}', [App\Controllers\ControleRcController::class , 'downloadEvidencia']);
-$router->get('/toners/amostragens', [App\Controllers\AmostragemController::class , 'index']);
-// Amostragens actions
-$router->post('/toners/amostragens', [App\Controllers\AmostragemController::class , 'store']);
-$router->post('/toners/amostragens/test', [App\Controllers\AmostragemController::class , 'testStore']);
-$router->post('/toners/amostragens/{id}/update', [App\Controllers\AmostragemController::class , 'update']);
-$router->delete('/toners/amostragens/{id}', [App\Controllers\AmostragemController::class , 'delete']);
-$router->get('/toners/amostragens/{id}/pdf', [App\Controllers\AmostragemController::class , 'show']);
-$router->get('/toners/amostragens/{id}/evidencias', [App\Controllers\AmostragemController::class , 'getEvidencias']);
-$router->get('/toners/amostragens/{id}/evidencia/{evidenciaId}', [App\Controllers\AmostragemController::class , 'evidencia']);
+/* MODULO LEGADO - DESATIVADO (Substituído por /amostragens-2)
+324: $router->get('/toners/amostragens', [App\Controllers\AmostragemController::class , 'index']);
+325: // Amostragens actions
+326: $router->post('/toners/amostragens', [App\Controllers\AmostragemController::class , 'store']);
+327: $router->post('/toners/amostragens/test', [App\Controllers\AmostragemController::class , 'testStore']);
+328: $router->post('/toners/amostragens/{id}/update', [App\Controllers\AmostragemController::class , 'update']);
+329: $router->delete('/toners/amostragens/{id}', [App\Controllers\AmostragemController::class , 'delete']);
+330: $router->get('/toners/amostragens/{id}/pdf', [App\Controllers\AmostragemController::class , 'show']);
+331: $router->get('/toners/amostragens/{id}/evidencias', [App\Controllers\AmostragemController::class , 'getEvidencias']);
+332: $router->get('/toners/amostragens/{id}/evidencia/{evidenciaId}', [App\Controllers\AmostragemController::class , 'evidencia']);
+*/
 // Garantias routes
 $router->get('/garantias', [App\Controllers\GarantiasController::class , 'index']);
 $router->post('/garantias', [App\Controllers\GarantiasController::class , 'create']); // Rota para o formulário

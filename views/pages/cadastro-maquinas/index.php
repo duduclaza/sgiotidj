@@ -127,52 +127,32 @@ function editMaquina(maquina) {
   isEditing = true;
 }
 
-async function deleteMaquina(id) {
-  if (!confirm('Tem certeza que deseja excluir esta máquina?')) return;
-  
-  try {
-    const response = await fetch('/cadastro-maquinas/delete', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: `id=${id}`
-    });
-    
-    const result = await response.json();
-    alert(result.message);
-    
-    if (result.success) {
-      window.location.reload();
-    }
-  } catch (error) {
-    alert('Erro ao excluir máquina');
-  }
-}
-
 function exportMaquinas(e) {
-  const button = e ? e.target.closest('button') : document.querySelector('button[onclick*="exportMaquinas"]');
-  const originalContent = button.innerHTML;
-  button.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Exportando...';
-  button.disabled = true;
+  const btn = e ? e.currentTarget : document.querySelector('button[onclick*="exportMaquinas"]');
+  setButtonLoading(btn, true);
 
-  const link = document.createElement('a');
-  link.href = '/cadastro-maquinas/export';
-  link.download = 'maquinas_' + new Date().toISOString().slice(0, 10) + '.csv';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-
+  // Simulação de delay para feedback visual de exportação
   setTimeout(() => {
-    button.innerHTML = originalContent;
-    button.disabled = false;
-    alert('Exportação concluída com sucesso!');
-  }, 2000);
+    const link = document.createElement('a');
+    link.href = '/cadastro-maquinas/export';
+    link.download = 'maquinas_' + new Date().toISOString().slice(0, 10) + '.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    setButtonLoading(btn, false);
+    showToast('Exportação iniciada com sucesso!', 'success');
+  }, 1000);
 }
 
 document.getElementById('maquinaForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   
+  const btn = this.querySelector('button[type="submit"]');
   const formData = new FormData(this);
   const url = isEditing ? '/cadastro-maquinas/update' : '/cadastro-maquinas/store';
+  
+  setButtonLoading(btn, true);
   
   try {
     const response = await fetch(url, {
@@ -181,13 +161,44 @@ document.getElementById('maquinaForm').addEventListener('submit', async function
     });
     
     const result = await response.json();
-    alert(result.message);
     
-    if (result.success && result.redirect) {
-      window.location.href = result.redirect;
+    if (result.success) {
+      showToast(result.message, 'success');
+      if (result.redirect) {
+        setTimeout(() => window.location.href = result.redirect, 800);
+      } else {
+        window.location.reload();
+      }
+    } else {
+      setButtonLoading(btn, false);
+      showToast(result.message, 'error');
     }
   } catch (error) {
-    alert('Erro ao salvar máquina');
+    setButtonLoading(btn, false);
+    showToast('Erro ao salvar máquina', 'error');
   }
 });
+
+async function deleteMaquina(id) {
+  showConfirm('Tem certeza que deseja excluir esta máquina?', async () => {
+    try {
+      const response = await fetch('/cadastro-maquinas/delete', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `id=${id}`
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        showToast(result.message, 'success');
+        setTimeout(() => window.location.reload(), 800);
+      } else {
+        showToast(result.message, 'error');
+      }
+    } catch (error) {
+      showToast('Erro ao excluir máquina', 'error');
+    }
+  }, { danger: true, title: 'Excluir Máquina' });
+}
 </script>

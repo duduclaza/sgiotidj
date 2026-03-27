@@ -230,31 +230,36 @@ function editPeca(peca) {
 }
 
 async function deletePeca(id) {
-  if (!confirm('Tem certeza que deseja excluir esta peça?')) return;
-  
-  try {
-    const response = await fetch('/cadastro-pecas/delete', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: `id=${id}`
-    });
-    
-    const result = await response.json();
-    alert(result.message);
-    
-    if (result.success) {
-      window.location.reload();
+  showConfirm('Tem certeza que deseja excluir esta peça?', async () => {
+    try {
+      const response = await fetch('/cadastro-pecas/delete', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `id=${id}`
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        showToast(result.message, 'success');
+        setTimeout(() => window.location.reload(), 800);
+      } else {
+        showToast(result.message, 'error');
+      }
+    } catch (error) {
+      showToast('Erro ao excluir peça', 'error');
     }
-  } catch (error) {
-    alert('Erro ao excluir peça');
-  }
+  }, { danger: true, title: 'Excluir Peça' });
 }
 
 document.getElementById('pecaForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   
+  const btn = this.querySelector('button[type="submit"]');
   const formData = new FormData(this);
   const url = isEditing ? '/cadastro-pecas/update' : '/cadastro-pecas/store';
+  
+  setButtonLoading(btn, true);
   
   try {
     const response = await fetch(url, {
@@ -263,13 +268,21 @@ document.getElementById('pecaForm').addEventListener('submit', async function(e)
     });
     
     const result = await response.json();
-    alert(result.message);
     
-    if (result.success && result.redirect) {
-      window.location.href = result.redirect;
+    if (result.success) {
+      showToast(result.message, 'success');
+      if (result.redirect) {
+        setTimeout(() => window.location.href = result.redirect, 800);
+      } else {
+        window.location.reload();
+      }
+    } else {
+      setButtonLoading(btn, false);
+      showToast(result.message, 'error');
     }
   } catch (error) {
-    alert('Erro ao salvar peça');
+    setButtonLoading(btn, false);
+    showToast('Erro ao salvar peça', 'error');
   }
 });
 
@@ -279,7 +292,7 @@ function openImportModal() {
   const modal = document.getElementById('importModal');
   
   if (!modal) {
-    alert('Erro: Modal de importação não foi encontrado. Por favor, recarregue a página.');
+    showToast('Erro: Modal de importação não encontrado.', 'error');
     return;
   }
   
@@ -475,8 +488,6 @@ function importExcelPecas() {
 
 function processImportPecas(data) {
   updateProgressPecas(20, 'Processando dados...');
-  
-  // Pular linhas de cabeçalho (até linha 8)
   const dataRows = data.slice(9).filter(row => row && row.length >= 2 && row[0] && row[1]);
   
   if (dataRows.length === 0) {
@@ -484,13 +495,11 @@ function processImportPecas(data) {
     return;
   }
   
-  updateProgressPecas(40, `Encontradas ${dataRows.length} peças para importar...`);
-  
-  // Preparar dados para envio
+  updateProgressPecas(40, `Localizadas ${dataRows.length} peças...`);
   const formData = new FormData();
   formData.append('pecas_data', JSON.stringify(dataRows));
   
-  updateProgressPecas(60, 'Enviando dados para o servidor...');
+  updateProgressPecas(60, 'Enviando para o servidor...');
   
   fetch('/cadastro-pecas/import', {
     method: 'POST',
@@ -502,9 +511,9 @@ function processImportPecas(data) {
       updateProgressPecas(100, `Concluído! ${result.imported} peças importadas`);
       setTimeout(() => {
         closeImportModal();
-        alert('Importação concluída com sucesso!');
-        window.location.reload();
-      }, 1500);
+        showToast(`Importação concluída: ${result.imported} registros.`, 'success');
+        setTimeout(() => window.location.reload(), 1000);
+      }, 1000);
     } else {
       showImportError(result.message || 'Erro ao importar peças');
     }
@@ -515,16 +524,18 @@ function processImportPecas(data) {
 }
 
 function updateProgressPecas(percentage, status) {
-  document.getElementById('progressBar').style.width = percentage + '%';
-  document.getElementById('progressText').textContent = percentage + '%';
-  document.getElementById('importStatus').textContent = status;
+  const bar = document.getElementById('progressBar');
+  const text = document.getElementById('progressText');
+  const statusEl = document.getElementById('importStatus');
+  if (bar) bar.style.width = percentage + '%';
+  if (text) text.textContent = percentage + '%';
+  if (statusEl) statusEl.textContent = status;
 }
-
 
 function showImportError(message) {
   document.getElementById('progressContainer').classList.add('hidden');
   document.getElementById('importBtn').disabled = false;
-  alert('Erro na importação: ' + message);
+  showToast('Erro na importação: ' + message, 'error');
 }
 
 function filterPecas() {

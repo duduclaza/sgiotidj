@@ -8,54 +8,57 @@
   </div>
   
   <!-- Formulário de Cadastro -->
-  <div class="bg-white dark:bg-slate-800 border dark:border-slate-700/50 rounded-lg p-6 transition-colors">
-    <h2 class="text-lg font-medium dark:text-white mb-4">Cadastrar Novo Toner</h2>
-    <form method="post" action="/toners/cadastro" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Modelo *</label>
-        <input type="text" name="modelo" placeholder="Ex: HP CF280A" class="w-full border border-gray-300 dark:border-slate-600 rounded px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" required>
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 rounded-xl p-6 shadow-sm transition-all">
+    <div class="flex items-center gap-3 mb-6">
+        <div class="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        </div>
+        <h2 class="text-lg font-semibold text-slate-800 dark:text-white">Cadastrar Novo Toner</h2>
+    </div>
+    <form method="post" action="/toners/cadastro" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="formCadastroToner">
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Modelo *</label>
+        <input type="text" name="modelo" placeholder="Ex: HP CF280A" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none" required>
       </div>
       
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Peso Cheio (g) <span class="text-gray-500 dark:text-gray-400 text-xs">(opcional)</span></label>
-        <input type="number" step="0.01" name="peso_cheio" placeholder="Ex: 850.50" class="w-full border border-gray-300 dark:border-slate-600 rounded px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" oninput="calcularCampos()" onchange="calcularCampos()">
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Se informar peso, ambos devem ser preenchidos</p>
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Peso Cheio (g) <span class="text-slate-400 font-normal lowercase">(opcional)</span></label>
+        <input type="number" step="0.01" name="peso_cheio" placeholder="Ex: 850.50" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none" oninput="calcularCampos()" onchange="calcularCampos()">
       </div>
       
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Peso Vazio (g) <span class="text-gray-500 dark:text-gray-400 text-xs">(opcional)</span></label>
-        <input type="number" step="0.01" name="peso_vazio" placeholder="Ex: 120.30" class="w-full border border-gray-300 dark:border-slate-600 rounded px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" oninput="calcularCampos()" onchange="calcularCampos()">
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Se informar peso, ambos devem ser preenchidos</p>
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Peso Vazio (g) <span class="text-slate-400 font-normal lowercase">(opcional)</span></label>
+        <input type="number" step="0.01" name="peso_vazio" placeholder="Ex: 120.30" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none" oninput="calcularCampos()" onchange="calcularCampos()">
       </div>
       
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">📊 Gramatura (g)</label>
-        <input type="number" step="0.01" name="gramatura" value="" class="w-full border border-gray-300 dark:border-slate-600 rounded px-3 py-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-700 dark:to-slate-750 text-green-600 dark:text-green-400 font-semibold" readonly>
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">📊 Gramatura (g)</label>
+        <input type="number" step="0.01" name="gramatura" value="" class="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 bg-slate-100 dark:bg-slate-900/50 text-green-600 dark:text-green-400 font-bold transition-all outline-none" readonly>
       </div>
       
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Capacidade de Folhas *</label>
-        <input type="number" name="capacidade_folhas" placeholder="Ex: 2700" class="w-full border border-gray-300 dark:border-slate-600 rounded px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" required oninput="calcularCampos()" onchange="calcularCampos()">
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Capacidade de Folhas *</label>
+        <input type="number" name="capacidade_folhas" placeholder="Ex: 2700" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none" required oninput="calcularCampos()" onchange="calcularCampos()">
       </div>
       
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Preço do Toner (R$) *</label>
-        <input type="number" step="0.01" name="preco_toner" placeholder="Ex: 89.90" class="w-full border border-gray-300 dark:border-slate-600 rounded px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" required oninput="calcularCampos()" onchange="calcularCampos()">
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Preço do Toner (R$) *</label>
+        <input type="number" step="0.01" name="preco_toner" placeholder="Ex: 89.90" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none" required oninput="calcularCampos()" onchange="calcularCampos()">
       </div>
       
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">📊 Gramatura por Folha (g)</label>
-        <input type="number" step="0.0001" name="gramatura_por_folha" value="" class="w-full border border-gray-300 dark:border-slate-600 rounded px-3 py-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-700 dark:to-slate-750 text-green-600 dark:text-green-400 font-semibold" readonly>
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">📊 Gramatura por Folha (g)</label>
+        <input type="number" step="0.0001" name="gramatura_por_folha" value="" class="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 bg-slate-100 dark:bg-slate-900/50 text-green-600 dark:text-green-400 font-bold transition-all outline-none" readonly>
       </div>
       
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">📊 Custo por Folha (R$)</label>
-        <input type="number" step="0.0001" name="custo_por_folha" value="" class="w-full border border-gray-300 dark:border-slate-600 rounded px-3 py-2 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-700 dark:to-slate-750 text-green-600 dark:text-green-400 font-semibold" readonly>
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">📊 Custo por Folha (R$)</label>
+        <input type="number" step="0.0001" name="custo_por_folha" value="" class="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 bg-slate-100 dark:bg-slate-900/50 text-green-600 dark:text-green-400 font-bold transition-all outline-none" readonly>
       </div>
       
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cor *</label>
-        <select name="cor" class="w-full border border-gray-300 dark:border-slate-600 rounded px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" required>
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Cor *</label>
+        <select name="cor" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none appearance-none" required>
           <option value="">Selecione a cor</option>
           <option value="Yellow">Yellow</option>
           <option value="Magenta">Magenta</option>
@@ -64,9 +67,9 @@
         </select>
       </div>
       
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo *</label>
-        <select name="tipo" class="w-full border border-gray-300 dark:border-slate-600 rounded px-3 py-2 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" required>
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tipo *</label>
+        <select name="tipo" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none appearance-none" required>
           <option value="">Selecione o tipo</option>
           <option value="Original">Original</option>
           <option value="Compativel">Compatível</option>
@@ -74,22 +77,25 @@
         </select>
       </div>
       
-      <div class="md:col-span-2 lg:col-span-3">
-        <button type="submit" class="px-6 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Salvar Toner</button>
+      <div class="md:col-span-2 lg:col-span-3 pt-4 border-t border-slate-100 dark:border-slate-700/50 flex justify-end">
+        <button type="submit" id="btnSalvarToner" class="px-8 py-3 rounded-xl bg-blue-600 text-white hover:bg-blue-700 font-bold shadow-lg shadow-blue-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            Salvar Toner
+        </button>
       </div>
     </form>
   </div>
 
   <!-- Lista/Grid -->
-  <div class="bg-white dark:bg-slate-800 border dark:border-slate-700/50 rounded-lg transition-colors">
-    <div class="px-4 py-3 border-b dark:border-slate-700 flex justify-between items-center">
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 rounded-xl shadow-sm transition-all overflow-hidden">
+    <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4">
       <div>
-        <h2 class="text-lg font-medium dark:text-white">Toners Cadastrados</h2>
-        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1" id="resultsCount">
+        <h2 class="text-lg font-bold text-slate-800 dark:text-white">Toners Cadastrados</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1" id="resultsCount">
           Carregando...
         </p>
       </div>
-      <button onclick="exportToExcel(event)" class="px-3 py-1 text-sm rounded bg-green-600 text-white hover:bg-green-700 flex items-center space-x-1 transition-colors">
+      <button onclick="exportToExcel(event)" class="px-4 py-2 text-sm rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 flex items-center gap-2 transition-all shadow-md shadow-emerald-500/10 active:scale-95">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
         </svg>
@@ -98,12 +104,12 @@
     </div>
     
     <!-- Campo de Busca -->
-    <div class="px-4 py-3 border-b dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50">
-      <div class="flex gap-3 items-center">
+    <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-md">
+      <div class="flex flex-col md:flex-row gap-4 items-center">
         <!-- Dropdown de Coluna -->
         <select 
           id="searchColumn" 
-          class="border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white transition-colors"
+          class="w-full md:w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm text-slate-700 dark:text-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all appearance-none"
         >
           <option value="all">Todas as colunas</option>
           <option value="0">Modelo</option>
@@ -112,60 +118,59 @@
         </select>
         
         <!-- Campo de Busca -->
-        <div class="relative flex-1 max-w-md">
+        <div class="relative flex-1 w-full max-w-lg">
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
           <input 
             type="text" 
             id="searchToners" 
-            placeholder="Digite para buscar..." 
-            class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            placeholder="Digite para buscar modelo, cor ou tipo..." 
+            class="w-full pl-11 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
           >
-          <button type="button" id="runSearchBtn" title="Buscar" onclick="window.searchToners && window.searchToners()"
-                  class="absolute inset-y-0 left-0 pl-3 pr-2 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-          </button>
         </div>
 
-        <!-- Botão Buscar dedicado -->
-        <button type="button" id="searchActionBtn" onclick="window.searchToners && window.searchToners()"
-                class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-300 transition-colors">
-          Buscar
-        </button>
-        
-        <!-- Botão Limpar -->
-        <button type="button" id="clearSearchBtn" onclick="window.clearSearch && window.clearSearch()"
-                class="px-4 py-2 rounded-lg bg-gray-500 text-white hover:bg-gray-600 focus:ring-2 focus:ring-gray-300 transition-colors">
-          Limpar
-        </button>
+        <div class="flex gap-2 w-full md:w-auto">
+            <button type="button" id="searchActionBtn" onclick="window.searchToners && window.searchToners()"
+                    class="flex-1 md:flex-none px-6 py-2.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 font-bold shadow-lg shadow-blue-500/10 transition-all hover:-translate-y-0.5 active:translate-y-0">
+              Buscar
+            </button>
+            
+            <button type="button" id="clearSearchBtn" onclick="window.clearSearch && window.clearSearch()"
+                    class="flex-1 md:flex-none px-6 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 font-bold transition-all active:scale-95">
+              Limpar
+            </button>
+        </div>
       </div>
     </div>
-    <div class="overflow-x-auto">
-      <table class="min-w-full text-sm divide-y divide-gray-200 dark:divide-slate-700">
-        <thead class="bg-gray-50 dark:bg-slate-900/50">
+    <div class="overflow-x-auto ring-1 ring-slate-200 dark:ring-slate-700/50 rounded-xl mx-6 mb-6">
+      <table class="min-w-full text-sm divide-y divide-slate-100 dark:divide-slate-700/50">
+        <thead class="bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-md">
           <tr>
-            <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Modelo</th>
-            <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Peso Cheio</th>
-            <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Peso Vazio</th>
-            <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Gramatura</th>
-            <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Cap. Folhas</th>
-            <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Preço</th>
-            <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Gram/Folha</th>
-            <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Custo/Folha</th>
-            <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Cor</th>
-            <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Tipo</th>
-            <th class="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
-              <div class="flex items-center space-x-1">
-                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <th class="px-4 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Modelo</th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Peso Cheio</th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Peso Vazio</th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Gramatura</th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Cap. Folhas</th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Preço</th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Gram/Folha</th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Custo/Folha</th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Cor</th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tipo</th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              <div class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 <span>Última Atualização</span>
               </div>
             </th>
-            <th class="px-3 py-2 text-right font-medium text-gray-700 dark:text-gray-300">Ações</th>
+            <th class="px-4 py-3 text-right text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Ações</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200 dark:divide-slate-700 text-gray-900 dark:text-gray-300" id="tonersTbody">
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 text-slate-700 dark:text-slate-300" id="tonersTbody">
           <?php if (empty($toners)): ?>
             <tr>
               <td colspan="12" class="px-4 py-8 text-center text-gray-500">Nenhum toner cadastrado</td>
@@ -175,9 +180,9 @@
               <?php 
                 // Verificar se o cadastro está incompleto (sem peso_cheio ou peso_vazio)
                 $cadastroIncompleto = empty($t['peso_cheio']) || empty($t['peso_vazio']);
-                $rowClass = $cadastroIncompleto ? 'bg-red-50 dark:bg-red-900/20 border-l-4 border-l-red-400 dark:border-l-red-800' : 'hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors';
+                $rowClass = $cadastroIncompleto ? 'bg-red-50/50 dark:bg-red-900/10 border-l-4 border-l-red-500 dark:border-l-red-800' : 'hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors';
               ?>
-              <tr class="<?= $rowClass ?>" data-toner-id="<?= $t['id'] ?>" <?= $cadastroIncompleto ? 'title="Cadastro incompleto: Peso Cheio e Peso Vazio não preenchidos"' : '' ?>>
+              <tr class="<?= $rowClass ?> group" data-toner-id="<?= $t['id'] ?>" <?= $cadastroIncompleto ? 'title="Cadastro incompleto: Peso Cheio e Peso Vazio não preenchidos"' : '' ?>>
                 <td class="px-3 py-2">
                   <span class="edit-display-modelo-<?= $t['id'] ?>"><?= e($t['modelo']) ?></span>
                   <input type="text" class="edit-input-modelo-<?= $t['id'] ?> border rounded px-2 py-1 hidden w-full text-xs" value="<?= e($t['modelo']) ?>">
@@ -245,7 +250,7 @@
                       <?= number_format((float)$gpf_value, 4) ?>g
                     <?php endif; ?>
                   </span>
-                  <input type="number" step="0.0001" class="edit-input-gramatura_por_folha-<?= $t['id'] ?> border rounded px-2 py-1 hidden w-20 text-xs bg-gray-100" readonly>
+                  <input type="number" step="0.0001" class="edit-input-gramatura_por_folha-<?= $t['id'] ?> w-20 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs hidden" readonly>
                 </td>
                 <td class="px-3 py-2">
                   <span class="edit-display-custo_por_folha-<?= $t['id'] ?>">
@@ -255,7 +260,7 @@
                       R$ <?= number_format($t['custo_por_folha'], 4, ',', '.') ?>
                     <?php endif; ?>
                   </span>
-                  <input type="number" step="0.0001" class="edit-input-custo_por_folha-<?= $t['id'] ?> border rounded px-2 py-1 hidden w-20 text-xs bg-gray-100" readonly>
+                   <input type="number" step="0.0001" class="edit-input-custo_por_folha-<?= $t['id'] ?> w-20 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs hidden" readonly>
                 </td>
                 <td class="px-3 py-2">
                   <span class="edit-display-cor-<?= $t['id'] ?>"><?= e($t['cor']) ?></span>
@@ -310,11 +315,34 @@
                     </div>
                   </div>
                 </td>
-                <td class="px-3 py-2 text-right space-x-1">
-                  <button onclick="editToner(<?= $t['id'] ?>)" class="edit-btn-<?= $t['id'] ?> text-blue-600 hover:text-blue-800 text-xs">Editar</button>
-                  <button onclick="saveToner(<?= $t['id'] ?>)" class="save-btn-<?= $t['id'] ?> text-green-600 hover:text-green-800 text-xs hidden">Salvar</button>
-                  <button onclick="cancelEditToner(<?= $t['id'] ?>)" class="cancel-btn-<?= $t['id'] ?> text-gray-600 hover:text-gray-800 text-xs hidden">Cancelar</button>
-                  <button onclick="deleteToner(<?= $t['id'] ?>)" class="text-red-600 hover:text-red-800 text-xs">Excluir</button>
+                <td class="px-4 py-3 text-right whitespace-nowrap">
+                  <!-- Botões de Exibição -->
+                  <div class="flex justify-end gap-2 edit-display-actions-<?= $t['id'] ?>">
+                    <button onclick="editToner(<?= $t['id'] ?>)" 
+                            class="edit-btn-<?= $t['id'] ?> p-2 text-slate-400 hover:text-blue-600 dark:text-slate-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/40 rounded-xl transition-all"
+                            title="Editar">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    </button>
+                    <button onclick="deleteToner(<?= $t['id'] ?>)" 
+                            class="p-2 text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/40 rounded-xl transition-all"
+                            title="Excluir">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                  </div>
+                  
+                  <!-- Botões de Edição -->
+                  <div class="flex justify-end gap-2 edit-input-actions-<?= $t['id'] ?> hidden">
+                    <button onclick="saveToner(<?= $t['id'] ?>)" 
+                            class="save-btn-<?= $t['id'] ?> p-2 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/40 rounded-xl transition-all"
+                            title="Salvar">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </button>
+                    <button onclick="cancelEditToner(<?= $t['id'] ?>)" 
+                            class="cancel-btn-<?= $t['id'] ?> p-2 text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/40 rounded-xl transition-all"
+                            title="Cancelar">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                  </div>
                 </td>
               </tr>
             <?php endforeach; ?>
@@ -804,10 +832,7 @@ function importFullScreenExcel() {
   const fileInput = document.getElementById('fullScreenFileInput');
   const file = fileInput.files[0];
   
-  if (!file) {
-    alert('Por favor, selecione um arquivo Excel.');
-    return;
-  }
+    showToast('error', 'Arquivo não selecionado', 'Por favor, selecione um arquivo Excel.');
   
   // Mostrar progress
   document.getElementById('fullScreenProgressContainer').style.display = 'block';
@@ -934,10 +959,7 @@ function importDynamicExcel() {
   const fileInput = document.getElementById('dynamicExcelFileInput');
   const file = fileInput.files[0];
   
-  if (!file) {
-    alert('Por favor, selecione um arquivo Excel.');
-    return;
-  }
+    showToast('error', 'Arquivo não selecionado', 'Por favor, selecione um arquivo Excel.');
   
   // Usar a mesma lógica de importação, mas com IDs dinâmicos
   document.getElementById('dynamicProgressContainer').style.display = 'block';
@@ -1187,10 +1209,7 @@ function importExcel() {
   
   console.log('Arquivo selecionado:', file);
   
-  if (!file) {
-    alert('Por favor, selecione um arquivo Excel.');
-    return;
-  }
+    showToast('error', 'Arquivo não selecionado', 'Por favor, selecione um arquivo Excel.');
   
   // Show progress container and hide buttons
   document.getElementById('progressContainer').classList.remove('hidden');

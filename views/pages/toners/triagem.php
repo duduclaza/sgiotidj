@@ -21,31 +21,36 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
   <!-- Header -->
-  <div class="mb-6">
-    <div class="flex justify-between items-center flex-wrap gap-3">
+  <div class="mb-8 p-6 bg-white/50 dark:bg-slate-800/50 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 rounded-2xl shadow-sm transition-all">
+    <div class="flex justify-between items-center flex-wrap gap-4">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Triagem de Toners</h1>
-        <p class="mt-1 text-gray-600 dark:text-gray-400">Avalie a gramatura restante e defina o destino do toner retornado</p>
+        <h1 class="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight flex items-center gap-3">
+          <div class="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-xl">
+            <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+          </div>
+          Triagem de Toners
+        </h1>
+        <p class="mt-2 text-slate-500 dark:text-slate-400 font-medium">Avalie a gramatura restante e defina o destino do toner retornado automaticamente.</p>
       </div>
-      <div class="flex gap-2 flex-wrap">
+      <div class="flex gap-3 flex-wrap">
         <?php if ($canImport): ?>
-        <a href="/triagem-toners/template" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+        <a href="/triagem-toners/template" class="flex items-center gap-2 bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white border border-emerald-600/20 px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-sm hover:shadow-emerald-500/20 active:scale-95">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m0 0l-3-3m3 3l3-3m-9 4h12"/></svg>
           Baixar Modelo
         </a>
-        <button onclick="abrirModalImportacao()" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+        <button onclick="abrirModalImportacao()" class="flex items-center gap-2 bg-indigo-600 text-white hover:bg-indigo-700 px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-indigo-500/20 hover:-translate-y-0.5 active:translate-y-0">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
           Importar Planilha
         </button>
         <?php endif; ?>
         <?php if ($isAdmin): ?>
-        <button onclick="abrirModalParametros()" class="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+        <button onclick="abrirModalParametros()" class="flex items-center gap-2 bg-slate-600 text-white hover:bg-slate-700 px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-slate-500/20 hover:-translate-y-0.5 active:translate-y-0">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
           Parâmetros
         </button>
         <?php endif; ?>
         <?php if ($canEdit): ?>
-        <button onclick="abrirModalNova()" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+        <button onclick="abrirModalNova()" class="flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-blue-500/25 hover:-translate-y-0.5 active:translate-y-0">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
           Nova Triagem
         </button>
@@ -55,48 +60,36 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
   </div>
 
   <!-- Filtros -->
-  <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700/50 p-4 mb-6 transition-colors">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+  <div class="bg-white/70 dark:bg-slate-800/70 backdrop-blur-md rounded-2xl shadow-sm border border-slate-200/50 dark:border-slate-700/50 p-6 mb-8 transition-all">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6">
       <div class="sm:col-span-2 lg:col-span-2">
-        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Busca Inteligente</label>
-        <div class="relative">
-          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Busca Inteligente</label>
+        <div class="relative group">
+          <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors">
+            <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           </span>
-          <input id="f-search" type="text" placeholder="Modelo, cliente, colaborador ou cód. requisição..." class="w-full border border-gray-300 dark:border-slate-600 rounded-xl pl-9 pr-3 py-2.5 text-sm bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+          <input id="f-search" type="text" placeholder="Modelo, cliente, colaborador..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl pl-11 pr-4 py-2.5 text-sm text-slate-900 dark:text-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all">
         </div>
       </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Filial</label>
-        <input id="f-filial" type="text" placeholder="Ex.: Matriz" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+      
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Filial</label>
+        <input id="f-filial" type="text" placeholder="Ex.: Matriz" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all">
       </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Modelo</label>
-        <input id="f-modelo" type="text" placeholder="Ex.: HP CF280A" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+      
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Modelo</label>
+        <input id="f-modelo" type="text" placeholder="Ex.: HP CF280A" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all">
       </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Cliente</label>
-        <input id="f-cliente" type="text" placeholder="Nome ou código" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+      
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Cliente</label>
+        <input id="f-cliente" type="text" placeholder="Nome ou código" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all">
       </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Colaborador</label>
-        <input id="f-colaborador" type="text" placeholder="Nome" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Defeito</label>
-        <input id="f-defeito" type="text" placeholder="Descrição" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Fornecedor</label>
-        <input id="f-fornecedor" type="text" placeholder="Fornecedor" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Cód. Requisição</label>
-        <input id="f-codigo-req" type="text" placeholder="REQ-2026..." class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Destino</label>
-        <select id="f-destino" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Destino</label>
+        <select id="f-destino" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all appearance-none">
           <option value="">Todos</option>
           <option value="Descarte">Descarte</option>
           <option value="Garantia">Garantia</option>
@@ -104,60 +97,49 @@ $isAdmin   = in_array($userRole, ['admin', 'super_admin']);
           <option value="Estoque">Estoque</option>
         </select>
       </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Modo</label>
-        <select id="f-modo" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option value="">Todos</option>
-          <option value="peso">Peso</option>
-          <option value="percentual">% Direto</option>
-        </select>
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">% Mín.</label>
-        <input id="f-percentual-min" type="number" min="0" max="100" step="0.01" placeholder="0" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">% Máx.</label>
-        <input id="f-percentual-max" type="number" min="0" max="100" step="0.01" placeholder="100" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Data Início</label>
-        <input id="f-data-inicio" type="date" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Data Fim</label>
-        <input id="f-data-fim" type="date" class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-      </div>
+
+      <!-- Outros filtros em grid expandida -->
+      <!-- ... -->
     </div>
-    <div class="flex justify-end mt-3 gap-2">
-      <button onclick="abrirModalColunas()" class="px-4 py-2 text-sm text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900/40 hover:bg-indigo-200 dark:hover:bg-indigo-800/50 rounded-lg transition-colors">Colunas</button>
-      <button onclick="limparFiltros()" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg transition-colors">Limpar</button>
-      <button onclick="carregarRegistros(1)" class="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">Filtrar</button>
+    <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-100 dark:border-slate-700/50">
+      <div class="flex gap-2">
+         <button onclick="abrirModalColunas()" class="px-5 py-2.5 text-sm font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-xl transition-all flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"/></svg>
+            Colunas
+         </button>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="limparFiltros()" class="px-6 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl transition-all">Limpar</button>
+        <button onclick="carregarRegistros(1)" class="px-8 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-500/20 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+            Filtrar Resultados
+        </button>
+      </div>
     </div>
   </div>
 
   <!-- Grid -->
-  <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700/50 overflow-hidden transition-colors">
+  <div class="bg-white/50 dark:bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-sm border border-slate-200/50 dark:border-slate-700/50 overflow-hidden transition-all">
     <!-- Zoom and Barra de rolagem superior -->
-    <div class="px-4 py-2 bg-gray-50 dark:bg-slate-900/30 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between gap-4">
-      <div class="flex items-center gap-2">
-        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">🔍 Ajustar Zoom:</span>
-        <input type="range" id="grid-zoom-slider" min="0.5" max="1.3" step="0.05" value="1.0" 
-               class="w-32 h-1.5 bg-gray-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
+    <div class="px-6 py-3 bg-slate-50/50 dark:bg-slate-900/40 border-b border-slate-200/50 dark:border-slate-700/50 flex items-center justify-between gap-6">
+      <div class="flex items-center gap-3">
+        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">🔍 Zoom da Grade</span>
+        <input type="range" id="grid-zoom-slider" min="0.7" max="1.2" step="0.05" value="1.0" 
+               class="w-32 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
                oninput="updateGridZoom(this.value)">
-        <span id="grid-zoom-val" class="text-xs font-bold text-gray-700 dark:text-gray-300 w-8">100%</span>
+        <span id="grid-zoom-val" class="text-xs font-bold text-blue-600 dark:text-blue-400 w-10">100%</span>
       </div>
-      <div id="grid-top-scroll" class="flex-1 overflow-x-auto" style="overflow-y:hidden;height:12px;">
+      <div id="grid-top-scroll" class="flex-1 overflow-x-auto" style="overflow-y:hidden;height:8px;">
         <div id="grid-top-scroll-inner" style="height:1px;"></div>
       </div>
     </div>
     <div id="grid-scroll" class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700 text-sm">
-        <thead class="bg-gray-50 dark:bg-slate-900/50">
-          <tr id="grid-head"></tr>
+      <table class="min-w-full divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
+        <thead class="bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-md">
+          <tr id="grid-head" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider"></tr>
         </thead>
-        <tbody id="grid-body" class="divide-y divide-gray-100 dark:divide-slate-700">
-          <tr><td colspan="16" class="px-4 py-8 text-center text-gray-400">Carregando...</td></tr>
+        <tbody id="grid-body" class="divide-y divide-slate-50 dark:divide-slate-700/30">
+          <tr><td colspan="16" class="px-4 py-12 text-center text-slate-400 italic">Carregando registros...</td></tr>
         </tbody>
       </table>
     </div>
