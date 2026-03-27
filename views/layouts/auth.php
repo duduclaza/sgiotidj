@@ -174,31 +174,25 @@ $title = $title ?? 'SGQ - Login';
   <canvas id="neural-canvas"></canvas>
   <div class="grid-overlay"></div>
 
-  <!-- Branding superior -->
-  <div class="text-center mb-4 relative z-10">
-    <a href="https://www.tiuai.com.br" target="_blank" rel="noopener noreferrer"
-       class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-600 hover:text-slate-400 transition-colors tracking-widest uppercase">
-      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
-      TI UAI
-    </a>
-  </div>
-
   <!-- Auth Card -->
   <div class="auth-card mx-4" style="max-width:420px; width:100%;">
-    <div class="auth-card-scroll">
-      <?php include $viewFile; ?>
+    <div class="auth-card-scroll flex flex-col min-h-full">
+      <div class="flex-grow">
+        <?php include $viewFile; ?>
+      </div>
     </div>
   </div>
 
-  <!-- Branding inferior -->
-  <div class="text-center mt-5 relative z-10">
+  <!-- Branding inferior externo -->
+  <div class="text-center mt-3 relative z-10 w-full max-w-[420px] mx-auto px-4 flex justify-center">
     <a href="https://www.tiuai.com.br" target="_blank" rel="noopener noreferrer"
-       class="inline-flex items-center gap-1.5 text-[11px] text-slate-700 hover:text-slate-400 transition-colors group">
+       class="inline-flex items-center justify-center gap-1.5 text-[11px] text-slate-500 hover:text-slate-300 transition-colors group">
       <span class="text-slate-600 group-hover:text-slate-400 transition-colors">Desenvolvido por</span>
       <span class="font-bold text-slate-500 group-hover:text-slate-300 tracking-wide transition-colors">TI UAI</span>
       <svg class="w-3 h-3 text-slate-600 group-hover:text-slate-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
     </a>
   </div>
+
 
   <?php include __DIR__ . '/../partials/ui-feedback.php'; ?>
   <?php include __DIR__ . '/../partials/ui-scripts.php'; ?>

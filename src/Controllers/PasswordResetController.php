@@ -20,7 +20,9 @@ class PasswordResetController
      */
     public function requestResetPage()
     {
-        include __DIR__ . '/../../views/pages/password-reset-request.php';
+        $title = 'Recuperar Senha - SGI OTI';
+        $viewFile = __DIR__ . '/../../views/pages/password-reset-request.php';
+        include __DIR__ . '/../../views/layouts/auth.php';
     }
 
     /**
@@ -28,7 +30,9 @@ class PasswordResetController
      */
     public function verifyCodePage()
     {
-        include __DIR__ . '/../../views/pages/password-reset-verify.php';
+        $title = 'Verificar Código - SGI OTI';
+        $viewFile = __DIR__ . '/../../views/pages/password-reset-verify.php';
+        include __DIR__ . '/../../views/layouts/auth.php';
     }
 
     /**
@@ -36,7 +40,9 @@ class PasswordResetController
      */
     public function resetPasswordPage()
     {
-        include __DIR__ . '/../../views/pages/password-reset-new.php';
+        $title = 'Nova Senha - SGI OTI';
+        $viewFile = __DIR__ . '/../../views/pages/password-reset-new.php';
+        include __DIR__ . '/../../views/layouts/auth.php';
     }
 
     /**
