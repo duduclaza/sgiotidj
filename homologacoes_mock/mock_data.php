@@ -327,4 +327,15 @@ function criarHomologacaoMock($dados) {
     $_SESSION['mock_homologacoes'][] = $dados;
     return $dados['id'];
 }
+
+function excluirHomologacaoMock($id) {
+    foreach ($_SESSION['mock_homologacoes'] as $key => $h) {
+        if ($h['id'] == $id) {
+            unset($_SESSION['mock_homologacoes'][$key]);
+            $_SESSION['mock_homologacoes'] = array_values($_SESSION['mock_homologacoes']); // Reindex
+            return true;
+        }
+    }
+    return false;
+}
 ?>
