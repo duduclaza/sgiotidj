@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Versão dos dados mock - incrementar para forçar reset dos dados antigos
-$MOCK_DATA_VERSION = 5;
+$MOCK_DATA_VERSION = 6;
 
 // Inicializar os dados mockados na sessão, se ainda não existirem ou se a versão mudou
 if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $MOCK_DATA_VERSION) {
@@ -35,6 +35,8 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'tipo_aquisicao'        => 'comprado',
             'data_vencimento'       => '2025-02-15',
             'dias_vencimento_notif' => 5,
+            'setor_responsavel'     => 'tecnico',
+            'dados_comercial'       => [],
             'status'                => 'concluida',
             'criado_por'            => 1,
             'responsaveis'          => [3, 4],
@@ -77,6 +79,8 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'tipo_aquisicao'        => 'comprado',
             'data_vencimento'       => '2025-03-01',
             'dias_vencimento_notif' => 5,
+            'setor_responsavel'     => 'tecnico',
+            'dados_comercial'       => [],
             'status'                => 'concluida',
             'criado_por'            => 1,
             'responsaveis'          => [5],
@@ -119,6 +123,8 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'tipo_aquisicao'        => 'emprestado',
             'data_vencimento'       => '2025-04-10',
             'dias_vencimento_notif' => 10,
+            'setor_responsavel'     => 'qualidade',
+            'dados_comercial'       => [],
             'status'                => 'concluida',
             'criado_por'            => 1,
             'responsaveis'          => [3, 5],
@@ -157,6 +163,8 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'tipo_aquisicao'        => 'comprado',
             'data_vencimento'       => '2025-03-30',
             'dias_vencimento_notif' => 5,
+            'setor_responsavel'     => 'tecnico',
+            'dados_comercial'       => [],
             'status'                => 'item_recebido',
             'criado_por'            => 1,
             'responsaveis'          => [4],
@@ -188,6 +196,12 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'tipo_aquisicao'        => 'comprado',
             'data_vencimento'       => date('Y-m-d', strtotime('+7 days')),
             'dias_vencimento_notif' => 5,
+            'setor_responsavel'     => 'comercial',
+            'dados_comercial'       => [
+                'vendedor_nome' => 'Marcos Vendedor',
+                'vendedor_email' => 'marcos@comercial.com',
+                'supervisor_email' => 'joao.supervisor@comercial.com'
+            ],
             'status'                => 'aguardando_chegada',
             'criado_por'            => 1,
             'responsaveis'          => [3, 4, 5],

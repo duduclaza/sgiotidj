@@ -27,6 +27,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['criar_homologacao']))
         'dias_antecedencia_notif' => (int)$_POST['dias_antecedencia_notif'],
         'data_vencimento' => $_POST['data_vencimento'] ?: null,
         'dias_vencimento_notif' => (int)$_POST['dias_vencimento_notif'],
+        'setor_responsavel' => $_POST['setor_responsavel'] ?? 'tecnico',
+        'dados_comercial' => [
+            'vendedor_nome' => $_POST['vendedor_nome'] ?? '',
+            'vendedor_email' => $_POST['vendedor_email'] ?? '',
+            'supervisor_email' => $_POST['supervisor_email'] ?? '',
+        ],
         'notificar_envolvidos' => isset($_POST['notificar_envolvidos']) ? 1 : 0,
     ];
     

@@ -137,21 +137,82 @@ if ($u['perfil'] !== 'compras') {
             </div>
             
             <div class="col-span-12 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-                <h3 class="text-md font-bold flex items-center gap-2 text-slate-700 dark:text-slate-300 mb-2"><i class="ph-fill ph-users text-cyan-500 text-lg"></i> Equipe Técnica Responsável pela Homologação</h3>
-                <p class="text-slate-500 dark:text-slate-400 text-xs mb-4">Selecione quem fará o recebimento e execução do checklist técnico (mínimo 1).</p>
-                <div class="flex flex-wrap gap-4">
-                    <?php foreach ($responsaveis as $resp): ?>
-                        <label class="cursor-pointer relative flex items-start">
-                            <div class="flex items-center h-5">
-                                <input type="checkbox" name="responsaveis[]" value="<?= $resp['id'] ?>" class="w-4 h-4 border border-slate-300 rounded bg-slate-50 focus:ring-3 focus:ring-primary-300 dark:bg-slate-700 dark:border-slate-600 dark:focus:ring-primary-600 dark:ring-offset-slate-800">
+                <h3 class="text-md font-bold flex items-center gap-2 text-slate-700 dark:text-slate-300 mb-2"><i class="ph-fill ph-users-three text-cyan-500 text-lg"></i> Setor Responsável pela Homologação</h3>
+                <p class="text-slate-500 dark:text-slate-400 text-xs mb-4">Defina qual departamento será o dono deste processo técnico (Técnico e Qualidade notificam todos do setor).</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <!-- Técnico -->
+                    <label class="relative cursor-pointer group">
+                        <input type="radio" name="setor_responsavel" value="tecnico" checked class="peer sr-only" onchange="toggleComercial(false)">
+                        <div class="p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl transition-all peer-checked:border-cyan-500 peer-checked:bg-cyan-50/50 dark:peer-checked:bg-cyan-900/20 peer-checked:ring-1 peer-checked:ring-cyan-500 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-cyan-500 transition-colors shadow-sm">
+                                <i class="ph ph-wrench text-2xl"></i>
                             </div>
-                            <div class="ml-3 text-sm">
-                                <span class="font-medium text-slate-900 dark:text-slate-300"><?= $resp['nome'] ?></span>
+                            <div class="font-bold text-slate-700 dark:text-slate-200">Técnico / Engenharia</div>
+                        </div>
+                    </label>
+
+                    <!-- Qualidade -->
+                    <label class="relative cursor-pointer group">
+                        <input type="radio" name="setor_responsavel" value="qualidade" class="peer sr-only" onchange="toggleComercial(false)">
+                        <div class="p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50/50 dark:peer-checked:bg-emerald-900/20 peer-checked:ring-1 peer-checked:ring-emerald-500 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-emerald-500 transition-colors shadow-sm">
+                                <i class="ph ph-seal-check text-2xl"></i>
                             </div>
-                        </label>
-                    <?php endforeach; ?>
+                            <div class="font-bold text-slate-700 dark:text-slate-200">Qualidade</div>
+                        </div>
+                    </label>
+
+                    <!-- Comercial -->
+                    <label class="relative cursor-pointer group">
+                        <input type="radio" name="setor_responsavel" value="comercial" class="peer sr-only" onchange="toggleComercial(true)">
+                        <div class="p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl transition-all peer-checked:border-indigo-500 peer-checked:bg-indigo-50/50 dark:peer-checked:bg-indigo-900/20 peer-checked:ring-1 peer-checked:ring-indigo-500 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-indigo-500 transition-colors shadow-sm">
+                                <i class="ph ph-briefcase text-2xl"></i>
+                            </div>
+                            <div class="font-bold text-slate-700 dark:text-slate-200">Comercial / Vendas</div>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Seção Dinâmica Comercial -->
+                <div id="secaoComercial" class="hidden animate-fade-in bg-indigo-50/30 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-900/30 rounded-2xl p-6 mt-4 mb-6">
+                    <h4 class="text-sm font-bold text-indigo-700 dark:text-indigo-400 mb-4 flex items-center gap-2">
+                        <i class="ph ph-envelope-simple-open text-lg"></i> Contatos da Área Comercial para SLA e Notificações
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2 uppercase tracking-wider">Nome do Vendedor</label>
+                            <input type="text" name="vendedor_nome" placeholder="Ex: João da Silva" class="bg-white border border-indigo-200 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 dark:bg-slate-900 dark:border-indigo-800 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2 uppercase tracking-wider">E-mail do Vendedor</label>
+                            <input type="email" name="vendedor_email" placeholder="vendedor@empresa.com" class="bg-white border border-indigo-200 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 dark:bg-slate-900 dark:border-indigo-800 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2 uppercase tracking-wider">E-mail do Supervisor</label>
+                            <input type="email" name="supervisor_email" placeholder="supervisor@empresa.com" class="bg-white border border-indigo-200 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 dark:bg-slate-900 dark:border-indigo-800 dark:text-white">
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <script>
+            function toggleComercial(show) {
+                const el = document.getElementById('secaoComercial');
+                const inputs = el.querySelectorAll('input');
+                if (show) {
+                    el.classList.remove('hidden');
+                    inputs.forEach(i => i.required = true);
+                } else {
+                    el.classList.add('hidden');
+                    inputs.forEach(i => {
+                        i.required = false;
+                        i.value = '';
+                    });
+                }
+            }
+            </script>
             
             <div class="col-span-12 mt-8 flex items-center gap-3">
                 <button type="submit" class="flex items-center gap-2 text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-6 py-3 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 transition-colors shadow-sm">

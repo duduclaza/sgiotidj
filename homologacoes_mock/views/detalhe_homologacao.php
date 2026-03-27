@@ -55,14 +55,26 @@
                         <tr class="flex justify-between py-2"><td class="text-slate-500 dark:text-slate-400">Criador</td><td class="text-slate-700 dark:text-slate-300 text-right"><?= getUserById($h['criado_por'])['nome'] ?></td></tr>
                         <tr class="flex justify-between py-2"><td class="text-slate-500 dark:text-slate-400 whitespace-nowrap">Logística (Chegada)</td><td class="text-slate-700 dark:text-slate-300 text-right"><?= $h['data_prevista_chegada'] ? date('d/m/Y', strtotime($h['data_prevista_chegada'])) : '-' ?></td></tr>
                         <tr class="flex justify-between py-2"><td class="text-rose-500 dark:text-rose-400 font-semibold italic">Deadline Final (SLA)</td><td class="text-rose-600 dark:text-rose-400 font-bold text-right"><?= $h['data_vencimento'] ? date('d/m/Y', strtotime($h['data_vencimento'])) : '-' ?></td></tr>
-                        <tr class="flex flex-col gap-2 py-2">
-                            <td class="text-slate-500 dark:text-slate-400">Técnicos Designados</td>
-                            <td class="flex flex-wrap gap-1">
-                                <?php foreach ($h['responsaveis'] as $resp_id): ?>
-                                    <span class="px-2 py-1 rounded bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-200 dark:border-slate-600 shadow-sm"><?= getUserById($resp_id)['nome'] ?></span>
-                                <?php endforeach; ?>
+                        <tr class="flex flex-col gap-2 py-3 border-t border-slate-100 dark:border-slate-700/50 mt-2">
+                            <td class="text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-widest">Setor Responsável</td>
+                            <td class="flex items-center gap-2">
+                                <?php 
+                                    $setor = $h['setor_responsavel'] ?? 'tecnico';
+                                    $icon = $setor === 'tecnico' ? 'ph-wrench' : ($setor === 'qualidade' ? 'ph-seal-check' : 'ph-briefcase');
+                                    $color = $setor === 'tecnico' ? 'cyan' : ($setor === 'qualidade' ? 'emerald' : 'indigo');
+                                ?>
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-<?= $color ?>-100 text-<?= $color ?>-800 dark:bg-<?= $color ?>-900/30 dark:text-<?= $color ?>-400 text-xs font-bold border border-<?= $color ?>-200 dark:border-<?= $color ?>-800">
+                                    <i class="ph-bold <?= $icon ?>"></i> <?= strtoupper($setor) ?>
+                                </span>
                             </td>
                         </tr>
+                        <?php if ($setor === 'comercial' && !empty($h['dados_comercial'])): ?>
+                        <tr class="flex flex-col gap-1 py-2 bg-indigo-50/50 dark:bg-indigo-900/10 p-3 rounded-lg border border-indigo-100 dark:border-indigo-900/30 mt-2">
+                            <td class="text-indigo-700 dark:text-indigo-400 text-[11px] font-bold">Vendedor: <span class="font-normal text-slate-700 dark:text-slate-300"><?= $h['dados_comercial']['vendedor_nome'] ?></span></td>
+                            <td class="text-indigo-700 dark:text-indigo-400 text-[11px] font-bold">E-mail: <span class="font-normal text-slate-700 dark:text-slate-300"><?= $h['dados_comercial']['vendedor_email'] ?></span></td>
+                            <td class="text-indigo-700 dark:text-indigo-400 text-[11px] font-bold">Supervisor: <span class="font-normal text-slate-700 dark:text-slate-300"><?= $h['dados_comercial']['supervisor_email'] ?></span></td>
+                        </tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>

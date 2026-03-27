@@ -49,7 +49,17 @@ foreach ($homologacoes as $h) {
     if ($h['status'] !== 'concluida' && $h['status'] !== 'cancelada' && !empty($h['data_vencimento'])) {
         $diasVenc = calcularDiasRestantes($h['data_vencimento']);
         if ($diasVenc !== null && $diasVenc <= ($h['dias_vencimento_notif'] ?? 5)) {
-            $msgVenc = $diasVenc < 0 ? "⚠️ <strong>ATENÇÃO:</strong> A homologação <strong>{$h['codigo']}</strong> está <strong>VENCIDA</strong> há " . abs($diasVenc) . " dias!" : "📅 <strong>Prazo:</strong> A homologação <strong>{$h['codigo']}</strong> ({$h['modelo']}) vence em <strong>{$diasVenc} dias</strong>!";
+            $setorTxt = ucfirst($h['setor_responsavel'] ?? 'tecnico');
+            
+            if ($diasVenc < 0) {
+                $msgVenc = "⚠️ <strong>VENCIDO:</strong> A homologação <strong>{$h['codigo']}</strong> está atrasada há " . abs($diasVenc) . " dias! Equipe <strong>{$setorTxt}</strong> cobrada.";
+            } else {
+                $msgVenc = "📅 <strong>Prazo ({$setorTxt}):</strong> Vence em <strong>{$diasVenc} dias</strong>.";
+                if (($h['setor_responsavel'] ?? '') === 'comercial' && !empty($h['dados_comercial']['vendedor_email'])) {
+                    $msgVenc .= " <span class='block text-[11px] opacity-80 mt-1 italic'>📧 E-mail de SLA enviado para {$h['dados_comercial']['vendedor_nome']} e Supervisor.</span>";
+                }
+            }
+
             $alertas[] = [
                 'tipo' => 'vencimento',
                 'msg' => $msgVenc
