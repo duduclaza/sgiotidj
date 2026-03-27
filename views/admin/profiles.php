@@ -19,29 +19,14 @@
 <?php endif; ?>
 
 <section class="space-y-8 animate-fade-in">
-  <!-- Header Quick Stats -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <div class="bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl p-6 rounded-3xl border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex items-center gap-5 group hover:border-blue-500/50 transition-all duration-500">
-      <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
-        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+  <!-- Header Actions -->
+  <div class="flex justify-end items-center">
+    <button onclick="toggleProfileForm()" id="toggleFormBtn" class="px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-extrabold text-sm flex items-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-slate-900/10 dark:shadow-white/5 border border-slate-800 dark:border-slate-200">
+      <div class="bg-blue-500 rounded-lg p-1">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
       </div>
-      <div>
-        <p class="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none mb-1.5">Arquiteturas de Acesso</p>
-        <h3 class="text-2xl font-black text-slate-800 dark:text-white leading-none flex items-center gap-2">
-          <span id="profilesTotal">...</span>
-          <span class="text-xs font-bold text-blue-500 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-lg">Ativos</span>
-        </h3>
-      </div>
-    </div>
-    
-    <div class="md:col-span-2 flex justify-end items-center gap-4">
-      <button onclick="toggleProfileForm()" id="toggleFormBtn" class="px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-extrabold text-sm flex items-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-slate-900/10 dark:shadow-white/5 border border-slate-800 dark:border-slate-200">
-        <div class="bg-blue-500 rounded-lg p-1">
-          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-        </div>
-        Projetar Novo Perfil
-      </button>
-    </div>
+      Projetar Novo Perfil
+    </button>
   </div>
 
   <!-- Profile Configuration Form -->
