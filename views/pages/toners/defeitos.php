@@ -774,7 +774,6 @@ function showToast(type, titulo, msg) {
                             class="w-full bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-lg px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-100 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
                             <option value="">— Selecione a classificação —</option>
                             <!-- Hardcoded fallback defaults from before, so old ones work logically -->
-                            <option value="DEFEITO_PROCEDENTE">DEFEITO PROCEDENTE (Antigo)</option>
                             <option value="TONER_SEM_DEFEITO">TONER SEM DEFEITO / USO INTERNO</option>
                             <!-- List from DB -->
                             <?php foreach ($defeitos_lista ?? [] as $def): ?>
