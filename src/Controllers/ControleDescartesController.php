@@ -238,8 +238,10 @@ class ControleDescartesController
 
             // Verificar duplicidade de OS
             $numero_os = $_POST['numero_os'] ?? null;
-            if ($numero_os && $this->isOsDuplicada($numero_os)) {
-                echo json_encode(['success' => false, 'message' => "A Ordem de Servico (OS) '{$numero_os}' ja esta cadastrada no sistema. Verifique os dados."]);
+            if ($numero_os && ($duplicado = $this->isOsDuplicada($numero_os))) {
+                $msg = "A Ordem de Servico (OS) '{$numero_os}' ja esta cadastrada no sistema.";
+                $msg .= " (Série: {$duplicado['numero_serie']} | Filial: {$duplicado['filial_nome']})";
+                echo json_encode(['success' => false, 'message' => $msg]);
                 return;
             }
             
@@ -422,8 +424,10 @@ class ControleDescartesController
 
             // Verificar duplicidade de OS (excluindo o atual)
             $numero_os = $_POST['numero_os'] ?? null;
-            if ($numero_os && $this->isOsDuplicada($numero_os, $descarte_id)) {
-                echo json_encode(['success' => false, 'message' => "A Ordem de Servico (OS) '{$numero_os}' ja esta cadastrada em outro registro."]);
+            if ($numero_os && ($duplicado = $this->isOsDuplicada($numero_os, $descarte_id))) {
+                $msg = "A Ordem de Servico (OS) '{$numero_os}' ja esta cadastrada em outro registro.";
+                $msg .= " (Série: {$duplicado['numero_serie']} | Filial: {$duplicado['filial_nome']})";
+                echo json_encode(['success' => false, 'message' => $msg]);
                 return;
             }
 
@@ -830,22 +834,25 @@ class ControleDescartesController
 
     // Métodos auxiliares
 
-    // Verificar se OS já está cadastrada (anti-duplicidade)
-    private function isOsDuplicada($numeroOs, $excludeId = null): bool
+    // Verificar se OS já está cadastrada (anti-duplicidade) - Retorna o registro se existir
+    private function isOsDuplicada($numeroOs, $excludeId = null)
     {
         if (empty($numeroOs)) return false;
 
-        $sql = "SELECT id FROM controle_descartes WHERE numero_os = ?";
+        $sql = "SELECT d.id, d.numero_serie, f.nome as filial_nome 
+                FROM controle_descartes d 
+                LEFT JOIN filiais f ON d.filial_id = f.id
+                WHERE d.numero_os = ?";
         $params = [$numeroOs];
 
         if ($excludeId !== null) {
-            $sql .= " AND id != ?";
+            $sql .= " AND d.id != ?";
             $params[] = $excludeId;
         }
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
-        return $stmt->rowCount() > 0;
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
     private function getDescarteById($id)
     {
@@ -1097,8 +1104,8 @@ class ControleDescartesController
                     }
 
                     // Verificar duplicidade de OS na importacao
-                    if (!empty($numeroOs) && $this->isOsDuplicada($numeroOs)) {
-                        $errors[] = "Linha $linha: OS '$numeroOs' ja existe no sistema e foi pulada";
+                    if (!empty($numeroOs) && ($duplicado = $this->isOsDuplicada($numeroOs))) {
+                        $errors[] = "Linha $linha: OS '$numeroOs' ja existe no sistema (Série: {$duplicado['numero_serie']} | Filial: {$duplicado['filial_nome']}) e foi pulada";
                         continue;
                     }
 
