@@ -5,6 +5,17 @@
  */
 ?>
 
+<style>
+  @keyframes highlight-fade {
+    0% { background-color: rgba(244, 63, 94, 0.2); }
+    100% { background-color: transparent; }
+  }
+  .highlight-row {
+    animation: highlight-fade 3s ease-in-out forwards;
+    border-left: 4px solid #f43f5e !important;
+  }
+</style>
+
 <section class="space-y-6">
 
   <!-- Cabeçalho -->
@@ -267,7 +278,8 @@ else: ?>
         </thead>
         <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
           <?php foreach ($defeitos_historico as $d): ?>
-          <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors defeito-row"
+          <tr id="defeito-<?php echo $d['id']; ?>" 
+              class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors defeito-row"
               data-busca="<?= strtolower(htmlspecialchars(
                   ($d['modelo_toner'] ?? '') . ' ' .
                   ($d['numero_pedido'] ?? '') . ' ' .
@@ -1025,6 +1037,22 @@ document.getElementById('formDevolutiva').addEventListener('submit', async (e) =
     } finally {
         btn.disabled = false;
         btn.innerText = originalText;
+    }
+});
+
+// Highlight and Scroll to record if ID is provided in URL
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetId = urlParams.get('id');
+    
+    if (targetId) {
+        const row = document.getElementById('defeito-' + targetId);
+        if (row) {
+            setTimeout(() => {
+                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                row.classList.add('highlight-row');
+            }, 500);
+        }
     }
 });
 </script>

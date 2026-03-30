@@ -84,13 +84,13 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
   .kpi-card-inner { display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
   .filter-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--dash-text); border-radius: 10px; padding: 8px 12px; font-size: 0.82rem; transition: border-color 0.2s; outline: none; width: 100%; }
   .filter-input:focus { border-color: var(--dash-accent); box-shadow: 0 0 0 2px rgba(244,63,94,0.15); }
-  .filter-input option { color: #f8fafc; background: #0f172a; } /* Fix para contraste das opções */
+  .filter-input option { color: #f8fafc; background: #0f172a; }
   
   /* TomSelect Dark Theme Overrides */
   .ts-wrapper.filter-input { padding: 0 !important; border: none !important; background: transparent !important; box-shadow: none !important; }
   .ts-wrapper .ts-control {
     background: #1e293b !important; border: 1px solid rgba(255,255,255,0.12) !important; color: #f8fafc !important;
-    border-radius: 10px !important; padding: 8px 12px !important; font-size: 0.82rem !important; cursor: pointer !important; box-shadow: none !important;
+    border-radius: 10px !important; padding: 10px 14px !important; font-size: 0.82rem !important; cursor: pointer !important; box-shadow: none !important;
   }
   .ts-wrapper.focus .ts-control { border-color: #f43f5e !important; box-shadow: 0 0 0 2px rgba(244,63,94,0.15) !important; background: #1e293b !important; color: #f8fafc !important; }
   .ts-wrapper .ts-dropdown, .ts-wrapper .ts-control input { color: #f8fafc !important; }
@@ -103,7 +103,33 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
 
   .chart-wrapper { position: relative; width: 100%; }
   .chart-wrapper canvas { width: 100% !important; }
+
+  /* Fullscreen chart styles */
+  .chart-expand-btn { cursor:pointer; padding:4px; border-radius:8px; color:var(--dash-muted); transition:all 0.2s; border:none; background:transparent; }
+  .chart-expand-btn:hover { color:#fff; background:rgba(255,255,255,0.08); }
+  .chart-fullscreen-overlay { display:none; position:fixed; inset:0; z-index:99999; background:#060c1b; padding:0; flex-direction:column; align-items:center; justify-content:center; }
+  .chart-fullscreen-overlay.active { display:flex; }
+  .chart-fullscreen-overlay .fs-inner { width:92vw; max-width:1200px; height:85vh; display:flex; flex-direction:column; }
+  .chart-fullscreen-overlay .fs-header { display:flex; align-items:center; justify-content:space-between; padding:20px 0 16px; flex-shrink:0; }
+  .chart-fullscreen-overlay .fs-close { cursor:pointer; padding:10px 20px; border-radius:12px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.06); color:#e2e8f0; font-size:0.85rem; font-weight:600; transition:all 0.2s; }
+  .chart-fullscreen-overlay .fs-close:hover { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.25); }
 </style>
+
+<!-- Fullscreen Overlay -->
+<div id="chartFullscreen" class="chart-fullscreen-overlay">
+  <div class="fs-inner">
+    <div class="fs-header">
+      <div>
+        <h2 id="fsTitle" class="text-2xl font-bold text-white">Gráfico</h2>
+        <p id="fsSubtitle" class="text-sm text-slate-400 mt-1">Detalhes do indicador selecionado</p>
+      </div>
+      <button onclick="fecharFullscreen()" class="fs-close">Fechar Esc</button>
+    </div>
+    <div class="flex-1 min-h-0 bg-white/[0.02] rounded-2xl p-6 border border-white/5">
+      <canvas id="chartFullscreenCanvas"></canvas>
+    </div>
+  </div>
+</div>
 
 <div class="dash-container px-6 py-8">
   <div class="max-w-[1400px] mx-auto space-y-6">
@@ -138,25 +164,33 @@ $moduloAtual = strtolower(trim((string)($_GET['modulo'] ?? '')));
       </div>
     </div>
 
-    <!-- Filtros Globais -->
-    <div class="dash-card p-4 relative z-50">
-      <div class="flex flex-wrap items-center gap-3">
-        <div class="flex items-center gap-2 mr-2">
+    <!-- Filtros Globais Organizados -->
+    <div class="dash-card p-5 relative z-50 overflow-visible">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+        <!-- Ícone + Título pequeno (Opcional, mas dá elegância) -->
+        <div class="md:col-span-1 hidden lg:flex items-center gap-2">
           <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
-          <span class="text-xs font-semibold text-slate-300 uppercase letter-spacing-wide">Filtros</span>
+          <span class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Filtros</span>
         </div>
         
-        <select id="filtroCliente" class="filter-input w-full md:w-48 text-xs" onchange="fetchTonersDefeitoDashboard()">
-          <option value="">Cliente (Todos)</option>
-        </select>
-        <select id="filtroFilial" class="filter-input w-full md:w-48 text-xs" onchange="fetchTonersDefeitoDashboard()">
-          <option value="">Filial (Todas)</option>
-        </select>
-        <select id="filtroStatus" class="filter-input w-full md:w-48 text-xs" onchange="fetchTonersDefeitoDashboard()">
-          <option value="">Classificação (Todas)</option>
-        </select>
-        
-        <button onclick="cleanFilters()" class="text-xs text-rose-400 hover:text-white transition px-2 ml-auto">Limpar filtros</button>
+        <div class="md:col-span-12 lg:col-span-11 grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+          <div class="relative">
+            <select id="filtroCliente" class="filter-input" onchange="fetchTonersDefeitoDashboard()">
+              <option value="">Cliente (Todos)</option>
+            </select>
+          </div>
+          <div class="relative">
+            <select id="filtroFilial" class="filter-input" onchange="fetchTonersDefeitoDashboard()">
+              <option value="">Filial (Todas)</option>
+            </select>
+          </div>
+          <div class="relative flex items-center gap-3">
+            <select id="filtroStatus" class="filter-input" onchange="fetchTonersDefeitoDashboard()">
+              <option value="">Classificação (Todas)</option>
+            </select>
+            <button onclick="cleanFilters()" class="text-[10px] font-bold text-rose-400 hover:text-rose-100 transition whitespace-nowrap uppercase tracking-widest bg-rose-500/10 px-3 py-2 rounded-lg border border-rose-500/20">Limpar</button>
+          </div>
+        </div>
       </div>
     </div>
 
