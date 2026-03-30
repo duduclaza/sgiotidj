@@ -2,9 +2,14 @@
 
 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
     <div>
-        <h2 class="text-3xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-            <?= $h['codigo'] ?>
-        </h2>
+        <div class="flex items-center gap-3 mb-2">
+            <h2 class="text-3xl font-bold text-slate-800 dark:text-white">
+                <?= $h['codigo'] ?>
+            </h2>
+            <div class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                <?= getRotuloVersao(getVersaoHomologacao($h['id'])) ?>
+            </div>
+        </div>
         <h5 class="text-slate-500 dark:text-slate-400 font-medium text-lg mt-1"><?= $h['titulo'] ?></h5>
     </div>
     <div class="flex flex-col items-end gap-2">

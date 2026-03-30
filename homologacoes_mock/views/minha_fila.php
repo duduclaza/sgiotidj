@@ -23,6 +23,7 @@ if ($u['perfil'] !== 'responsavel' && $u['perfil'] !== 'admin' && $u['perfil'] !
         <table class="w-full text-sm text-left text-slate-600 dark:text-slate-300">
             <thead class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700/50 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700/50">
                 <tr>
+                    <th class="px-5 py-3">Versão</th>
                     <th class="px-5 py-3">Código</th>
                     <th class="px-5 py-3">Equipamento</th>
                     <th class="px-5 py-3 text-center">Qtd / Tipo</th>
@@ -47,6 +48,11 @@ if ($u['perfil'] !== 'responsavel' && $u['perfil'] !== 'admin' && $u['perfil'] !
                     $perc = $total_items > 0 ? round(($respondidos / $total_items) * 100) : 0;
                 ?>
                 <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                    <td class="px-5 py-3 font-bold text-center">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                            <?= getRotuloVersao(getVersaoHomologacao($h['id'])) ?>
+                        </span>
+                    </td>
                     <td class="px-5 py-3 font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap"><?= $h['codigo'] ?></td>
                     <td class="px-5 py-3">
                         <div class="flex items-center gap-3">

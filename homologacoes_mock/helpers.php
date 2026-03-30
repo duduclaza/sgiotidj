@@ -135,4 +135,44 @@ function getSequenciaHomologacaoProduto($id_ou_produto_original) {
     
     return $sequencia;
 }
+
+// Obter a versão (posição) de uma homologação na sua cadeia
+// Retorna: 1 (primeira), 2 (segunda rehomologação), 3 (terceira), etc
+function getVersaoHomologacao($id) {
+    $homologacao = getHomologacaoById($id);
+    if (!$homologacao) return null;
+    
+    // Se for primeira, versão é 1
+    if ($homologacao['tipo_homologacao'] === 'primeira') {
+        return 1;
+    }
+    
+    // Se for rehomologação, contar quantas anteriores existem
+    $versao = 1;
+    $proxima_id = $homologacao['homologacao_anterior_id'];
+    
+    while ($proxima_id) {
+        $versao++;
+        $anterior = getHomologacaoById($proxima_id);
+        if (!$anterior) break;
+        $proxima_id = $anterior['homologacao_anterior_id'];
+    }
+    
+    return $versao;
+}
+
+// Obter rótulo legível da versão (1ª, 2ª, 3ª, 4ª, etc)
+function getRotuloVersao($versao) {
+    if (!$versao) return '—';
+    
+    $sufixos = [
+        1 => '1ª Homologação',
+        2 => '2ª Homologação (Rehom)',
+        3 => '3ª Homologação (Rehom)',
+        4 => '4ª Homologação (Rehom)',
+        5 => '5ª Homologação (Rehom)',
+    ];
+    
+    return $sufixos[$versao] ?? $versao . 'ª Homologação';
+}
 ?>

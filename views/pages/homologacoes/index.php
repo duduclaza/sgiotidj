@@ -390,6 +390,7 @@
                         <button type="button" title="Excluir" onclick="event.stopPropagation(); deleteHomologacao(<?= $h['id'] ?>)" class="absolute top-2 right-2 text-slate-400 hover:text-red-600">
                             🗑️
                         </button>
+                        <div class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 mb-2"><?= getRotuloVersao(getVersaoHomologacao($h['id'])) ?></div>
                         <div class="text-sm font-bold text-slate-700 mb-1"><?= e($h['cod_referencia']) ?></div>
                         <div class="text-xs text-slate-600 mb-2 line-clamp-2"><?= e($h['descricao']) ?></div>
                         <?php if (!empty($h['departamento_resp_nome'])): ?>
@@ -454,6 +455,7 @@
                          draggable="true"
                          onclick="openCardDetails(<?= $h['id'] ?>)">
                         <button type="button" title="Excluir" onclick="event.stopPropagation(); deleteHomologacao(<?= $h['id'] ?>)" class="absolute top-2 right-2 text-slate-400 hover:text-red-600">🗑️</button>
+                        <div class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 mb-2"><?= getRotuloVersao(getVersaoHomologacao($h['id'])) ?></div>
                         <div class="text-sm font-bold text-slate-700 mb-1"><?= e($h['cod_referencia']) ?></div>
                         <div class="text-xs text-slate-600 mb-2 line-clamp-2"><?= e($h['descricao']) ?></div>
                         <?php if (!empty($h['departamento_resp_nome'])): ?>
@@ -463,16 +465,6 @@
                         <?php $dr2=(int)($h['dias_restantes']??99999);$da2=(int)($h['dias_aviso']??7); if($dr2<0){$vc='badge-venc-late';$vi='🔴';$vt='Vencido '.abs($dr2).'d';}elseif($dr2<=$da2){$vc='badge-venc-warn';$vi='🟡';$vt='Vence em '.$dr2.'d';}else{$vc='badge-venc-ok';$vi='🟢';$vt='Vence em '.$dr2.'d';} ?>
                         <span class="badge-vencimento <?= $vc ?> mb-2"><?= $vi ?> <?= $vt ?></span>
                         <?php endif; ?>
-                        <div class="flex items-center justify-between text-xs">
-                            <?php if ($h['total_anexos'] > 0): ?><span class="text-slate-500">📎 <?= $h['total_anexos'] ?></span><?php else: ?><span></span><?php endif; ?>
-                            <span class="text-slate-400 text-[10px]"><?= date('d/m/y', strtotime($h['created_at'])) ?></span>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-
-        <!-- Coluna: Em Análise -->
         <div class="kanban-col">
             <div class="flex items-center justify-between mb-3 px-2">
                 <div class="flex items-center gap-2">
@@ -494,6 +486,7 @@
                          draggable="true"
                          onclick="openCardDetails(<?= $h['id'] ?>)">
                         <button type="button" title="Excluir" onclick="event.stopPropagation(); deleteHomologacao(<?= $h['id'] ?>)" class="absolute top-2 right-2 text-slate-400 hover:text-red-600">🗑️</button>
+                        <div class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 mb-2"><?= getRotuloVersao(getVersaoHomologacao($h['id'])) ?></div>
                         <div class="text-sm font-bold text-slate-700 mb-1"><?= e($h['cod_referencia']) ?></div>
                         <div class="text-xs text-slate-600 mb-2 line-clamp-2"><?= e($h['descricao']) ?></div>
                         <?php if (!empty($h['aprovado_por_nome'])): ?>
@@ -541,6 +534,7 @@
                          draggable="true"
                          onclick="openCardDetails(<?= $h['id'] ?>)">
                         <button type="button" title="Excluir" onclick="event.stopPropagation(); deleteHomologacao(<?= $h['id'] ?>)" class="absolute top-2 right-2 text-slate-400 hover:text-red-600">🗑️</button>
+                        <div class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 mb-2"><?= getRotuloVersao(getVersaoHomologacao($h['id'])) ?></div>
                         <div class="text-sm font-bold text-slate-700 mb-1"><?= e($h['cod_referencia']) ?></div>
                         <div class="text-xs text-slate-600 mb-2 line-clamp-2"><?= e($h['descricao']) ?></div>
                         <?php if (!empty($h['aprovado_por_nome'])): ?>
@@ -583,6 +577,7 @@
                          draggable="true"
                          onclick="openCardDetails(<?= $h['id'] ?>)">
                         <button type="button" title="Excluir" onclick="event.stopPropagation(); deleteHomologacao(<?= $h['id'] ?>)" class="absolute top-2 right-2 text-slate-400 hover:text-red-600">🗑️</button>
+                        <div class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 mb-2"><?= getRotuloVersao(getVersaoHomologacao($h['id'])) ?></div>
                         <div class="text-sm font-bold text-slate-700 mb-1"><?= e($h['cod_referencia']) ?></div>
                         <div class="text-xs text-slate-600 mb-2 line-clamp-2"><?= e($h['descricao']) ?></div>
                         <?php if (!empty($h['aprovado_por_nome'])): ?>
@@ -621,6 +616,7 @@
                          draggable="true"
                          onclick="openCardDetails(<?= $h['id'] ?>)">
                         <button type="button" title="Excluir" onclick="event.stopPropagation(); deleteHomologacao(<?= $h['id'] ?>)" class="absolute top-2 right-2 text-slate-400 hover:text-red-600">🗑️</button>
+                        <div class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 mb-2"><?= getRotuloVersao(getVersaoHomologacao($h['id'])) ?></div>
                         <div class="text-sm font-bold text-slate-700 mb-1"><?= e($h['cod_referencia']) ?></div>
                         <div class="text-xs text-slate-600 mb-2 line-clamp-2"><?= e($h['descricao']) ?></div>
                         <?php if (!empty($h['reprovado_por_nome'])): ?>
