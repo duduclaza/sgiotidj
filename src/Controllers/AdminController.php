@@ -606,7 +606,7 @@ class AdminController
                             SUM(t.quantidade) AS total_quantidade,
                             COUNT(t.id) AS total_registros,
                             SUM(CASE WHEN t.devolutiva_resultado IS NULL OR t.devolutiva_resultado = '' THEN 1 ELSE 0 END) AS pendentes,
-                            SUM(CASE WHEN t.devolutiva_resultado = 'TONER_SEM_DEFEITO' THEN 1 ELSE 0 END) AS falsos_positivos,
+                            SUM(CASE WHEN t.devolutiva_resultado = 'TONER_SEM_DEFEITO' OR t.devolutiva_resultado LIKE '%impres%alta%' OR t.devolutiva_resultado LIKE '%rea de impress%' THEN 1 ELSE 0 END) AS falsos_positivos,
                             SUM(CASE WHEN t.devolutiva_resultado IS NOT NULL AND t.devolutiva_resultado != '' THEN 1 ELSE 0 END) AS total_classificado
                         FROM toners_defeitos t 
                         LEFT JOIN filiais f ON f.id = t.filial_id
