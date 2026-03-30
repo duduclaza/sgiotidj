@@ -3,6 +3,12 @@ require_once __DIR__ . '/init.php';
 
 $u = getUsuarioLogado();
 
+// Determinar tipo de homologação baseado no setor do usuário
+$tipoHomologacao = 'primeira'; //Default
+if ($u && strtolower($u['setor']) !== 'compras') {
+    $tipoHomologacao = 'rehomologacao';
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['criar_homologacao'])) {
     $responsaveis = isset($_POST['responsaveis']) ? $_POST['responsaveis'] : [];
     
@@ -15,6 +21,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['criar_homologacao']))
         'numero_serie' => $_POST['numero_serie'],
         'quantidade' => (int)($_POST['quantidade'] ?? 1),
         'tipo_aquisicao' => $_POST['tipo_aquisicao'] ?? 'comprado',
+        'tipo_homologacao' => $_POST['tipo_homologacao'] ?? $tipoHomologacao,
+        'homologacao_anterior_id' => isset($_POST['homologacao_anterior_id']) && $_POST['homologacao_anterior_id'] 
+            ? (int)$_POST['homologacao_anterior_id'] 
+            : null,
         'responsaveis' => array_map('intval', $responsaveis),
         'data_prevista_chegada' => $_POST['data_prevista_chegada'] ?: null,
         'dias_antecedencia_notif' => (int)$_POST['dias_antecedencia_notif'],
@@ -29,14 +39,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['criar_homologacao']))
         'notificar_envolvidos' => isset($_POST['notificar_envolvidos']) ? 1 : 0,
     ];
     
-    $id = criarHomologacaoMock($novoRegistro);
-    $_SESSION['flash_message'] = ['type' => 'success', 'text' => "Homologação criada com sucesso! (ID: $id)"];
-    header("Location: detalhe_homologacao.php?id=$id");
-    exit;
+    try {
+        $id = criarHomologacaoMock($novoRegistro);
+        $_SESSION['flash_message'] = ['type' => 'success', 'text' => "Homologação criada com sucesso! (ID: $id)"];
+        header("Location: detalhe_homologacao.php?id=$id");
+        exit;
+    } catch (Exception $e) {
+        $_SESSION['flash_message'] = ['type' => 'error', 'text' => $e->getMessage()];
+    }
 }
 
 $data = getMockData();
 $responsaveis = array_filter($data['usuarios'], fn($u) => $u['perfil'] === 'responsavel');
+$ultimasHomologacoes = getUltimasHomologacoesPorProduto();
 
 // Inicializar tipos mock se necessário
 if (!isset($_SESSION['mock_tipos_produto'])) {

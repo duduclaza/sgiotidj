@@ -1,20 +1,72 @@
 <?php 
 require __DIR__ . '/_subnav.php'; 
-
-if ($u['perfil'] !== 'compras') {
-    echo "<div class='bg-rose-50 border border-rose-200 text-rose-800 rounded-xl p-4 mb-6 shadow-sm dark:bg-rose-900/20 dark:border-rose-800 dark:text-rose-300 flex items-center gap-3'><i class='ph-fill ph-warning-circle text-xl'></i> Acesso restrito. Apenas o setor de Compras pode abrir homologações. Mude o simulador de Perfil acima!</div>";
-    return;
-}
 ?>
 
 <div class="mb-6">
     <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">Nova Homologação de TI</h2>
-    <p class="text-slate-500 dark:text-slate-400 text-sm">Preencha os dados do equipamento para iniciar a esteira.</p>
+    <p class="text-slate-500 dark:text-slate-400 text-sm">
+        <?php if ($tipoHomologacao === 'primeira'): ?>
+            Preencha os dados do equipamento para iniciar a primeira homologação.
+        <?php else: ?>
+            Selecione uma homologação anterior para criar uma rehomologação.
+        <?php endif; ?>
+    </p>
 </div>
 
 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
     <form method="POST" action="" class="p-6">
         <input type="hidden" name="criar_homologacao" value="1">
+        <input type="hidden" name="tipo_homologacao" value="<?= htmlspecialchars($tipoHomologacao) ?>">
+        
+        <!-- Seção: Tipo de Homologação (apenas para info visual) -->
+        <div class="mb-6 pb-6 border-b border-slate-200 dark:border-slate-700">
+            <h3 class="text-sm font-bold flex items-center gap-2 text-slate-700 dark:text-slate-300 mb-3">
+                <?php if ($tipoHomologacao === 'primeira'): ?>
+                    <i class="ph-fill ph-plus-circle text-blue-500 text-lg"></i> Primeira Homologação
+                <?php else: ?>
+                    <i class="ph-fill ph-arrows-clockwise text-orange-500 text-lg"></i> Rehomologação
+                <?php endif; ?>
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">
+                <?php if ($tipoHomologacao === 'primeira'): ?>
+                    Você está criando uma homologação inicial para um novo produto.
+                <?php else: ?>
+                    Você está criando uma rehomologação encadeada. Selecione qual homologação anterior deseja validar novamente.
+                <?php endif; ?>
+            </p>
+        </div>
+
+        <!-- Se for Rehomologação, mostrar seletor de últimas homologações -->
+        <?php if ($tipoHomologacao === 'rehomologacao'): ?>
+            <div class="mb-6 pb-6 border-b border-slate-200 dark:border-slate-700">
+                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+                    <i class="ph-fill ph-package text-purple-500"></i> Selecione a Homologação Anterior <span class="text-red-500">*</span>
+                </label>
+                
+                <?php if (empty($ultimasHomologacoes)): ?>
+                    <div class="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-4 dark:bg-amber-900/20 dark:border-amber-900/30 dark:text-amber-300">
+                        <p class="text-sm">⚠️ Nenhuma homologação aprovada disponível. Crie uma primeira homologação antes de fazer uma rehomologação.</p>
+                    </div>
+                <?php else: ?>
+                    <select name="homologacao_anterior_id" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:text-white">
+                        <option value="">Selecione uma homologação...</option>
+                        <?php foreach ($ultimasHomologacoes as $hom): ?>
+                            <?php if ($hom['status'] === 'concluida' && $hom['resultado'] === 'aprovado'): ?>
+                                <option value="<?= $hom['id'] ?>">
+                                    [<?= htmlspecialchars($hom['codigo']) ?>] 
+                                    <?= htmlspecialchars($hom['titulo']) ?>
+                                    (<?= htmlspecialchars($hom['modelo']) ?>) 
+                                    - <?= date('d/m/Y', strtotime($hom['data_criacao'])) ?>
+                                </option>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </select>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                        💡 Mostrando apenas as últimas homologações de cada produto que foram aprovadas.
+                    </p>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
         
         <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
             <div class="col-span-12 md:col-span-8">

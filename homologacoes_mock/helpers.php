@@ -79,4 +79,60 @@ function getIconForTipo($tipo) {
         default: return 'ph-box';
     }
 }
+
+// Obter homologações aprovadas e vigentes (últimas de cada cadeia)
+// Retorna array com as últimas homologações de cada produto original
+function getUltimasHomologacoesPorProduto() {
+    $homologacoes = $_SESSION['mock_homologacoes'] ?? [];
+    $produtos = []; // Indexado por produto_original_id ou id (se primeira)
+    
+    // Agrupar por produto e pegar cronologicamente a última
+    foreach ($homologacoes as $h) {
+        $chave = ($h['tipo_homologacao'] === 'primeira') ? $h['id'] : $h['produto_original_id'];
+        
+        if (!isset($produtos[$chave]) || strtotime($h['data_criacao']) > strtotime($produtos[$chave]['data_criacao'])) {
+            $produtos[$chave] = $h;
+        }
+    }
+    
+    return array_values($produtos);
+}
+
+// Obter toda a cadeia de homologações de um produto original
+// Se passar ID de primeira homologação, retorna: [HOM-001, HOM-002, HOM-003...]
+function getSequenciaHomologacaoProduto($id_ou_produto_original) {
+    $homologacoes = $_SESSION['mock_homologacoes'] ?? [];
+    $sequencia = [];
+    
+    // Encontrar a primeira homologação deste produto
+    $primeira = null;
+    foreach ($homologacoes as $h) {
+        if ($h['tipo_homologacao'] === 'primeira' && $h['id'] == $id_ou_produto_original) {
+            $primeira = $h;
+            break;
+        }
+    }
+    
+    if (!$primeira) return [];
+    
+    $sequencia[] = $primeira;
+    $proxima_id = $primeira['id'];
+    
+    // Construir cadeia de rehomologações
+    while (true) {
+        $encontrou = false;
+        foreach ($homologacoes as $h) {
+            if ($h['tipo_homologacao'] === 'rehomologacao' && 
+                $h['homologacao_anterior_id'] == $proxima_id) {
+                $sequencia[] = $h;
+                $proxima_id = $h['id'];
+                $encontrou = true;
+                break;
+            }
+        }
+        if (!$encontrou) break;
+    }
+    
+    return $sequencia;
+}
 ?>

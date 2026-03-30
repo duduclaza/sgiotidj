@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Versão dos dados mock - incrementar para forçar reset dos dados antigos
-$MOCK_DATA_VERSION = 7;
+$MOCK_DATA_VERSION = 9;
 
 // Inicializar os dados mockados na sessão, se ainda não existirem ou se a versão mudou
 if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $MOCK_DATA_VERSION) {
@@ -41,6 +41,9 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'foto_carga'            => 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=400&h=300',
             'status'                => 'concluida',
             'criado_por'            => 1,
+            'tipo_homologacao'      => 'primeira',
+            'produto_original_id'   => null,
+            'homologacao_anterior_id' => null,
             'responsaveis'          => [3, 4],
             'data_criacao'          => '2025-01-10',
             'data_prevista_chegada' => '2025-01-20',
@@ -87,6 +90,9 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'foto_carga'            => 'https://images.unsplash.com/photo-1566576721346-d4a3b4eaad5b?auto=format&fit=crop&w=400&h=300',
             'status'                => 'concluida',
             'criado_por'            => 1,
+            'tipo_homologacao'      => 'primeira',
+            'produto_original_id'   => null,
+            'homologacao_anterior_id' => null,
             'responsaveis'          => [5],
             'data_criacao'          => '2025-02-05',
             'data_prevista_chegada' => '2025-02-15',
@@ -133,6 +139,9 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'foto_carga'            => 'https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=400&h=300',
             'status'                => 'concluida',
             'criado_por'            => 1,
+            'tipo_homologacao'      => 'rehomologacao',
+            'produto_original_id'   => 1,
+            'homologacao_anterior_id' => 1,
             'responsaveis'          => [3, 5],
             'data_criacao'          => '2025-02-20',
             'data_prevista_chegada' => '2025-03-01',
@@ -175,6 +184,9 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'foto_carga'            => 'https://images.unsplash.com/photo-1590639880812-1f44a30e461a?auto=format&fit=crop&w=400&h=300',
             'status'                => 'item_recebido',
             'criado_por'            => 1,
+            'tipo_homologacao'      => 'primeira',
+            'produto_original_id'   => null,
+            'homologacao_anterior_id' => null,
             'responsaveis'          => [4],
             'data_criacao'          => '2025-03-01',
             'data_prevista_chegada' => '2025-03-10',
@@ -214,6 +226,9 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'foto_carga'            => '',
             'status'                => 'aguardando_chegada',
             'criado_por'            => 1,
+            'tipo_homologacao'      => 'primeira',
+            'produto_original_id'   => null,
+            'homologacao_anterior_id' => null,
             'responsaveis'          => [3, 4, 5],
             'data_criacao'          => '2025-03-15',
             'data_prevista_chegada' => date('Y-m-d', strtotime('+2 days')),
@@ -312,17 +327,55 @@ function criarHomologacaoMock($dados) {
     $dados['criado_por'] = $_SESSION['usuario_logado_id'];
     $dados['checklist_respostas'] = [];
     
+    // Definir tipo_homologacao baseado no setor do usuário
+    if (!isset($dados['tipo_homologacao'])) {
+        $usuario = getUserById($_SESSION['usuario_logado_id']);
+        if ($usuario && strtolower($usuario['setor']) === 'compras') {
+            $dados['tipo_homologacao'] = 'primeira';
+        } else {
+            $dados['tipo_homologacao'] = 'rehomologacao';
+        }
+    }
+    
+    // Se for primeira homologação
+    if ($dados['tipo_homologacao'] === 'primeira') {
+        $dados['produto_original_id'] = null;
+        $dados['homologacao_anterior_id'] = null;
+    } else {
+        // Se for rehomologação, OBRIGATÓRIO ter homologacao_anterior_id
+        if (!isset($dados['homologacao_anterior_id']) || !$dados['homologacao_anterior_id']) {
+            throw new Exception("Rehomologação requer homologacao_anterior_id");
+        }
+        // produto_original_id deve ser preenchido dinamicamente
+        if (!isset($dados['produto_original_id'])) {
+            // Buscar qual é a primeira homologação da cadeia
+            $anterior = null;
+            $homologacoes = $_SESSION['mock_homologacoes'];
+            foreach ($homologacoes as $h) {
+                if ($h['id'] == $dados['homologacao_anterior_id']) {
+                    $anterior = $h;
+                    break;
+                }
+            }
+            if ($anterior) {
+                $dados['produto_original_id'] = ($anterior['tipo_homologacao'] === 'primeira') 
+                    ? $anterior['id'] 
+                    : $anterior['produto_original_id'];
+            }
+        }
+    }
+    
     // Fill empty arrays/variables
-    $dados['data_recebimento']      = null;
-    $dados['recebido_por']          = null;
-    $dados['local_homologacao']     = null;
-    $dados['data_inicio_homologacao']= null;
-    $dados['data_fim_homologacao']  = null;
-    $dados['data_instalacao_cliente']= null;
-    $dados['nome_cliente']          = null;
-    $dados['resultado']             = null;
-    $dados['parecer_final']         = null;
-    $dados['observacoes_checklist'] = null;
+    $dados['data_recebimento']      = $dados['data_recebimento'] ?? null;
+    $dados['recebido_por']          = $dados['recebido_por'] ?? null;
+    $dados['local_homologacao']     = $dados['local_homologacao'] ?? null;
+    $dados['data_inicio_homologacao']= $dados['data_inicio_homologacao'] ?? null;
+    $dados['data_fim_homologacao']  = $dados['data_fim_homologacao'] ?? null;
+    $dados['data_instalacao_cliente']= $dados['data_instalacao_cliente'] ?? null;
+    $dados['nome_cliente']          = $dados['nome_cliente'] ?? null;
+    $dados['resultado']             = $dados['resultado'] ?? null;
+    $dados['parecer_final']         = $dados['parecer_final'] ?? null;
+    $dados['observacoes_checklist'] = $dados['observacoes_checklist'] ?? null;
     
     $_SESSION['mock_homologacoes'][] = $dados;
     return $dados['id'];
