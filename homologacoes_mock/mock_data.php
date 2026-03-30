@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Versão dos dados mock - incrementar para forçar reset dos dados antigos
-$MOCK_DATA_VERSION = 10;
+$MOCK_DATA_VERSION = 11;
 
 // Inicializar os dados mockados na sessão, se ainda não existirem ou se a versão mudou
 if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $MOCK_DATA_VERSION) {
@@ -387,6 +387,44 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
                 'compatibilidade_firmware'=> true,
             ],
             'observacoes_checklist' => 'Ciclos de teste completados. 125.000 páginas impressas sem problemas. Peça aprovada para continuidade de uso.',
+        ],
+        [
+            'id'                    => 9,
+            'codigo'                => 'HOM-2025-009',
+            'titulo'                => 'Homologação de Novos Toners Premium - Lexmark',
+            'tipo_equipamento'      => 'Suprimento de Impressora',
+            'descricao'             => 'Avaliação de qualidade e rendimento de novos toners premium para linha Lexmark',
+            'fornecedor'            => 'Premium Supplies Ltda',
+            'modelo'                => 'Lexmark MS/MX 310/410/510/610',
+            'numero_serie'          => 'LOT-LEX-2025-P09',
+            'quantidade'            => 10,
+            'tipo_aquisicao'        => 'comprado',
+            'data_vencimento'       => date('Y-m-d', strtotime('+5 days')),
+            'dias_vencimento_notif' => 5,
+            'setor_responsavel'     => 'qualidade',
+            'dados_comercial'       => [],
+            'observacoes_logistica' => 'Material entregue diretamente na sala da qualidade.',
+            'foto_carga'            => 'https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=400&h=300',
+            'status'                => 'em_homologacao',
+            'criado_por'            => 1,
+            'tipo_homologacao'      => 'primeira',
+            'produto_original_id'   => null,
+            'homologacao_anterior_id' => null,
+            'responsaveis'          => [3], // Rafael
+            'data_criacao'          => date('Y-m-d', strtotime('-5 days')),
+            'data_prevista_chegada' => date('Y-m-d', strtotime('-4 days')),
+            'dias_antecedencia_notif'=> 3,
+            'data_recebimento'      => date('Y-m-d', strtotime('-3 days')),
+            'recebido_por'          => 2,
+            'local_homologacao'     => 'laboratorio',
+            'data_inicio_homologacao'=> date('Y-m-d', strtotime('-1 days')),
+            'data_fim_homologacao'  => null,
+            'data_instalacao_cliente'=> null,
+            'nome_cliente'          => null,
+            'resultado'             => null,
+            'parecer_final'         => null,
+            'checklist_respostas'   => [], // Vazio para o Rafael preencher
+            'observacoes_checklist' => null,
         ],
     ];
 
