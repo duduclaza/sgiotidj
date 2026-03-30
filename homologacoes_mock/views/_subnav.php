@@ -10,6 +10,13 @@ $perfisSidebar = [
     'logistica' => [
         ['url' => 'logistica.php', 'label' => 'Painel Logística', 'icon' => 'ph-truck'],
     ],
+    'qualidade' => [
+        ['url' => 'minha_fila.php', 'label' => 'Minhas Homologações', 'icon' => 'ph-list-checks'],
+        ['url' => 'nova_homologacao.php', 'label' => 'Nova Rehomologação', 'icon' => 'ph-plus-circle'],
+    ],
+    'tecnico' => [
+        ['url' => 'minha_fila.php', 'label' => 'Minhas Homologações', 'icon' => 'ph-list-checks'],
+    ],
     'responsavel' => [
         ['url' => 'minha_fila.php', 'label' => 'Minhas Homologações', 'icon' => 'ph-list-checks'],
     ]

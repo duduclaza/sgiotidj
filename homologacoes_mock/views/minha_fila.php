@@ -1,6 +1,6 @@
 <?php require __DIR__ . '/_subnav.php'; 
 
-if ($u['perfil'] !== 'responsavel' && $u['perfil'] !== 'admin' && $u['perfil'] !== 'super_admin') {
+if ($u['perfil'] !== 'responsavel' && $u['perfil'] !== 'qualidade' && $u['perfil'] !== 'tecnico' && $u['perfil'] !== 'admin' && $u['perfil'] !== 'super_admin') {
     echo "<div class='bg-rose-50 border border-rose-200 text-rose-800 rounded-xl p-4 mb-6 shadow-sm dark:bg-rose-900/20 dark:border-rose-800 dark:text-rose-300 flex items-center gap-3'><i class='ph-fill ph-warning-circle text-xl'></i> Acesso restrito. Sua conta não está na pool técnica. Use o switch de simulador de usuário se desejar.</div>";
     return;
 }

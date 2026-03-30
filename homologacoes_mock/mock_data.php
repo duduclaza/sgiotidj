@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Versão dos dados mock - incrementar para forçar reset dos dados antigos
-$MOCK_DATA_VERSION = 9;
+$MOCK_DATA_VERSION = 10;
 
 // Inicializar os dados mockados na sessão, se ainda não existirem ou se a versão mudou
 if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $MOCK_DATA_VERSION) {
@@ -16,9 +16,9 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
     $_SESSION['mock_usuarios'] = [
         ['id' => 1, 'nome' => 'Fernanda',  'setor' => 'Compras',   'perfil' => 'compras'],
         ['id' => 2, 'nome' => 'Gustavo',   'setor' => 'Logística', 'perfil' => 'logistica'],
-        ['id' => 3, 'nome' => 'Rafael',    'setor' => 'TI',        'perfil' => 'responsavel'],
-        ['id' => 4, 'nome' => 'Camila',    'setor' => 'TI',        'perfil' => 'responsavel'],
-        ['id' => 5, 'nome' => 'Geison',    'setor' => 'TI',        'perfil' => 'responsavel'],
+        ['id' => 3, 'nome' => 'Rafael',    'setor' => 'Qualidade', 'perfil' => 'qualidade'],
+        ['id' => 4, 'nome' => 'Camila',    'setor' => 'TI',        'perfil' => 'tecnico'],
+        ['id' => 5, 'nome' => 'Geison',    'setor' => 'TI',        'perfil' => 'tecnico'],
     ];
 
     $_SESSION['mock_homologacoes'] = [
@@ -245,6 +245,149 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
             'checklist_respostas'   => [],
             'observacoes_checklist' => null,
         ],
+        [
+            'id'                    => 6,
+            'codigo'                => 'HOM-2025-001-R1',
+            'titulo'                => 'Rehomologação: Impressora HP LaserJet M404dn (Revisão Anual)',
+            'tipo_equipamento'      => 'Impressora',
+            'descricao'             => 'Revisão anual de conformidade e testes de durabilidade após 1 ano de operação',
+            'fornecedor'            => 'HP do Brasil Ltda',
+            'modelo'                => 'LaserJet M404dn',
+            'numero_serie'          => 'SN-HP-2025-00123',
+            'quantidade'            => 1,
+            'tipo_aquisicao'        => 'comprado',
+            'data_vencimento'       => '2026-02-15',
+            'dias_vencimento_notif' => 5,
+            'setor_responsavel'     => 'qualidade',
+            'dados_comercial'       => [],
+            'observacoes_logistica' => 'Item ainda em operação. Será coletado na segunda-feira para revisão completa.',
+            'foto_carga'            => 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=400&h=300',
+            'status'                => 'concluida',
+            'criado_por'            => 3,
+            'tipo_homologacao'      => 'rehomologacao',
+            'produto_original_id'   => 1,
+            'homologacao_anterior_id' => 1,
+            'responsaveis'          => [3, 5],
+            'data_criacao'          => '2025-12-01',
+            'data_prevista_chegada' => '2025-12-08',
+            'dias_antecedencia_notif'=> 3,
+            'data_recebimento'      => '2025-12-08',
+            'recebido_por'          => 2,
+            'local_homologacao'     => 'laboratorio',
+            'data_inicio_homologacao'=> '2025-12-09',
+            'data_fim_homologacao'  => '2025-12-15',
+            'data_instalacao_cliente'=> null,
+            'nome_cliente'          => null,
+            'resultado'             => 'aprovado',
+            'parecer_final'         => 'Equipamento aprovado. Mantém total compatibilidade após 1 ano. Consumo dentro dos limites. Recomendação: substituir fusível preventivamente em 6 meses.',
+            'checklist_respostas'   => [
+                'instalacao_driver'       => true,
+                'qualidade_impressao'     => true,
+                'velocidade_impressao'    => true,
+                'conectividade_rede'      => true,
+                'compatibilidade_sistemas'=> true,
+                'nivel_ruido'             => true,
+                'consumo_energia'         => true,
+                'facilidade_manutencao'   => true,
+                'qualidade_suprimento'    => true,
+                'documentacao_tecnica'    => true,
+            ],
+            'observacoes_checklist' => 'Contagem de cópias: 847.392. Desempenho dentro do esperado. Sem problemas mecânicos detectados.',
+        ],
+        [
+            'id'                    => 7,
+            'codigo'                => 'HOM-2025-001-R2',
+            'titulo'                => 'Rehomologação: Impressora HP LaserJet M404dn (Após Revisão Preventiva)',
+            'tipo_equipamento'      => 'Impressora',
+            'descricao'             => 'Teste pós-manutenção preventiva realizada conforme recomendação da revisão anterior',
+            'fornecedor'            => 'HP do Brasil Ltda',
+            'modelo'                => 'LaserJet M404dn',
+            'numero_serie'          => 'SN-HP-2025-00123',
+            'quantidade'            => 1,
+            'tipo_aquisicao'        => 'comprado',
+            'data_vencimento'       => '2026-08-01',
+            'dias_vencimento_notif' => 5,
+            'setor_responsavel'     => 'tecnico',
+            'dados_comercial'       => [],
+            'observacoes_logistica' => 'Retornando de revisão preventiva (fusível e correia) realizada pela assistência técnica.',
+            'foto_carga'            => 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=400&h=300',
+            'status'                => 'concluida',
+            'criado_por'            => 5,
+            'tipo_homologacao'      => 'rehomologacao',
+            'produto_original_id'   => 1,
+            'homologacao_anterior_id' => 6,
+            'responsaveis'          => [4, 5],
+            'data_criacao'          => '2026-06-01',
+            'data_prevista_chegada' => '2026-06-05',
+            'dias_antecedencia_notif'=> 2,
+            'data_recebimento'      => '2026-06-04',
+            'recebido_por'          => 2,
+            'local_homologacao'     => 'laboratorio',
+            'data_inicio_homologacao'=> '2026-06-05',
+            'data_fim_homologacao'  => '2026-06-08',
+            'data_instalacao_cliente'=> null,
+            'nome_cliente'          => null,
+            'resultado'             => 'aprovado',
+            'parecer_final'=> 'Equipamento aprovado após revisão preventiva. Todos os componentes substituídos funcionando perfeitamente. Qualidade de impressão excelente. Recomendação: continuar em operação por mais 6 meses antes da próxima revisão.',
+            'checklist_respostas'   => [
+                'instalacao_driver'       => true,
+                'qualidade_impressao'     => true,
+                'velocidade_impressao'    => true,
+                'conectividade_rede'      => true,
+                'compatibilidade_sistemas'=> true,
+                'nivel_ruido'             => true,
+                'consumo_energia'         => true,
+                'facilidade_manutencao'   => true,
+                'qualidade_suprimento'    => true,
+                'documentacao_tecnica'    => true,
+            ],
+            'observacoes_checklist' => 'Testes funcionais realizados por 4 horas. Sem erros ou travamentos. Fusível e correia novos confirmam funcionamento ótimo.',
+        ],
+        [
+            'id'                    => 8,
+            'codigo'                => 'HOM-2025-004-R1',
+            'titulo'                => 'Rehomologação: Fusor para Lexmark MS821 (Validação Pós-Instalação)',
+            'tipo_equipamento'      => 'Peça de Impressora',
+            'descricao'             => 'Validação após instalação em máquina produtiva para verificar desempenho real',
+            'fornecedor'            => 'TecPeças Importações',
+            'modelo'                => 'Fusor 40X9929 Compatível',
+            'numero_serie'          => 'LOT-FUS-2025-0089',
+            'quantidade'            => 1,
+            'tipo_aquisicao'        => 'comprado',
+            'data_vencimento'       => '2025-09-30',
+            'dias_vencimento_notif' => 5,
+            'setor_responsavel'     => 'tecnico',
+            'dados_comercial'       => [],
+            'observacoes_logistica' => 'Peça retirada da máquina após 3 meses de uso para teste pós-instalação.',
+            'foto_carga'            => 'https://images.unsplash.com/photo-1590639880812-1f44a30e461a?auto=format&fit=crop&w=400&h=300',
+            'status'                => 'concluida',
+            'criado_por'            => 4,
+            'tipo_homologacao'      => 'rehomologacao',
+            'produto_original_id'   => 4,
+            'homologacao_anterior_id' => 4,
+            'responsaveis'          => [4],
+            'data_criacao'          => '2025-06-15',
+            'data_prevista_chegada' => '2025-06-18',
+            'dias_antecedencia_notif'=> 3,
+            'data_recebimento'      => '2025-06-18',
+            'recebido_por'          => 2,
+            'local_homologacao'     => 'laboratorio',
+            'data_inicio_homologacao'=> '2025-06-19',
+            'data_fim_homologacao'  => '2025-06-22',
+            'data_instalacao_cliente'=> null,
+            'nome_cliente'          => null,
+            'resultado'             => 'aprovado',
+            'parecer_final'         => 'Equipamento aprovado para uso contínuo. Funcionou perfeitamente após 3 meses em operação. Sem sinais de desgaste prematuro. Compatibilidade confirmada.',
+            'checklist_respostas'   => [
+                'encaixe_fixacao'         => true,
+                'funcionamento_apos_instalacao' => true,
+                'qualidade_apos_troca'   => true,
+                'temperatura_operacao'   => true,
+                'durabilidade_ciclos'    => true,
+                'compatibilidade_firmware'=> true,
+            ],
+            'observacoes_checklist' => 'Ciclos de teste completados. 125.000 páginas impressas sem problemas. Peça aprovada para continuidade de uso.',
+        ],
     ];
 
     $_SESSION['mock_checklists_por_tipo'] = [
@@ -327,10 +470,10 @@ function criarHomologacaoMock($dados) {
     $dados['criado_por'] = $_SESSION['usuario_logado_id'];
     $dados['checklist_respostas'] = [];
     
-    // Definir tipo_homologacao baseado no setor do usuário
+    // Definir tipo_homologacao baseado no perfil do usuário
     if (!isset($dados['tipo_homologacao'])) {
         $usuario = getUserById($_SESSION['usuario_logado_id']);
-        if ($usuario && strtolower($usuario['setor']) === 'compras') {
+        if ($usuario && strtolower($usuario['perfil']) === 'compras') {
             $dados['tipo_homologacao'] = 'primeira';
         } else {
             $dados['tipo_homologacao'] = 'rehomologacao';

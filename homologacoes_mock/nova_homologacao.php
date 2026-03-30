@@ -3,9 +3,15 @@ require_once __DIR__ . '/init.php';
 
 $u = getUsuarioLogado();
 
+// Verificar permissão: apenas Compras e Qualidade podem criar
+if (!$u || ($u['perfil'] !== 'compras' && $u['perfil'] !== 'qualidade' && $u['perfil'] !== 'admin' && $u['perfil'] !== 'super_admin')) {
+    echo "<div class='bg-rose-50 border border-rose-200 text-rose-800 rounded-xl p-4 m-6 shadow-sm dark:bg-rose-900/20 dark:border-rose-800 dark:text-rose-300 flex items-center gap-3'><i class='ph-fill ph-warning-circle text-xl'></i> <strong>Acesso negado.</strong> Apenas Compras e Qualidade podem criar homologações. Seu perfil: <strong>{$u['perfil']}</strong></div>";
+    return;
+}
+
 // Determinar tipo de homologação baseado no setor do usuário
 $tipoHomologacao = 'primeira'; //Default
-if ($u && strtolower($u['setor']) !== 'compras') {
+if ($u && strtolower($u['perfil']) === 'qualidade') {
     $tipoHomologacao = 'rehomologacao';
 }
 
@@ -50,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['criar_homologacao']))
 }
 
 $data = getMockData();
-$responsaveis = array_filter($data['usuarios'], fn($u) => $u['perfil'] === 'responsavel');
+$responsaveis = array_filter($data['usuarios'], fn($u) => $u['perfil'] === 'tecnico');
 $ultimasHomologacoes = getUltimasHomologacoesPorProduto();
 
 // Inicializar tipos mock se necessário

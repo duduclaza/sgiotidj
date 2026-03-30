@@ -3,7 +3,13 @@ require __DIR__ . '/_subnav.php';
 ?>
 
 <div class="mb-6">
-    <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">Nova Homologação de TI</h2>
+    <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">
+        <?php if ($tipoHomologacao === 'primeira'): ?>
+            ➕ Nova Homologação Inicial
+        <?php else: ?>
+            🔄 Nova Rehomologação
+        <?php endif; ?>
+    </h2>
     <p class="text-slate-500 dark:text-slate-400 text-sm">
         <?php if ($tipoHomologacao === 'primeira'): ?>
             Preencha os dados do equipamento para iniciar a primeira homologação.
