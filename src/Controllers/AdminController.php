@@ -524,6 +524,11 @@ class AdminController
                 $params[] = trim($_GET['cliente']);
             }
 
+            if (!empty($_GET['status'])) {
+                $where .= ' AND t.devolutiva_resultado = ?';
+                $params[] = trim($_GET['status']);
+            }
+
             // 1. Quantidade por modelo (Gráfico de Barras)
             $sqlModelos = "SELECT COALESCE(NULLIF(t.modelo_toner, ''), 'Desconhecido') AS label, SUM(t.quantidade) AS total
                            FROM toners_defeitos t
@@ -566,11 +571,43 @@ class AdminController
             $stmt->execute($params);
             $chartDevolutivas = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-            // KPIs for the top cards (total defeitos and items without devolutivas) total qty
+            // 5. Pareto de Defeitos (por devolutiva_resultado)
+            $sqlPareto = "SELECT COALESCE(NULLIF(t.devolutiva_resultado, ''), 'Pendente') AS label, COUNT(*) AS total
+                          FROM toners_defeitos t
+                          LEFT JOIN filiais f ON f.id = t.filial_id
+                          WHERE {$where}
+                          GROUP BY label ORDER BY total DESC";
+            $stmt = $this->db->prepare($sqlPareto);
+            $stmt->execute($params);
+            $chartPareto = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            // 6. Evolução Mensal
+            $sqlEvolucao = "SELECT DATE_FORMAT(t.created_at, '%Y-%m') AS label, COUNT(*) AS total
+                            FROM toners_defeitos t
+                            LEFT JOIN filiais f ON f.id = t.filial_id
+                            WHERE {$where}
+                            GROUP BY label ORDER BY label ASC";
+            $stmt = $this->db->prepare($sqlEvolucao);
+            $stmt->execute($params);
+            $chartEvolucao = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            // 7. Últimos Registros (Top 50)
+            $sqlUltimos = "SELECT t.id, t.modelo_toner, t.cliente_nome, f.nome AS filial_nome, t.quantidade, t.devolutiva_resultado, t.created_at
+                           FROM toners_defeitos t
+                           LEFT JOIN filiais f ON f.id = t.filial_id
+                           WHERE {$where}
+                           ORDER BY t.created_at DESC LIMIT 50";
+            $stmt = $this->db->prepare($sqlUltimos);
+            $stmt->execute($params);
+            $ultimos = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            // KPIs for the top cards
             $sqlKpis = "SELECT 
                             SUM(t.quantidade) AS total_quantidade,
                             COUNT(t.id) AS total_registros,
-                            SUM(CASE WHEN t.devolutiva_resultado IS NULL OR t.devolutiva_resultado = '' THEN 1 ELSE 0 END) AS pendentes
+                            SUM(CASE WHEN t.devolutiva_resultado IS NULL OR t.devolutiva_resultado = '' THEN 1 ELSE 0 END) AS pendentes,
+                            SUM(CASE WHEN t.devolutiva_resultado = 'TONER_SEM_DEFEITO' THEN 1 ELSE 0 END) AS falsos_positivos,
+                            SUM(CASE WHEN t.devolutiva_resultado IS NOT NULL AND t.devolutiva_resultado != '' THEN 1 ELSE 0 END) AS total_classificado
                         FROM toners_defeitos t 
                         LEFT JOIN filiais f ON f.id = t.filial_id
                         WHERE {$where}";
@@ -581,23 +618,31 @@ class AdminController
             // Filters
             $filiais = $this->db->query("SELECT DISTINCT nome FROM filiais ORDER BY nome")->fetchAll(\PDO::FETCH_COLUMN);
             $clientes = $this->db->query("SELECT DISTINCT cliente_nome FROM toners_defeitos WHERE cliente_nome IS NOT NULL AND cliente_nome != '' ORDER BY cliente_nome")->fetchAll(\PDO::FETCH_COLUMN);
+            $classificacoes = $this->db->query("SELECT DISTINCT devolutiva_resultado FROM toners_defeitos WHERE devolutiva_resultado IS NOT NULL AND devolutiva_resultado != '' ORDER BY devolutiva_resultado")->fetchAll(\PDO::FETCH_COLUMN);
 
             echo json_encode([
                 'success' => true,
                 'kpis' => [
                     'total_quantidade' => (int)($kpis['total_quantidade'] ?? 0),
                     'total_registros' => (int)($kpis['total_registros'] ?? 0),
-                    'pendentes' => (int)($kpis['pendentes'] ?? 0)
+                    'pendentes' => (int)($kpis['pendentes'] ?? 0),
+                    'falsos_positivos' => (int)($kpis['falsos_positivos'] ?? 0),
+                    'total_classificado' => (int)($kpis['total_classificado'] ?? 0),
+                    'taxa_falso_positivo' => $kpis['total_registros'] > 0 ? round(($kpis['falsos_positivos'] / $kpis['total_registros']) * 100, 1) : 0
                 ],
                 'charts' => [
                     'modelos' => $chartModelos,
                     'filiais' => $chartFiliais,
                     'clientes' => $chartClientes,
                     'devolutivas' => $chartDevolutivas,
+                    'pareto_defeitos' => $chartPareto,
+                    'evolucao_mensal' => $chartEvolucao
                 ],
+                'ultimos_registros' => $ultimos,
                 'filter_options' => [
                     'filiais' => $filiais ?: [],
-                    'clientes' => $clientes ?: []
+                    'clientes' => $clientes ?: [],
+                    'classificacoes' => $classificacoes ?: []
                 ]
             ]);
         } catch (\Exception $e) {

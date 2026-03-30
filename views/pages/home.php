@@ -2,6 +2,10 @@
 $userId = $_SESSION['user_id'];
 $userRole = $_SESSION['user_role'] ?? '';
 
+// Fetch pending counts for badges
+$db = \App\Config\Database::getInstance();
+$pendingDefeitos = $db->query("SELECT COUNT(*) FROM toners_defeitos WHERE (devolutiva_resultado IS NULL OR devolutiva_resultado = '')")->fetchColumn();
+
 // Helper function locally if not already defined (though it should be in sidebar)
 if (!function_exists('hasPermission')) {
     function hasPermission($module, $action = 'view') {
@@ -43,7 +47,8 @@ $dashboardModules = [
         'desc' => 'Gerenciar biblioteca de defeitos conhecidos.',
         'icon' => 'ph-puzzle-piece',
         'color' => 'red',
-        'href' => '/cadastro-defeitos'
+        'href' => '/cadastro-defeitos',
+        'badge' => $pendingDefeitos > 0 ? $pendingDefeitos : null
     ],
     [
         'id' => 'garantias',
@@ -100,42 +105,50 @@ $allowedModules = array_filter($dashboardModules, function($m) use ($userRole) {
                     Seu perfil é <span class="bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-md text-sm"><?= e($userProfile['name'] ?? 'Usuário') ?></span>.
                 </p>
             </div>
-            <div class="hidden md:block">
-                <div class="text-right">
-                    <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Data de hoje</p>
-                    <p class="text-lg font-bold text-slate-700 dark:text-slate-200" id="current-date-display"><?= date('d \d\e F, Y') ?></p>
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 dark:bg-blue-500 p-3 rounded-2xl shadow-lg shadow-blue-500/30 text-white">
+                    <i class="ph-fill ph-calendar-check text-2xl"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none mb-1">Data de hoje</p>
+                    <p class="text-sm font-bold text-slate-700 dark:text-slate-200"><?= date('d \d\e F \d\e Y') ?></p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Seção de Ações Rápidas -->
+    <!-- Grid de Módulos Principal -->
     <div class="mb-8">
-        <h2 class="text-xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-3">
-            <span class="p-2 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-xl">
-                <i class="ph ph-lightning text-xl"></i>
-            </span>
-            Ações Rápidas & Favoritos
-        </h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <?php foreach ($allowedModules as $mod): ?>
-                <a href="<?= $mod['href'] ?>" class="group block p-6 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700/50 hover:border-blue-500 dark:hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300 relative overflow-hidden">
-                    <!-- Brilho ao hover -->
-                    <div class="absolute -right-8 -top-8 w-24 h-24 bg-<?= $mod['color'] ?>-500/5 rounded-full blur-2xl group-hover:bg-<?= $mod['color'] ?>-500/20 transition-all duration-500"></div>
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Canais de Gestão</h2>
+            <div class="h-px flex-1 bg-slate-200 dark:bg-slate-800 ml-6"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <?php foreach ($allowedModules as $m): ?>
+                <a href="<?= e($m['href']) ?>" class="group block bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700/50 hover:border-slate-400 dark:hover:border-slate-500 transition-all duration-300 relative overflow-hidden">
+                    <?php if (isset($m['badge'])): ?>
+                        <div class="absolute top-4 right-4 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-4 ring-white dark:ring-slate-800 animate-pulse">
+                            <?= e($m['badge']) ?>
+                        </div>
+                    <?php endif; ?>
                     
-                    <div class="flex items-start gap-5">
-                        <div class="p-4 bg-<?= $mod['color'] ?>-50 dark:bg-<?= $mod['color'] ?>-900/30 text-<?= $mod['color'] ?>-600 dark:text-<?= $mod['color'] ?>-400 rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                            <i class="ph <?= $mod['icon'] ?> text-2xl font-bold"></i>
+                    <div class="flex flex-col h-full">
+                        <div class="mb-5 flex items-center justify-between">
+                            <div class="p-4 bg-<?= $m['color'] ?>-100 dark:bg-<?= $m['color'] ?>-900/30 text-<?= $m['color'] ?>-600 dark:text-<?= $m['color'] ?>-400 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                                <i class="ph <?= e($m['icon']) ?> text-2xl"></i>
+                            </div>
+                            <i class="ph ph-arrow-right text-slate-300 dark:text-slate-600 group-hover:translate-x-1 transition-transform"></i>
                         </div>
-                        <div class="flex-1">
-                            <h3 class="font-bold text-slate-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors uppercase tracking-tight"><?= $mod['label'] ?></h3>
-                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed"><?= $mod['desc'] ?></p>
-                        </div>
-                        <div class="text-slate-300 dark:text-slate-600 group-hover:text-blue-500 transition-colors mt-1">
-                            <i class="ph ph-arrow-right font-bold"></i>
-                        </div>
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-2 leading-tight">
+                            <?= e($m['label']) ?>
+                        </h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                            <?= e($m['desc']) ?>
+                        </p>
                     </div>
+                    
+                    <!-- Efeito de brilho no hover -->
+                    <div class="absolute -bottom-12 -right-12 w-24 h-24 bg-<?= $m['color'] ?>-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
                 </a>
             <?php endforeach; ?>
         </div>
