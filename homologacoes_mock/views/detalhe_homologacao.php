@@ -259,7 +259,7 @@
 
         <!-- ================= FASE 2: TI INICIA TESTES ================= -->
         <?php if ($h['status'] === 'item_recebido'): ?>
-            <?php if (($u['perfil'] === 'responsavel' && in_array($u['id'], $h['responsaveis'])) || $u['perfil'] === 'admin'): ?>
+            <?php if (in_array($u['perfil'], ['responsavel', 'qualidade', 'tecnico', 'admin'])): ?>
                 <div class="bg-white dark:bg-slate-800 rounded-xl shadow border border-slate-200 dark:border-slate-700/50 border-t-4 border-t-cyan-500 overflow-hidden">
                     <div class="p-6">
                         <h5 class="text-xl font-bold text-cyan-600 dark:text-cyan-500 mb-2 flex items-center gap-2">
@@ -316,7 +316,7 @@
         <!-- ================= FASE 3 E 4: CHECKLIST E FORMULÁRIOS VIVOS ================= -->
         <?php if ($h['status'] === 'em_homologacao' || $h['status'] === 'concluida'): ?>
             <?php 
-                $canEdit = ($h['status'] === 'em_homologacao' && ($u['perfil'] === 'admin' || str_contains($u['perfil'], 'respon'))); 
+                $canEdit = ($h['status'] === 'em_homologacao' && (in_array($u['perfil'], ['admin', 'responsavel', 'qualidade', 'tecnico']))); 
             ?>
             <div class="bg-white dark:bg-slate-800 rounded-xl shadow border border-slate-200 dark:border-slate-700/50 border-t-4 border-t-slate-800 dark:border-t-slate-200 overflow-hidden">
                 <div class="bg-slate-50 dark:bg-slate-800/80 p-5 border-b border-slate-200 dark:border-slate-700/50 flex items-center justify-between">

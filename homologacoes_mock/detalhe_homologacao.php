@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
             $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Item recebido registrado com sucesso!'];
         }
-        elseif ($acao === 'iniciar_homologacao' && ($u['perfil'] === 'responsavel' || $u['perfil'] === 'super_admin' || $u['perfil'] === 'admin')) {
+        elseif ($acao === 'iniciar_homologacao' && (in_array($u['perfil'], ['responsavel', 'qualidade', 'tecnico']) || $u['perfil'] === 'super_admin' || $u['perfil'] === 'admin')) {
             atualizarHomologacaoMock($id, [
                 'status' => 'em_homologacao',
                 'local_homologacao' => $_POST['local_homologacao'],
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
             $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Homologação iniciada. Preencha o checklist técnico!'];
         }
-        elseif ($acao === 'salvar_checklist' && ($u['perfil'] === 'responsavel' || $u['perfil'] === 'super_admin' || $u['perfil'] === 'admin')) {
+        elseif ($acao === 'salvar_checklist' && (in_array($u['perfil'], ['responsavel', 'qualidade', 'tecnico']) || $u['perfil'] === 'super_admin' || $u['perfil'] === 'admin')) {
             $respostas = $_POST['checklist'] ?? [];
             $booleadas = [];
             foreach ($respostas as $k => $v) {
@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
             $_SESSION['flash_message'] = ['type' => 'info', 'text' => 'Bateria de testes rascunhada e salva com sucesso.'];
         }
-        elseif ($acao === 'finalizar_homologacao' && ($u['perfil'] === 'responsavel' || $u['perfil'] === 'super_admin' || $u['perfil'] === 'admin')) {
+        elseif ($acao === 'finalizar_homologacao' && (in_array($u['perfil'], ['responsavel', 'qualidade', 'tecnico']) || $u['perfil'] === 'super_admin' || $u['perfil'] === 'admin')) {
             $respostas = $_POST['checklist'] ?? [];
             $booleadas = [];
             $tem_pendente = false;
