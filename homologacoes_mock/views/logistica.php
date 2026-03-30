@@ -27,7 +27,8 @@ if ($u['perfil'] !== 'logistica' && $u['perfil'] !== 'admin' && $u['perfil'] !==
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 border-t-4 border-t-amber-500 flex flex-col hover:shadow-md transition-shadow">
             <div class="p-5 flex-1">
                 <div class="flex justify-between items-start mb-3">
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 flex-col items-start">
+                        <span class="text-xs text-slate-500 dark:text-slate-400 italic mb-1"><?= getRotuloVersao(getVersaoHomologacao($h['id'])) ?></span>
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
                             <i class="ph-fill ph-clock"></i> Pendente Doca
                         </span>
