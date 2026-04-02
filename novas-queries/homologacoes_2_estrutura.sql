@@ -126,7 +126,7 @@ CREATE TABLE IF NOT EXISTS homologacoes_2_anexos (
     caminho VARCHAR(500) NULL,
     arquivo_blob MEDIUMBLOB NULL,
     nome_original VARCHAR(255) NOT NULL,
-    mime_type VARCHAR(120) NULL,
+    mime_type ENUM('image/png', 'image/jpeg', 'application/pdf') NULL,
     tamanho_bytes INT UNSIGNED NOT NULL DEFAULT 0,
     created_by INT UNSIGNED NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

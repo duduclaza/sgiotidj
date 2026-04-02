@@ -1177,8 +1177,8 @@ class Homologacoes2Service
             return 0;
         }
 
-        if ($totalFiles > 5) {
-            throw new \RuntimeException('Envie no maximo 5 imagens por etapa.');
+        if ($totalFiles > 10) {
+            throw new \RuntimeException('Envie no máximo 10 arquivos por etapa.');
         }
 
         $supportsBlob = $this->supportsBlobAttachments();
@@ -1211,7 +1211,7 @@ class Homologacoes2Service
             }
 
             if (($files['error'][$index] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-                throw new \RuntimeException('Falha ao enviar uma das imagens.');
+                throw new \RuntimeException('Falha ao enviar um dos arquivos.');
             }
 
             $tmpName = $files['tmp_name'][$index] ?? '';
@@ -1220,17 +1220,18 @@ class Homologacoes2Service
             }
 
             $mimeType = $this->detectImageMimeType($tmpName, (string) ($files['type'][$index] ?? ''));
-            if (!in_array($mimeType, ['image/png', 'image/jpeg'], true)) {
-                throw new \RuntimeException('Apenas imagens PNG ou JPEG sao permitidas.');
+            $allowedTypes = ['image/png', 'image/jpeg', 'application/pdf'];
+            if (!in_array($mimeType, $allowedTypes, true)) {
+                throw new \RuntimeException('Apenas arquivos PNG, JPEG ou PDF são permitidos.');
             }
 
             $binary = file_get_contents($tmpName);
             if ($binary === false) {
-                throw new \RuntimeException('Nao foi possivel ler uma das imagens enviadas.');
+                throw new \RuntimeException('Não foi possível ler um dos arquivos enviados.');
             }
 
             if (strlen($binary) > (15 * 1024 * 1024)) {
-                throw new \RuntimeException('Cada imagem deve ter no maximo 15 MB.');
+                throw new \RuntimeException('Cada arquivo deve ter no máximo 15 MB.');
             }
 
             if ($supportsBlob && $stmtBlob instanceof \PDOStatement) {
@@ -1243,11 +1244,11 @@ class Homologacoes2Service
                 $stmtBlob->bindValue(7, $userId, PDO::PARAM_INT);
                 $stmtBlob->execute();
             } elseif ($stmtPath instanceof \PDOStatement) {
-                $extension = $mimeType === 'image/png' ? 'png' : 'jpg';
+                $extension = $mimeType === 'image/png' ? 'png' : ($mimeType === 'application/pdf' ? 'pdf' : 'jpg');
                 $filename = uniqid($tipo . '_', true) . '.' . $extension;
                 $target = $baseDir . '/' . $filename;
                 if (!move_uploaded_file($tmpName, $target)) {
-                    throw new \RuntimeException('Nao foi possivel salvar uma das imagens enviadas.');
+                    throw new \RuntimeException('Não foi possível salvar um dos arquivos enviados.');
                 }
 
                 $relative = 'storage/uploads/homologacoes-2/' . $homologacaoId . '/' . $tipo . '/' . $filename;
