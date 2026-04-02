@@ -28,6 +28,12 @@ $perfisSidebar = [
 
 $linksAtuais = $perfisSidebar[$u['perfil']] ?? $perfisSidebar['tecnico'];
 $currentPage = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/', '/') ?: '/';
+$perfilLabel = ucfirst($u['perfil']);
+if (in_array(strtolower((string) ($u['role'] ?? '')), ['super_admin', 'superadmin'], true)) {
+    $perfilLabel = 'Super Admin';
+} elseif (strtolower((string) ($u['role'] ?? '')) === 'admin') {
+    $perfilLabel = 'Admin';
+}
 ?>
 
 <div class="bg-emerald-600 text-white text-center py-2 px-4 rounded-xl mb-4 font-bold tracking-wider shadow-lg flex items-center justify-center gap-2">
@@ -49,7 +55,7 @@ $currentPage = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: 
 
     <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg py-1.5 px-3 shrink-0">
         <span class="text-[10px] text-slate-400 font-semibold uppercase whitespace-nowrap">Perfil:</span>
-        <span class="text-xs font-bold text-slate-700 dark:text-slate-200"><?= htmlspecialchars(ucfirst($u['perfil'])) ?></span>
+        <span class="text-xs font-bold text-slate-700 dark:text-slate-200"><?= htmlspecialchars($perfilLabel) ?></span>
         <span class="text-[11px] text-slate-400">•</span>
         <span class="text-xs text-slate-500 dark:text-slate-400"><?= htmlspecialchars($u['nome']) ?></span>
     </div>
