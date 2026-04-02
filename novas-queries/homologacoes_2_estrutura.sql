@@ -90,10 +90,9 @@ CREATE TABLE IF NOT EXISTS homologacoes_2 (
     CONSTRAINT fk_h2_tipo FOREIGN KEY (tipo_id) REFERENCES homologacoes_2_tipos(id),
     CONSTRAINT fk_h2_homologacao_anterior FOREIGN KEY (homologacao_anterior_id) REFERENCES homologacoes_2(id) ON DELETE SET NULL,
     CONSTRAINT fk_h2_produto_original FOREIGN KEY (produto_original_id) REFERENCES homologacoes_2(id) ON DELETE SET NULL,
-    CONSTRAINT fk_h2_fornecedor FOREIGN KEY (fornecedor_id) REFERENCES fornecedores(id) ON DELETE SET NULL,
-    CONSTRAINT fk_h2_cliente FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE SET NULL,
-    CONSTRAINT fk_h2_criado_por FOREIGN KEY (criado_por) REFERENCES users(id),
-    CONSTRAINT fk_h2_recebido_por FOREIGN KEY (recebido_por) REFERENCES users(id) ON DELETE SET NULL
+    -- FKs com tabelas legadas (users/fornecedores/clientes) foram removidas
+    -- para evitar erro 150 em ambientes onde o tipo/engine dessas tabelas varia.
+    -- A integridade desses IDs continua validada pela camada PHP do modulo.
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS homologacoes_2_responsaveis (
@@ -102,8 +101,7 @@ CREATE TABLE IF NOT EXISTS homologacoes_2_responsaveis (
     user_id INT UNSIGNED NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uk_h2_responsavel (homologacao_id, user_id),
-    CONSTRAINT fk_h2_responsavel_homologacao FOREIGN KEY (homologacao_id) REFERENCES homologacoes_2(id) ON DELETE CASCADE,
-    CONSTRAINT fk_h2_responsavel_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    CONSTRAINT fk_h2_responsavel_homologacao FOREIGN KEY (homologacao_id) REFERENCES homologacoes_2(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS homologacoes_2_respostas (
@@ -118,8 +116,7 @@ CREATE TABLE IF NOT EXISTS homologacoes_2_respostas (
     updated_at DATETIME NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uk_h2_resposta (homologacao_id, checklist_item_id),
     CONSTRAINT fk_h2_resposta_homologacao FOREIGN KEY (homologacao_id) REFERENCES homologacoes_2(id) ON DELETE CASCADE,
-    CONSTRAINT fk_h2_resposta_item FOREIGN KEY (checklist_item_id) REFERENCES homologacoes_2_checklist_itens(id) ON DELETE CASCADE,
-    CONSTRAINT fk_h2_resposta_user FOREIGN KEY (respondido_por) REFERENCES users(id) ON DELETE SET NULL
+    CONSTRAINT fk_h2_resposta_item FOREIGN KEY (checklist_item_id) REFERENCES homologacoes_2_checklist_itens(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS homologacoes_2_anexos (
@@ -133,8 +130,7 @@ CREATE TABLE IF NOT EXISTS homologacoes_2_anexos (
     created_by INT UNSIGNED NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     KEY idx_h2_anexos_tipo (tipo),
-    CONSTRAINT fk_h2_anexo_homologacao FOREIGN KEY (homologacao_id) REFERENCES homologacoes_2(id) ON DELETE CASCADE,
-    CONSTRAINT fk_h2_anexo_user FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+    CONSTRAINT fk_h2_anexo_homologacao FOREIGN KEY (homologacao_id) REFERENCES homologacoes_2(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS homologacoes_2_historico (
@@ -149,8 +145,7 @@ CREATE TABLE IF NOT EXISTS homologacoes_2_historico (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     KEY idx_h2_hist_homologacao (homologacao_id),
     KEY idx_h2_hist_acao (acao),
-    CONSTRAINT fk_h2_hist_homologacao FOREIGN KEY (homologacao_id) REFERENCES homologacoes_2(id) ON DELETE CASCADE,
-    CONSTRAINT fk_h2_hist_user FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+    CONSTRAINT fk_h2_hist_homologacao FOREIGN KEY (homologacao_id) REFERENCES homologacoes_2(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO homologacoes_2_tipos (nome, ativo) VALUES
