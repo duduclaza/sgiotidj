@@ -103,8 +103,8 @@ if ($u['perfil'] !== 'compras' && $u['perfil'] !== 'admin' && $u['perfil'] !== '
                                 <i class="ph-bold ph-eye text-lg"></i>
                             </a>
                             
-                            <?php if ($h['status'] !== 'concluida' && $h['status'] !== 'cancelada'): ?>
-                                <button type="button" onclick="openCancelModal(<?= $h['id'] ?>, '<?= $h['codigo'] ?>')" class="text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-400 dark:hover:bg-rose-800/50 rounded-lg p-2 transition-colors" title="Cancelar Processo">
+                            <?php if (in_array($u['perfil'], ['admin', 'super_admin', 'compras'])): ?>
+                                <button type="button" onclick="openCancelModal(<?= $h['id'] ?>, '<?= $h['codigo'] ?>')" class="text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-400 dark:hover:bg-rose-800/50 rounded-lg p-2 transition-colors" title="Excluir/Cancelar Processo">
                                     <i class="ph-bold ph-x text-lg"></i>
                                 </button>
                             <?php endif; ?>
