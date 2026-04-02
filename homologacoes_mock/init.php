@@ -32,6 +32,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 2. Cancelar ou Excluir Definitivamente
     if (isset($_POST['acao']) && $_POST['acao'] === 'cancelar_homologacao') {
+        $u = getUsuarioLogado();
+        if (!in_array($u['perfil'] ?? '', ['admin', 'super_admin', 'compras'], true)) {
+            $_SESSION['flash_message'] = ['type' => 'danger', 'text' => "Você não tem permissão para cancelar ou excluir."];
+            header("Location: " . basename($_SERVER['PHP_SELF']));
+            exit;
+        }
+
         $id = (int)$_POST['id'];
         $excluir = isset($_POST['excluir_definitivo']) && $_POST['excluir_definitivo'] === '1';
         

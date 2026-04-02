@@ -143,7 +143,7 @@
                         <div class="flex items-center justify-end gap-2">
                             <?php if (in_array($u['perfil'], ['admin', 'super_admin', 'compras'])): ?>
                                 <button type="button" onclick="openCancelModal(<?= $h['id'] ?>, '<?= $h['codigo'] ?>')" class="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors group" title="Excluir/Cancelar Homologação">
-                                    <i class="ph-fill ph-x-circle text-xl group-hover:scale-110 transition-transform"></i>
+                                    <i class="ph-fill ph-trash text-xl group-hover:scale-110 transition-transform"></i>
                                 </button>
                             <?php endif; ?>
                             <a href="/homologacoes-2/<?= $h['id'] ?>" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-lg transition-colors">

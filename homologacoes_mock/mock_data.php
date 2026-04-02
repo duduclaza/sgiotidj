@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Versão dos dados mock - incrementar para forçar reset dos dados antigos
-$MOCK_DATA_VERSION = 11;
+$MOCK_DATA_VERSION = 12;
 
 // Inicializar os dados mockados na sessão, se ainda não existirem ou se a versão mudou
 if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $MOCK_DATA_VERSION) {
@@ -19,6 +19,8 @@ if (!isset($_SESSION['mock_data_version']) || $_SESSION['mock_data_version'] < $
         ['id' => 3, 'nome' => 'Rafael',    'setor' => 'Qualidade', 'perfil' => 'qualidade'],
         ['id' => 4, 'nome' => 'Camila',    'setor' => 'TI',        'perfil' => 'tecnico'],
         ['id' => 5, 'nome' => 'Geison',    'setor' => 'TI',        'perfil' => 'tecnico'],
+        ['id' => 6, 'nome' => 'Admin User', 'setor' => 'Gestão',    'perfil' => 'admin'],
+        ['id' => 7, 'nome' => 'Super User', 'setor' => 'Diretoria', 'perfil' => 'super_admin'],
     ];
 
     $_SESSION['mock_homologacoes'] = [

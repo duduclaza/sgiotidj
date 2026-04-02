@@ -297,6 +297,10 @@ class Homologacoes2Controller
     {
         try {
             if (($_POST['acao'] ?? '') === 'cancelar_homologacao') {
+                if (!in_array($u['perfil'] ?? '', ['admin', 'super_admin', 'compras'], true)) {
+                    throw new \RuntimeException('Você não tem permissão para cancelar ou excluir esta homologação.');
+                }
+
                 $this->service->cancelHomologacao(
                     (int) ($_POST['id'] ?? 0),
                     (($_POST['excluir_definitivo'] ?? '0') === '1'),
