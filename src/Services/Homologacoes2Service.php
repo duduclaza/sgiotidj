@@ -155,6 +155,7 @@ class Homologacoes2Service
         $ids = array_map('intval', array_column($rows, 'id'));
         $responsaveis = $this->getResponsaveisMap($ids);
         $versions = $this->buildVersionMap($rows);
+        $anexosResumo = $this->getAnexosResumoMap($ids);
 
         foreach ($rows as &$row) {
             $row['responsaveis'] = $responsaveis[(int) $row['id']] ?? [];
@@ -169,7 +170,11 @@ class Homologacoes2Service
             }
 
             $row['versao_numero'] = $versions[(int) $row['id']] ?? 1;
-            $row['laudo_anexos'] = $this->getAnexosPaths((int) $row['id'], 'laudo');
+            $row['logistica_anexos_count'] = $anexosResumo[(int) $row['id']]['logistica'] ?? 0;
+            $row['laudo_anexos_count'] = $anexosResumo[(int) $row['id']]['laudo'] ?? 0;
+            if ($row['logistica_anexos_count'] > 0 && empty($row['foto_carga'])) {
+                $row['foto_carga'] = 'anexos_blob';
+            }
         }
 
         return $rows;
@@ -179,6 +184,8 @@ class Homologacoes2Service
     {
         foreach ($this->getHomologacoes() as $homologacao) {
             if ((int) $homologacao['id'] === $id) {
+                $homologacao['logistica_anexos'] = $this->getAnexosForView((int) $homologacao['id'], 'logistica');
+                $homologacao['laudo_anexos'] = $this->getAnexosForView((int) $homologacao['id'], 'laudo');
                 return $homologacao;
             }
         }
@@ -429,7 +436,7 @@ class Homologacoes2Service
         }
     }
 
-    public function registerRecebimento(int $id, array $input, array $user): void
+    public function registerRecebimento(int $id, array $input, array $user, ?array $files = null): void
     {
         $homologacao = $this->getHomologacaoBase($id);
         if (!$homologacao) {
@@ -446,13 +453,16 @@ class Homologacoes2Service
                  updated_at = NOW()
              WHERE id = :id"
         );
+        $uploadedImages = $this->normalizeUploadedFileCount($files['logistica_anexos'] ?? null);
         $stmt->execute([
             ':data_recebimento' => $input['data_recebimento'] ?: date('Y-m-d'),
             ':observacoes_logistica' => trim((string) ($input['observacoes_logistica'] ?? '')) ?: null,
-            ':foto_carga' => trim((string) ($input['foto_carga'] ?? '')) ?: null,
+            ':foto_carga' => $uploadedImages > 0 ? 'anexos_blob' : (trim((string) ($input['foto_carga'] ?? '')) ?: null),
             ':recebido_por' => (int) $user['id'],
             ':id' => $id,
         ]);
+
+        $this->storeAttachments($id, $files['logistica_anexos'] ?? null, 'logistica', (int) $user['id']);
 
         $this->registrarHistorico($id, 'recebimento', $homologacao['status'], 'item_recebido', 'Recebimento físico registrado pela logística.', (int) $user['id']);
     }
@@ -1022,6 +1032,7 @@ class Homologacoes2Service
     {
         $role = strtolower($this->resolveRuntimeRole($row));
         if (in_array($role, ['admin', 'super_admin', 'superadmin'], true)) {
+            // Trata admin e super_admin como 'admin' para efeito de permissão
             return 'admin';
         }
 
@@ -1159,26 +1170,48 @@ class Homologacoes2Service
         return trim($normalized, '_');
     }
 
-    private function storeAttachments(int $homologacaoId, ?array $files, string $tipo, int $userId): void
+    private function storeAttachments(int $homologacaoId, ?array $files, string $tipo, int $userId): int
     {
-        if (!$files || empty($files['name']) || !is_array($files['name'])) {
-            return;
+        $totalFiles = $this->normalizeUploadedFileCount($files);
+        if ($totalFiles === 0) {
+            return 0;
         }
 
-        $baseDir = dirname(__DIR__, 2) . '/storage/uploads/homologacoes-2/' . $homologacaoId . '/' . $tipo;
-        if (!is_dir($baseDir)) {
-            mkdir($baseDir, 0777, true);
+        if ($totalFiles > 5) {
+            throw new \RuntimeException('Envie no maximo 5 imagens por etapa.');
         }
 
-        $stmt = $this->db->prepare(
-            "INSERT INTO homologacoes_2_anexos (
-                homologacao_id, tipo, caminho, nome_original, mime_type, tamanho_bytes, created_by, created_at
-             ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())"
-        );
+        $supportsBlob = $this->supportsBlobAttachments();
+        $stmtBlob = null;
+        $stmtPath = null;
 
+        if ($supportsBlob) {
+            $stmtBlob = $this->db->prepare(
+                "INSERT INTO homologacoes_2_anexos (
+                    homologacao_id, tipo, caminho, arquivo_blob, nome_original, mime_type, tamanho_bytes, created_by, created_at
+                 ) VALUES (?, ?, NULL, ?, ?, ?, ?, ?, NOW())"
+            );
+        } else {
+            $baseDir = dirname(__DIR__, 2) . '/storage/uploads/homologacoes-2/' . $homologacaoId . '/' . $tipo;
+            if (!is_dir($baseDir)) {
+                mkdir($baseDir, 0777, true);
+            }
+
+            $stmtPath = $this->db->prepare(
+                "INSERT INTO homologacoes_2_anexos (
+                    homologacao_id, tipo, caminho, nome_original, mime_type, tamanho_bytes, created_by, created_at
+                 ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())"
+            );
+        }
+
+        $saved = 0;
         foreach ($files['name'] as $index => $originalName) {
-            if (($files['error'][$index] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            if (($files['error'][$index] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
                 continue;
+            }
+
+            if (($files['error'][$index] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+                throw new \RuntimeException('Falha ao enviar uma das imagens.');
             }
 
             $tmpName = $files['tmp_name'][$index] ?? '';
@@ -1186,39 +1219,159 @@ class Homologacoes2Service
                 continue;
             }
 
-            $extension = strtolower(pathinfo((string) $originalName, PATHINFO_EXTENSION));
-            if (!in_array($extension, ['png', 'jpg', 'jpeg', 'pdf'], true)) {
-                continue;
+            $mimeType = $this->detectImageMimeType($tmpName, (string) ($files['type'][$index] ?? ''));
+            if (!in_array($mimeType, ['image/png', 'image/jpeg'], true)) {
+                throw new \RuntimeException('Apenas imagens PNG ou JPEG sao permitidas.');
             }
 
-            $filename = uniqid($tipo . '_', true) . '.' . $extension;
-            $target = $baseDir . '/' . $filename;
-            if (!move_uploaded_file($tmpName, $target)) {
-                continue;
+            $binary = file_get_contents($tmpName);
+            if ($binary === false) {
+                throw new \RuntimeException('Nao foi possivel ler uma das imagens enviadas.');
             }
 
-            $relative = 'storage/uploads/homologacoes-2/' . $homologacaoId . '/' . $tipo . '/' . $filename;
-            $stmt->execute([
-                $homologacaoId,
-                $tipo,
-                $relative,
-                $originalName,
-                $files['type'][$index] ?? null,
-                (int) ($files['size'][$index] ?? 0),
-                $userId,
-            ]);
+            if (strlen($binary) > (15 * 1024 * 1024)) {
+                throw new \RuntimeException('Cada imagem deve ter no maximo 15 MB.');
+            }
+
+            if ($supportsBlob && $stmtBlob instanceof \PDOStatement) {
+                $stmtBlob->bindValue(1, $homologacaoId, PDO::PARAM_INT);
+                $stmtBlob->bindValue(2, $tipo);
+                $stmtBlob->bindValue(3, $binary, PDO::PARAM_LOB);
+                $stmtBlob->bindValue(4, (string) $originalName);
+                $stmtBlob->bindValue(5, $mimeType);
+                $stmtBlob->bindValue(6, (int) ($files['size'][$index] ?? strlen($binary)), PDO::PARAM_INT);
+                $stmtBlob->bindValue(7, $userId, PDO::PARAM_INT);
+                $stmtBlob->execute();
+            } elseif ($stmtPath instanceof \PDOStatement) {
+                $extension = $mimeType === 'image/png' ? 'png' : 'jpg';
+                $filename = uniqid($tipo . '_', true) . '.' . $extension;
+                $target = $baseDir . '/' . $filename;
+                if (!move_uploaded_file($tmpName, $target)) {
+                    throw new \RuntimeException('Nao foi possivel salvar uma das imagens enviadas.');
+                }
+
+                $relative = 'storage/uploads/homologacoes-2/' . $homologacaoId . '/' . $tipo . '/' . $filename;
+                $stmtPath->execute([
+                    $homologacaoId,
+                    $tipo,
+                    $relative,
+                    $originalName,
+                    $mimeType,
+                    (int) ($files['size'][$index] ?? strlen($binary)),
+                    $userId,
+                ]);
+            }
+
+            $saved++;
         }
+
+        return $saved;
     }
 
-    private function getAnexosPaths(int $homologacaoId, string $tipo): array
+    private function getAnexosResumoMap(array $homologacaoIds): array
     {
+        if (empty($homologacaoIds)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($homologacaoIds), '?'));
         $stmt = $this->db->prepare(
-            "SELECT caminho
+            "SELECT homologacao_id, tipo, COUNT(*) AS total
+             FROM homologacoes_2_anexos
+             WHERE homologacao_id IN ($placeholders)
+             GROUP BY homologacao_id, tipo"
+        );
+        $stmt->execute($homologacaoIds);
+
+        $map = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $map[(int) $row['homologacao_id']][(string) $row['tipo']] = (int) $row['total'];
+        }
+
+        return $map;
+    }
+
+    private function getAnexosForView(int $homologacaoId, string $tipo): array
+    {
+        if ($this->supportsBlobAttachments()) {
+            $stmt = $this->db->prepare(
+                "SELECT id, nome_original, mime_type, tamanho_bytes, arquivo_blob, caminho
+                 FROM homologacoes_2_anexos
+                 WHERE homologacao_id = ? AND tipo = ?
+                 ORDER BY id"
+            );
+            $stmt->execute([$homologacaoId, $tipo]);
+
+            $anexos = [];
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $data = $row['arquivo_blob'] ?? null;
+                if ($data !== null && $data !== '') {
+                    $row['data_uri'] = 'data:' . ($row['mime_type'] ?: 'image/jpeg') . ';base64,' . base64_encode($data);
+                } elseif (!empty($row['caminho'])) {
+                    $row['data_uri'] = '../' . ltrim((string) $row['caminho'], '/');
+                } else {
+                    $row['data_uri'] = '';
+                }
+                $anexos[] = $row;
+            }
+
+            return $anexos;
+        }
+
+        $stmt = $this->db->prepare(
+            "SELECT id, nome_original, mime_type, tamanho_bytes, caminho
              FROM homologacoes_2_anexos
              WHERE homologacao_id = ? AND tipo = ?
              ORDER BY id"
         );
         $stmt->execute([$homologacaoId, $tipo]);
-        return array_map(fn ($row) => $row['caminho'], $stmt->fetchAll(PDO::FETCH_ASSOC));
+
+        return array_map(function (array $row) {
+            $row['data_uri'] = !empty($row['caminho']) ? ('../' . ltrim((string) $row['caminho'], '/')) : '';
+            return $row;
+        }, $stmt->fetchAll(PDO::FETCH_ASSOC));
+    }
+
+    private function normalizeUploadedFileCount(?array $files): int
+    {
+        if (!$files || empty($files['name'])) {
+            return 0;
+        }
+
+        $names = is_array($files['name']) ? $files['name'] : [$files['name']];
+        return count(array_filter($names, fn ($name) => trim((string) $name) !== ''));
+    }
+
+    private function detectImageMimeType(string $tmpName, string $fallbackMime): string
+    {
+        if (function_exists('finfo_open')) {
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            if ($finfo !== false) {
+                $mime = finfo_file($finfo, $tmpName) ?: '';
+                finfo_close($finfo);
+                if ($mime !== '') {
+                    return $mime;
+                }
+            }
+        }
+
+        return strtolower(trim($fallbackMime));
+    }
+
+    private function supportsBlobAttachments(): bool
+    {
+        static $supportsBlob = null;
+        if ($supportsBlob !== null) {
+            return $supportsBlob;
+        }
+
+        try {
+            $stmt = $this->db->query("SHOW COLUMNS FROM homologacoes_2_anexos LIKE 'arquivo_blob'");
+            $supportsBlob = $stmt !== false && $stmt->fetch(PDO::FETCH_ASSOC) !== false;
+        } catch (Throwable) {
+            $supportsBlob = false;
+        }
+
+        return $supportsBlob;
     }
 }

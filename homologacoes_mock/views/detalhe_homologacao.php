@@ -157,7 +157,7 @@
                         </h5>
                         <p class="text-slate-600 dark:text-slate-300 text-sm mb-6">Confirme que o equipamento chegou ao setor e notifique automaticamente os técnicos de TI do pavilhão.</p>
                         
-                        <form method="POST" class="bg-amber-50 dark:bg-amber-900/10 p-5 rounded-xl border border-amber-100 dark:border-amber-800/50">
+                        <form method="POST" class="bg-amber-50 dark:bg-amber-900/10 p-5 rounded-xl border border-amber-100 dark:border-amber-800/50" enctype="multipart/form-data">
                             <input type="hidden" name="acao" value="confirmar_recebimento">
                             <div class="grid grid-cols-1 gap-5 mb-5">
                                 <div>
@@ -226,12 +226,16 @@
                 <div class="p-6">
                     <div class="flex flex-col md:flex-row gap-6">
                         <div class="md:w-1/3">
-                            <?php if ($h['foto_carga']): ?>
-                                <div class="relative group cursor-zoom-in overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg bg-slate-900">
-                                    <img src="<?= $h['foto_carga'] ?>" class="w-full h-auto object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" alt="Foto da Carga">
-                                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent flex items-end p-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <span class="text-white text-[10px] font-bold flex items-center gap-1"><i class="ph-bold ph-magnifying-glass-plus"></i> Ampliar Foto</span>
-                                    </div>
+                            <?php if (!empty($h['logistica_anexos'])): ?>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <?php foreach ($h['logistica_anexos'] as $anexo): ?>
+                                        <div class="relative group cursor-zoom-in overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg bg-slate-900">
+                                            <img src="<?= htmlspecialchars($anexo['data_uri'] ?? '') ?>" class="w-full h-24 object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" alt="<?= htmlspecialchars($anexo['nome_original'] ?? 'Foto da carga') ?>">
+                                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent flex items-end p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <span class="text-white text-[10px] font-bold flex items-center gap-1"><i class="ph-bold ph-magnifying-glass-plus"></i> Visualizar</span>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
                                 </div>
                             <?php else: ?>
                                 <div class="w-full aspect-video bg-slate-100 dark:bg-slate-900/50 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-slate-400 text-xs">
@@ -444,23 +448,12 @@
                                     </h6>
                                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                                         <?php foreach ($h['laudo_anexos'] as $anexo): ?>
-                                            <?php 
-                                                $isPdf = strtolower(pathinfo($anexo, PATHINFO_EXTENSION)) === 'pdf';
-                                                $path = '../' . $anexo; // Ajuste de path para o mock
-                                            ?>
-                                            <?php if ($isPdf): ?>
-                                                <a href="<?= $path ?>" target="_blank" class="flex flex-col items-center justify-center p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all hover:shadow-md group">
-                                                    <i class="ph ph-file-pdf text-3xl text-rose-500 mb-1 group-hover:scale-110 transition-transform"></i>
-                                                    <span class="text-[9px] text-slate-500 dark:text-slate-400 font-bold truncate w-full text-center">Abrir PDF</span>
-                                                </a>
-                                            <?php else: ?>
-                                                <div class="relative group cursor-zoom-in overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 shadow-sm">
-                                                    <img src="<?= $path ?>" class="w-full h-20 object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" alt="Anexo">
-                                                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                                        <i class="ph-bold ph-eye text-white"></i>
-                                                    </div>
+                                            <div class="relative group cursor-zoom-in overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 shadow-sm">
+                                                <img src="<?= htmlspecialchars($anexo['data_uri'] ?? '') ?>" class="w-full h-20 object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" alt="<?= htmlspecialchars($anexo['nome_original'] ?? 'Anexo') ?>">
+                                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                                    <i class="ph-bold ph-eye text-white"></i>
                                                 </div>
-                                            <?php endif; ?>
+                                            </div>
                                         <?php endforeach; ?>
                                     </div>
                                 </div>
@@ -520,7 +513,7 @@
                         <span class="text-[10px] font-normal text-slate-500 dark:text-slate-400 opacity-70">PNG, JPG ou PDF</span>
                     </label>
                     <div class="relative group">
-                        <input type="file" name="laudo_anexos[]" id="input_laudo_anexos" multiple accept=".png,.jpg,.jpeg,.pdf" onchange="validarLimiteArquivos(this)" 
+                        <input type="file" name="laudo_anexos[]" id="input_laudo_anexos" multiple accept=".png,.jpg,.jpeg" onchange="validarLimiteArquivosImagem(this, 'file_list_preview', 5)" 
                                class="block w-full text-xs text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 dark:file:bg-slate-700 dark:file:text-slate-200 cursor-pointer border border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-4 transition-all hover:border-primary-400 dark:hover:border-primary-500">
                         <div id="file_list_preview" class="mt-2 text-[10px] flex flex-wrap gap-2"></div>
                     </div>
@@ -591,6 +584,31 @@
             span.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600";
             const icon = file.type.includes('pdf') ? '<i class="ph ph-file-pdf text-rose-500"></i>' : '<i class="ph ph-image text-emerald-500"></i>';
             span.innerHTML = `${icon} ${file.name.substring(0, 15)}${file.name.length > 15 ? '...' : ''}`;
+            preview.appendChild(span);
+        });
+    }
+
+    function validarLimiteArquivosImagem(input, previewId, limite) {
+        const preview = document.getElementById(previewId);
+        preview.innerHTML = '';
+
+        if (input.files.length > limite) {
+            alert(`Voce so pode selecionar no maximo ${limite} imagens.`);
+            input.value = '';
+            return;
+        }
+
+        Array.from(input.files).forEach(file => {
+            if (!['image/png', 'image/jpeg'].includes(file.type)) {
+                alert('Apenas imagens PNG ou JPEG sao permitidas.');
+                input.value = '';
+                preview.innerHTML = '';
+                return;
+            }
+
+            const span = document.createElement('span');
+            span.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600";
+            span.innerHTML = `<i class="ph ph-image text-emerald-500"></i> ${file.name.substring(0, 15)}${file.name.length > 15 ? '...' : ''}`;
             preview.appendChild(span);
         });
     }

@@ -75,7 +75,7 @@ if ($u['perfil'] !== 'logistica' && $u['perfil'] !== 'admin' && $u['perfil'] !==
                     <h5 class="text-lg font-bold text-amber-950 flex items-center gap-2"><i class="ph-fill ph-clipboard-text"></i> Termo de Recebimento Físico</h5>
                     <button type="button" onclick="closeModal('receiveModal<?= $h['id'] ?>')" class="text-amber-800 hover:text-amber-950 transition-colors"><i class="ph-bold ph-x text-xl"></i></button>
                 </div>
-                <form method="POST" action="" class="p-6">
+                <form method="POST" action="" class="p-6" enctype="multipart/form-data">
                     <input type="hidden" name="confirmar_recebimento_id" value="<?= $h['id'] ?>">
                     
                     <div class="mb-4">
@@ -87,21 +87,10 @@ if ($u['perfil'] !== 'logistica' && $u['perfil'] !== 'admin' && $u['perfil'] !==
                         <textarea name="observacoes_logistica" rows="3" placeholder="Caixa amassada? Lacre rompido? Volume extra?" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-amber-500 focus:border-amber-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white"></textarea>
                     </div>
                     <div class="mb-6">
-                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Foto da Carga (Simulado)</label>
-                        <div class="grid grid-cols-3 gap-2">
-                            <label class="relative cursor-pointer">
-                                <input type="radio" name="foto_carga" value="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=400&h=300" checked class="peer sr-only">
-                                <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=150&h=100" class="rounded border-2 border-transparent peer-checked:border-amber-500 opacity-60 peer-checked:opacity-100 h-12 w-full object-cover">
-                            </label>
-                            <label class="relative cursor-pointer">
-                                <input type="radio" name="foto_carga" value="https://images.unsplash.com/photo-1566576721346-d4a3b4eaad5b?auto=format&fit=crop&w=400&h=300" class="peer sr-only">
-                                <img src="https://images.unsplash.com/photo-1566576721346-d4a3b4eaad5b?auto=format&fit=crop&w=150&h=100" class="rounded border-2 border-transparent peer-checked:border-amber-500 opacity-60 peer-checked:opacity-100 h-12 w-full object-cover">
-                            </label>
-                            <label class="relative cursor-pointer">
-                                <input type="radio" name="foto_carga" value="https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=400&h=300" class="peer sr-only">
-                                <img src="https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=150&h=100" class="rounded border-2 border-transparent peer-checked:border-amber-500 opacity-60 peer-checked:opacity-100 h-12 w-full object-cover">
-                            </label>
-                        </div>
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Fotos da Carga (Max. 5 imagens PNG/JPEG)</label>
+                        <input type="file" name="logistica_anexos[]" multiple accept=".png,.jpg,.jpeg" onchange="validarArquivosImagem(this, 'preview_logistica_<?= $h['id'] ?>', 5)"
+                               class="block w-full text-xs text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 cursor-pointer border border-dashed border-slate-300 rounded-xl p-4">
+                        <div id="preview_logistica_<?= $h['id'] ?>" class="mt-2 text-[10px] flex flex-wrap gap-2"></div>
                     </div>
                     
                     <div class="flex justify-end gap-3">
@@ -157,13 +146,13 @@ if ($u['perfil'] !== 'logistica' && $u['perfil'] !== 'admin' && $u['perfil'] !==
                     </td>
                     <td class="px-5 py-3 text-center">
                         <div class="flex items-center justify-center gap-1.5">
-                            <?php if (!empty($h['foto_carga'])): ?>
+                            <?php if (($h['logistica_anexos_count'] ?? 0) > 0 || !empty($h['foto_carga'])): ?>
                                 <i class="ph-fill ph-camera text-amber-500 text-lg" title="Foto disponível"></i>
                             <?php endif; ?>
                             <?php if (!empty($h['observacoes_logistica'])): ?>
                                 <i class="ph-fill ph-chat-centered-text text-blue-500 text-lg" title="<?= htmlspecialchars($h['observacoes_logistica']) ?>"></i>
                             <?php endif; ?>
-                            <?php if (empty($h['foto_carga']) && empty($h['observacoes_logistica']) && $h['status'] !== 'aguardando_chegada'): ?>
+                            <?php if (($h['logistica_anexos_count'] ?? 0) === 0 && empty($h['foto_carga']) && empty($h['observacoes_logistica']) && $h['status'] !== 'aguardando_chegada'): ?>
                                 <span class="text-slate-300 dark:text-slate-600">-</span>
                             <?php endif; ?>
                         </div>
@@ -191,4 +180,28 @@ if ($u['perfil'] !== 'logistica' && $u['perfil'] !== 'admin' && $u['perfil'] !==
 <script>
 function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function validarArquivosImagem(input, previewId, limite) {
+    const preview = document.getElementById(previewId);
+    preview.innerHTML = '';
+
+    if (input.files.length > limite) {
+        alert(`Voce so pode selecionar no maximo ${limite} imagens.`);
+        input.value = '';
+        return;
+    }
+
+    for (const file of Array.from(input.files)) {
+        if (!['image/png', 'image/jpeg'].includes(file.type)) {
+            alert('Apenas imagens PNG ou JPEG sao permitidas.');
+            input.value = '';
+            preview.innerHTML = '';
+            return;
+        }
+
+        const tag = document.createElement('span');
+        tag.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200';
+        tag.innerHTML = `<i class="ph ph-image"></i> ${file.name.substring(0, 20)}${file.name.length > 20 ? '...' : ''}`;
+        preview.appendChild(tag);
+    }
+}
 </script>

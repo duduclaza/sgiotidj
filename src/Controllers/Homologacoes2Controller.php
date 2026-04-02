@@ -83,7 +83,7 @@ class Homologacoes2Controller
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_recebimento_id'])) {
             try {
-                $this->service->registerRecebimento((int) $_POST['confirmar_recebimento_id'], $_POST, $u);
+                $this->service->registerRecebimento((int) $_POST['confirmar_recebimento_id'], $_POST, $u, $_FILES);
                 $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Recebimento físico confirmado com sucesso.'];
             } catch (\Throwable $e) {
                 $_SESSION['flash_message'] = ['type' => 'danger', 'text' => $e->getMessage()];
@@ -273,7 +273,7 @@ class Homologacoes2Controller
             $acao = $_POST['acao'] ?? '';
 
             if ($acao === 'confirmar_recebimento') {
-                $this->service->registerRecebimento($id, $_POST, $u);
+                $this->service->registerRecebimento($id, $_POST, $u, $_FILES);
                 $_SESSION['flash_message'] = ['type' => 'success', 'text' => 'Item recebido registrado com sucesso.'];
             } elseif ($acao === 'iniciar_homologacao') {
                 $this->service->startHomologacao($id, $_POST, $u);
@@ -372,7 +372,8 @@ class Homologacoes2Controller
 
     private function canManageCadastros(array $u): bool
     {
-        return in_array($u['perfil'], ['compras', 'admin'], true)
+        // Permite admin, super_admin e compras gerenciarem cadastros (inclusive exclusão)
+        return in_array($u['perfil'], ['compras', 'admin', 'super_admin', 'superadmin'], true)
             || PermissionService::hasPermission((int) $_SESSION['user_id'], 'homologacoes_2', 'edit');
     }
 

