@@ -46,6 +46,7 @@ class Homologacoes2Controller
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['criar_homologacao'])) {
             try {
                 $_POST['tipo_id'] = $_POST['tipo_equipamento'] ?? null;
+                $this->normalizeCreatePayload();
                 $id = $this->service->createHomologacao($_POST, (int) $_SESSION['user_id']);
                 $_SESSION['flash_message'] = ['type' => 'success', 'text' => "Homologação criada com sucesso! (ID: {$id})"];
                 redirect('/homologacoes-2/' . $id);
@@ -55,6 +56,7 @@ class Homologacoes2Controller
         }
 
         $dados = $this->service->getCreateFormData($u);
+        $dados['responsaveisPorSetor'] = $this->groupResponsaveisBySetor($this->service->getActiveUsers());
         extract($dados, EXTR_SKIP);
         $title = 'Nova Homologação - Homologações 2.0';
         $viewFile = dirname(__DIR__, 2) . '/homologacoes_mock/views/nova_homologacao.php';
@@ -379,6 +381,82 @@ class Homologacoes2Controller
         return in_array($u['perfil'], ['qualidade', 'tecnico', 'admin'], true)
             || (int) $h['criado_por'] === (int) $u['id']
             || in_array((int) $u['id'], $h['responsaveis'], true);
+    }
+
+    private function normalizeCreatePayload(): void
+    {
+        $setor = (string) ($_POST['setor_responsavel'] ?? 'tecnico');
+
+        if ($setor === 'comercial') {
+            $vendedorNome = trim((string) ($_POST['vendedor_nome'] ?? ''));
+            $vendedorEmail = trim((string) ($_POST['vendedor_email'] ?? ''));
+            $supervisorEmail = trim((string) ($_POST['supervisor_email'] ?? ''));
+
+            if ($vendedorNome === '' || $vendedorEmail === '' || $supervisorEmail === '') {
+                throw new \RuntimeException('Preencha os dados do vendedor e do supervisor comercial.');
+            }
+
+            if (!filter_var($vendedorEmail, FILTER_VALIDATE_EMAIL) || !filter_var($supervisorEmail, FILTER_VALIDATE_EMAIL)) {
+                throw new \RuntimeException('Informe e-mails comerciais validos.');
+            }
+
+            if (empty($_POST['responsaveis'])) {
+                $_POST['responsaveis'] = [(int) $_SESSION['user_id']];
+            }
+
+            return;
+        }
+
+        if (!isset($_POST['responsaveis'])) {
+            $_POST['responsaveis'] = [];
+            return;
+        }
+
+        if (!is_array($_POST['responsaveis'])) {
+            $_POST['responsaveis'] = [$_POST['responsaveis']];
+        }
+    }
+
+    private function groupResponsaveisBySetor(array $users): array
+    {
+        $grupos = [
+            'tecnico' => [],
+            'qualidade' => [],
+        ];
+
+        foreach ($users as $user) {
+            $setor = $this->inferResponsavelSetor($user);
+            if ($setor !== null) {
+                $grupos[$setor][] = $user;
+            }
+        }
+
+        return $grupos;
+    }
+
+    private function inferResponsavelSetor(array $user): ?string
+    {
+        $haystack = strtolower(implode(' ', array_filter([
+            (string) ($user['perfil'] ?? ''),
+            (string) ($user['setor'] ?? ''),
+            (string) ($user['profile_name'] ?? ''),
+            (string) ($user['role'] ?? ''),
+        ])));
+
+        if (str_contains($haystack, 'qualid')) {
+            return 'qualidade';
+        }
+
+        if (
+            str_contains($haystack, 'tecn')
+            || str_contains($haystack, 'engenh')
+            || str_contains($haystack, 'suporte')
+            || preg_match('/\bti\b/', $haystack)
+        ) {
+            return 'tecnico';
+        }
+
+        return null;
     }
 
     private function deny(): void

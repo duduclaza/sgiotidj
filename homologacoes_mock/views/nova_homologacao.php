@@ -201,7 +201,7 @@ require __DIR__ . '/_subnav.php';
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <!-- Técnico -->
                     <label class="relative cursor-pointer group">
-                        <input type="radio" name="setor_responsavel" value="tecnico" checked class="peer sr-only" onchange="toggleComercial(false)">
+                        <input type="radio" name="setor_responsavel" value="tecnico" checked class="peer sr-only" onchange="setSetorResponsavel('tecnico')">
                         <div class="p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl transition-all peer-checked:border-cyan-500 peer-checked:bg-cyan-50/50 dark:peer-checked:bg-cyan-900/20 peer-checked:ring-1 peer-checked:ring-cyan-500 flex items-center gap-3">
                             <div class="w-10 h-10 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-cyan-500 transition-colors shadow-sm">
                                 <i class="ph ph-wrench text-2xl"></i>
@@ -212,7 +212,7 @@ require __DIR__ . '/_subnav.php';
 
                     <!-- Qualidade -->
                     <label class="relative cursor-pointer group">
-                        <input type="radio" name="setor_responsavel" value="qualidade" class="peer sr-only" onchange="toggleComercial(false)">
+                        <input type="radio" name="setor_responsavel" value="qualidade" class="peer sr-only" onchange="setSetorResponsavel('qualidade')">
                         <div class="p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50/50 dark:peer-checked:bg-emerald-900/20 peer-checked:ring-1 peer-checked:ring-emerald-500 flex items-center gap-3">
                             <div class="w-10 h-10 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-emerald-500 transition-colors shadow-sm">
                                 <i class="ph ph-seal-check text-2xl"></i>
@@ -223,7 +223,7 @@ require __DIR__ . '/_subnav.php';
 
                     <!-- Comercial -->
                     <label class="relative cursor-pointer group">
-                        <input type="radio" name="setor_responsavel" value="comercial" class="peer sr-only" onchange="toggleComercial(true)">
+                        <input type="radio" name="setor_responsavel" value="comercial" class="peer sr-only" onchange="setSetorResponsavel('comercial')">
                         <div class="p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl transition-all peer-checked:border-indigo-500 peer-checked:bg-indigo-50/50 dark:peer-checked:bg-indigo-900/20 peer-checked:ring-1 peer-checked:ring-indigo-500 flex items-center gap-3">
                             <div class="w-10 h-10 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-indigo-500 transition-colors shadow-sm">
                                 <i class="ph ph-briefcase text-2xl"></i>
@@ -253,23 +253,107 @@ require __DIR__ . '/_subnav.php';
                         </div>
                     </div>
                 </div>
+
+                <div id="secaoResponsaveis" class="animate-fade-in bg-cyan-50/30 dark:bg-cyan-900/10 border border-cyan-100 dark:border-cyan-900/30 rounded-2xl p-6 mt-4 mb-6">
+                    <h4 class="text-sm font-bold text-cyan-700 dark:text-cyan-400 mb-4 flex items-center gap-2">
+                        <i class="ph ph-user-list text-lg"></i> Responsaveis do setor
+                    </h4>
+
+                    <div id="responsaveis_tecnico" data-setor-panel="tecnico">
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Selecione quem vai atuar pela equipe Tecnica / Engenharia.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <?php foreach (($responsaveisPorSetor['tecnico'] ?? []) as $responsavel): ?>
+                                <label class="flex items-start gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/70 p-4">
+                                    <input type="checkbox" name="responsaveis[]" value="<?= (int) $responsavel['id'] ?>" data-responsavel-setor="tecnico" class="mt-1 w-4 h-4 border border-slate-300 rounded bg-slate-50 text-cyan-600 focus:ring-cyan-500 dark:bg-slate-700 dark:border-slate-600">
+                                    <span>
+                                        <span class="block text-sm font-semibold text-slate-700 dark:text-slate-200"><?= htmlspecialchars($responsavel['nome']) ?></span>
+                                        <span class="block text-xs text-slate-500 dark:text-slate-400"><?= htmlspecialchars($responsavel['email'] ?: 'Sem e-mail cadastrado') ?></span>
+                                        <span class="block text-[11px] text-slate-400 dark:text-slate-500"><?= htmlspecialchars($responsavel['setor'] ?: 'Tecnico') ?></span>
+                                    </span>
+                                </label>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+
+                    <div id="responsaveis_qualidade" data-setor-panel="qualidade" class="hidden">
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Selecione quem vai atuar pela equipe de Qualidade.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <?php foreach (($responsaveisPorSetor['qualidade'] ?? []) as $responsavel): ?>
+                                <label class="flex items-start gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/70 p-4">
+                                    <input type="checkbox" name="responsaveis[]" value="<?= (int) $responsavel['id'] ?>" data-responsavel-setor="qualidade" class="mt-1 w-4 h-4 border border-slate-300 rounded bg-slate-50 text-emerald-600 focus:ring-emerald-500 dark:bg-slate-700 dark:border-slate-600">
+                                    <span>
+                                        <span class="block text-sm font-semibold text-slate-700 dark:text-slate-200"><?= htmlspecialchars($responsavel['nome']) ?></span>
+                                        <span class="block text-xs text-slate-500 dark:text-slate-400"><?= htmlspecialchars($responsavel['email'] ?: 'Sem e-mail cadastrado') ?></span>
+                                        <span class="block text-[11px] text-slate-400 dark:text-slate-500"><?= htmlspecialchars($responsavel['setor'] ?: 'Qualidade') ?></span>
+                                    </span>
+                                </label>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <script>
-            function toggleComercial(show) {
-                const el = document.getElementById('secaoComercial');
-                const inputs = el.querySelectorAll('input');
-                if (show) {
-                    el.classList.remove('hidden');
-                    inputs.forEach(i => i.required = true);
-                } else {
-                    el.classList.add('hidden');
-                    inputs.forEach(i => {
-                        i.required = false;
-                        i.value = '';
+            function setSetorResponsavel(setor) {
+                const secaoComercial = document.getElementById('secaoComercial');
+                const secaoResponsaveis = document.getElementById('secaoResponsaveis');
+                const inputsComercial = secaoComercial.querySelectorAll('input');
+                const checkboxesResponsaveis = document.querySelectorAll('input[data-responsavel-setor]');
+                const paineis = document.querySelectorAll('[data-setor-panel]');
+
+                if (setor === 'comercial') {
+                    secaoComercial.classList.remove('hidden');
+                    secaoResponsaveis.classList.add('hidden');
+                    inputsComercial.forEach(input => input.required = true);
+                    checkboxesResponsaveis.forEach(input => {
+                        input.checked = false;
+                        input.required = false;
+                        input.setCustomValidity('');
                     });
+                    return;
                 }
+
+                secaoComercial.classList.add('hidden');
+                inputsComercial.forEach(input => {
+                    input.required = false;
+                    input.value = '';
+                });
+
+                secaoResponsaveis.classList.remove('hidden');
+                paineis.forEach(painel => painel.classList.toggle('hidden', painel.dataset.setorPanel !== setor));
+
+                const checkboxesDoSetor = Array.from(checkboxesResponsaveis).filter(input => input.dataset.responsavelSetor === setor);
+                checkboxesResponsaveis.forEach(input => {
+                    if (input.dataset.responsavelSetor !== setor) {
+                        input.checked = false;
+                        input.required = false;
+                        input.setCustomValidity('');
+                    }
+                });
+
+                checkboxesDoSetor.forEach(input => {
+                    input.required = false;
+                    input.setCustomValidity('');
+                });
             }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                const selecionado = document.querySelector('input[name="setor_responsavel"]:checked');
+                setSetorResponsavel(selecionado ? selecionado.value : 'tecnico');
+
+                const form = document.querySelector('form');
+                form.addEventListener('submit', (event) => {
+                    const setor = document.querySelector('input[name="setor_responsavel"]:checked')?.value || 'tecnico';
+                    const checkboxes = Array.from(document.querySelectorAll(`input[data-responsavel-setor="${setor}"]`));
+                    checkboxes.forEach(input => input.setCustomValidity(''));
+
+                    if (setor !== 'comercial' && checkboxes.length > 0 && !checkboxes.some(input => input.checked)) {
+                        event.preventDefault();
+                        checkboxes[0].setCustomValidity('Selecione ao menos um responsavel.');
+                        checkboxes[0].reportValidity();
+                    }
+                });
+            });
             </script>
             
             <div class="col-span-12 mt-8 flex items-center gap-3">
