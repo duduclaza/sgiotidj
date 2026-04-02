@@ -425,8 +425,8 @@ class Homologacoes2Controller
         ];
 
         foreach ($users as $user) {
-            $setor = $this->inferResponsavelSetor($user);
-            if ($setor !== null) {
+            $setores = $this->inferResponsavelSetores($user);
+            foreach ($setores as $setor) {
                 $grupos[$setor][] = $user;
             }
         }
@@ -434,29 +434,38 @@ class Homologacoes2Controller
         return $grupos;
     }
 
-    private function inferResponsavelSetor(array $user): ?string
+    private function inferResponsavelSetores(array $user): array
     {
-        $haystack = strtolower(implode(' ', array_filter([
-            (string) ($user['perfil'] ?? ''),
-            (string) ($user['setor'] ?? ''),
-            (string) ($user['profile_name'] ?? ''),
-            (string) ($user['role'] ?? ''),
-        ])));
+        $role = strtolower((string) ($user['role'] ?? ''));
+        $perfil = strtolower((string) ($user['perfil'] ?? ''));
+        $setor = $this->normalizeSetorNome((string) ($user['setor'] ?? ''));
 
-        if (str_contains($haystack, 'qualid')) {
-            return 'qualidade';
+        if (in_array($role, ['admin', 'super_admin', 'superadmin'], true) || $perfil === 'admin') {
+            return ['tecnico', 'qualidade'];
         }
 
-        if (
-            str_contains($haystack, 'tecn')
-            || str_contains($haystack, 'engenh')
-            || str_contains($haystack, 'suporte')
-            || preg_match('/\bti\b/', $haystack)
-        ) {
-            return 'tecnico';
+        if ($setor === 'qualidade') {
+            return ['qualidade'];
         }
 
-        return null;
+        if ($setor === 'area tecnica') {
+            return ['tecnico'];
+        }
+
+        return [];
+    }
+
+    private function normalizeSetorNome(string $value): string
+    {
+        $value = trim(mb_strtolower($value, 'UTF-8'));
+        $value = str_replace(
+            ['á', 'à', 'â', 'ã', 'é', 'ê', 'í', 'ó', 'ô', 'õ', 'ú', 'ç'],
+            ['a', 'a', 'a', 'a', 'e', 'e', 'i', 'o', 'o', 'o', 'u', 'c'],
+            $value
+        );
+        $value = preg_replace('/\s+/', ' ', $value) ?: $value;
+
+        return $value;
     }
 
     private function deny(): void
