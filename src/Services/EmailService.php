@@ -2201,4 +2201,108 @@ Não responda este email - ele é enviado automaticamente
             </div>
         </body>
         </html>";
+    /**
+     * Enviar notificação de mudança de status da homologação
+     */
+    public function sendHomologacaoStatusUpdate(array $homologacao, array $recipients, string $statusNovo, ?string $observacao = null): bool
+    {
+        if (empty($recipients)) {
+            return false;
+        }
+
+        $labelStatus = match ($statusNovo) {
+            'item_recebido' => '📦 Item Recebido (Pronto para Testes)',
+            'em_homologacao' => '🧪 Testes Iniciados',
+            'concluida' => '✅ Processo Concluído',
+            default => '🔄 Atualização de Status',
+        };
+
+        if ($statusNovo === 'concluida') {
+            $resultado = $homologacao['resultado'] ?? 'pendente';
+            $labelStatus = ($resultado === 'aprovado' || $resultado === 'aprovado_restricoes') ? '✅ Homologação APROVADA' : '❌ Homologação REPROVADA';
+        }
+
+        $subject = "{$labelStatus}: {$homologacao['codigo']} - {$homologacao['titulo']}";
+        $body = $this->buildHomologacaoStatusEmailTemplate($homologacao, $statusNovo, $observacao);
+        
+        $altSubject = "SGQ OTI DJ - ATUALIZAÇÃO DE STATUS";
+        $altBody = "{$altSubject}\n\n";
+        $altBody .= "Código: {$homologacao['codigo']}\n";
+        $altBody .= "Título: {$homologacao['titulo']}\n";
+        $altBody .= "Status: {$labelStatus}\n";
+        if ($observacao) $altBody .= "Observação: {$observacao}\n";
+        $altBody .= "\nAcesse o sistema para mais detalhes.";
+        
+        return $this->send($recipients, $subject, $body, $altBody);
+    }
+
+    private function buildHomologacaoStatusEmailTemplate(array $homologacao, string $status, ?string $observacao): string
+    {
+        $appUrl = $_ENV['APP_URL'] ?? 'https://djbr.sgqoti.com.br';
+        
+        $config = match ($status) {
+            'item_recebido' => ['label' => '📦 ITEM RECEBIDO', 'color' => '#0ea5e9', 'bg' => '#f0f9ff'],
+            'em_homologacao' => ['label' => '🧪 TESTES INICIADOS', 'color' => '#8b5cf6', 'bg' => '#f5f3ff'],
+            'concluida' => ($homologacao['resultado'] ?? 'pendente') === 'reprovado' 
+                ? ['label' => '❌ REPROVADO', 'color' => '#ef4444', 'bg' => '#fef2f2']
+                : ['label' => '✅ APROVADO', 'color' => '#10b981', 'bg' => '#f0fdf4'],
+            default => ['label' => '🔄 STATUS ATUALIZADO', 'color' => '#64748b', 'bg' => '#f8fafc'],
+        };
+        
+        return "
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8fafc; }
+                .container { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border: 1px solid #e2e8f0; }
+                .header { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); padding: 32px; text-align: center; color: white; }
+                .header h1 { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em; }
+                .status-badge { background-color: {$config['bg']}; color: {$config['color']}; padding: 12px; text-align: center; font-weight: 800; font-size: 14px; border-bottom: 2px solid {$config['color']}; text-transform: uppercase; letter-spacing: 0.1em; }
+                .content { padding: 32px; }
+                .info-grid { display: grid; grid-template-columns: 1fr; gap: 12px; background-color: #f1f5f9; padding: 16px; border-radius: 12px; margin-bottom: 24px; }
+                .info-item { border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+                .info-item:last-child { border: none; }
+                .info-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #64748b; display: block; }
+                .info-value { font-size: 14px; font-weight: 600; color: #1e293b; display: block; }
+                .obs-box { background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 16px; border-radius: 0 8px 8px 0; margin-bottom: 24px; font-style: italic; color: #92400e; font-size: 14px; }
+                .btn { display: block; width: 100%; padding: 14px; background-color: #1e293b; color: white !important; text-align: center; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 14px; margin-top: 10px; box-sizing: border-box; }
+                .footer { background-color: #f8fafc; padding: 24px; text-align: center; color: #64748b; font-size: 12px; border-top: 1px solid #e2e8f0; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h1>SGQ OTI DJ</h1>
+                    <p>Logística e Qualidade</p>
+                </div>
+                <div class='status-badge'>
+                    {$config['label']}
+                </div>
+                <div class='content'>
+                    <div class='info-grid'>
+                        <div class='info-item'>
+                            <span class='info-label'>Homologação</span>
+                            <span class='info-value'>{$homologacao['codigo']} - {$homologacao['titulo']}</span>
+                        </div>
+                        <div class='info-item'>
+                            <span class='info-label'>Modelo / Referência</span>
+                            <span class='info-value'>{$homologacao['modelo']}</span>
+                        </div>
+                        <div class='info-item'>
+                            <span class='info-label'>Fornecedor</span>
+                            <span class='info-value'>{$homologacao['fornecedor_nome']}</span>
+                        </div>
+                    </div>" . ($observacao ? "<div class='obs-box'><strong>Nota:</strong><br>{$observacao}</div>" : "") . "
+                    <a href='{$appUrl}/homologacoes/{$homologacao['id']}' class='btn'>🔗 Ver Detalhes no Sistema</a>
+                </div>
+                <div class='footer'>
+                    <p>© " . date('Y') . " - Sistema SGQ OTI DJ</p>
+                </div>
+            </div>
+        </body>
+        </html>";
+    }
 }

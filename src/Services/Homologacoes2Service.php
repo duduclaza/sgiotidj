@@ -440,35 +440,7 @@ class Homologacoes2Service
             $this->db->commit();
 
             // --- NOTIFICAÇÃO POR EMAIL ---
-            try {
-                $emails = [];
-                
-                // 1. Emails dos Responsáveis Selecionados
-                if (!empty($responsaveis)) {
-                    $emails = array_merge($emails, $this->getUsersEmails($responsaveis));
-                }
-
-                // 2. Emails Comerciais (Vendedor e Supervisor)
-                if (!empty($input['vendedor_email'])) $emails[] = trim($input['vendedor_email']);
-                if (!empty($input['supervisor_email'])) $emails[] = trim($input['supervisor_email']);
-
-                // 3. Email da Logística (se solicitado)
-                if (!empty($input['notificar_envolvidos'])) {
-                    $emails = array_merge($emails, $this->getLogisticaEmails());
-                }
-
-                $emails = array_values(array_unique(array_filter($emails)));
-
-                if (!empty($emails)) {
-                    $homologacaoData = $this->getHomologacaoBase($id);
-                    if ($homologacaoData) {
-                        $this->getEmailService()->sendHomologacaoNotification($homologacaoData, $emails);
-                    }
-                }
-            } catch (Throwable $e) {
-                // Logar erro mas não falhar a criação
-                error_log("Erro ao enviar email de homologação: " . $e->getMessage());
-            }
+            $this->notifyStatusChange($id, 'criacao', null, $userId);
 
             return $id;
         } catch (Throwable $e) {
@@ -506,6 +478,9 @@ class Homologacoes2Service
         $this->storeAttachments($id, $files['logistica_anexos'] ?? null, 'logistica', (int) $user['id']);
 
         $this->registrarHistorico($id, 'recebimento', $homologacao['status'], 'item_recebido', 'Recebimento físico registrado pela logística.', (int) $user['id']);
+
+        // Notificar interessados (Técnicos/Qualidade) que o item chegou
+        $this->notifyStatusChange($id, 'item_recebido', trim((string) ($input['observacoes_logistica'] ?? '')), (int) $user['id']);
     }
 
     public function startHomologacao(int $id, array $input, array $user): void
@@ -542,6 +517,9 @@ class Homologacoes2Service
         ]);
 
         $this->registrarHistorico($id, 'inicio_testes', $homologacao['status'], 'em_homologacao', 'Equipe técnica iniciou os testes.', (int) $user['id']);
+
+        // Notificar interessados que os testes começaram
+        $this->notifyStatusChange($id, 'em_homologacao', null, (int) $user['id']);
     }
 
     public function saveChecklistDraft(int $id, array $input, array $user): void
@@ -640,6 +618,11 @@ class Homologacoes2Service
             $this->registrarHistorico($id, 'finalizacao', $homologacao['status'], $statusNovo, 'Homologação atualizada com veredito final.', (int) $user['id']);
 
             $this->db->commit();
+
+            // Notificar interessados sobre o resultado final
+            if ($statusNovo === 'concluida') {
+                $this->notifyStatusChange($id, 'concluida', trim((string) ($input['novo_parecer_final'] ?? '')), (int) $user['id']);
+            }
         } catch (Throwable $e) {
             $this->db->rollBack();
             throw $e;
@@ -654,7 +637,7 @@ class Homologacoes2Service
         }
 
         if ($excluirDefinitivo) {
-            $this->notifyHomologacaoInvolved($id, 'exclusao', $user['nome'] ?? 'Sistema');
+            $this->notifyStatusChange($id, 'exclusao', null, (int) $user['id'], $user['nome'] ?? 'Sistema');
             $this->deleteHomologacaoPermanently($id);
             return;
         }
@@ -663,7 +646,7 @@ class Homologacoes2Service
         $stmt->execute([$id]);
         $this->registrarHistorico($id, 'cancelamento', $homologacao['status'], 'cancelada', 'Processo cancelado e mantido em histórico.', (int) $user['id']);
         
-        $this->notifyHomologacaoInvolved($id, 'cancelamento', $user['nome'] ?? 'Sistema');
+        $this->notifyStatusChange($id, 'cancelamento', null, (int) $user['id'], $user['nome'] ?? 'Sistema');
     }
 
     private function deleteHomologacaoPermanently(int $id): void
@@ -1509,43 +1492,83 @@ class Homologacoes2Service
     }
 
     /**
-     * Notifica todos os envolvidos sobre cancelamento ou exclusão
+     * Centraliza a lógica de notificação de status para os interessados corretos
      */
-    private function notifyHomologacaoInvolved(int $id, string $motivo, string $autorNome): void
+    private function notifyStatusChange(int $id, string $tipoAcao, ?string $observacao = null, ?int $authorId = null, string $authorName = ''): void
     {
         try {
-            $h = $this->getHomologacaoBase($id);
+            $h = $this->getHomologacao($id);
             if (!$h) return;
 
             $recipients = [];
 
-            // 1. Responsáveis Técnicos
-            $responsaveisIds = $this->getResponsaveisMap([$id])[$id] ?? [];
-            if (!empty($responsaveisIds)) {
-                $recipients = array_merge($recipients, $this->getUsersEmails($responsaveisIds));
-            }
+            // Regras de destinatários por fase
+            switch ($tipoAcao) {
+                case 'criacao':
+                    // Criador (opcional, já que ele gerou) + Comerciais + Responsáveis + Logística (se marcada)
+                    if (!empty($h['vendedor_email'])) $recipients[] = $h['vendedor_email'];
+                    if (!empty($h['supervisor_email'])) $recipients[] = $h['supervisor_email'];
+                    if (!empty($h['responsaveis'])) $recipients = array_merge($recipients, $this->getUsersEmails($h['responsaveis']));
+                    if (!empty($h['notificar_envolvidos'])) $recipients = array_merge($recipients, $this->getLogisticaEmails());
+                    
+                    if (!empty($recipients)) {
+                        $this->getEmailService()->sendHomologacaoNotification($h, array_unique(array_filter($recipients)));
+                    }
+                    return;
 
-            // 2. Comercial (Vendedor e Supervisor)
-            if (!empty($h['vendedor_email'])) $recipients[] = $h['vendedor_email'];
-            if (!empty($h['supervisor_email'])) $recipients[] = $h['supervisor_email'];
+                case 'item_recebido':
+                    // Logística recebeu -> Notificar Técnicos/Qualidade responsáveis e Comercial
+                    if (!empty($h['responsaveis'])) $recipients = array_merge($recipients, $this->getUsersEmails($h['responsaveis']));
+                    if (!empty($h['vendedor_email'])) $recipients[] = $h['vendedor_email'];
+                    break;
 
-            // 3. Logística
-            $recipients = array_merge($recipients, $this->getLogisticaEmails());
+                case 'em_homologacao':
+                    // Testes iniciados -> Notificar Criador e Comercial
+                    if (!empty($h['vendedor_email'])) $recipients[] = $h['vendedor_email'];
+                    if (!empty($h['supervisor_email'])) $recipients[] = $h['supervisor_email'];
+                    if (!empty($h['criado_por'])) $recipients = array_merge($recipients, $this->getUsersEmails([(int)$h['criado_por']]));
+                    break;
 
-            // 4. Criador
-            if (!empty($h['criado_por'])) {
-                $criadorEmail = $this->getUsersEmails([(int)$h['criado_por']]);
-                if (!empty($criadorEmail)) $recipients = array_merge($recipients, $criadorEmail);
+                case 'concluida':
+                    // Finalizado -> Notificar TODO MUNDO (Comercial, Criador, Logística (para devolução), Responsáveis)
+                    if (!empty($h['vendedor_email'])) $recipients[] = $h['vendedor_email'];
+                    if (!empty($h['supervisor_email'])) $recipients[] = $h['supervisor_email'];
+                    if (!empty($h['criado_por'])) $recipients = array_merge($recipients, $this->getUsersEmails([(int)$h['criado_por']]));
+                    $recipients = array_merge($recipients, $this->getLogisticaEmails());
+                    if (!empty($h['responsaveis'])) $recipients = array_merge($recipients, $this->getUsersEmails($h['responsaveis']));
+                    break;
+
+                case 'cancelamento':
+                case 'exclusao':
+                    // Notificar TODO MUNDO
+                    if (!empty($h['responsaveis'])) $recipients = array_merge($recipients, $this->getUsersEmails($h['responsaveis']));
+                    if (!empty($h['vendedor_email'])) $recipients[] = $h['vendedor_email'];
+                    if (!empty($h['supervisor_email'])) $recipients[] = $h['supervisor_email'];
+                    $recipients = array_merge($recipients, $this->getLogisticaEmails());
+                    if (!empty($h['criado_por'])) {
+                        $criadorEmail = $this->getUsersEmails([(int)$h['criado_por']]);
+                        if (!empty($criadorEmail)) $recipients = array_merge($recipients, $criadorEmail);
+                    }
+
+                    $recipients = array_unique(array_filter($recipients));
+                    if (!empty($recipients)) {
+                        $this->getEmailService()->sendHomologacaoCancellationNotification($h, $recipients, $tipoAcao, $authorName);
+                    }
+                    return;
             }
 
             $recipients = array_unique(array_filter($recipients));
             if (empty($recipients)) return;
 
-            $this->getEmailService()->sendHomologacaoCancellationNotification($h, $recipients, $motivo, $autorNome);
-        } catch (Throwable) {
-            // Silencia erros de e-mail para não travar a ação principal (cancelamento/exclusão)
+            $this->getEmailService()->sendHomologacaoStatusUpdate($h, $recipients, $tipoAcao, $observacao);
+        } catch (Throwable $e) {
+            error_log("Erro em notifyStatusChange: " . $e->getMessage());
         }
     }
+
+    /**
+     * Notifica todos os envolvidos sobre cancelamento ou exclusão
+     */
 
     /**
      * Busca emails de uma lista de IDs de usuários
