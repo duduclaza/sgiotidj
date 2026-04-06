@@ -241,10 +241,24 @@
                             <?php if (!empty($h['logistica_anexos'])): ?>
                                 <div class="grid grid-cols-2 gap-3">
                                     <?php foreach ($h['logistica_anexos'] as $anexo): ?>
-                                        <div class="relative group cursor-zoom-in overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg bg-slate-900">
-                                            <img src="<?= htmlspecialchars($anexo['data_uri'] ?? '') ?>" class="w-full h-24 object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" alt="<?= htmlspecialchars($anexo['nome_original'] ?? 'Foto da carga') ?>">
-                                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent flex items-end p-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <span class="text-white text-[10px] font-bold flex items-center gap-1"><i class="ph-bold ph-magnifying-glass-plus"></i> Visualizar</span>
+                                        <div class="relative group overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg bg-slate-100 dark:bg-slate-900">
+                                            <?php if ($anexo['tipo_mime'] === 'application/pdf'): ?>
+                                                <div class="w-full h-24 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 text-rose-500">
+                                                    <i class="ph-bold ph-file-pdf text-3xl"></i>
+                                                    <span class="text-[8px] mt-1 font-bold">PDF</span>
+                                                </div>
+                                            <?php else: ?>
+                                                <img src="<?= htmlspecialchars($anexo['data_uri'] ?? '') ?>" class="w-full h-24 object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" alt="<?= htmlspecialchars($anexo['nome_original'] ?? 'Foto da carga') ?>">
+                                            <?php endif; ?>
+                                            
+                                            <!-- Botoes de Acao -->
+                                            <div class="absolute inset-x-0 bottom-0 bg-black/60 translate-y-full group-hover:translate-y-0 transition-transform flex items-center justify-around p-1.5">
+                                                <button type="button" onclick="mostrarAnexo('<?= htmlspecialchars($anexo['data_uri'] ?? '') ?>', '<?= htmlspecialchars($anexo['nome_original'] ?? '') ?>')" class="text-white hover:text-amber-400 transition-colors" title="Visualizar">
+                                                    <i class="ph-bold ph-magnifying-glass-plus text-lg"></i>
+                                                </button>
+                                                <a href="<?= htmlspecialchars($anexo['data_uri'] ?? '') ?>" download="<?= htmlspecialchars($anexo['nome_original'] ?? 'anexo_logistica') ?>" class="text-white hover:text-emerald-400 transition-colors" title="Baixar">
+                                                    <i class="ph-bold ph-download-simple text-lg"></i>
+                                                </a>
                                             </div>
                                         </div>
                                     <?php endforeach; ?>
@@ -460,10 +474,23 @@
                                     </h6>
                                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                                         <?php foreach ($h['laudo_anexos'] as $anexo): ?>
-                                            <div class="relative group cursor-zoom-in overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 shadow-sm">
-                                                <img src="<?= htmlspecialchars($anexo['data_uri'] ?? '') ?>" class="w-full h-20 object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" alt="<?= htmlspecialchars($anexo['nome_original'] ?? 'Anexo') ?>">
-                                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                                    <i class="ph-bold ph-eye text-white"></i>
+                                            <div class="relative group overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 shadow-sm">
+                                                <?php if (($anexo['tipo_mime'] ?? '') === 'application/pdf'): ?>
+                                                    <div class="w-full h-20 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 text-rose-500">
+                                                        <i class="ph-bold ph-file-pdf text-2xl"></i>
+                                                        <span class="text-[8px] mt-1 font-bold">PDF</span>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <img src="<?= htmlspecialchars($anexo['data_uri'] ?? '') ?>" class="w-full h-20 object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" alt="<?= htmlspecialchars($anexo['nome_original'] ?? 'Anexo') ?>">
+                                                <?php endif; ?>
+
+                                                <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-4 transition-opacity">
+                                                    <button type="button" onclick="mostrarAnexo('<?= htmlspecialchars($anexo['data_uri'] ?? '') ?>', '<?= htmlspecialchars($anexo['nome_original'] ?? '') ?>')" class="text-white hover:text-primary-400 transition-colors" title="Ver">
+                                                        <i class="ph-bold ph-eye text-lg"></i>
+                                                    </button>
+                                                    <a href="<?= htmlspecialchars($anexo['data_uri'] ?? '') ?>" download="<?= htmlspecialchars($anexo['nome_original'] ?? 'anexo_laudo') ?>" class="text-white hover:text-emerald-400 transition-colors" title="Download">
+                                                        <i class="ph-bold ph-download-simple text-lg"></i>
+                                                    </a>
                                                 </div>
                                             </div>
                                         <?php endforeach; ?>
@@ -666,4 +693,48 @@
 <script>
 function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+function mostrarAnexo(uri, nome) {
+    const modal = document.getElementById('modalPreviewAnexo');
+    const container = document.getElementById('previewAnexoContainer');
+    const title = document.getElementById('previewAnexoTitle');
+    
+    title.innerText = nome;
+    container.innerHTML = '';
+    
+    if (uri.includes('application/pdf')) {
+        const iframe = document.createElement('iframe');
+        iframe.src = uri;
+        iframe.className = "w-full h-[70vh] rounded-lg border border-slate-200 dark:border-slate-700";
+        container.appendChild(iframe);
+        
+        // Fallback para visualização de PDF
+        const fallback = document.createElement('div');
+        fallback.className = "mt-4 text-center";
+        fallback.innerHTML = `<a href="${uri}" download="${nome}" class="text-primary-600 font-bold hover:underline">Caso o PDF não abra, clique aqui para baixar</a>`;
+        container.appendChild(fallback);
+    } else {
+        const img = document.createElement('img');
+        img.src = uri;
+        img.className = "max-w-full max-h-[80vh] rounded-lg shadow-lg mx-auto block object-contain";
+        container.appendChild(img);
+    }
+    
+    openModal('modalPreviewAnexo');
+}
 </script>
+
+<!-- Modal Visualização de Anexo -->
+<div id="modalPreviewAnexo" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 animate-fade-in">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-4xl mx-auto overflow-hidden">
+        <div class="p-4 border-b border-slate-200 dark:border-slate-700/50 flex justify-between items-center">
+            <h5 id="previewAnexoTitle" class="text-sm font-bold text-slate-800 dark:text-white truncate pr-4">Anexo</h5>
+            <button type="button" onclick="closeModal('modalPreviewAnexo')" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                <i class="ph-bold ph-x text-2xl"></i>
+            </button>
+        </div>
+        <div id="previewAnexoContainer" class="p-4 bg-slate-50 dark:bg-slate-900/50 flex flex-col items-center justify-center min-h-[40vh]">
+            <!-- Conteúdo dinâmico -->
+        </div>
+    </div>
+</div>
