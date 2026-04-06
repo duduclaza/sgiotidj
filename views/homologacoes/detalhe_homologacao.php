@@ -171,28 +171,10 @@
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Foto da Carga / Evidência (Simulado)</label>
-                                    <div class="grid grid-cols-3 gap-3">
-                                        <label class="relative cursor-pointer group">
-                                            <input type="radio" name="foto_carga" value="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=400&h=300" checked class="peer sr-only">
-                                            <div class="border-2 border-transparent peer-checked:border-primary-500 rounded-lg overflow-hidden grayscale peer-checked:grayscale-0 transition-all">
-                                                <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=150&h=100" class="w-full h-16 object-cover" alt="Foto 1">
-                                            </div>
-                                        </label>
-                                        <label class="relative cursor-pointer group">
-                                            <input type="radio" name="foto_carga" value="https://images.unsplash.com/photo-1566576721346-d4a3b4eaad5b?auto=format&fit=crop&w=400&h=300" class="peer sr-only">
-                                            <div class="border-2 border-transparent peer-checked:border-primary-500 rounded-lg overflow-hidden grayscale peer-checked:grayscale-0 transition-all">
-                                                <img src="https://images.unsplash.com/photo-1566576721346-d4a3b4eaad5b?auto=format&fit=crop&w=150&h=100" class="w-full h-16 object-cover" alt="Foto 2">
-                                            </div>
-                                        </label>
-                                        <label class="relative cursor-pointer group">
-                                            <input type="radio" name="foto_carga" value="https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=400&h=300" class="peer sr-only">
-                                            <div class="border-2 border-transparent peer-checked:border-primary-500 rounded-lg overflow-hidden grayscale peer-checked:grayscale-0 transition-all">
-                                                <img src="https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=150&h=100" class="w-full h-16 object-cover" alt="Foto 3">
-                                            </div>
-                                        </label>
-                                    </div>
-                                    <p class="text-[10px] text-slate-500 mt-2 italic">* Selecione uma foto acima para simular o upload da logística.</p>
+                                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Fotos/Documentos da Carga (Max. 10 arquivos PNG/JPG/PDF)</label>
+                                    <input type="file" name="logistica_anexos[]" multiple accept=".png,.jpg,.jpeg,.pdf" onchange="validarArquivosLogistica(this)"
+                                           class="block w-full text-xs text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 cursor-pointer border border-dashed border-slate-300 rounded-xl p-4">
+                                    <div id="preview_logistica_evidencias" class="mt-2 text-[10px] flex flex-wrap gap-2"></div>
                                 </div>
                             </div>
                             <div class="flex">
@@ -200,6 +182,36 @@
                                     <i class="ph-bold ph-package"></i> Registrar Chegada e Evidências
                                 </button>
                             </div>
+                            
+                            <script>
+                            function validarArquivosLogistica(input) {
+                                const preview = document.getElementById('preview_logistica_evidencias');
+                                preview.innerHTML = '';
+
+                                if (input.files.length > 10) {
+                                    alert('Você só pode selecionar no máximo 10 arquivos.');
+                                    input.value = '';
+                                    return;
+                                }
+
+                                const permittedTypes = ['image/png', 'image/jpeg', 'application/pdf'];
+
+                                for (const file of Array.from(input.files)) {
+                                    if (!permittedTypes.includes(file.type)) {
+                                        alert('Apenas arquivos PNG, JPEG ou PDF são permitidos.');
+                                        input.value = '';
+                                        preview.innerHTML = '';
+                                        return;
+                                    }
+
+                                    const isPdf = file.type === 'application/pdf';
+                                    const tag = document.createElement('span');
+                                    tag.className = `inline-flex items-center gap-1 px-2 py-0.5 rounded ${isPdf ? 'bg-blue-50 text-blue-800 border-blue-200' : 'bg-amber-50 text-amber-800 border-amber-200'} border`;
+                                    tag.innerHTML = `<i class="ph ph-${isPdf ? 'file-pdf' : 'image'}"></i> ${file.name.substring(0, 20)}${file.name.length > 20 ? '...' : ''}`;
+                                    preview.appendChild(tag);
+                                }
+                            }
+                            </script>
                         </form>
                     </div>
                 </div>

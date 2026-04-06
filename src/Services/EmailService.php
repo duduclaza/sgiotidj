@@ -2106,4 +2106,99 @@ Não responda este email - ele é enviado automaticamente
         </body>
         </html>";
     }
+
+    /**
+     * Enviar notificação de cancelamento/exclusão de homologação
+     */
+    public function sendHomologacaoCancellationNotification(array $homologacao, array $recipients, string $motivo, string $autorNome): bool
+    {
+        if (empty($recipients)) {
+            return false;
+        }
+
+        $subject = "❌ Homologação " . ($motivo === 'exclusao' ? 'Excluída' : 'Cancelada') . ": {$homologacao['codigo']} - {$homologacao['titulo']}";
+        $body = $this->buildHomologacaoCancellationEmailTemplate($homologacao, $motivo, $autorNome);
+        
+        $altSubject = $motivo === 'exclusao' ? 'HOMOLOGAÇÃO EXCLUÍDA' : 'HOMOLOGAÇÃO CANCELADA';
+        $altBody = "{$altSubject} - SGQ OTI DJ\n\n";
+        $altBody .= "Código: {$homologacao['codigo']}\n";
+        $altBody .= "Título: {$homologacao['titulo']}\n";
+        $altBody .= "Realizado por: {$autorNome}\n";
+        $altBody .= "Status: " . ($motivo === 'exclusao' ? 'Removida do Sistema' : 'Cancelada') . "\n\n";
+        $altBody .= "Acesse o sistema para mais informações.";
+        
+        return $this->send($recipients, $subject, $body, $altBody);
+    }
+
+    private function buildHomologacaoCancellationEmailTemplate(array $homologacao, string $motivo, string $autorNome): string
+    {
+        $appUrl = $_ENV['APP_URL'] ?? 'https://djbr.sgqoti.com.br';
+        $tipoAcao = $motivo === 'exclusao' ? 'Exclusão Permanente' : 'Cancelamento do Processo';
+        $corAcao = '#e11d48'; // Rose 600
+        
+        return "
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8fafc; }
+                .container { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border: 1px solid #e2e8f0; }
+                .header { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); padding: 32px; text-align: center; color: white; }
+                .header h1 { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em; }
+                .alert-banner { background-color: #fff1f2; border-bottom: 2px solid {$corAcao}; padding: 15px; text-align: center; color: {$corAcao}; font-weight: bold; }
+                .content { padding: 32px; }
+                .info-grid { display: grid; grid-template-columns: 1fr; gap: 16px; background-color: #f1f5f9; padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 1px solid #e2e8f0; }
+                .info-item { border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
+                .info-item:last-child { border: none; }
+                .info-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; display: block; margin-bottom: 4px; }
+                .info-value { font-size: 15px; font-weight: 600; color: #1e293b; display: block; }
+                .footer { background-color: #f8fafc; padding: 24px; text-align: center; color: #64748b; font-size: 12px; border-top: 1px solid #e2e8f0; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h1>SISTEMA SGQ OTI DJ</h1>
+                    <p>Logística e Qualidade</p>
+                </div>
+                <div class='alert-banner'>
+                    🚨 AVISO DE " . mb_strtoupper((string) $tipoAcao, 'UTF-8') . "
+                </div>
+                <div class='content'>
+                    <p style='margin-bottom: 20px;'>Informamos que o processo de homologação abaixo foi <strong>" . ($motivo === 'exclusao' ? 'excluído permanentemente' : 'cancelado') . "</strong> no sistema.</p>
+                    
+                    <div class='info-grid'>
+                        <div class='info-item'>
+                            <span class='info-label'>Código / Processo</span>
+                            <span class='info-value'>{$homologacao['codigo']}</span>
+                        </div>
+                        <div class='info-item'>
+                            <span class='info-label'>Título da Homologação</span>
+                            <span class='info-value'>{$homologacao['titulo']}</span>
+                        </div>
+                        <div class='info-item'>
+                            <span class='info-label'>Realizado por</span>
+                            <span class='info-value'>{$autorNome}</span>
+                        </div>
+                        <div class='info-item'>
+                            <span class='info-label'>Modelo / Referência</span>
+                            <span class='info-value'>{$homologacao['modelo']}</span>
+                        </div>
+                        <div class='info-item'>
+                            <span class='info-label'>Fornecedor</span>
+                            <span class='info-value'>{$homologacao['fornecedor_nome']}</span>
+                        </div>
+                    </div>
+
+                    <p style='font-size: 13px; color: #64748b; text-align: center;'>Este registro não requer mais ações imediatas da sua parte.</p>
+                </div>
+                <div class='footer'>
+                    <p>© " . date('Y') . " - Sistema SGQ OTI DJ</p>
+                    <p>Este é um e-mail automático, não responda.</p>
+                </div>
+            </div>
+        </body>
+        </html>";
 }

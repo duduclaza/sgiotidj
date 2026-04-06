@@ -87,8 +87,8 @@ if ($u['perfil'] !== 'logistica' && $u['perfil'] !== 'admin' && $u['perfil'] !==
                         <textarea name="observacoes_logistica" rows="3" placeholder="Caixa amassada? Lacre rompido? Volume extra?" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-amber-500 focus:border-amber-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white"></textarea>
                     </div>
                     <div class="mb-6">
-                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Fotos da Carga (Max. 5 imagens PNG/JPEG)</label>
-                        <input type="file" name="logistica_anexos[]" multiple accept=".png,.jpg,.jpeg" onchange="validarArquivosImagem(this, 'preview_logistica_<?= $h['id'] ?>', 5)"
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Fotos/Documentos da Carga (Max. 10 arquivos PNG/JPG/PDF)</label>
+                        <input type="file" name="logistica_anexos[]" multiple accept=".png,.jpg,.jpeg,.pdf" onchange="validarArquivosImagem(this, 'preview_logistica_<?= $h['id'] ?>', 10)"
                                class="block w-full text-xs text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 cursor-pointer border border-dashed border-slate-300 rounded-xl p-4">
                         <div id="preview_logistica_<?= $h['id'] ?>" class="mt-2 text-[10px] flex flex-wrap gap-2"></div>
                     </div>
@@ -185,22 +185,25 @@ function validarArquivosImagem(input, previewId, limite) {
     preview.innerHTML = '';
 
     if (input.files.length > limite) {
-        alert(`Voce so pode selecionar no maximo ${limite} imagens.`);
+        alert(`Você só pode selecionar no máximo ${limite} arquivos.`);
         input.value = '';
         return;
     }
 
+    const permittedTypes = ['image/png', 'image/jpeg', 'application/pdf'];
+
     for (const file of Array.from(input.files)) {
-        if (!['image/png', 'image/jpeg'].includes(file.type)) {
-            alert('Apenas imagens PNG ou JPEG sao permitidas.');
+        if (!permittedTypes.includes(file.type)) {
+            alert('Apenas arquivos PNG, JPEG ou PDF são permitidos.');
             input.value = '';
             preview.innerHTML = '';
             return;
         }
 
+        const isPdf = file.type === 'application/pdf';
         const tag = document.createElement('span');
-        tag.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200';
-        tag.innerHTML = `<i class="ph ph-image"></i> ${file.name.substring(0, 20)}${file.name.length > 20 ? '...' : ''}`;
+        tag.className = `inline-flex items-center gap-1 px-2 py-0.5 rounded ${isPdf ? 'bg-blue-50 text-blue-800 border-blue-200' : 'bg-amber-50 text-amber-800 border-amber-200'} border`;
+        tag.innerHTML = `<i class="ph ph-${isPdf ? 'file-pdf' : 'image'}"></i> ${file.name.substring(0, 20)}${file.name.length > 20 ? '...' : ''}`;
         preview.appendChild(tag);
     }
 }

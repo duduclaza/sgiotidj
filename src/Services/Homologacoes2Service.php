@@ -654,6 +654,7 @@ class Homologacoes2Service
         }
 
         if ($excluirDefinitivo) {
+            $this->notifyHomologacaoInvolved($id, 'exclusao', $user['nome'] ?? 'Sistema');
             $this->deleteHomologacaoPermanently($id);
             return;
         }
@@ -661,6 +662,8 @@ class Homologacoes2Service
         $stmt = $this->db->prepare("UPDATE homologacoes_2 SET status = 'cancelada', updated_at = CURRENT_TIMESTAMP WHERE id = ?");
         $stmt->execute([$id]);
         $this->registrarHistorico($id, 'cancelamento', $homologacao['status'], 'cancelada', 'Processo cancelado e mantido em histórico.', (int) $user['id']);
+        
+        $this->notifyHomologacaoInvolved($id, 'cancelamento', $user['nome'] ?? 'Sistema');
     }
 
     private function deleteHomologacaoPermanently(int $id): void
@@ -1271,7 +1274,7 @@ class Homologacoes2Service
                  ) VALUES (?, ?, NULL, ?, ?, ?, ?, ?, NOW())"
             );
         } else {
-            $baseDir = dirname(__DIR__, 2) . '/storage/uploads/homologacoes/' . $homologacaoId . '/' . $tipo;
+            $baseDir = dirname(__DIR__, 2) . '/anexos/' . $homologacaoId . '/' . $tipo;
             if (!is_dir($baseDir)) {
                 mkdir($baseDir, 0777, true);
             }
@@ -1330,7 +1333,7 @@ class Homologacoes2Service
                     throw new \RuntimeException('Não foi possível salvar um dos arquivos enviados.');
                 }
 
-                $relative = 'storage/uploads/homologacoes/' . $homologacaoId . '/' . $tipo . '/' . $filename;
+                $relative = 'anexos/' . $homologacaoId . '/' . $tipo . '/' . $filename;
                 $stmtPath->execute([
                     $homologacaoId,
                     $tipo,
@@ -1441,7 +1444,7 @@ class Homologacoes2Service
     // Remove apenas a pasta do registro dentro do diretório de uploads do módulo.
     private function purgeAttachmentDirectory(int $homologacaoId): void
     {
-        $baseDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'homologacoes';
+        $baseDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'anexos';
         $targetDir = $baseDir . DIRECTORY_SEPARATOR . $homologacaoId;
 
         if (!is_dir($targetDir)) {
@@ -1503,6 +1506,45 @@ class Homologacoes2Service
         }
 
         return $supportsBlob;
+    }
+
+    /**
+     * Notifica todos os envolvidos sobre cancelamento ou exclusão
+     */
+    private function notifyHomologacaoInvolved(int $id, string $motivo, string $autorNome): void
+    {
+        try {
+            $h = $this->getHomologacaoBase($id);
+            if (!$h) return;
+
+            $recipients = [];
+
+            // 1. Responsáveis Técnicos
+            $responsaveisIds = $this->getResponsaveisMap([$id])[$id] ?? [];
+            if (!empty($responsaveisIds)) {
+                $recipients = array_merge($recipients, $this->getUsersEmails($responsaveisIds));
+            }
+
+            // 2. Comercial (Vendedor e Supervisor)
+            if (!empty($h['vendedor_email'])) $recipients[] = $h['vendedor_email'];
+            if (!empty($h['supervisor_email'])) $recipients[] = $h['supervisor_email'];
+
+            // 3. Logística
+            $recipients = array_merge($recipients, $this->getLogisticaEmails());
+
+            // 4. Criador
+            if (!empty($h['criado_por'])) {
+                $criadorEmail = $this->getUsersEmails([(int)$h['criado_por']]);
+                if (!empty($criadorEmail)) $recipients = array_merge($recipients, $criadorEmail);
+            }
+
+            $recipients = array_unique(array_filter($recipients));
+            if (empty($recipients)) return;
+
+            $this->getEmailService()->sendHomologacaoCancellationNotification($h, $recipients, $motivo, $autorNome);
+        } catch (Throwable) {
+            // Silencia erros de e-mail para não travar a ação principal (cancelamento/exclusão)
+        }
     }
 
     /**
