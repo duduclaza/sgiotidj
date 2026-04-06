@@ -67,6 +67,8 @@ class PermissionMiddleware
         '/certificados/delete' => 'certificados',
         '/toners/amostragens' => 'amostragens',
         '/amostragens-2' => 'amostragens_2',
+        '/amostragens-2/import-xml/parse' => 'amostragens_2',
+        '/amostragens-2/import-xml/store' => 'amostragens_2',
         '/controle-de-descartes' => 'controle_descartes',
         '/controle-descartes' => 'controle_descartes',
         '/precificacao-coleta-descartes' => 'precificacao_coleta_descartes',

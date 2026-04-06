@@ -286,6 +286,10 @@ $router->post('/amostragens-2/enviar-email', [App\Controllers\Amostragens2Contro
 $router->get('/amostragens-2/export', [App\Controllers\Amostragens2Controller::class , 'exportExcel']);
 $router->get('/amostragens-2/graficos', [App\Controllers\Amostragens2Controller::class , 'graficos']);
 
+// ===== IMPORTAÇÃO XML =====
+$router->post('/amostragens-2/import-xml/parse', [App\Controllers\Amostragens2Controller::class , 'parseXml']);
+$router->post('/amostragens-2/import-xml/store', [App\Controllers\Amostragens2Controller::class , 'storeImported']);
+
 // Cadastro de Máquinas routes
 $router->get('/cadastro-maquinas', [App\Controllers\CadastroMaquinasController::class , 'index']);
 $router->post('/cadastro-maquinas/store', [App\Controllers\CadastroMaquinasController::class , 'store']);
