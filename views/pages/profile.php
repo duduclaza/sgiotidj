@@ -1,8 +1,3 @@
-<?php
-$title = 'Meu Perfil - SGQ OTI DJ';
-$viewFile = __FILE__;
-?>
-
 <section class="space-y-6">
   <div class="flex justify-between items-center">
     <h1 class="text-2xl font-semibold text-gray-900">Meu Perfil</h1>

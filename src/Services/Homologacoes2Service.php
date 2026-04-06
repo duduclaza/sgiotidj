@@ -613,15 +613,53 @@ class Homologacoes2Service
         }
 
         if ($excluirDefinitivo) {
-            $stmt = $this->db->prepare("UPDATE homologacoes_2 SET deleted_at = NOW(), updated_at = NOW() WHERE id = ?");
-            $stmt->execute([$id]);
-            $this->registrarHistorico($id, 'exclusao', $homologacao['status'], 'cancelada', 'Registro removido da fila geral.', (int) $user['id']);
+            $this->deleteHomologacaoPermanently($id);
             return;
         }
 
-        $stmt = $this->db->prepare("UPDATE homologacoes_2 SET status = 'cancelada', updated_at = NOW() WHERE id = ?");
+        $stmt = $this->db->prepare("UPDATE homologacoes_2 SET status = 'cancelada', updated_at = CURRENT_TIMESTAMP WHERE id = ?");
         $stmt->execute([$id]);
         $this->registrarHistorico($id, 'cancelamento', $homologacao['status'], 'cancelada', 'Processo cancelado e mantido em histórico.', (int) $user['id']);
+    }
+
+    private function deleteHomologacaoPermanently(int $id): void
+    {
+        $this->db->beginTransaction();
+
+        try {
+            $this->detachLinkedHomologacoes($id);
+
+            foreach ([
+                'homologacoes_2_respostas',
+                'homologacoes_2_responsaveis',
+                'homologacoes_2_anexos',
+                'homologacoes_2_historico',
+            ] as $table) {
+                $stmt = $this->db->prepare("DELETE FROM {$table} WHERE homologacao_id = ?");
+                $stmt->execute([$id]);
+            }
+
+            $stmt = $this->db->prepare("DELETE FROM homologacoes_2 WHERE id = ?");
+            $stmt->execute([$id]);
+
+            $this->db->commit();
+        } catch (Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $e;
+        }
+
+        $this->purgeAttachmentDirectory($id);
+    }
+
+    private function detachLinkedHomologacoes(int $id): void
+    {
+        foreach (['homologacao_anterior_id', 'produto_original_id'] as $column) {
+            $stmt = $this->db->prepare("UPDATE homologacoes_2 SET {$column} = NULL WHERE {$column} = ?");
+            $stmt->execute([$id]);
+        }
     }
 
     public function addTipoProduto(string $nome): void
@@ -1124,7 +1162,7 @@ class Homologacoes2Service
             "INSERT INTO homologacoes_2_historico (
                 homologacao_id, acao, status_anterior, status_novo, descricao,
                 created_by, created_by_name, created_at
-             ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())"
+             ) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)"
         );
         $stmt->execute([
             $homologacaoId,
@@ -1357,6 +1395,56 @@ class Homologacoes2Service
         }
 
         return strtolower(trim($fallbackMime));
+    }
+
+    // Remove apenas a pasta do registro dentro do diretório de uploads do módulo.
+    private function purgeAttachmentDirectory(int $homologacaoId): void
+    {
+        $baseDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'homologacoes-2';
+        $targetDir = $baseDir . DIRECTORY_SEPARATOR . $homologacaoId;
+
+        if (!is_dir($targetDir)) {
+            return;
+        }
+
+        $resolvedBase = realpath($baseDir);
+        $resolvedTarget = realpath($targetDir);
+        if ($resolvedBase === false || $resolvedTarget === false) {
+            return;
+        }
+
+        $allowedPrefix = rtrim($resolvedBase, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        if ($resolvedTarget !== $resolvedBase && !str_starts_with($resolvedTarget, $allowedPrefix)) {
+            return;
+        }
+
+        $this->deleteDirectoryRecursively($resolvedTarget);
+    }
+
+    private function deleteDirectoryRecursively(string $directory): void
+    {
+        $items = scandir($directory);
+        if ($items === false) {
+            return;
+        }
+
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+
+            $path = $directory . DIRECTORY_SEPARATOR . $item;
+            if (is_dir($path)) {
+                $this->deleteDirectoryRecursively($path);
+                continue;
+            }
+
+            if (is_file($path)) {
+                @unlink($path);
+            }
+        }
+
+        @rmdir($directory);
     }
 
     private function supportsBlobAttachments(): bool

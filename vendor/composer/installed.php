@@ -3,7 +3,7 @@
         'name' => 'sgqoti/sgqdj',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '4a50e1582d906f9753ba14a352fbc6eadc0c79ca',
+        'reference' => 'ae4c054557a1525e4efa1445a6e3639cce0c98e8',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -529,7 +529,7 @@
         'sgqoti/sgqdj' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '4a50e1582d906f9753ba14a352fbc6eadc0c79ca',
+            'reference' => 'ae4c054557a1525e4efa1445a6e3639cce0c98e8',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

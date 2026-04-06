@@ -1,0 +1,61 @@
+{
+    "id": "form_1768566845_696a303d08fa3",
+    "titulo": "AVALIAÇÃO DE DESEMPENHO DO COLABORADOR -  \"Nome do Colaborador\"",
+    "descricao": "Tem como objetivo avaliar o desempenho do colaborador para promover melhorias, desenvolvimento profissional e alinhamento com os objetivos da empresa.",
+    "perguntas": [
+        {
+            "texto": "Cargo:",
+            "tipo": "texto"
+        },
+        {
+            "texto": "Gestor Imediato:",
+            "tipo": "texto"
+        },
+        {
+            "texto": "Data da admissão:",
+            "tipo": "texto"
+        },
+        {
+            "texto": "Setor:",
+            "tipo": "texto"
+        },
+        {
+            "texto": "Data da avaliação:",
+            "tipo": "texto"
+        },
+        {
+            "texto": "Em uma escala de 0 a 10, qual é o nível de domínio do colaborador sobre a ferramenta\/software? (Hard Skills)",
+            "tipo": "numero"
+        },
+        {
+            "texto": "Em uma escala de 0 a 10, como você avalia o conhecimento e o cumprimento dos processos internos pelo colaborador? (Hard Skills)",
+            "tipo": "numero"
+        },
+        {
+            "texto": "Em uma escala de 0 a 10, como você avalia a qualidade técnica da entrega realizada pelo colaborador? (Hard Skills)",
+            "tipo": "numero"
+        },
+        {
+            "texto": "Em uma escala de 0 a 10, como você avalia o trabalho e a convivência do colaborador em equipe? (Soft Skills)",
+            "tipo": "numero"
+        },
+        {
+            "texto": "Em uma escala de 0 a 10, como você avalia a comunicação do colaborador? (Soft Skills)",
+            "tipo": "numero"
+        },
+        {
+            "texto": "Em uma escala de 0 a 10, como você avalia a pontualidade e a assiduidade do colaborador? (Soft Skills)",
+            "tipo": "numero"
+        },
+        {
+            "texto": "Em uma escala de 0 a 10, como você avalia a produtividade do colaborador? (Soft Skills)",
+            "tipo": "numero"
+        }
+    ],
+    "logo": null,
+    "ativo": true,
+    "criado_por": 25,
+    "criado_por_nome": "Rafael Doretto Camargo",
+    "criado_em": "2026-01-16 12:34:05",
+    "atualizado_em": "2026-01-16 12:34:05"
+}

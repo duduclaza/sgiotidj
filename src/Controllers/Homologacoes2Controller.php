@@ -27,6 +27,7 @@ class Homologacoes2Controller
 
         $dados = $this->service->getDashboardData($_GET);
         $dados['u'] = $u;
+        $dados['canCancelOrDelete'] = $this->canCancelOrDeleteFromListing($u);
         $homologacoes = $dados['homologacoes'];
         $this->prepareViewContext($homologacoes);
 
@@ -112,6 +113,7 @@ class Homologacoes2Controller
         }
 
         $dados = $this->service->getMonitoringData();
+        $dados['canCancelOrDelete'] = $this->canCancelOrDeleteFromListing($u);
         $homologacoes = $dados['homologacoes'];
         $this->prepareViewContext($homologacoes);
 
@@ -297,7 +299,7 @@ class Homologacoes2Controller
     {
         try {
             if (($_POST['acao'] ?? '') === 'cancelar_homologacao') {
-                if (!in_array($u['perfil'] ?? '', ['admin', 'super_admin', 'compras'], true)) {
+                if (!$this->canCancelOrDeleteFromListing($u)) {
                     throw new \RuntimeException('Você não tem permissão para cancelar ou excluir esta homologação.');
                 }
 
@@ -314,6 +316,15 @@ class Homologacoes2Controller
         }
 
         redirect($redirectTo);
+    }
+
+    private function canCancelOrDeleteFromListing(array $u): bool
+    {
+        $perfil = strtolower((string) ($u['perfil'] ?? ''));
+        $role = strtolower((string) ($u['role'] ?? ''));
+
+        return in_array($perfil, ['compras', 'admin'], true)
+            || in_array($role, ['admin', 'super_admin', 'superadmin'], true);
     }
 
     private function prepareViewContext(array $homologacoes): void

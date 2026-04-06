@@ -1,6 +1,6 @@
 <?php require __DIR__ . '/_subnav.php'; 
 
-if ($u['perfil'] !== 'compras' && $u['perfil'] !== 'admin' && $u['perfil'] !== 'super_admin') {
+if (empty($canCancelOrDelete)) {
     echo "<div class='bg-rose-50 border border-rose-200 text-rose-800 rounded-xl p-4 mb-6 shadow-sm dark:bg-rose-900/20 dark:border-rose-800 dark:text-rose-300 flex items-center gap-3'><i class='ph-fill ph-warning-circle text-xl'></i> Acesso restrito ao Setor de Compras. Somente usuários de compras visualizam este painel de monitoramento. Selecione o perfil correspondente na barra superior.</div>";
     return;
 }
@@ -103,7 +103,7 @@ if ($u['perfil'] !== 'compras' && $u['perfil'] !== 'admin' && $u['perfil'] !== '
                                 <i class="ph-bold ph-eye text-lg"></i>
                             </a>
                             
-                            <?php if (in_array($u['perfil'], ['admin', 'super_admin', 'compras'])): ?>
+                            <?php if (!empty($canCancelOrDelete)): ?>
                                 <button type="button" onclick="window.openCancelModal(<?= $h['id'] ?>, '<?= $h['codigo'] ?>')" class="text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-400 dark:hover:bg-rose-800/50 rounded-lg p-2 transition-colors group" title="Excluir/Cancelar Processo">
                                     <i class="ph-fill ph-trash text-lg group-hover:scale-110 transition-transform"></i>
                                 </button>
@@ -198,4 +198,23 @@ window.processCancellation = function() {
         document.getElementById('cancelForm').submit();
     }, 800);
 };
+
+document.querySelectorAll('button[title="Excluir/Cancelar Processo"]').forEach((button) => {
+    if ((button.getAttribute('onclick') || '').includes('openCancelModal')) {
+        button.removeAttribute('onclick');
+    }
+
+    button.addEventListener('click', (event) => {
+        event.preventDefault();
+
+        const row = button.closest('tr');
+        const detailLink = row?.querySelector('a[href^="/homologacoes-2/"]');
+        const idMatch = detailLink?.getAttribute('href')?.match(/\/homologacoes-2\/(\d+)/);
+        const code = row?.querySelector('td .font-semibold')?.textContent?.trim() || '';
+
+        if (idMatch) {
+            window.openCancelModal(Number(idMatch[1]), code);
+        }
+    });
+});
 </script>

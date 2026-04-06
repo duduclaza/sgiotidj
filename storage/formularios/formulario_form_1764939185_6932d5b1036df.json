@@ -1,0 +1,33 @@
+{
+    "id": "form_1764939185_6932d5b1036df",
+    "titulo": "Pesquisa de satisfação do Cliente - Técnico residente (Ailton Silva)",
+    "descricao": "Este formulário tem como objetivo avaliar o desempenho do colaborador(a) residente, garantindo que o atendimento atenda às expectativas do cliente e contribua para a melhoria contínua dos nossos serviços. Observação: As respostas contidas nesse formulário são confidenciais.",
+    "perguntas": [
+        {
+            "texto": "De modo geral, em uma escala de 0 a 10, quão satisfeito você está com o trabalho do colaborador(a)?",
+            "tipo": "numero"
+        },
+        {
+            "texto": "O colaborador(a) demonstra conhecimento técnico necessário para solucionar as ocorrências referente aos equipamentos?",
+            "tipo": "sim_nao"
+        },
+        {
+            "texto": "O colaborador(a) tem um bom relacionamento profissional com os usuários?",
+            "tipo": "sim_nao"
+        },
+        {
+            "texto": "Nas horas vagas o colaborador(a) tem realizado manutenções preventivas e atendido de forma proativa?",
+            "tipo": "sim_nao"
+        },
+        {
+            "texto": "Você teria alguma sugestão de melhoria para aprimorar o nosso serviço prestado?",
+            "tipo": "texto"
+        }
+    ],
+    "logo": "storage\/formularios\/logos\/form_1764939185_6932d5b1036df.png",
+    "ativo": true,
+    "criado_por": 25,
+    "criado_por_nome": "Rafael Doretto Camargo",
+    "criado_em": "2025-12-05 12:53:05",
+    "atualizado_em": "2025-12-05 12:53:05"
+}

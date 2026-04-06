@@ -141,7 +141,7 @@
                     </td>
                     <td class="px-6 py-4 text-right whitespace-nowrap">
                         <div class="flex items-center justify-end gap-2">
-                            <?php if (in_array($u['perfil'], ['admin', 'super_admin', 'compras'])): ?>
+                            <?php if (!empty($canCancelOrDelete)): ?>
                                 <button type="button" onclick="window.openCancelModal(<?= $h['id'] ?>, '<?= $h['codigo'] ?>')" class="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-colors group" title="Excluir/Cancelar Homologação">
                                     <i class="ph-fill ph-trash text-xl group-hover:scale-110 transition-transform"></i>
                                 </button>
@@ -244,6 +244,47 @@ function processCancellation() {
 window.openCancelModal = openCancelModal;
 window.closeCancelModal = closeCancelModal;
 window.processCancellation = processCancellation;
+
+document.querySelectorAll('button[title="Excluir/Cancelar HomologaÃ§Ã£o"]').forEach((button) => {
+    if ((button.getAttribute('onclick') || '').includes('openCancelModal')) {
+        button.removeAttribute('onclick');
+    }
+
+    button.addEventListener('click', (event) => {
+        event.preventDefault();
+
+        const row = button.closest('tr');
+        const detailLink = row?.querySelector('a[href^="/homologacoes-2/"]');
+        const idMatch = detailLink?.getAttribute('href')?.match(/\/homologacoes-2\/(\d+)/);
+        const code = row?.querySelector('td .font-semibold')?.textContent?.trim() || '';
+
+        if (idMatch) {
+            window.openCancelModal(Number(idMatch[1]), code);
+        }
+    });
+});
+
+document.querySelectorAll('button[onclick*="openCancelModal"]').forEach((button) => {
+    if (button.dataset.cancelBound === '1') {
+        return;
+    }
+
+    button.dataset.cancelBound = '1';
+    button.removeAttribute('onclick');
+
+    button.addEventListener('click', (event) => {
+        event.preventDefault();
+
+        const row = button.closest('tr');
+        const detailLink = row?.querySelector('a[href^="/homologacoes-2/"]');
+        const idMatch = detailLink?.getAttribute('href')?.match(/\/homologacoes-2\/(\d+)/);
+        const code = row?.querySelector('td .font-semibold')?.textContent?.trim() || '';
+
+        if (idMatch) {
+            window.openCancelModal(Number(idMatch[1]), code);
+        }
+    });
+});
 </script>
 
 <style>
