@@ -729,6 +729,8 @@ $router->get('/area-tecnica/checklists/{id}', [App\Controllers\AreaTecnicaContro
 // Rota de Teste de E-mail (Diagnóstico Debug)
 $router->get('/teste-smtp-debug', [App\Controllers\TesteEmailController::class , 'index']);
 $router->post('/teste-smtp-debug', [App\Controllers\TesteEmailController::class , 'index']);
+$router->get('/teste-resend-debug', [App\Controllers\TesteResendController::class , 'index']);
+$router->post('/teste-resend-debug', [App\Controllers\TesteResendController::class , 'index']);
 
 // ===== MÓDULO RH - RECURSOS HUMANOS =====
 $router->get('/rh', [App\Controllers\RhController::class , 'index']);
@@ -791,7 +793,8 @@ try {
         strpos($currentRoute, '/nps/salvar-resposta') === 0 || // Salvar resposta pública NPS
         strpos($currentRoute, '/area-tecnica/checklist') === 0 || // Checklist Virtual público
         strpos($currentRoute, '/homologacoes/public/') === 0 || // Checklist público Homologações
-        $currentRoute === '/teste-smtp-debug' // Teste debug email
+        $currentRoute === '/teste-smtp-debug' || // Teste debug email
+        $currentRoute === '/teste-resend-debug' // Teste debug resend
         );
 
     if (!$isPublicAuthRoute) {
