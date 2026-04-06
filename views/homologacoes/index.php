@@ -158,10 +158,9 @@
     </div>
 </div>
 <!-- Modal de Cancelamento -->
-<div id="cancelModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeCancelModal()"></div>
-    <div class="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden transform transition-all">
-        <div class="p-6">
+<div id="cancelModal" class="modal-overlay">
+    <div class="modal-container max-w-md">
+        <div class="modal-body p-6">
             <div class="w-16 h-16 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-full flex items-center justify-center mb-4 mx-auto">
                 <i class="ph-fill ph-warning text-3xl"></i>
             </div>
@@ -213,30 +212,22 @@
 </div>
 
 <script>
-// Usando definições globais para compatibilidade absoluta
+// Inicializar modal com a classe utilitária do sistema SGQ
+const modalRef = new SGQModal('cancelModal');
+
 function openCancelModal(id, code) {
-    console.log('Abrindo modal para:', id, code);
-    const modal = document.getElementById('cancelModal');
-    if (modal) {
-        document.getElementById('cancelId').value = id;
-        document.getElementById('cancelCode').innerText = code;
-        modal.classList.add('active'); // Necessario para o modal-styles.css global
-        modal.classList.remove('hidden');
-    } else {
-        console.error('Modal de cancelamento não encontrado!');
-    }
+    console.log('Abrindo modal padronizado para:', id, code);
+    document.getElementById('cancelId').value = id;
+    document.getElementById('cancelCode').innerText = code;
+    modalRef.open();
 }
 
 function closeCancelModal() {
-    const modal = document.getElementById('cancelModal');
-    if (modal) {
-        modal.classList.remove('active');
-        modal.classList.add('hidden');
-    }
+    modalRef.close();
 }
 
 function processCancellation() {
-    closeCancelModal();
+    modalRef.close();
     const overlay = document.getElementById('notifOverlay');
     if (overlay) overlay.classList.remove('hidden');
     
@@ -245,7 +236,7 @@ function processCancellation() {
     }, 800);
 }
 
-// Também expõe no window
+// Também expõe no window para compatibilidade com onclicks
 window.openCancelModal = openCancelModal;
 window.closeCancelModal = closeCancelModal;
 window.processCancellation = processCancellation;

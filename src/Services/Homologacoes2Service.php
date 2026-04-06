@@ -7,8 +7,18 @@ use Throwable;
 
 class Homologacoes2Service
 {
+    private ?EmailService $emailService = null;
+
     public function __construct(private PDO $db)
     {
+    }
+
+    private function getEmailService(): EmailService
+    {
+        if ($this->emailService === null) {
+            $this->emailService = new EmailService();
+        }
+        return $this->emailService;
     }
 
     public function getCurrentUser(int $userId): ?array
@@ -428,6 +438,37 @@ class Homologacoes2Service
             $this->registrarHistorico($id, 'criada', null, 'aguardando_chegada', 'Homologação aberta no sistema.', $userId);
 
             $this->db->commit();
+
+            // --- NOTIFICAÇÃO POR EMAIL ---
+            try {
+                $emails = [];
+                
+                // 1. Emails dos Responsáveis Selecionados
+                if (!empty($responsaveis)) {
+                    $emails = array_merge($emails, $this->getUsersEmails($responsaveis));
+                }
+
+                // 2. Emails Comerciais (Vendedor e Supervisor)
+                if (!empty($input['vendedor_email'])) $emails[] = trim($input['vendedor_email']);
+                if (!empty($input['supervisor_email'])) $emails[] = trim($input['supervisor_email']);
+
+                // 3. Email da Logística (se solicitado)
+                if (!empty($input['notificar_envolvidos'])) {
+                    $emails = array_merge($emails, $this->getLogisticaEmails());
+                }
+
+                $emails = array_values(array_unique(array_filter($emails)));
+
+                if (!empty($emails)) {
+                    $homologacaoData = $this->getHomologacaoBase($id);
+                    if ($homologacaoData) {
+                        $this->getEmailService()->sendHomologacaoNotification($homologacaoData, $emails);
+                    }
+                }
+            } catch (Throwable $e) {
+                // Logar erro mas não falhar a criação
+                error_log("Erro ao enviar email de homologação: " . $e->getMessage());
+            }
 
             return $id;
         } catch (Throwable $e) {
@@ -1462,5 +1503,27 @@ class Homologacoes2Service
         }
 
         return $supportsBlob;
+    }
+
+    /**
+     * Busca emails de uma lista de IDs de usuários
+     */
+    private function getUsersEmails(array $userIds): array
+    {
+        if (empty($userIds)) return [];
+        $placeholders = implode(',', array_fill(0, count($userIds), '?'));
+        $stmt = $this->db->prepare("SELECT email FROM users WHERE id IN ($placeholders) AND email IS NOT NULL AND email != ''");
+        $stmt->execute($userIds);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    /**
+     * Busca emails de usuários do setor Logística
+     */
+    private function getLogisticaEmails(): array
+    {
+        $stmt = $this->db->prepare("SELECT email FROM users WHERE (setor LIKE '%logistica%' OR department LIKE '%logistica%') AND email IS NOT NULL AND email != ''");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 }

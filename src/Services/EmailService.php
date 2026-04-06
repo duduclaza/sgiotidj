@@ -2007,4 +2007,103 @@ Este é um email automático do Sistema SGQ OTI DJ
 Não responda este email - ele é enviado automaticamente
         ";
     }
+
+    /**
+     * Enviar notificação de nova homologação
+     */
+    public function sendHomologacaoNotification(array $homologacao, array $recipients): bool
+    {
+        if (empty($recipients)) {
+            return false;
+        }
+
+        $subject = "📋 Nova Homologação Registrada: {$homologacao['codigo']} - {$homologacao['titulo']}";
+        $body = $this->buildHomologacaoEmailTemplate($homologacao);
+        
+        $altBody = "NOVA HOMOLOGAÇÃO REGISTRADA - SGQ OTI DJ\n\n";
+        $altBody .= "Código: {$homologacao['codigo']}\n";
+        $altBody .= "Título: {$homologacao['titulo']}\n";
+        $altBody .= "Modelo: {$homologacao['modelo']}\n";
+        $altBody .= "Fornecedor: {$homologacao['fornecedor_nome']}\n";
+        $altBody .= "Status: Aguardando Chegada\n\n";
+        $altBody .= "Acesse o sistema para ver os detalhes completos.";
+        
+        return $this->send($recipients, $subject, $body, $altBody);
+    }
+
+    private function buildHomologacaoEmailTemplate(array $homologacao): string
+    {
+        $appUrl = $_ENV['APP_URL'] ?? 'https://djbr.sgqoti.com.br';
+        $dataPrevista = !empty($homologacao['data_prevista_chegada']) ? date('d/m/Y', strtotime($homologacao['data_prevista_chegada'])) : 'Não informada';
+        
+        return "
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8fafc; }
+                .container { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border: 1px solid #e2e8f0; }
+                .header { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); padding: 32px; text-align: center; color: white; }
+                .header h1 { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em; }
+                .header p { margin: 8px 0 0; color: #94a3b8; font-size: 14px; font-weight: 500; }
+                .content { padding: 32px; }
+                .badge { display: inline-block; padding: 6px 12px; border-radius: 9999px; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 24px; background: #fef3c7; color: #92400e; }
+                .info-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 32px; }
+                .info-item { padding: 16px; background: #f1f5f9; border-radius: 12px; }
+                .info-label { display: block; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
+                .info-value { display: block; font-size: 15px; font-weight: 600; color: #1e293b; }
+                .description { margin-bottom: 32px; padding: 20px; border-left: 4px solid #3b82f6; background: #eff6ff; border-radius: 0 12px 12px 0; }
+                .description h3 { margin: 0 0 8px; font-size: 14px; color: #1e40af; }
+                .description p { margin: 0; font-size: 14px; color: #1e3a8a; }
+                .footer { padding: 24px; text-align: center; background: #f8fafc; border-top: 1px solid #e2e8f0; }
+                .footer p { margin: 0; font-size: 12px; color: #94a3b8; }
+                .btn { display: inline-block; width: 100%; padding: 14px; background: #3b82f6; color: white !important; text-decoration: none; border-radius: 10px; font-weight: 700; text-align: center; margin-top: 16px; box-sizing: border-box; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h1>SGQ OTI DJ</h1>
+                    <p>SISTEMA DE GESTÃO DA QUALIDADE</p>
+                </div>
+                <div class='content'>
+                    <div class='badge'>NOVA HOMOLOGAÇÃO REGISTRADA</div>
+                    <h2 style='margin: 0 0 24px; color: #1e293b; font-size: 20px;'>{$homologacao['titulo']}</h2>
+                    
+                    <div class='info-grid'>
+                        <div class='info-item'>
+                            <span class='info-label'>Código do Processo</span>
+                            <span class='info-value'>{$homologacao['codigo']}</span>
+                        </div>
+                        <div class='info-item'>
+                            <span class='info-label'>Modelo / Referência</span>
+                            <span class='info-value'>{$homologacao['modelo']}</span>
+                        </div>
+                        <div class='info-item'>
+                            <span class='info-label'>Fornecedor</span>
+                            <span class='info-value'>{$homologacao['fornecedor_nome']}</span>
+                        </div>
+                        <div class='info-item'>
+                            <span class='info-label'>Previsão de Chegada</span>
+                            <span class='info-value'>{$dataPrevista}</span>
+                        </div>
+                    </div>
+
+                    <div class='description'>
+                        <h3>📝 Descrição do Objetivo:</h3>
+                        <p>{$homologacao['descricao']}</p>
+                    </div>
+
+                    <a href='{$appUrl}/homologacoes/{$homologacao['id']}' class='btn'>🔗 Ver Detalhes no Sistema</a>
+                </div>
+                <div class='footer'>
+                    <p>© " . date('Y') . " - Sistema SGQ OTI DJ</p>
+                    <p>Este é um e-mail automático, não responda.</p>
+                </div>
+            </div>
+        </body>
+        </html>";
+    }
 }
