@@ -1427,4 +1427,153 @@ class Amostragens2Controller
             echo "Erro ao carregar página";
         }
     }
+
+    /**
+     * Extrai dados de um arquivo XML de NF-e
+     */
+    public function parseXml(): void
+    {
+        header('Content-Type: application/json');
+
+        try {
+            if (empty($_FILES['xml_file']['tmp_name'])) {
+                echo json_encode(['success' => false, 'message' => 'Nenhum arquivo enviado']);
+                return;
+            }
+
+            $xmlPath = $_FILES['xml_file']['tmp_name'];
+            $xml = simplexml_load_file($xmlPath);
+
+            if (!$xml) {
+                echo json_encode(['success' => false, 'message' => 'Erro ao ler arquivo XML']);
+                return;
+            }
+
+            // Registrar namespaces da NF-e
+            $namespaces = $xml->getNamespaces(true);
+            $nfeNs = $namespaces[''] ?? $namespaces['nfe'] ?? 'http://www.portalfiscal.inf.br/nfe';
+            $xml->registerXPathNamespace('nfe', $nfeNs);
+
+            // Extrair dados básicos
+            $nNF = (string)$xml->xpath('//nfe:ide/nfe:nNF')[0] ?? '';
+            $emitCNPJ = (string)$xml->xpath('//nfe:emit/nfe:CNPJ')[0] ?? '';
+            $emitNome = (string)$xml->xpath('//nfe:emit/nfe:xNome')[0] ?? '';
+
+            // Tentar encontrar fornecedor pelo CNPJ ou Nome
+            $fornecedorEncontrado = null;
+            if (!empty($emitCNPJ)) {
+                $stmt = $this->db->prepare('SELECT id, nome FROM fornecedores WHERE cnpj = :cnpj OR nome LIKE :nome LIMIT 1');
+                $stmt->execute([
+                    ':cnpj' => $emitCNPJ,
+                    ':nome' => '%' . $emitNome . '%'
+                ]);
+                $fornecedorEncontrado = $stmt->fetch(PDO::FETCH_ASSOC);
+            }
+
+            // Extrair Itens
+            $itens = [];
+            $detalhes = $xml->xpath('//nfe:det');
+
+            foreach ($detalhes as $det) {
+                if (isset($det->prod)) {
+                    $prod = $det->prod;
+                    $itens[] = [
+                        'nItem' => (string)$det['nItem'],
+                        'codigo' => (string)$prod->cProd,
+                        'nome' => (string)$prod->xProd,
+                        'quantidade' => (float)$prod->qCom,
+                        'unidade' => (string)$prod->uCom
+                    ];
+                }
+            }
+
+            echo json_encode([
+                'success' => true,
+                'data' => [
+                    'numero_nf' => $nNF,
+                    'fornecedor' => [
+                        'cnpj' => $emitCNPJ,
+                        'nome' => $emitNome,
+                        'id' => $fornecedorEncontrado['id'] ?? null,
+                        'sistema_nome' => $fornecedorEncontrado['nome'] ?? null
+                    ],
+                    'itens' => $itens
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            error_log("Erro ao processar XML: " . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Erro interno ao processar XML: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Salva múltiplas amostragens vindas da importação XML
+     */
+    public function storeImported(): void
+    {
+        header('Content-Type: application/json');
+
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+
+            if (!$data || empty($data['items'])) {
+                echo json_encode(['success' => false, 'message' => 'Dados inválidos ou lista de itens vazia']);
+                return;
+            }
+
+            $userId = $_SESSION['user_id'];
+            $filialId = $_SESSION['user_filial_id'] ?? 1; // Fallback para filial 1
+            
+            $fornecedorId = (int)$data['fornecedor_id'];
+            $tipoProduto = $data['tipo_produto'];
+            $numeroNf = $data['numero_nf'];
+            $responsaveis = $data['responsaveis'] ?? [];
+            $responsaveisStr = implode(',', $responsaveis);
+
+            $this->db->beginTransaction();
+
+            $stmt = $this->db->prepare('
+                INSERT INTO amostragens_2 (
+                    user_id, filial_id, numero_nf, tipo_produto, 
+                    produto_id, codigo_produto, nome_produto,
+                    quantidade_recebida, fornecedor_id, responsaveis, 
+                    status_final, created_at
+                ) VALUES (
+                    :user_id, :filial_id, :numero_nf, :tipo_produto, 
+                    :produto_id, :codigo_produto, :nome_produto,
+                    :quantidade_recebida, :fornecedor_id, :responsaveis, 
+                    "Pendente", NOW()
+                )
+            ');
+
+            $importados = 0;
+            foreach ($data['items'] as $item) {
+                $stmt->execute([
+                    ':user_id' => $userId,
+                    ':filial_id' => $filialId,
+                    ':numero_nf' => $numeroNf,
+                    ':tipo_produto' => $tipoProduto,
+                    ':produto_id' => (int)$item['produto_id'],
+                    ':codigo_produto' => $item['codigo'],
+                    ':nome_produto' => $item['nome'],
+                    ':quantidade_recebida' => (int)$item['quantidade'],
+                    ':fornecedor_id' => $fornecedorId,
+                    ':responsaveis' => $responsaveisStr
+                ]);
+                $importados++;
+            }
+
+            $this->db->commit();
+
+            echo json_encode(['success' => true, 'message' => "{$importados} itens importados com sucesso!", 'redirect' => '/amostragens-2']);
+
+        } catch (\Exception $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            error_log("Erro na importação em lote: " . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Erro ao salvar importação: ' . $e->getMessage()]);
+        }
+    }
 }

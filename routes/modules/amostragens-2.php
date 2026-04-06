@@ -31,7 +31,12 @@ $router->post('/amostragens-2/update-status', [Amostragens2Controller::class, 'u
 $router->post('/amostragens-2/delete', [Amostragens2Controller::class, 'delete']);
 
 // ===== EMAIL E RELATÓRIOS =====
-
+ 
 $router->post('/amostragens-2/enviar-email', [Amostragens2Controller::class, 'enviarEmailDetalhes']);
 $router->get('/amostragens-2/export', [Amostragens2Controller::class, 'exportExcel']);
 $router->get('/amostragens-2/graficos', [Amostragens2Controller::class, 'graficos']);
+
+// ===== IMPORTAÇÃO XML =====
+
+$router->post('/amostragens-2/import-xml/parse', [Amostragens2Controller::class, 'parseXml']);
+$router->post('/amostragens-2/import-xml/store', [Amostragens2Controller::class, 'storeImported']);

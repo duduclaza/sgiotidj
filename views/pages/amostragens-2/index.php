@@ -5,6 +5,8 @@ $usuarios = $usuarios ?? [];
 $filiais = $filiais ?? [];
 $fornecedores = $fornecedores ?? [];
 $toners = $toners ?? [];
+$maquinas = $maquinas ?? [];
+$pecas = $pecas ?? [];
 
 /**
  * Função para construir URL de paginação mantendo os filtros
@@ -20,11 +22,18 @@ function construirUrlPaginacao($pagina) {
   <!-- Header -->
   <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">🔬 Amostragens 2.0</h1>
-    <button onclick="novaAmostragem()" 
-            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
-      <span>➕</span>
-      <span>Nova Amostragem</span>
-    </button>
+    <div class="flex items-center gap-3">
+      <button onclick="abrirModalImportXml()" 
+              class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+        <span>📄</span>
+        <span>Importar XML</span>
+      </button>
+      <button onclick="novaAmostragem()" 
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+        <span>➕</span>
+        <span>Nova Amostragem</span>
+      </button>
+    </div>
   </div>
 
   <!-- Formulário Inline (Hidden por padrão) -->
@@ -734,7 +743,112 @@ function construirUrlPaginacao($pagina) {
 
 </div>
 
-<!-- ========== MODAL: PERSONALIZAR COLUNAS ========== -->
+<!-- ========== MODAL: IMPORTAR XML ========== -->
+<div id="modal-import-xml" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden p-4 animate-in fade-in zoom-in duration-200">
+  <div class="bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col max-h-[90vh]">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700 bg-slate-800/50">
+      <div>
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <span>📄</span> Importar Amostragens via XML
+        </h2>
+        <p class="text-xs text-gray-400 mt-1">Siga os passos para importar múltiplos itens de uma NF-e.</p>
+      </div>
+      <button onclick="fecharModalImportXml()" class="text-gray-400 hover:text-white transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Conteúdo -->
+    <div class="flex-1 overflow-y-auto p-6 space-y-8">
+      <!-- Passo 1: Upload de Arquivo -->
+      <div id="import-xml-step-1" class="space-y-4">
+        <div class="p-8 border-2 border-dashed border-slate-600 rounded-2xl text-center bg-slate-900/30 hover:border-blue-500/50 transition-all cursor-pointer group" onclick="document.getElementById('xml_file_input').click()">
+          <input type="file" id="xml_file_input" class="hidden" accept=".xml" onchange="processarArquivoXml(this)">
+          <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">📄</div>
+          <h3 class="text-lg font-semibold text-white">Selecione o arquivo XML da NF-e</h3>
+          <p class="text-sm text-gray-400">Clique para buscar ou arraste o arquivo aqui (Apenas .xml)</p>
+        </div>
+      </div>
+
+      <!-- Passo 2: Mapeamento e Configuração (Hidden inicialmente) -->
+      <div id="import-xml-step-2" class="hidden space-y-6">
+        <!-- Info da NF -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-slate-900/50 rounded-xl border border-slate-700">
+          <div>
+            <label class="text-[10px] uppercase font-bold text-slate-500 block mb-1">Número da NF</label>
+            <p id="xml-nf-numero" class="text-lg font-mono font-bold text-blue-400">-</p>
+          </div>
+          <div class="md:col-span-2">
+            <label class="text-[10px] uppercase font-bold text-slate-500 block mb-1">Fornecedor no XML</label>
+            <p id="xml-fornecedor-nome" class="text-lg font-semibold text-white truncate">-</p>
+          </div>
+        </div>
+
+        <!-- Configurações Globais -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-200 mb-1">Mapear Para Fornecedor *</label>
+            <select id="xml-mapping-fornecedor" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white">
+              <option value="">Selecione...</option>
+              <?php foreach ($fornecedores as $forn): ?>
+                <option value="<?= $forn['id'] ?>"><?= e($forn['nome']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-200 mb-1">Tipo de Produto *</label>
+            <select id="xml-mapping-tipo" onchange="limparMapeamentosProdutos()" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white">
+              <option value="Toner">Toner</option>
+              <option value="Peça">Peça</option>
+              <option value="Máquina">Máquina</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-200 mb-1">Responsáveis *</label>
+            <select id="xml-mapping-responsaveis" multiple class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-xs h-[38px] overflow-y-auto">
+              <?php foreach ($usuarios as $user): ?>
+                <option value="<?= $user['id'] ?>"><?= e($user['name']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+        </div>
+
+        <!-- Tabela de Itens -->
+        <div class="space-y-3">
+          <div class="flex justify-between items-end">
+            <h3 class="text-sm font-bold text-slate-300 uppercase tracking-widest">Itens do XML</h3>
+            <p class="text-[10px] text-slate-500">Selecione os itens para importar e mapeie com o cadastro.</p>
+          </div>
+          <div class="border border-slate-700 rounded-xl overflow-hidden">
+            <table class="w-full text-xs text-left">
+              <thead class="bg-slate-900/50 text-slate-400 font-bold border-b border-slate-700">
+                <tr>
+                  <th class="px-4 py-3 w-10"><input type="checkbox" checked onchange="toggleTodosItensXml(this.checked)"></th>
+                  <th class="px-4 py-3">Item (XML)</th>
+                  <th class="px-4 py-3">Qtd</th>
+                  <th class="px-4 py-3">Mapear com Produto do Sistema</th>
+                </tr>
+              </thead>
+              <tbody id="xml-itens-lista" class="divide-y divide-slate-700 bg-slate-800/20">
+                <!-- Populado via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="px-6 py-4 border-t border-slate-700 bg-slate-900/50 flex justify-between items-center mr-0">
+      <button onclick="fecharModalImportXml()" class="px-6 py-2 text-sm text-slate-400 hover:text-white transition-colors">Cancelar</button>
+      <div class="flex gap-2">
+        <button id="btn-voltar-xml" onclick="voltarPassoXml()" class="hidden px-6 py-2 bg-slate-700 text-white rounded-xl hover:bg-slate-600 transition-colors">Voltar</button>
+        <button id="btn-importar-xml" onclick="confirmarImportacaoXml()" class="hidden px-8 py-2 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-900/20 transition-all">Importar Selecionados</button>
+      </div>
+    </div>
+  </div>
+</div>
 <div id="modal-colunas" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
   <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-xl transition-colors">
     <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700">
@@ -1946,4 +2060,303 @@ function saveColumnWidths() {
   
   localStorage.setItem(COL_WIDTHS_KEY, JSON.stringify(widths));
 }
+
+// ========== LOGICA DE IMPORTAÇÃO XML ==========
+
+let xmlDataOriginal = null;
+
+function abrirModalImportXml() {
+  document.getElementById('modal-import-xml').classList.remove('hidden');
+  document.getElementById('import-xml-step-1').classList.remove('hidden');
+  document.getElementById('import-xml-step-2').classList.add('hidden');
+  document.getElementById('btn-voltar-xml').classList.add('hidden');
+  document.getElementById('btn-importar-xml').classList.add('hidden');
+}
+
+function fecharModalImportXml() {
+  document.getElementById('modal-import-xml').classList.add('hidden');
+  // Reset form
+  document.getElementById('xml_file_input').value = '';
+}
+
+function voltarPassoXml() {
+  document.getElementById('import-xml-step-1').classList.remove('hidden');
+  document.getElementById('import-xml-step-2').classList.add('hidden');
+  document.getElementById('btn-voltar-xml').classList.add('hidden');
+  document.getElementById('btn-importar-xml').classList.add('hidden');
+}
+
+async function processarArquivoXml(input) {
+  if (!input.files || !input.files[0]) return;
+
+  const formData = new FormData();
+  formData.append('xml_file', input.files[0]);
+
+  mostrarToast('⏳ Processando XML...', 'info');
+
+  try {
+    const response = await fetch('/amostragens-2/import-xml/parse', {
+      method: 'POST',
+      body: formData
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      xmlDataOriginal = result.data;
+      renderizarCapturaXml(result.data);
+      
+      // Mudar passo
+      document.getElementById('import-xml-step-1').classList.add('hidden');
+      document.getElementById('import-xml-step-2').classList.remove('hidden');
+      document.getElementById('btn-voltar-xml').classList.remove('hidden');
+      document.getElementById('btn-importar-xml').classList.remove('hidden');
+      
+      mostrarToast('✅ XML lido com sucesso!', 'success');
+    } else {
+      mostrarToast('❌ ' + result.message, 'error');
+    }
+  } catch (error) {
+    console.error('Erro ao processar XML:', error);
+    mostrarToast('❌ Erro de conexão ao processar XML', 'error');
+  }
+}
+
+function renderizarCapturaXml(data) {
+  document.getElementById('xml-nf-numero').textContent = data.numero_nf || 'Não encontrada';
+  document.getElementById('xml-fornecedor-nome').textContent = data.fornecedor.nome || 'Não encontrado';
+  
+  // Pre-selecionar fornecedor se encontrado
+  if (data.fornecedor.id) {
+    document.getElementById('xml-mapping-fornecedor').value = data.fornecedor.id;
+  }
+
+  const tbody = document.getElementById('xml-itens-lista');
+  tbody.innerHTML = '';
+
+  data.itens.forEach((item, index) => {
+    const tr = document.createElement('tr');
+    tr.className = 'hover:bg-slate-700/30 transition-colors';
+    tr.innerHTML = `
+      <td class="px-4 py-3">
+        <input type="checkbox" class="xml-item-check" checked data-index="${index}">
+      </td>
+      <td class="px-4 py-3">
+        <div class="font-bold text-white">${item.codigo}</div>
+        <div class="text-slate-400 max-w-xs truncate" title="${item.nome}">${item.nome}</div>
+      </td>
+      <td class="px-4 py-3 font-mono text-blue-400 font-bold">
+        ${item.quantidade} <span class="text-[9px] text-slate-500 uppercase">${item.unidade}</span>
+      </td>
+      <td class="px-4 py-3">
+        <div class="relative">
+          <input type="text" 
+                 placeholder="Buscar produto no sistema..." 
+                 onkeyup="buscarProdutoMapeamento(this, ${index})"
+                 class="w-full bg-slate-700 border border-slate-600 rounded-lg px-2 py-1.5 text-white focus:ring-1 focus:ring-blue-500 text-xs">
+          <div id="results-${index}" class="absolute left-0 right-0 mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-xl z-50 hidden max-h-40 overflow-y-auto">
+          </div>
+          <input type="hidden" id="mapped-id-${index}" value="">
+          <input type="hidden" id="mapped-nome-${index}" value="">
+          <input type="hidden" id="mapped-codigo-${index}" value="">
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+    
+    // Tentar auto-mapear se detectar código similar
+    autoMapearItem(item.codigo, index);
+  });
+}
+
+function toggleTodosItensXml(checked) {
+  document.querySelectorAll('.xml-item-check').forEach(cb => cb.checked = checked);
+}
+
+function limparMapeamentosProdutos() {
+  // Se mudar o tipo global, limpa os IDs mapeados pois a tabela de busca mudou
+  document.querySelectorAll('input[id^="mapped-id-"]').forEach(input => input.value = '');
+  document.querySelectorAll('input[id^="mapped-nome-"]').forEach(input => input.value = '');
+  document.querySelectorAll('input[id^="mapped-codigo-"]').forEach(input => {
+    const index = input.id.replace('mapped-codigo-', '');
+    input.closest('td').querySelector('input[type="text"]').value = '';
+    input.value = '';
+  });
+}
+
+/**
+ * Busca produtos dinamicamente baseado no tipo selecionado globalmente
+ */
+async function buscarProdutoMapeamento(input, index) {
+  const query = input.value.trim();
+  const resultsDiv = document.getElementById(`results-${index}`);
+  const tipo = document.getElementById('xml-mapping-tipo').value;
+
+  if (query.length < 2) {
+    resultsDiv.classList.add('hidden');
+    return;
+  }
+
+  // Usar a mesma lógica de filtragem que já existe no sistema mas adaptada para o modal
+  // NOTA: No Amostragens2Controller::index, os produtos já vêm carregados em arrays JS.
+  // Vou usar esses arrays já injetados na página para busca local rápida.
+
+  let baseArray = [];
+  if (tipo === 'Toner') baseArray = window.tonersData || [];
+  else if (tipo === 'Máquina') baseArray = window.maquinasData || [];
+  else if (tipo === 'Peça') baseArray = window.pecasData || [];
+
+  const filtrados = baseArray.filter(p => 
+    p.codigo.toLowerCase().includes(query.toLowerCase()) || 
+    p.nome.toLowerCase().includes(query.toLowerCase())
+  ).slice(0, 5); // Limitar a 5 resultados
+
+  if (filtrados.length > 0) {
+    resultsDiv.innerHTML = filtrados.map(p => `
+      <div onclick="selecionarProdutoMapeamento(${index}, '${p.id}', '${p.codigo.replace(/'/g, "\\'")}', '${p.nome.replace(/'/g, "\\'")}')" 
+           class="px-3 py-2 hover:bg-slate-700 cursor-pointer border-b border-slate-700 last:border-0">
+        <div class="font-bold text-blue-400 text-[10px]">${p.codigo}</div>
+        <div class="text-white text-[11px] truncate">${p.nome}</div>
+      </div>
+    `).join('');
+    resultsDiv.classList.remove('hidden');
+  } else {
+    resultsDiv.innerHTML = '<div class="px-3 py-2 text-slate-500 italic text-[10px]">Nenhum produto encontrado</div>';
+    resultsDiv.classList.remove('hidden');
+  }
+}
+
+function selecionarProdutoMapeamento(index, id, codigo, nome) {
+  const resultsDiv = document.getElementById(`results-${index}`);
+  const inputBusca = resultsDiv.closest('td').querySelector('input[type="text"]');
+  const inputId = document.getElementById(`mapped-id-${index}`);
+  const inputNome = document.getElementById(`mapped-nome-${index}`);
+  const inputCodigo = document.getElementById(`mapped-codigo-${index}`);
+
+  inputBusca.value = `[${codigo}] ${nome}`;
+  inputId.value = id;
+  inputNome.value = nome;
+  inputCodigo.value = codigo;
+  
+  resultsDiv.classList.add('hidden');
+  inputBusca.classList.add('border-green-500/50', 'bg-green-900/10');
+}
+
+/**
+ * Tenta encontrar automaticamente um produto no sistema
+ */
+function autoMapearItem(codigoXml, index) {
+  const tipo = document.getElementById('xml-mapping-tipo').value;
+  let baseArray = [];
+  if (tipo === 'Toner') baseArray = window.tonersData || [];
+  else if (tipo === 'Máquina') baseArray = window.maquinasData || [];
+  else if (tipo === 'Peça') baseArray = window.pecasData || [];
+
+  // Busca exata pelo código
+  const match = baseArray.find(p => p.codigo.trim() === codigoXml.trim());
+  if (match) {
+    selecionarProdutoMapeamento(index, match.id, match.codigo, match.nome);
+  }
+}
+
+async function confirmarImportacaoXml() {
+  const fornecedorId = document.getElementById('xml-mapping-fornecedor').value;
+  const tipoProduto = document.getElementById('xml-mapping-tipo').value;
+  const responsaveis = Array.from(document.getElementById('xml-mapping-responsaveis').selectedOptions).map(o => o.value);
+  const numeroNf = xmlDataOriginal.numero_nf;
+
+  if (!fornecedorId || responsaveis.length === 0) {
+    mostrarToast('⚠️ Selecione o fornecedor e ao menos um responsável', 'warning');
+    return;
+  }
+
+  const itemsChecks = document.querySelectorAll('.xml-item-check:checked');
+  const itemsMapeados = [];
+
+  let erroMapeamento = false;
+  itemsChecks.forEach(cb => {
+    const index = cb.dataset.index;
+    const prodId = document.getElementById(`mapped-id-${index}`).value;
+    const prodNome = document.getElementById(`mapped-nome-${index}`).value;
+    const prodCodigo = document.getElementById(`mapped-codigo-${index}`).value;
+    
+    if (!prodId) {
+      erroMapeamento = true;
+      cb.closest('tr').classList.add('bg-red-900/10');
+    } else {
+      itemsMapeados.push({
+        produto_id: prodId,
+        codigo: prodCodigo,
+        nome: prodNome,
+        quantidade: xmlDataOriginal.itens[index].quantidade
+      });
+    }
+  });
+
+  if (erroMapeamento) {
+    mostrarToast('❌ Alguns itens selecionados não foram mapeados com produtos do sistema', 'error');
+    return;
+  }
+
+  if (itemsMapeados.length === 0) {
+    mostrarToast('⚠️ Selecione pelo menos um item para importar', 'warning');
+    return;
+  }
+
+  btnStatus('btn-importar-xml', 'loading');
+
+  try {
+    const response = await fetch('/amostragens-2/import-xml/store', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fornecedor_id: fornecedorId,
+        tipo_produto: tipoProduto,
+        responsaveis: responsaveis,
+        numero_nf: numeroNf,
+        items: itemsMapeados
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      mostrarToast('✅ ' + result.message, 'success');
+      setTimeout(() => window.location.reload(), 1500);
+    } else {
+      mostrarToast('❌ ' + result.message, 'error');
+      btnStatus('btn-importar-xml', 'reset');
+    }
+  } catch (error) {
+    console.error('Erro na importação:', error);
+    mostrarToast('❌ Erro de conexão ao salvar importação', 'error');
+    btnStatus('btn-importar-xml', 'reset');
+  }
+}
+
+// Injetar dados de produtos para busca rápida no modal
+// (Isso deve ser colocado no topo do script ou onde as variáveis PHP estão disponíveis)
+window.tonersData = <?= json_encode($toners) ?>;
+window.maquinasData = <?= json_encode($maquinas) ?>;
+window.pecasData = <?= json_encode($pecas) ?>;
+
+
+function btnStatus(id, status) {
+  const btn = document.getElementById(id);
+  if (status === 'loading') {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="animate-spin mr-2">🔄</span> Processando...';
+  } else {
+    btn.disabled = false;
+    btn.textContent = 'Importar Selecionados';
+  }
+}
+
+// Fechar resultados de busca ao clicar fora
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.relative')) {
+    document.querySelectorAll('[id^="results-"]').forEach(div => div.classList.add('hidden'));
+  }
+});
+
 </script>
