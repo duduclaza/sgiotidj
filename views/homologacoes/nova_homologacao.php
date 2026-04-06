@@ -360,7 +360,7 @@ require __DIR__ . '/_subnav.php';
                 <button type="submit" class="flex items-center gap-2 text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-6 py-3 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 transition-colors shadow-sm">
                     <i class="ph-bold ph-check"></i> Abrir Processo Oficial
                 </button>
-                <a href="/homologacoes-2" class="text-slate-500 bg-white hover:bg-slate-100 focus:ring-4 focus:outline-none focus:ring-slate-200 rounded-lg border border-slate-200 text-sm font-medium px-6 py-3 hover:text-slate-900 focus:z-10 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600 dark:hover:text-white dark:hover:bg-slate-700 dark:focus:ring-slate-700 transition-colors shadow-sm">
+                <a href="/homologacoes" class="text-slate-500 bg-white hover:bg-slate-100 focus:ring-4 focus:outline-none focus:ring-slate-200 rounded-lg border border-slate-200 text-sm font-medium px-6 py-3 hover:text-slate-900 focus:z-10 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600 dark:hover:text-white dark:hover:bg-slate-700 dark:focus:ring-slate-700 transition-colors shadow-sm">
                     Cancelar
                 </a>
             </div>

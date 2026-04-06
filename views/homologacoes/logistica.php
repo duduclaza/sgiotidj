@@ -167,7 +167,7 @@ if ($u['perfil'] !== 'logistica' && $u['perfil'] !== 'admin' && $u['perfil'] !==
                         <?php if ($h['status'] === 'aguardando_chegada'): ?>
                             <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">Pendente</span>
                         <?php else: ?>
-                            <a href="/homologacoes-2/<?= $h['id'] ?>" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 transition-colors">Recebido <i class="ph ph-arrow-square-out ml-1"></i></a>
+                            <a href="/homologacoes/<?= $h['id'] ?>" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200 transition-colors">Recebido <i class="ph ph-arrow-square-out ml-1"></i></a>
                         <?php endif; ?>
                     </td>
                 </tr>

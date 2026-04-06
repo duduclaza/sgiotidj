@@ -99,7 +99,7 @@ if (empty($canCancelOrDelete)) {
                     </td>
                     <td class="px-6 py-4 text-right whitespace-nowrap">
                         <div class="flex items-center justify-end gap-2">
-                            <a href="/homologacoes-2/<?= $h['id'] ?>" class="text-primary-600 bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/30 dark:text-primary-400 dark:hover:bg-primary-800/50 rounded-lg p-2 transition-colors" title="Ver Relatório">
+                            <a href="/homologacoes/<?= $h['id'] ?>" class="text-primary-600 bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/30 dark:text-primary-400 dark:hover:bg-primary-800/50 rounded-lg p-2 transition-colors" title="Ver Relatório">
                                 <i class="ph-bold ph-eye text-lg"></i>
                             </a>
                             
@@ -128,7 +128,7 @@ if (empty($canCancelOrDelete)) {
             <h3 class="text-xl font-bold text-slate-800 dark:text-white text-center mb-2">Cancelar Homologação</h3>
             <p class="text-slate-500 dark:text-slate-400 text-sm text-center mb-6">Você está prestes a cancelar a <strong id="cancelCode"></strong>. Como deseja proceder?</p>
             
-            <form id="cancelForm" method="POST" action="">
+            <form id="cancelForm" method="POST" action="/homologacoes/monitoramento">
                 <input type="hidden" name="acao" value="cancelar_homologacao">
                 <input type="hidden" name="id" id="cancelId">
                 
@@ -208,8 +208,8 @@ document.querySelectorAll('button[title="Excluir/Cancelar Processo"]').forEach((
         event.preventDefault();
 
         const row = button.closest('tr');
-        const detailLink = row?.querySelector('a[href^="/homologacoes-2/"]');
-        const idMatch = detailLink?.getAttribute('href')?.match(/\/homologacoes-2\/(\d+)/);
+        const detailLink = row?.querySelector('a[href^="/homologacoes/"]');
+        const idMatch = detailLink?.getAttribute('href')?.match(/\/homologacoes\/(\d+)/);
         const code = row?.querySelector('td .font-semibold')?.textContent?.trim() || '';
 
         if (idMatch) {

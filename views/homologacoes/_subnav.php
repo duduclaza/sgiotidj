@@ -1,28 +1,28 @@
 <?php
 $perfisSidebar = [
     'compras' => [
-        ['url' => '/homologacoes-2', 'label' => 'Painel Geral', 'icon' => 'ph-chart-pie-slice'],
-        ['url' => '/homologacoes-2/nova', 'label' => 'Nova Homologação', 'icon' => 'ph-plus-circle'],
-        ['url' => '/homologacoes-2/monitoramento', 'label' => 'Monitorar Entregas', 'icon' => 'ph-magnifying-glass'],
-        ['url' => '/homologacoes-2/gerenciar', 'label' => 'Gerenciar', 'icon' => 'ph-gear'],
+        ['url' => '/homologacoes', 'label' => 'Painel Geral', 'icon' => 'ph-chart-pie-slice'],
+        ['url' => '/homologacoes/nova', 'label' => 'Nova Homologação', 'icon' => 'ph-plus-circle'],
+        ['url' => '/homologacoes/monitoramento', 'label' => 'Monitorar Entregas', 'icon' => 'ph-magnifying-glass'],
+        ['url' => '/homologacoes/gerenciar', 'label' => 'Gerenciar', 'icon' => 'ph-gear'],
     ],
     'logistica' => [
-        ['url' => '/homologacoes-2/logistica', 'label' => 'Painel Logística', 'icon' => 'ph-truck'],
+        ['url' => '/homologacoes/logistica', 'label' => 'Painel Logística', 'icon' => 'ph-truck'],
     ],
     'qualidade' => [
-        ['url' => '/homologacoes-2/minha-fila', 'label' => 'Minhas Homologações', 'icon' => 'ph-list-checks'],
-        ['url' => '/homologacoes-2/nova', 'label' => 'Nova Rehomologação', 'icon' => 'ph-plus-circle'],
+        ['url' => '/homologacoes/minha-fila', 'label' => 'Minhas Homologações', 'icon' => 'ph-list-checks'],
+        ['url' => '/homologacoes/nova', 'label' => 'Nova Rehomologação', 'icon' => 'ph-plus-circle'],
     ],
     'tecnico' => [
-        ['url' => '/homologacoes-2/minha-fila', 'label' => 'Minhas Homologações', 'icon' => 'ph-list-checks'],
+        ['url' => '/homologacoes/minha-fila', 'label' => 'Minhas Homologações', 'icon' => 'ph-list-checks'],
     ],
     'admin' => [
-        ['url' => '/homologacoes-2', 'label' => 'Painel Geral', 'icon' => 'ph-chart-pie-slice'],
-        ['url' => '/homologacoes-2/nova', 'label' => 'Nova Homologação', 'icon' => 'ph-plus-circle'],
-        ['url' => '/homologacoes-2/logistica', 'label' => 'Painel Logística', 'icon' => 'ph-truck'],
-        ['url' => '/homologacoes-2/minha-fila', 'label' => 'Minha Fila', 'icon' => 'ph-list-checks'],
-        ['url' => '/homologacoes-2/monitoramento', 'label' => 'Monitoramento', 'icon' => 'ph-magnifying-glass'],
-        ['url' => '/homologacoes-2/gerenciar', 'label' => 'Gerenciar', 'icon' => 'ph-gear'],
+        ['url' => '/homologacoes', 'label' => 'Painel Geral', 'icon' => 'ph-chart-pie-slice'],
+        ['url' => '/homologacoes/nova', 'label' => 'Nova Homologação', 'icon' => 'ph-plus-circle'],
+        ['url' => '/homologacoes/logistica', 'label' => 'Painel Logística', 'icon' => 'ph-truck'],
+        ['url' => '/homologacoes/minha-fila', 'label' => 'Minha Fila', 'icon' => 'ph-list-checks'],
+        ['url' => '/homologacoes/monitoramento', 'label' => 'Monitoramento', 'icon' => 'ph-magnifying-glass'],
+        ['url' => '/homologacoes/gerenciar', 'label' => 'Gerenciar', 'icon' => 'ph-gear'],
     ],
 ];
 

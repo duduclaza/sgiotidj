@@ -181,7 +181,6 @@ if ($userRole === 'super_admin' || $userRole === 'admin') {
               'precificacao-coleta-descartes' => ['label' => 'Precificação de Coleta', 'icon' => 'ph-currency-dollar'],
               'amostragens-2'             => ['label' => 'Amostragens 2.0',          'icon' => 'ph-flask'],
               'homologacoes'              => ['label' => 'Homologações',             'icon' => 'ph-traffic-cone'],
-              'homologacoes-2'            => ['label' => 'Homologações 2.0',         'icon' => 'ph-traffic-cone'],
               'certificados'              => ['label' => 'Certificados',             'icon' => 'ph-scroll'],
               'fmea'                      => ['label' => 'FMEA',                     'icon' => 'ph-trend-up'],
               'pops-e-its'                => ['label' => 'POPs e ITs',              'icon' => 'ph-books'],

@@ -641,7 +641,7 @@
     }
 
     function copiarLinkPublico(token) {
-        const url = window.location.origin + '/homologacoes-2/public/' + token;
+        const url = window.location.origin + '/homologacoes/public/' + token;
         navigator.clipboard.writeText(url).then(() => {
             alert("Link público copiado para a área de transferência!\nEnvie este link para quem fará os testes em campo.");
         }).catch(err => {

@@ -188,7 +188,7 @@ class Homologacoes2Controller
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$concluido) {
             try {
                 $this->service->submitPublicChecklist((string) $token, $_POST);
-                header('Location: /homologacoes-2/public/' . urlencode((string) $token) . '?sucesso=1');
+                header('Location: /homologacoes/public/' . urlencode((string) $token) . '?sucesso=1');
                 exit;
             } catch (\Throwable $e) {
                 http_response_code(500);

@@ -94,7 +94,7 @@ if ($u['perfil'] !== 'responsavel' && $u['perfil'] !== 'qualidade' && $u['perfil
                         <?php endif; ?>
                     </td>
                     <td class="px-5 py-3 text-right">
-                        <a href="/homologacoes-2/<?= $h['id'] ?>" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white <?= $h['status'] === 'em_homologacao' ? 'bg-primary-600 hover:bg-primary-700' : 'bg-slate-800 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600' ?> rounded-lg transition-colors shadow-sm">
+                        <a href="/homologacoes/<?= $h['id'] ?>" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white <?= $h['status'] === 'em_homologacao' ? 'bg-primary-600 hover:bg-primary-700' : 'bg-slate-800 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600' ?> rounded-lg transition-colors shadow-sm">
                             <i class="ph-bold ph-sign-in"></i> Entrar
                         </a>
                     </td>

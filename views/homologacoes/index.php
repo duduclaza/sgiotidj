@@ -65,7 +65,7 @@
                 <option value="Suprimento de Impressora" <?= $filtroTipo == 'Suprimento de Impressora' ? 'selected' : '' ?>>Suprimento</option>
                 <option value="Peça de Impressora" <?= $filtroTipo == 'Peça de Impressora' ? 'selected' : '' ?>>Peça</option>
             </select>
-            <a href="/homologacoes-2" class="text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white p-2">Limpar</a>
+            <a href="/homologacoes" class="text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white p-2">Limpar</a>
         </form>
     </div>
     
@@ -146,7 +146,7 @@
                                     <i class="ph-fill ph-trash text-xl group-hover:scale-110 transition-transform"></i>
                                 </button>
                             <?php endif; ?>
-                            <a href="/homologacoes-2/<?= $h['id'] ?>" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-lg transition-colors">
+                            <a href="/homologacoes/<?= $h['id'] ?>" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-lg transition-colors">
                                 Abrir
                             </a>
                         </div>
@@ -168,7 +168,7 @@
             <h3 class="text-xl font-bold text-slate-800 dark:text-white text-center mb-2">Cancelar Homologação</h3>
             <p class="text-slate-500 dark:text-slate-400 text-sm text-center mb-6">Você está prestes a cancelar a <strong id="cancelCode"></strong>. Como deseja proceder?</p>
             
-            <form id="cancelForm" method="POST" action="">
+            <form id="cancelForm" method="POST" action="/homologacoes">
                 <input type="hidden" name="acao" value="cancelar_homologacao">
                 <input type="hidden" name="id" id="cancelId">
                 
@@ -254,8 +254,8 @@ document.querySelectorAll('button[title="Excluir/Cancelar HomologaÃ§Ã£o"]').
         event.preventDefault();
 
         const row = button.closest('tr');
-        const detailLink = row?.querySelector('a[href^="/homologacoes-2/"]');
-        const idMatch = detailLink?.getAttribute('href')?.match(/\/homologacoes-2\/(\d+)/);
+        const detailLink = row?.querySelector('a[href^="/homologacoes/"]');
+        const idMatch = detailLink?.getAttribute('href')?.match(/\/homologacoes\/(\d+)/);
         const code = row?.querySelector('td .font-semibold')?.textContent?.trim() || '';
 
         if (idMatch) {
@@ -276,8 +276,8 @@ document.querySelectorAll('button[onclick*="openCancelModal"]').forEach((button)
         event.preventDefault();
 
         const row = button.closest('tr');
-        const detailLink = row?.querySelector('a[href^="/homologacoes-2/"]');
-        const idMatch = detailLink?.getAttribute('href')?.match(/\/homologacoes-2\/(\d+)/);
+        const detailLink = row?.querySelector('a[href^="/homologacoes/"]');
+        const idMatch = detailLink?.getAttribute('href')?.match(/\/homologacoes\/(\d+)/);
         const code = row?.querySelector('td .font-semibold')?.textContent?.trim() || '';
 
         if (idMatch) {
