@@ -48,16 +48,23 @@ class EmailService
     private function configureMailer(): void
     {
         try {
-            // Configurações do servidor SMTP (Hostinger) - FALLBACK
+            // Configurações baseadas no .env
             $this->mailer->isSMTP();
-            $this->mailer->Host       = 'smtp.hostinger.com';
+            $this->mailer->Host       = $this->env('MAIL_HOST', 'smtp.hostinger.com');
             $this->mailer->SMTPAuth   = true;
-            $this->mailer->Username   = 'suporte@djbr.sgqoti.com.br';
-            $this->mailer->Password   = 'Pandora@1989';
-            $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL (Porta 465)
-            $this->mailer->Port       = 465;
+            $this->mailer->Username   = $this->env('MAIL_USERNAME', 'suporte@sgqoti.com.br');
+            $this->mailer->Password   = $this->env('MAIL_PASSWORD', 'Pandora@1989');
             
-            // Timeout settings para melhor performance
+            $encryption = strtolower($this->env('MAIL_ENCRYPTION', 'ssl'));
+            if ($encryption === 'ssl' || $encryption === 'smtps') {
+                $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            } else {
+                $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            }
+            
+            $this->mailer->Port = (int)$this->env('MAIL_PORT', 465);
+            
+            // Timeout settings 
             $this->mailer->Timeout = 20;
             $this->mailer->SMTPOptions = array(
                 'ssl' => array(
@@ -67,15 +74,18 @@ class EmailService
                 )
             );
             
-            // Default sender
-            $this->mailer->setFrom('suporte@djbr.sgqoti.com.br', 'SGQ OTI DJ');
+            // Default sender (Priorizar resend_from se configurado)
+            $fromEmail = $this->env('MAIL_FROM_ADDRESS', $this->env('RESEND_FROM_EMAIL', 'suporte@sgqoti.com.br'));
+            $fromName = $this->env('MAIL_FROM_NAME', 'SGQ OTI DJ');
+            $this->mailer->setFrom($fromEmail, $fromName);
             
             // Content settings
             $this->mailer->isHTML(true);
             $this->mailer->CharSet = 'UTF-8';
             
-            // Debug desligado em produção
-            $this->mailer->SMTPDebug = 0;
+            // Debug (Usar APP_DEBUG para logar erros SMTP)
+            $isDebug = (strtolower($this->env('APP_DEBUG', 'false')) === 'true');
+            $this->mailer->SMTPDebug = $isDebug ? 2 : 0;
             $this->mailer->Debugoutput = function($str, $level) {
                 error_log("PHPMailer Debug [$level]: $str");
             };
@@ -97,10 +107,10 @@ class EmailService
      */
     public function send($to, string $subject, string $body, ?string $altBody = null, array $attachments = []): bool
     {
-        // Tentar Resend primeiro (se não houver anexos)
-        if ($this->useResend && $this->resendService && empty($attachments)) {
+        // Tentar Resend primeiro
+        if ($this->useResend && $this->resendService) {
             error_log("📧 Tentando enviar via Resend API...");
-            $result = $this->resendService->send($to, $subject, $body, $altBody);
+            $result = $this->resendService->send($to, $subject, $body, $altBody, $attachments);
             
             if ($result) {
                 return true;

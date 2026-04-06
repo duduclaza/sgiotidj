@@ -16,10 +16,10 @@ class ResendService
 
     public function __construct()
     {
-        // API Key do Resend
-        $this->apiKey = $this->env('RESEND_API_KEY', 're_KTUc33tE_HP8BGt11jhZmokDXrjznhnKK');
+        // Priorizar .env para API Key
+        $this->apiKey = $this->env('RESEND_API_KEY', '');
 
-        // Email do domínio verificado no Resend (tiuai.com.br)
+        // Email do domínio verificado no Resend
         $this->fromEmail = $this->env('RESEND_FROM_EMAIL', 'suporte@tiuai.com.br');
         $this->fromName = $this->env('MAIL_FROM_NAME', 'SGI ATLAS');
     }
@@ -49,9 +49,10 @@ class ResendService
      * @param string $subject Assunto
      * @param string $html Corpo HTML
      * @param string|null $text Corpo texto plano (opcional)
+     * @param array $attachments Array de caminhos de arquivos
      * @return bool
      */
-    public function send($to, string $subject, string $html, ?string $text = null): bool
+    public function send($to, string $subject, string $html, ?string $text = null, array $attachments = []): bool
     {
         $this->lastError = null;
 
@@ -80,6 +81,20 @@ class ResendService
 
             if ($text) {
                 $payload['text'] = $text;
+            }
+
+            // Adicionar anexos se houver
+            if (!empty($attachments)) {
+                $payload['attachments'] = [];
+                foreach ($attachments as $filePath) {
+                    if (file_exists($filePath)) {
+                        $content = base64_encode(file_get_contents($filePath));
+                        $payload['attachments'][] = [
+                            'filename' => basename($filePath),
+                            'content' => $content
+                        ];
+                    }
+                }
             }
 
             // Fazer requisição para API Resend
