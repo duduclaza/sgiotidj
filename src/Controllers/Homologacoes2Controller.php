@@ -21,7 +21,7 @@ class Homologacoes2Controller
         $u = $this->requireModuleAccess();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $this->handleCancelFromListing($u, '/homologacoes-2');
+            $this->handleCancelFromListing($u, '/homologacoes');
             return;
         }
 
@@ -33,7 +33,7 @@ class Homologacoes2Controller
 
         extract($dados, EXTR_SKIP);
         $title = 'Homologações 2.0 - Dashboard';
-        $viewFile = dirname(__DIR__, 2) . '/homologacoes_mock/views/index.php';
+        $viewFile = dirname(__DIR__, 2) . '/views/homologacoes/index.php';
         include dirname(__DIR__, 2) . '/views/layouts/main.php';
     }
 
@@ -51,7 +51,7 @@ class Homologacoes2Controller
                 $this->normalizeCreatePayload();
                 $id = $this->service->createHomologacao($_POST, (int) $_SESSION['user_id']);
                 $_SESSION['flash_message'] = ['type' => 'success', 'text' => "Homologação criada com sucesso! (ID: {$id})"];
-                redirect('/homologacoes-2/' . $id);
+                redirect('/homologacoes/' . $id);
             } catch (\Throwable $e) {
                 $_SESSION['flash_message'] = ['type' => 'danger', 'text' => $e->getMessage()];
             }
@@ -61,7 +61,7 @@ class Homologacoes2Controller
         $dados['responsaveisPorSetor'] = $this->groupResponsaveisBySetor($this->service->getActiveUsers());
         extract($dados, EXTR_SKIP);
         $title = 'Nova Homologação - Homologações 2.0';
-        $viewFile = dirname(__DIR__, 2) . '/homologacoes_mock/views/nova_homologacao.php';
+        $viewFile = dirname(__DIR__, 2) . '/views/homologacoes/nova_homologacao.php';
         include dirname(__DIR__, 2) . '/views/layouts/main.php';
     }
 
@@ -75,7 +75,7 @@ class Homologacoes2Controller
         $this->prepareViewContext($dados['homologacoes']);
 
         $title = 'Minha Fila - Homologações 2.0';
-        $viewFile = dirname(__DIR__, 2) . '/homologacoes_mock/views/minha_fila.php';
+        $viewFile = dirname(__DIR__, 2) . '/views/homologacoes/minha_fila.php';
         include dirname(__DIR__, 2) . '/views/layouts/main.php';
     }
 
@@ -91,7 +91,7 @@ class Homologacoes2Controller
                 $_SESSION['flash_message'] = ['type' => 'danger', 'text' => $e->getMessage()];
             }
 
-            redirect('/homologacoes-2/logistica');
+            redirect('/homologacoes/logistica');
         }
 
         $dados = $this->service->getLogisticsData();
@@ -99,7 +99,7 @@ class Homologacoes2Controller
         $this->prepareViewContext($homologacoes);
 
         $title = 'Painel Logística - Homologações 2.0';
-        $viewFile = dirname(__DIR__, 2) . '/homologacoes_mock/views/logistica.php';
+        $viewFile = dirname(__DIR__, 2) . '/views/homologacoes/logistica.php';
         include dirname(__DIR__, 2) . '/views/layouts/main.php';
     }
 
@@ -108,7 +108,7 @@ class Homologacoes2Controller
         $u = $this->requireModuleAccess();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $this->handleCancelFromListing($u, '/homologacoes-2/monitoramento');
+            $this->handleCancelFromListing($u, '/homologacoes/monitoramento');
             return;
         }
 
@@ -118,7 +118,7 @@ class Homologacoes2Controller
         $this->prepareViewContext($homologacoes);
 
         $title = 'Monitoramento - Homologações 2.0';
-        $viewFile = dirname(__DIR__, 2) . '/homologacoes_mock/views/monitoramento.php';
+        $viewFile = dirname(__DIR__, 2) . '/views/homologacoes/monitoramento.php';
         include dirname(__DIR__, 2) . '/views/layouts/main.php';
     }
 
@@ -139,7 +139,7 @@ class Homologacoes2Controller
         extract($dados, EXTR_SKIP);
 
         $title = 'Gestão de Homologações 2.0';
-        $viewFile = dirname(__DIR__, 2) . '/homologacoes_mock/views/gerenciar_cadastros.php';
+        $viewFile = dirname(__DIR__, 2) . '/views/homologacoes/gerenciar_cadastros.php';
         include dirname(__DIR__, 2) . '/views/layouts/main.php';
     }
 
@@ -169,7 +169,7 @@ class Homologacoes2Controller
         $canEdit = $this->canEditHomologacao($u, $h);
 
         $title = $h['codigo'] . ' - Homologação';
-        $viewFile = dirname(__DIR__, 2) . '/homologacoes_mock/views/detalhe_homologacao.php';
+        $viewFile = dirname(__DIR__, 2) . '/views/homologacoes/detalhe_homologacao.php';
         include dirname(__DIR__, 2) . '/views/layouts/main.php';
     }
 
@@ -197,7 +197,7 @@ class Homologacoes2Controller
             }
         }
 
-        include dirname(__DIR__, 2) . '/views/pages/homologacoes-2/public_checklist.php';
+        include dirname(__DIR__, 2) . '/views/pages/homologacoes/public_checklist.php';
     }
 
     public function apiTipos(): void
@@ -267,7 +267,7 @@ class Homologacoes2Controller
             $_SESSION['flash_message'] = ['type' => 'danger', 'text' => $e->getMessage()];
         }
 
-        redirect('/homologacoes-2/gerenciar');
+        redirect('/homologacoes/gerenciar');
     }
 
     private function handleDetailPost(int $id, array $u): void
@@ -292,7 +292,7 @@ class Homologacoes2Controller
             $_SESSION['flash_message'] = ['type' => 'danger', 'text' => $e->getMessage()];
         }
 
-        redirect('/homologacoes-2/' . $id);
+        redirect('/homologacoes/' . $id);
     }
 
     private function handleCancelFromListing(array $u, string $redirectTo): void
