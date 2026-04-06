@@ -2341,6 +2341,38 @@ window.maquinasData = <?= json_encode($maquinas) ?>;
 window.pecasData = <?= json_encode($pecas) ?>;
 
 
+function mostrarToast(mensagem, tipo = 'info') {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+
+  const toast = document.createElement('div');
+  toast.className = `p-4 rounded-xl shadow-2xl border-l-4 flex items-center gap-3 min-w-[300px] animate-in slide-in-from-right duration-300 pointer-events-auto cursor-pointer
+    ${tipo === 'success' ? 'bg-green-900/90 border-green-500 text-green-100' : 
+      tipo === 'error' ? 'bg-red-900/90 border-red-500 text-red-100' : 
+      tipo === 'warning' ? 'bg-yellow-900/90 border-yellow-500 text-yellow-100' : 
+      'bg-blue-900/90 border-blue-500 text-blue-100'}`;
+  
+  const icon = tipo === 'success' ? '✅' : tipo === 'error' ? '❌' : tipo === 'warning' ? '⚠️' : 'ℹ️';
+  
+  toast.innerHTML = `
+    <div class="flex-shrink-0 text-xl">${icon}</div>
+    <div class="flex-1 text-sm font-medium">${mensagem}</div>
+  `;
+
+  toast.onclick = () => {
+    toast.remove();
+  };
+
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    if (toast.parentElement) {
+      toast.remove();
+    }
+  }, 5000);
+}
+
+
 function btnStatus(id, status) {
   const btn = document.getElementById(id);
   if (status === 'loading') {
