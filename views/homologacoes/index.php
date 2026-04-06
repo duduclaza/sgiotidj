@@ -220,6 +220,7 @@ function openCancelModal(id, code) {
     if (modal) {
         document.getElementById('cancelId').value = id;
         document.getElementById('cancelCode').innerText = code;
+        modal.classList.add('active'); // Necessario para o modal-styles.css global
         modal.classList.remove('hidden');
     } else {
         console.error('Modal de cancelamento não encontrado!');
@@ -227,7 +228,11 @@ function openCancelModal(id, code) {
 }
 
 function closeCancelModal() {
-    document.getElementById('cancelModal').classList.add('hidden');
+    const modal = document.getElementById('cancelModal');
+    if (modal) {
+        modal.classList.remove('active');
+        modal.classList.add('hidden');
+    }
 }
 
 function processCancellation() {
