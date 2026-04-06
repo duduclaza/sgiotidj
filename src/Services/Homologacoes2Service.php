@@ -1230,7 +1230,7 @@ class Homologacoes2Service
                  ) VALUES (?, ?, NULL, ?, ?, ?, ?, ?, NOW())"
             );
         } else {
-            $baseDir = dirname(__DIR__, 2) . '/storage/uploads/homologacoes-2/' . $homologacaoId . '/' . $tipo;
+            $baseDir = dirname(__DIR__, 2) . '/storage/uploads/homologacoes/' . $homologacaoId . '/' . $tipo;
             if (!is_dir($baseDir)) {
                 mkdir($baseDir, 0777, true);
             }
@@ -1289,7 +1289,7 @@ class Homologacoes2Service
                     throw new \RuntimeException('Não foi possível salvar um dos arquivos enviados.');
                 }
 
-                $relative = 'storage/uploads/homologacoes-2/' . $homologacaoId . '/' . $tipo . '/' . $filename;
+                $relative = 'storage/uploads/homologacoes/' . $homologacaoId . '/' . $tipo . '/' . $filename;
                 $stmtPath->execute([
                     $homologacaoId,
                     $tipo,
@@ -1400,7 +1400,7 @@ class Homologacoes2Service
     // Remove apenas a pasta do registro dentro do diretório de uploads do módulo.
     private function purgeAttachmentDirectory(int $homologacaoId): void
     {
-        $baseDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'homologacoes-2';
+        $baseDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'homologacoes';
         $targetDir = $baseDir . DIRECTORY_SEPARATOR . $homologacaoId;
 
         if (!is_dir($targetDir)) {

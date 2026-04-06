@@ -66,7 +66,7 @@ class Homologacoes2ServiceTest extends TestCase
 
         $this->db->exec("INSERT INTO users (id, name, email, role, status) VALUES (7, 'Admin Teste', 'admin@example.com', 'admin', 'active')");
 
-        $this->attachmentDir = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'homologacoes-2' . DIRECTORY_SEPARATOR . '10';
+        $this->attachmentDir = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'homologacoes' . DIRECTORY_SEPARATOR . '10';
         $this->recreateAttachmentDirectory();
     }
 
@@ -123,7 +123,7 @@ class Homologacoes2ServiceTest extends TestCase
         $this->db->exec("INSERT INTO homologacoes_2 (id, status, homologacao_anterior_id, produto_original_id) VALUES (12, 'aguardando_chegada', NULL, 10)");
         $this->db->exec('INSERT INTO homologacoes_2_responsaveis (id, homologacao_id, user_id) VALUES (1, 10, 7)');
         $this->db->exec('INSERT INTO homologacoes_2_respostas (id, homologacao_id, checklist_item_id) VALUES (1, 10, 99)');
-        $this->db->exec("INSERT INTO homologacoes_2_anexos (id, homologacao_id, caminho) VALUES (1, 10, 'storage/uploads/homologacoes-2/10/laudo/arquivo.txt')");
+        $this->db->exec("INSERT INTO homologacoes_2_anexos (id, homologacao_id, caminho) VALUES (1, 10, 'storage/uploads/homologacoes/10/laudo/arquivo.txt')");
         $this->db->exec("INSERT INTO homologacoes_2_historico (id, homologacao_id, acao, descricao, created_at) VALUES (1, 10, 'criacao', 'criado', CURRENT_TIMESTAMP)");
     }
 

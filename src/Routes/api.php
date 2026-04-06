@@ -24,11 +24,11 @@ $router->get('/api/toner', [TonersController::class, 'getTonerData']);
 $router->get('/api/setores', [RegistrosController::class, 'getDepartamentos']);
 $router->get('/api/filiais', [RegistrosController::class, 'getFiliais']);
 $router->get('/api/parametros', [RegistrosController::class, 'getParametros']);
-$router->get('/api/homologacoes-2/tipos', [Homologacoes2Controller::class, 'apiTipos']);
-$router->get('/api/homologacoes-2/fornecedores', [Homologacoes2Controller::class, 'apiFornecedores']);
-$router->get('/api/homologacoes-2/clientes', [Homologacoes2Controller::class, 'apiClientes']);
-$router->get('/api/homologacoes-2/checklists', [Homologacoes2Controller::class, 'apiChecklists']);
-$router->get('/api/homologacoes-2/{id}', [Homologacoes2Controller::class, 'apiHomologacao']);
+$router->get('/api/homologacoes/tipos', [Homologacoes2Controller::class, 'apiTipos']);
+$router->get('/api/homologacoes/fornecedores', [Homologacoes2Controller::class, 'apiFornecedores']);
+$router->get('/api/homologacoes/clientes', [Homologacoes2Controller::class, 'apiClientes']);
+$router->get('/api/homologacoes/checklists', [Homologacoes2Controller::class, 'apiChecklists']);
+$router->get('/api/homologacoes/{id}', [Homologacoes2Controller::class, 'apiHomologacao']);
 
 // API para seleção de produtos (Amostragens 2.0 e Garantias)
 $router->get('/api/toners', [TonersController::class, 'apiListToners']);
