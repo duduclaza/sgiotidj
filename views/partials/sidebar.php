@@ -48,7 +48,7 @@ $menu = [
     'href' => '#', 
     'icon' => '<i class="ph ph-clipboard-text"></i>', 
     'category' => true,
-    'modules' => ['triagem_toners', 'toners_retornados', 'amostragens_2', 'garantias', 'controle_descartes', 'precificacao_coleta_descartes', 'homologacoes', 'certificados', 'fmea', 'pops_its_visualizacao', 'pops_its_cadastro_titulos', 'pops_its_meus_registros', 'pops_its_pendente_aprovacao', 'fluxogramas', 'auditorias', 'nao_conformidades', 'melhoria_continua', 'melhoria_continua_2', 'controle_rc', 'nps'],
+    'modules' => ['triagem_toners', 'toners_retornados', 'amostragens_2', 'garantias', 'controle_descartes', 'precificacao_coleta_descartes', 'homologacoes_2', 'certificados', 'fmea', 'pops_its_visualizacao', 'pops_its_cadastro_titulos', 'pops_its_meus_registros', 'pops_its_pendente_aprovacao', 'fluxogramas', 'auditorias', 'nao_conformidades', 'melhoria_continua', 'melhoria_continua_2', 'controle_rc', 'nps'],
     'submenu' => [
       ['label' => 'Triagem de Toners', 'href' => '/triagem-toners', 'icon' => '<i class="ph ph-magnifying-glass"></i>', 'module' => 'triagem_toners'],
       // ['label' => 'Registro de Retornados', 'href' => '/toners/retornados', 'icon' => '<i class="ph ph-clipboard-text"></i>', 'module' => 'toners_retornados', 'roles' => ['super_admin', 'superadmin']],
@@ -56,8 +56,7 @@ $menu = [
       ['label' => 'Controle de Descartes', 'href' => '/controle-descartes', 'icon' => '<i class="ph ph-recycle"></i>', 'module' => 'controle_descartes'],
       ['label' => 'Precificação de Coleta', 'href' => '/precificacao-coleta-descartes', 'icon' => '<i class="ph ph-currency-dollar"></i>', 'module' => 'precificacao_coleta_descartes'],
       // Itens originais de Gestão da Qualidade
-      ['label' => 'Homologações', 'href' => '/homologacoes', 'icon' => '<i class="ph ph-traffic-cone"></i>', 'module' => 'homologacoes', 'highlight' => 'mustard'],
-      ['label' => 'Homologações 2.0', 'href' => '/homologacoes-2', 'title' => 'Homologações 2.0', 'icon' => '<i class="ph ph-traffic-cone"></i>', 'module' => 'homologacoes_2', 'is_public' => true, 'highlight' => 'mustard'],
+      ['label' => 'Homologações', 'href' => '/homologacoes', 'title' => 'Homologações', 'icon' => '<i class="ph ph-traffic-cone"></i>', 'module' => 'homologacoes_2', 'is_public' => true, 'highlight' => 'mustard'],
       ['label' => 'Certificados', 'href' => '/certificados', 'icon' => '<i class="ph ph-scroll"></i>', 'module' => 'certificados'],
       ['label' => 'FMEA', 'href' => '/fmea', 'icon' => '<i class="ph ph-trend-up"></i>', 'module' => 'fmea'],
       ['label' => 'POPs e ITs', 'href' => '/pops-e-its', 'icon' => '<i class="ph ph-books"></i>', 'module' => 'pops_its_visualizacao'],
