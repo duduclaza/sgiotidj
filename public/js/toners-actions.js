@@ -100,6 +100,22 @@ document.addEventListener('DOMContentLoaded', function() {
 function editToner(id) {
     console.log('Editando toner ID:', id);
     
+    // Destacar visualmente a linha em modo de edição
+    const row = document.querySelector(`tr[data-toner-id="${id}"]`);
+    if (row) {
+        // Remove hover padrão e adiciona destaque (Azul/Highlight)
+        row.classList.remove('hover:bg-slate-50', 'dark:hover:bg-slate-700/30');
+        row.classList.add('bg-blue-50/80', 'dark:bg-blue-900/30', 'outline', 'outline-2', 'outline-blue-500', 'dark:outline-blue-400', 'shadow-lg', 'relative', 'z-20');
+        
+        // Diminuir a opacidade das outras linhas para focar nesta
+        document.querySelectorAll('tbody tr').forEach(tr => {
+            if (tr !== row && !tr.classList.contains('no-results-row')) {
+                tr.style.opacity = '0.4';
+                tr.style.pointerEvents = 'none'; // Evita clique nas outras enquanto edita
+            }
+        });
+    }
+    
     // Ativar modo de edição para todos os campos
     const fields = ['modelo', 'peso_cheio', 'peso_vazio', 'gramatura', 'capacidade_folhas', 'preco_toner', 'gramatura_por_folha', 'custo_por_folha', 'cor', 'tipo'];
     
@@ -110,6 +126,9 @@ function editToner(id) {
         if (display && input) {
             display.classList.add('hidden');
             input.classList.remove('hidden');
+            
+            // Adicionar requinte visual aos inputs sendo editados
+            input.classList.add('ring-2', 'ring-blue-400', 'dark:ring-blue-500', 'border-blue-400', 'bg-white', 'dark:bg-slate-800', 'shadow-sm', 'transition-all');
             
             // Adicionar evento para salvar ao pressionar Enter
             input.addEventListener('keypress', function(e) {
@@ -127,8 +146,14 @@ function editToner(id) {
     const cancelBtn = document.querySelector(`.cancel-btn-${id}`);
     
     if (editBtn) editBtn.classList.add('hidden');
-    if (saveBtn) saveBtn.classList.remove('hidden');
-    if (cancelBtn) cancelBtn.classList.remove('hidden');
+    if (saveBtn) {
+        saveBtn.classList.remove('hidden');
+        saveBtn.classList.add('animate-pulse', 'ring-2', 'ring-emerald-400', 'bg-emerald-100', 'dark:bg-emerald-900/60');
+    }
+    if (cancelBtn) {
+        cancelBtn.classList.remove('hidden');
+        cancelBtn.classList.add('ring-1', 'ring-red-300', 'bg-red-50', 'dark:bg-red-900/30');
+    }
     
     // Focar no primeiro campo de input
     const firstInput = document.querySelector(`.edit-input-modelo-${id}`);
@@ -138,6 +163,19 @@ function editToner(id) {
 // Função para cancelar edição
 function cancelEditToner(id) {
     console.log('Cancelando edição do toner ID:', id);
+    
+    // Restaurar a linha e remover highlight
+    const row = document.querySelector(`tr[data-toner-id="${id}"]`);
+    if (row) {
+        row.classList.add('hover:bg-slate-50', 'dark:hover:bg-slate-700/30');
+        row.classList.remove('bg-blue-50/80', 'dark:bg-blue-900/30', 'outline', 'outline-2', 'outline-blue-500', 'dark:outline-blue-400', 'shadow-lg', 'relative', 'z-20');
+        
+        // Restaurar estado e opacidade das outras linhas
+        document.querySelectorAll('tbody tr').forEach(tr => {
+            tr.style.opacity = '';
+            tr.style.pointerEvents = '';
+        });
+    }
     
     // Desativar modo de edição para todos os campos
     const fields = ['modelo', 'peso_cheio', 'peso_vazio', 'gramatura', 'capacidade_folhas', 'preco_toner', 'gramatura_por_folha', 'custo_por_folha', 'cor', 'tipo'];
@@ -149,6 +187,7 @@ function cancelEditToner(id) {
         if (display && input) {
             display.classList.remove('hidden');
             input.classList.add('hidden');
+            input.classList.remove('ring-2', 'ring-blue-400', 'dark:ring-blue-500', 'border-blue-400', 'bg-white', 'dark:bg-slate-800', 'shadow-sm');
         }
     });
     
@@ -158,8 +197,14 @@ function cancelEditToner(id) {
     const cancelBtn = document.querySelector(`.cancel-btn-${id}`);
     
     if (editBtn) editBtn.classList.remove('hidden');
-    if (saveBtn) saveBtn.classList.add('hidden');
-    if (cancelBtn) cancelBtn.classList.add('hidden');
+    if (saveBtn) {
+        saveBtn.classList.add('hidden');
+        saveBtn.classList.remove('animate-pulse', 'ring-2', 'ring-emerald-400', 'bg-emerald-100', 'dark:bg-emerald-900/60');
+    }
+    if (cancelBtn) {
+        cancelBtn.classList.add('hidden');
+        cancelBtn.classList.remove('ring-1', 'ring-red-300', 'bg-red-50', 'dark:bg-red-900/30');
+    }
 }
 
 // Função para salvar edição
@@ -259,6 +304,25 @@ function saveToner(id) {
         showAlert('error', error?.message || 'Erro ao conectar ao servidor. Verifique sua conexão e tente novamente.');
     })
     .finally(() => {
+        // Restaurar estado visual da linha
+        const row = document.querySelector(`tr[data-toner-id="${id}"]`);
+        if (row) {
+            row.classList.add('hover:bg-slate-50', 'dark:hover:bg-slate-700/30');
+            row.classList.remove('bg-blue-50/80', 'dark:bg-blue-900/30', 'outline', 'outline-2', 'outline-blue-500', 'dark:outline-blue-400', 'shadow-lg', 'relative', 'z-20');
+            
+            // Restaurar estado e opacidade das outras linhas
+            document.querySelectorAll('tbody tr').forEach(tr => {
+                tr.style.opacity = '';
+                tr.style.pointerEvents = '';
+            });
+        }
+        
+        // Finalizar modo de edição nos inputs
+        fields.forEach(field => {
+            const input = document.querySelector(`.edit-input-${field}-${id}`);
+            if (input) input.classList.remove('ring-2', 'ring-blue-400', 'dark:ring-blue-500', 'border-blue-400', 'bg-white', 'dark:bg-slate-800', 'shadow-sm');
+        });
+
         // Restaurar botão de salvar
         if (saveBtn) {
             saveBtn.innerHTML = originalSaveText;
@@ -270,8 +334,16 @@ function saveToner(id) {
         const cancelBtn = document.querySelector(`.cancel-btn-${id}`);
         
         if (editBtn) editBtn.classList.remove('hidden');
-        if (saveBtn) saveBtn.classList.add('hidden');
-        if (cancelBtn) cancelBtn.classList.add('hidden');
+        
+        if (saveBtn) {
+            saveBtn.classList.add('hidden');
+            saveBtn.classList.remove('animate-pulse', 'ring-2', 'ring-emerald-400', 'bg-emerald-100', 'dark:bg-emerald-900/60');
+        }
+        
+        if (cancelBtn) {
+            cancelBtn.classList.add('hidden');
+            cancelBtn.classList.remove('ring-1', 'ring-red-300', 'bg-red-50', 'dark:bg-red-900/30');
+        }
     });
 }
 
