@@ -1,6 +1,8 @@
 <?php
 // Sistema SGQ OTI DJ - Versão Corrigida
 date_default_timezone_set('America/Sao_Paulo');
+// Renomeia a sessão para invalidar cookies antigos que causam o ERR_TOO_MANY_REDIRECTS
+session_name('SGQ_SESSAO_V2');
 session_start();
 
 // No-cache headers
