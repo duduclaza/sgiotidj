@@ -141,10 +141,11 @@ window.goToPage = function(page) {
 window.changeItemsPerPage = function(perPage) {
     window.itemsPerPage = parseInt(perPage, 10);
     window.currentPage = 1;
-    window.renderPage();
+    // Dispara a busca toda vez que mudar a paginação para reconstruir as linhas visíveis previnindo Array vazio
+    window.searchToners();
 };
 
-window.updatePaginationUI = function(startIndex, endIndex, total, totalPages) {
+window.updatePaginationUI = function(startIndex, endIndex, total = 0, totalPages = 0) {
     const infoSpan = document.getElementById('paginationInfo');
     const controls = document.getElementById('paginationControls');
     
