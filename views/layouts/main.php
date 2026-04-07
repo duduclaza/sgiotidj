@@ -7,9 +7,10 @@ header("Expires: 0"); // Proxies.
 $title = $title ?? 'SGQ OTI - DJ';
 $viewFile = $viewFile ?? __DIR__ . '/../pages/home.php';
 $sidebar = __DIR__ . '/../partials/sidebar.php';
-// Versão dinâmica para evitar cache (time() força atualização a cada reload)
-// Em produção, isso pode ser alterado para uma string fixa para performance
-$assetVersion = time();
+// Cache Busting inteligente: usa a data de modificação real do arquivo
+// Assim o cache é mantido até que o desenvolvedor altere o arquivo
+$stylePath = __DIR__ . '/../../src/Support/modal-styles.css';
+$assetVersion = file_exists($stylePath) ? filemtime($stylePath) : time();
 // Safe helper fallbacks in case global helpers are not loaded
 if (!function_exists('e')) {
   function e($value) { return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8'); }
