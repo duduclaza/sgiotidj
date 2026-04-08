@@ -427,6 +427,54 @@ if ($isAdmin) {
     </div>
 </div>
 
+<!-- Modal OS Duplicada -->
+<div id="modal-os-duplicada" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-[70]" onclick="if (event.target === this) fecharModalOsDuplicada()">
+    <div class="relative top-24 mx-auto w-11/12 md:w-[28rem] shadow-2xl rounded-2xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 overflow-hidden">
+        <div class="px-6 py-5 border-b border-gray-200 dark:border-slate-700 bg-red-50 dark:bg-red-900/20">
+            <div class="flex items-start justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-red-100 dark:bg-red-900/40 flex items-center justify-center text-red-600 dark:text-red-300">
+                        <i class="ph ph-warning-circle text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">OS ja cadastrada</h3>
+                        <p id="os-duplicada-texto" class="text-sm text-gray-600 dark:text-gray-300 mt-1">Olha, esta OS ja foi registrada.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="fecharModalOsDuplicada()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="px-6 py-5 space-y-4">
+            <div class="rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50 p-4 space-y-3">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">Numero da OS</p>
+                    <p id="os-duplicada-numero" class="text-base font-bold text-gray-900 dark:text-white mt-1">-</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">Numero de serie</p>
+                    <p id="os-duplicada-serie" class="text-base font-bold text-gray-900 dark:text-white mt-1">-</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">Filial</p>
+                    <p id="os-duplicada-filial" class="text-base font-bold text-gray-900 dark:text-white mt-1">-</p>
+                </div>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-300">
+                Confira os dados antes de salvar novamente ou use outra OS para este descarte.
+            </p>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/40 flex justify-end">
+            <button type="button" onclick="fecharModalOsDuplicada()" class="px-4 py-2 bg-slate-900 hover:bg-slate-700 text-white rounded-xl font-medium transition-colors">
+                Entendi
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- Modal Alterar Status -->
 <div id="modal-alterar-status" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
@@ -938,6 +986,31 @@ function fecharModalDescarte() {
     document.getElementById('modal-descarte').classList.add('hidden');
 }
 
+function abrirModalOsDuplicada(response) {
+    const duplicate = response?.duplicate || {};
+    const numeroOs = duplicate.numero_os || document.getElementById('numero-os')?.value || '-';
+    const numeroSerie = duplicate.numero_serie || '-';
+    const filial = duplicate.filial_nome || '-';
+
+    document.getElementById('os-duplicada-texto').textContent = response?.message || 'Olha, esta OS ja foi registrada.';
+    document.getElementById('os-duplicada-numero').textContent = numeroOs;
+    document.getElementById('os-duplicada-serie').textContent = numeroSerie;
+    document.getElementById('os-duplicada-filial').textContent = filial;
+    document.getElementById('modal-os-duplicada').classList.remove('hidden');
+}
+
+function fecharModalOsDuplicada() {
+    document.getElementById('modal-os-duplicada').classList.add('hidden');
+
+    const campoOs = document.getElementById('numero-os');
+    if (campoOs) {
+        campoOs.focus();
+        if (typeof campoOs.select === 'function') {
+            campoOs.select();
+        }
+    }
+}
+
 // Editar descarte
 function editarDescarte(id) {
     const descarte = descartes.find(d => d.id == id);
@@ -1038,6 +1111,18 @@ document.getElementById('btn-salvar-descarte').addEventListener('click', functio
             showToast('Sua sessão pode ter expirado. Por favor, faça login novamente.', 'error');
             return { success: false };
         }
+        const raw = await response.text();
+
+        if (!raw || !raw.trim()) {
+            return { success: false, message: 'Nao foi possivel processar a resposta do servidor.' };
+        }
+
+        try {
+            return JSON.parse(raw);
+        } catch (error) {
+            console.error('Resposta nao JSON em controle-descartes:', raw);
+            return { success: false, message: 'Nao foi possivel processar a resposta do servidor.' };
+        }
         try { return await response.json(); } catch (_) { return { success: false, message: 'Resposta inválida do servidor' }; }
     })
     .then(data => {
@@ -1045,6 +1130,8 @@ document.getElementById('btn-salvar-descarte').addEventListener('click', functio
             showToast(data.message || 'Registro salvo com sucesso!', 'success');
             fecharModalDescarte();
             carregarDescartes();
+        } else if (data && data.error_code === 'duplicate_os') {
+            abrirModalOsDuplicada(data);
         } else if (data && data.message) {
             showToast('Erro: ' + data.message, 'error');
         }

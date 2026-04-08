@@ -15,6 +15,30 @@ class ControleDescartesController
         $this->db = Database::getInstance();
         $this->ensureLogTableExists();
     }
+
+    private function clearOutputBuffer(): void
+    {
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+    }
+
+    private function buildDuplicateOsResponse(string $numeroOs, array $duplicado, bool $isUpdate = false): array
+    {
+        return [
+            'success' => false,
+            'error_code' => 'duplicate_os',
+            'message' => $isUpdate
+                ? 'Olha, esta OS ja foi registrada em outro descarte.'
+                : 'Olha, esta OS ja foi registrada.',
+            'duplicate' => [
+                'registro_id' => isset($duplicado['id']) ? (int) $duplicado['id'] : null,
+                'numero_os' => $numeroOs,
+                'numero_serie' => $duplicado['numero_serie'] ?? '',
+                'filial_nome' => $duplicado['filial_nome'] ?? '',
+            ],
+        ];
+    }
     
     // Garantir que a tabela de log existe
     private function ensureLogTableExists()
@@ -217,7 +241,7 @@ class ControleDescartesController
     public function create()
     {
         // Limpar qualquer output anterior
-        ob_clean();
+        $this->clearOutputBuffer();
         header('Content-Type: application/json');
         
         try {
@@ -238,6 +262,16 @@ class ControleDescartesController
 
             // Verificar duplicidade de OS
             $numero_os = $_POST['numero_os'] ?? null;
+            if ($numero_os) {
+                $duplicado = $this->isOsDuplicada($numero_os);
+                if ($duplicado) {
+                    echo json_encode(
+                        $this->buildDuplicateOsResponse((string) $numero_os, $duplicado),
+                        JSON_UNESCAPED_UNICODE
+                    );
+                    return;
+                }
+            }
             if ($numero_os && ($duplicado = $this->isOsDuplicada($numero_os))) {
                 $msg = "A Ordem de Servico (OS) '{$numero_os}' ja esta cadastrada no sistema.";
                 $msg .= " (Série: {$duplicado['numero_serie']} | Filial: {$duplicado['filial_nome']})";
@@ -389,7 +423,7 @@ class ControleDescartesController
     public function update()
     {
         // Limpar qualquer output anterior
-        ob_clean();
+        $this->clearOutputBuffer();
         header('Content-Type: application/json');
         
         try {
@@ -424,6 +458,16 @@ class ControleDescartesController
 
             // Verificar duplicidade de OS (excluindo o atual)
             $numero_os = $_POST['numero_os'] ?? null;
+            if ($numero_os) {
+                $duplicado = $this->isOsDuplicada($numero_os, $descarte_id);
+                if ($duplicado) {
+                    echo json_encode(
+                        $this->buildDuplicateOsResponse((string) $numero_os, $duplicado, true),
+                        JSON_UNESCAPED_UNICODE
+                    );
+                    return;
+                }
+            }
             if ($numero_os && ($duplicado = $this->isOsDuplicada($numero_os, $descarte_id))) {
                 $msg = "A Ordem de Servico (OS) '{$numero_os}' ja esta cadastrada em outro registro.";
                 $msg .= " (Série: {$duplicado['numero_serie']} | Filial: {$duplicado['filial_nome']})";
