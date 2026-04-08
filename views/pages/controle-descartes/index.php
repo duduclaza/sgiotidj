@@ -428,49 +428,53 @@ if ($isAdmin) {
 </div>
 
 <!-- Modal OS Duplicada -->
-<div id="modal-os-duplicada" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-[70]" onclick="if (event.target === this) fecharModalOsDuplicada()">
-    <div class="relative top-24 mx-auto w-11/12 md:w-[28rem] shadow-2xl rounded-2xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 overflow-hidden">
-        <div class="px-6 py-5 border-b border-gray-200 dark:border-slate-700 bg-red-50 dark:bg-red-900/20">
-            <div class="flex items-start justify-between gap-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-2xl bg-red-100 dark:bg-red-900/40 flex items-center justify-center text-red-600 dark:text-red-300">
-                        <i class="ph ph-warning-circle text-2xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">OS ja cadastrada</h3>
-                        <p id="os-duplicada-texto" class="text-sm text-gray-600 dark:text-gray-300 mt-1">Olha, esta OS ja foi registrada.</p>
-                    </div>
-                </div>
-                <button type="button" onclick="fecharModalOsDuplicada()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
-        <div class="px-6 py-5 space-y-4">
-            <div class="rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50 p-4 space-y-3">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">Numero da OS</p>
-                    <p id="os-duplicada-numero" class="text-base font-bold text-gray-900 dark:text-white mt-1">-</p>
-                </div>
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">Numero de serie</p>
-                    <p id="os-duplicada-serie" class="text-base font-bold text-gray-900 dark:text-white mt-1">-</p>
-                </div>
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">Filial</p>
-                    <p id="os-duplicada-filial" class="text-base font-bold text-gray-900 dark:text-white mt-1">-</p>
-                </div>
-            </div>
-            <p class="text-sm text-gray-600 dark:text-gray-300">
-                Confira os dados antes de salvar novamente ou use outra OS para este descarte.
-            </p>
-        </div>
-        <div class="px-6 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/40 flex justify-end">
-            <button type="button" onclick="fecharModalOsDuplicada()" class="px-4 py-2 bg-slate-900 hover:bg-slate-700 text-white rounded-xl font-medium transition-colors">
-                Entendi
+<div id="modal-os-duplicada" class="fixed inset-0 hidden z-[99999] bg-slate-950/92 overflow-y-auto" onclick="if (event.target === this) fecharModalOsDuplicada()">
+    <div class="min-h-screen w-full p-0 md:p-6">
+        <div class="relative min-h-screen md:min-h-[calc(100vh-3rem)] w-full bg-white dark:bg-slate-900 md:rounded-[2rem] shadow-2xl border-0 md:border md:border-slate-700 overflow-hidden flex items-center justify-center">
+            <button type="button" onclick="fecharModalOsDuplicada()" class="absolute top-5 right-5 md:top-7 md:right-7 text-slate-400 hover:text-slate-700 dark:hover:text-slate-100 transition-colors z-10">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
             </button>
+
+            <div class="w-full max-w-3xl px-6 py-14 md:px-12 md:py-16">
+                <div class="flex flex-col items-center text-center mb-10">
+                    <div class="w-20 h-20 rounded-[2rem] bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-300 mb-5 shadow-sm">
+                        <i class="ph ph-warning-circle text-5xl"></i>
+                    </div>
+                    <h3 class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">OS ja cadastrada</h3>
+                    <p id="os-duplicada-texto" class="text-base md:text-lg text-slate-600 dark:text-slate-300 mt-3 max-w-2xl">
+                        Olha, esta OS ja foi registrada.
+                    </p>
+                </div>
+
+                <div class="rounded-[2rem] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/70 p-6 md:p-8 shadow-inner">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+                        <div>
+                            <p class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Numero da OS</p>
+                            <p id="os-duplicada-numero" class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white mt-2 break-words">-</p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Numero de serie</p>
+                            <p id="os-duplicada-serie" class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white mt-2 break-words">-</p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Filial</p>
+                            <p id="os-duplicada-filial" class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white mt-2 break-words">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-center text-base md:text-lg text-slate-600 dark:text-slate-300 mt-8 max-w-2xl mx-auto">
+                    Confira os dados antes de salvar novamente ou use outra OS para este descarte.
+                </p>
+
+                <div class="flex justify-center mt-10">
+                    <button type="button" onclick="fecharModalOsDuplicada()" class="px-8 py-3.5 bg-slate-900 hover:bg-slate-700 text-white rounded-2xl font-bold text-base transition-colors shadow-lg">
+                        Entendi
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -997,10 +1001,12 @@ function abrirModalOsDuplicada(response) {
     document.getElementById('os-duplicada-serie').textContent = numeroSerie;
     document.getElementById('os-duplicada-filial').textContent = filial;
     document.getElementById('modal-os-duplicada').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
 }
 
 function fecharModalOsDuplicada() {
     document.getElementById('modal-os-duplicada').classList.add('hidden');
+    document.body.style.overflow = '';
 
     const campoOs = document.getElementById('numero-os');
     if (campoOs) {
@@ -1010,6 +1016,13 @@ function fecharModalOsDuplicada() {
         }
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const modalOsDuplicada = document.getElementById('modal-os-duplicada');
+    if (modalOsDuplicada && modalOsDuplicada.parentElement !== document.body) {
+        document.body.appendChild(modalOsDuplicada);
+    }
+});
 
 // Editar descarte
 function editarDescarte(id) {
