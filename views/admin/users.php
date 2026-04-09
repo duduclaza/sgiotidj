@@ -657,7 +657,9 @@ function displayPermissions(permissions) {
     { key: 'homologacoes', name: 'Gestão de Homologações (Fitas)', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' },
     { key: 'amostragens', name: 'Amostragens de Produção', icon: 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.675.337a4 4 0 01-2.547.547l-2.434-.487a2 2 0 00-1.022.547l-2.146 2.146a2 2 0 01-2.828 0l-.586-.586a2 2 0 010-2.828l2.146-2.146a2 2 0 00.547-1.022l.487-2.434a4 4 0 01.547-2.547l.337-.675a6 6 0 00.517-3.86l-.477-2.387a2 2 0 00-.547-1.022l-2.146-2.146a2 2 0 010-2.828l.586-.586a2 2 0 012.828 0l2.146 2.146z' },
     { key: 'auditorias', name: 'Auditorias de Processo', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
-    { key: 'garantias', name: 'Garantias & RMAs', icon: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z' }
+    { key: 'garantias', name: 'Garantias & RMAs', icon: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z' },
+    { key: 'elearning_gestor', name: 'E-Learning Professor', icon: 'M12 14l9-5-9-5-9 5 9 5zm0 2l-6.16-3.422L3 14.138V18l9 5 9-5v-3.862l-2.84-1.56L12 16z' },
+    { key: 'elearning_colaborador', name: 'E-Learning Aluno', icon: 'M12 14l9-5-9-5-9 5 9 5zm-5 4.5V14.7l5 2.778 5-2.778v3.8l-5 2.778-5-2.778z' }
   ];
   
   let html = `

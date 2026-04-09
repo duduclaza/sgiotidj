@@ -107,6 +107,17 @@ $menu = [
   ],
 */
   [
+    'label' => 'E-Learning',
+    'href'  => '#',
+    'icon'  => '<i class="ph ph-graduation-cap"></i>',
+    'category' => true,
+    'modules' => ['elearning_gestor', 'elearning_colaborador'],
+    'submenu' => [
+      ['label' => 'Professor', 'href' => '/elearning/gestor', 'icon' => '<i class="ph ph-chalkboard-teacher"></i>', 'module' => 'elearning_gestor'],
+      ['label' => 'Aluno', 'href' => '/elearning/colaborador', 'icon' => '<i class="ph ph-student"></i>', 'module' => 'elearning_colaborador'],
+    ]
+  ],
+  [
     'label' => 'Administrativo', 
     'href' => '#', 
     'icon' => '<i class="ph ph-gear"></i>', 

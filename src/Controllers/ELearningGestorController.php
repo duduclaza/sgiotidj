@@ -1,612 +1,510 @@
 <?php
+
 namespace App\Controllers;
 
-use App\Config\Database;
-use App\Controllers\AuthController;
+use App\Services\ELearningService;
 use App\Services\PermissionService;
-use App\Services\GoogleDriveService;
 
 class ELearningGestorController
 {
-    private $db;
+    private ELearningService $service;
 
-    public function __construct() { $this->db = Database::getInstance(); }
+    public function __construct()
+    {
+        $this->service = new ELearningService();
+    }
 
-    private function requireGestor(): void
+    public function dashboard(): void
+    {
+        $this->requireProfessor();
+        $this->render('elearning/gestor/dashboard', [
+            'title' => 'E-Learning Professor',
+            'data' => $this->service->teacherDashboardData($this->userId()),
+            'canEdit' => $this->canEdit(),
+            'canDelete' => $this->canDelete(),
+        ]);
+    }
+
+    public function cursos(): void
+    {
+        $this->requireProfessor();
+        $this->render('elearning/gestor/courses', [
+            'title' => 'Cursos | E-Learning Professor',
+            'data' => $this->service->teacherCoursesData($this->userId()),
+            'canEdit' => $this->canEdit(),
+            'canDelete' => $this->canDelete(),
+        ]);
+    }
+
+    public function aulas(int $cursoId): void
+    {
+        $this->renderWorkspace($cursoId, 'lessons');
+    }
+
+    public function provas(int $cursoId): void
+    {
+        $this->renderWorkspace($cursoId, 'exams');
+    }
+
+    public function matriculas(int $cursoId): void
+    {
+        $this->renderWorkspace($cursoId, 'students');
+    }
+
+    public function progressoDashboard(int $cursoId): void
+    {
+        $this->renderWorkspace($cursoId, 'reports');
+    }
+
+    public function armazenamento(): void
+    {
+        $this->requireProfessor();
+        $this->render('elearning/gestor/storage', [
+            'title' => 'Armazenamento | E-Learning Professor',
+            'data' => $this->service->storagePageData($this->userId()),
+        ]);
+    }
+
+    public function relatorios(): void
+    {
+        $this->requireProfessor();
+        $this->render('elearning/gestor/reports', [
+            'title' => 'Relatórios | E-Learning Professor',
+            'data' => $this->service->teacherReportsData($this->userId()),
+        ]);
+    }
+
+    public function diplomaConfig(): void
+    {
+        $this->requireProfessor();
+        $coursesData = $this->service->teacherCoursesData($this->userId());
+        $this->render('elearning/gestor/certificate_library', [
+            'title' => 'Biblioteca de Certificados',
+            'templates' => $this->service->getCertificateTemplates(),
+            'storage' => $this->service->getStorageSummary(),
+            'courses' => $coursesData['courses'] ?? [],
+            'schemaReady' => $coursesData['schema_ready'] ?? false,
+        ]);
+    }
+
+    public function thumbnailCurso(): void
+    {
+        $courseId = (int) ($_GET['id'] ?? 0);
+        $file = $courseId > 0 ? $this->service->courseCoverData($courseId) : null;
+        if (!$file) {
+            header('Location: /assets/logo.png');
+            exit;
+        }
+
+        header('Content-Type: ' . $file['mime']);
+        header('Content-Length: ' . filesize($file['path']));
+        readfile($file['path']);
+        exit;
+    }
+
+    public function storeCurso(): void
+    {
+        $this->requireProfessor();
+        $this->authorizeEdit();
+
+        try {
+            $courseId = $this->service->createCourse($_POST, $_FILES, $this->userId());
+            $this->json(['success' => true, 'message' => 'Curso criado com sucesso.', 'course_id' => $courseId]);
+        } catch (\Throwable $exception) {
+            $this->jsonError($exception);
+        }
+    }
+
+    public function updateCurso(): void
+    {
+        $this->requireProfessor();
+        $this->authorizeEdit();
+
+        try {
+            $courseId = (int) ($_POST['id'] ?? 0);
+            $this->service->updateCourse($courseId, $_POST, $_FILES, $this->userId());
+            $this->json(['success' => true, 'message' => 'Curso atualizado com sucesso.']);
+        } catch (\Throwable $exception) {
+            $this->jsonError($exception);
+        }
+    }
+
+    public function deleteCurso(): void
+    {
+        $this->requireProfessor();
+        $this->authorizeDelete();
+
+        try {
+            $result = $this->service->deleteCourse((int) ($_POST['id'] ?? 0), $this->userId());
+            $warnings = $result['warnings'] ?? [];
+            $message = $warnings
+                ? 'Curso excluido com sucesso, mas alguns videos externos podem precisar de conferencia manual.'
+                : 'Curso excluido com sucesso. Os videos hospedados e arquivos vinculados tambem foram removidos.';
+            $this->json([
+                'success' => true,
+                'message' => $message,
+                'data' => $result,
+            ]);
+        } catch (\Throwable $exception) {
+            $this->jsonError($exception);
+        }
+    }
+
+    public function storeAula(): void
+    {
+        $this->requireProfessor();
+        $this->authorizeEdit();
+
+        try {
+            $lessonId = $this->service->saveLesson($_POST, $_FILES, $this->userId());
+            $hasVideoUpload = !empty($_FILES['video']['tmp_name']);
+            $message = $hasVideoUpload
+                ? 'Aula salva com sucesso. O video pode levar alguns instantes para ficar pronto no Bunny Stream.'
+                : 'Aula salva com sucesso.';
+            $this->json(['success' => true, 'message' => $message, 'lesson_id' => $lessonId]);
+        } catch (\Throwable $exception) {
+            $this->jsonError($exception);
+        }
+    }
+
+    public function deleteAula(): void
+    {
+        $this->requireProfessor();
+        $this->authorizeDelete();
+
+        try {
+            $this->service->deleteLesson((int) ($_POST['id'] ?? 0), $this->userId());
+            $this->json(['success' => true, 'message' => 'Aula removida com sucesso.']);
+        } catch (\Throwable $exception) {
+            $this->jsonError($exception);
+        }
+    }
+
+    public function reorderAula(): void
+    {
+        $this->requireProfessor();
+        $this->authorizeEdit();
+
+        try {
+            $this->service->reorderLesson(
+                (int) ($_POST['lesson_id'] ?? 0),
+                (string) ($_POST['direction'] ?? 'up'),
+                $this->userId()
+            );
+            $this->json(['success' => true, 'message' => 'Ordem das aulas atualizada.']);
+        } catch (\Throwable $exception) {
+            $this->jsonError($exception);
+        }
+    }
+
+    public function uploadMaterial(): void
+    {
+        $this->storeAula();
+    }
+
+    public function updateMaterial(): void
+    {
+        $this->storeAula();
+    }
+
+    public function deleteMaterial(): void
+    {
+        $this->requireProfessor();
+        $this->authorizeDelete();
+
+        try {
+            $type = (string) ($_POST['type'] ?? '');
+            if ($type === 'video') {
+                $this->service->removeLessonVideo((int) ($_POST['lesson_id'] ?? 0), $this->userId());
+            } else {
+                $this->service->removeAttachment((int) ($_POST['attachment_id'] ?? 0), $this->userId());
+            }
+
+            $this->json(['success' => true, 'message' => 'Arquivo removido com sucesso.']);
+        } catch (\Throwable $exception) {
+            $this->jsonError($exception);
+        }
+    }
+
+    public function storeProva(): void
+    {
+        $this->requireProfessor();
+        $this->authorizeEdit();
+
+        try {
+            $examId = $this->service->saveExam($_POST, $this->userId());
+            $this->json(['success' => true, 'message' => 'Prova salva com sucesso.', 'exam_id' => $examId]);
+        } catch (\Throwable $exception) {
+            $this->jsonError($exception);
+        }
+    }
+
+    public function storeQuestao(): void
+    {
+        $this->json([
+            'success' => false,
+            'message' => 'Use o construtor de prova integrado na tela do curso para salvar questões e alternativas.',
+        ]);
+    }
+
+    public function deleteProva(): void
+    {
+        $this->requireProfessor();
+        $this->authorizeDelete();
+
+        try {
+            $this->service->deleteExam((int) ($_POST['id'] ?? 0), $this->userId());
+            $this->json(['success' => true, 'message' => 'Prova arquivada com sucesso.']);
+        } catch (\Throwable $exception) {
+            $this->jsonError($exception);
+        }
+    }
+
+    public function matricularColaborador(): void
+    {
+        $this->requireProfessor();
+        $this->authorizeEdit();
+
+        try {
+            $this->service->enrollStudent(
+                (int) ($_POST['course_id'] ?? $_POST['id_curso'] ?? 0),
+                (int) ($_POST['student_id'] ?? $_POST['id_usuario'] ?? 0),
+                $this->userId()
+            );
+            $this->json(['success' => true, 'message' => 'Aluno matriculado com sucesso.']);
+        } catch (\Throwable $exception) {
+            $this->jsonError($exception);
+        }
+    }
+
+    public function emitirCertificado(): void
+    {
+        $this->requireProfessor();
+        $this->authorizeEdit();
+
+        try {
+            $certificate = $this->service->issueCertificateFromEnrollment((int) ($_POST['enrollment_id'] ?? $_POST['matricula_id'] ?? 0), $this->userId());
+            $this->json([
+                'success' => true,
+                'message' => 'Certificado emitido com sucesso.',
+                'validation_code' => $certificate['validation_code'] ?? null,
+            ]);
+        } catch (\Throwable $exception) {
+            $this->jsonError($exception);
+        }
+    }
+
+    public function saveDiplomaConfig(): void
+    {
+        $this->requireProfessor();
+        $this->authorizeEdit();
+
+        try {
+            $this->service->saveCourseCertificateConfig($_POST, $_FILES, $this->userId());
+            $this->json(['success' => true, 'message' => 'Configuração de certificado salva com sucesso.']);
+        } catch (\Throwable $exception) {
+            $this->jsonError($exception);
+        }
+    }
+
+    public function diplomaLogo(): void
+    {
+        http_response_code(404);
+        echo 'Recurso movido para a configuração por curso.';
+    }
+
+    public function streamLessonVideo(int $lessonId): void
+    {
+        $this->requireProfessor();
+        $file = $this->service->lessonVideoData($lessonId, $this->userId(), true);
+        if (!$file) {
+            http_response_code(404);
+            echo 'Vídeo não encontrado.';
+            return;
+        }
+
+        if (($file['provider'] ?? '') === 'bunny' && !empty($file['playback_url'])) {
+            if (empty($file['is_ready'])) {
+                http_response_code(202);
+                header('Content-Type: text/html; charset=UTF-8');
+                echo '<!doctype html><html lang="pt-br"><head><meta charset="utf-8"><meta http-equiv="refresh" content="8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Video em processamento</title><style>body{margin:0;font-family:Outfit,Segoe UI,sans-serif;background:#0f172a;color:#e2e8f0;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}.card{max-width:640px;background:#111827;border:1px solid #1f2937;border-radius:24px;padding:32px;box-shadow:0 25px 60px rgba(0,0,0,.35)}h1{margin:0 0 12px;font-size:32px}p{line-height:1.6;color:#cbd5e1}a{display:inline-block;margin-top:16px;padding:12px 18px;border-radius:999px;background:#38bdf8;color:#082f49;text-decoration:none;font-weight:700}</style></head><body><div class="card"><h1>Video em processamento</h1><p>' . htmlspecialchars((string) ($file['processing_message'] ?? 'O Bunny Stream ainda esta preparando o video desta aula.'), ENT_QUOTES, 'UTF-8') . '</p><p>Esta tela atualiza sozinha em alguns segundos.</p><a href="javascript:window.location.reload()">Atualizar pagina agora</a></div></body></html>';
+                return;
+            }
+            header('Location: ' . $file['playback_url']);
+            exit;
+        }
+
+        $this->streamFile($file['path'], $file['mime'], false, $file['name'], true);
+    }
+
+    public function videoStatusAula(int $lessonId): void
+    {
+        $this->requireProfessor();
+
+        try {
+            $file = $this->service->lessonVideoData($lessonId, $this->userId(), true);
+            if (!$file) {
+                $this->json([
+                    'success' => true,
+                    'lesson_id' => $lessonId,
+                    'has_video' => false,
+                ]);
+            }
+
+            $this->json([
+                'success' => true,
+                'lesson_id' => $lessonId,
+                'has_video' => true,
+                'provider' => (string) ($file['provider'] ?? 'local'),
+                'status' => (string) ($file['status'] ?? ''),
+                'status_label' => (string) ($file['status_label'] ?? 'Pronto'),
+                'is_ready' => !empty($file['is_ready']),
+                'processing_message' => (string) ($file['processing_message'] ?? ''),
+                'duration_human' => (string) ($file['duration_human'] ?? ''),
+                'playback_url' => (string) ($file['playback_url'] ?? ''),
+                'embed_url' => (string) ($file['embed_url'] ?? ''),
+                'name' => (string) ($file['name'] ?? ''),
+            ]);
+        } catch (\Throwable $exception) {
+            $this->jsonError($exception);
+        }
+    }
+
+    public function downloadAttachment(int $attachmentId): void
+    {
+        $this->requireProfessor();
+        $file = $this->service->attachmentData($attachmentId, $this->userId(), true);
+        if (!$file) {
+            http_response_code(404);
+            echo 'Anexo não encontrado.';
+            return;
+        }
+
+        $this->streamFile($file['path'], $file['mime'], true, $file['name']);
+    }
+
+    private function renderWorkspace(int $courseId, string $tab): void
+    {
+        $this->requireProfessor();
+        $this->render('elearning/gestor/workspace', [
+            'title' => 'Gestão do Curso | E-Learning Professor',
+            'data' => $this->service->teacherCourseWorkspaceData($this->userId(), $courseId),
+            'activeTab' => $tab,
+            'canEdit' => $this->canEdit(),
+            'canDelete' => $this->canDelete(),
+        ]);
+    }
+
+    private function requireProfessor(): void
     {
         AuthController::requireAuth();
-        $uid = (int)($_SESSION['user_id'] ?? 0);
-        if (!PermissionService::hasPermission($uid, 'elearning_gestor', 'view')) {
-            http_response_code(403); echo '<h1>Acesso Negado</h1>'; exit;
+        if (!PermissionService::hasPermission($this->userId(), 'elearning_gestor', 'view')) {
+            http_response_code(403);
+            echo '<h1>Acesso negado</h1>';
+            exit;
+        }
+    }
+
+    private function authorizeEdit(): void
+    {
+        if (!$this->canEdit()) {
+            $this->json(['success' => false, 'message' => 'Sem permissão para editar.']);
+        }
+    }
+
+    private function authorizeDelete(): void
+    {
+        if (!$this->canDelete()) {
+            $this->json(['success' => false, 'message' => 'Sem permissão para excluir.']);
         }
     }
 
     private function canEdit(): bool
-    { return PermissionService::hasPermission((int)($_SESSION['user_id'] ?? 0), 'elearning_gestor', 'edit'); }
+    {
+        return PermissionService::hasPermission($this->userId(), 'elearning_gestor', 'edit');
+    }
 
     private function canDelete(): bool
-    { return PermissionService::hasPermission((int)($_SESSION['user_id'] ?? 0), 'elearning_gestor', 'delete'); }
+    {
+        return PermissionService::hasPermission($this->userId(), 'elearning_gestor', 'delete');
+    }
+
+    private function userId(): int
+    {
+        return (int) ($_SESSION['user_id'] ?? 0);
+    }
 
     private function render(string $view, array $data = []): void
     {
         extract($data);
         $viewFile = __DIR__ . '/../../views/pages/' . $view . '.php';
-        $title = $data['title'] ?? 'eLearning Gestor';
         include __DIR__ . '/../../views/layouts/main.php';
     }
 
-    private function json(array $p): void
+    private function json(array $payload): void
     {
-        if (ob_get_level()) ob_clean();
+        if (ob_get_level()) {
+            ob_clean();
+        }
+
         header('Content-Type: application/json');
-        echo json_encode($p);
+        echo json_encode($payload);
         exit;
     }
 
-    // ---------- DASHBOARD ----------
-    public function dashboard(): void
+    private function jsonError(\Throwable $exception): void
     {
-        $this->requireGestor();
-        try {
-            $totalCursos     = $this->db->query("SELECT COUNT(*) FROM elearning_cursos")->fetchColumn();
-            $totalMatriculas = $this->db->query("SELECT COUNT(*) FROM elearning_matriculas")->fetchColumn();
-            $totalConc       = $this->db->query("SELECT COUNT(*) FROM elearning_matriculas WHERE status='concluido'")->fetchColumn();
-            $cursos          = $this->db->query("
-                SELECT c.id, c.titulo, c.descricao, c.status, c.carga_horaria, c.criado_em,
-                       CASE WHEN c.thumbnail IS NOT NULL THEN 1 ELSE 0 END AS has_thumbnail,
-                       u.name AS gestor_nome,
-                       COUNT(m.id) AS total_matriculas
-                FROM elearning_cursos c
-                LEFT JOIN users u ON u.id = c.id_gestor
-                LEFT JOIN elearning_matriculas m ON m.id_curso = c.id
-                GROUP BY c.id ORDER BY c.criado_em DESC LIMIT 50
-            ")->fetchAll(\PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) {
-            $totalCursos = $totalMatriculas = $totalConc = 0; $cursos = [];
-        }
-        $this->render('elearning/gestor/dashboard', [
-            'title' => 'eLearning Gestor — Dashboard',
-            'totalCursos' => $totalCursos, 'totalMatriculas' => $totalMatriculas,
-            'totalConcluidos' => $totalConc, 'cursos' => $cursos,
-            'canEdit' => $this->canEdit(), 'canDelete' => $this->canDelete(),
+        $this->json([
+            'success' => false,
+            'message' => $exception->getMessage(),
         ]);
     }
 
-    // ---------- CURSOS ----------
-    public function cursos(): void
+    private function streamFile(string $path, string $mime, bool $download, string $downloadName, bool $supportRange = false): void
     {
-        $this->requireGestor();
-        try {
-            $cursos = $this->db->query("
-                SELECT c.id, c.titulo, c.descricao, c.status, c.carga_horaria, c.id_gestor, c.criado_em,
-                       CASE WHEN c.thumbnail IS NOT NULL THEN 1 ELSE 0 END AS has_thumbnail,
-                       u.name AS gestor_nome,
-                       COUNT(DISTINCT a.id) AS total_aulas,
-                       COUNT(DISTINCT m.id) AS total_matriculas
-                FROM elearning_cursos c
-                LEFT JOIN users u ON u.id = c.id_gestor
-                LEFT JOIN elearning_aulas a ON a.id_curso = c.id
-                LEFT JOIN elearning_matriculas m ON m.id_curso = c.id
-                GROUP BY c.id ORDER BY c.criado_em DESC
-            ")->fetchAll(\PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) { $cursos = []; }
-        $this->render('elearning/gestor/cursos', [
-            'title' => 'eLearning — Cursos', 'cursos' => $cursos,
-            'canEdit' => $this->canEdit(), 'canDelete' => $this->canDelete(),
-        ]);
-    }
-
-    public function storeCurso(): void
-    {
-        $this->requireGestor();
-        if (!$this->canEdit()) $this->json(['success' => false, 'message' => 'Sem permissão.']);
-        $titulo = trim($_POST['titulo'] ?? '');
-        if (!$titulo) $this->json(['success' => false, 'message' => 'Título obrigatório.']);
-        $desc   = trim($_POST['descricao'] ?? '');
-        $ch     = max(0, (int)($_POST['carga_horaria'] ?? 0));
-        $status = in_array($_POST['status'] ?? '', ['ativo','inativo','rascunho']) ? $_POST['status'] : 'rascunho';
-        $uid    = (int)($_SESSION['user_id'] ?? 0);
-
-        // Thumbnail como BLOB
-        $thumbData = null;
-        $thumbTipo = null;
-        $thumbUrl = trim($_POST['thumbnail_url'] ?? '');
-
-        if ($thumbUrl && filter_var($thumbUrl, FILTER_VALIDATE_URL)) {
-            // Baixar imagem da biblioteca e salvar como blob
-            $imgData = @file_get_contents($thumbUrl);
-            if ($imgData && strlen($imgData) > 0) {
-                $thumbData = $imgData;
-                // Detectar tipo via magic bytes
-                $finfo = new \finfo(FILEINFO_MIME_TYPE);
-                $thumbTipo = $finfo->buffer($imgData) ?: 'image/jpeg';
-            }
-        } elseif (!empty($_FILES['thumbnail']['tmp_name']) && $_FILES['thumbnail']['error'] === UPLOAD_ERR_OK) {
-            $ext = strtolower(pathinfo($_FILES['thumbnail']['name'], PATHINFO_EXTENSION));
-            $allowed = ['jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp'];
-            if (isset($allowed[$ext]) && $_FILES['thumbnail']['size'] <= 10*1024*1024) {
-                $thumbData = file_get_contents($_FILES['thumbnail']['tmp_name']);
-                $thumbTipo = $allowed[$ext];
-            }
-        }
-
-        try {
-            $st = $this->db->prepare("INSERT INTO elearning_cursos (titulo,descricao,thumbnail,thumbnail_tipo,id_gestor,status,carga_horaria,criado_em) VALUES (?,?,?,?,?,?,?,NOW())");
-            $st->execute([$titulo, $desc, $thumbData, $thumbTipo, $uid, $status, $ch]);
-            $this->json(['success' => true, 'message' => 'Curso criado!', 'id' => $this->db->lastInsertId()]);
-        } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
-    }
-
-    public function updateCurso(): void
-    {
-        $this->requireGestor();
-        if (!$this->canEdit()) $this->json(['success' => false, 'message' => 'Sem permissão.']);
-        $id = (int)($_POST['id'] ?? 0); $titulo = trim($_POST['titulo'] ?? '');
-        if (!$id || !$titulo) $this->json(['success' => false, 'message' => 'Dados inválidos.']);
-        $desc   = trim($_POST['descricao'] ?? '');
-        $ch     = max(0, (int)($_POST['carga_horaria'] ?? 0));
-        $status = in_array($_POST['status'] ?? '', ['ativo','inativo','rascunho']) ? $_POST['status'] : 'rascunho';
-
-        // Thumbnail como BLOB
-        $thumbData = null;
-        $thumbTipo = null;
-        $hasNewThumb = false;
-        $thumbUrl = trim($_POST['thumbnail_url'] ?? '');
-
-        if ($thumbUrl && filter_var($thumbUrl, FILTER_VALIDATE_URL)) {
-            $imgData = @file_get_contents($thumbUrl);
-            if ($imgData && strlen($imgData) > 0) {
-                $thumbData = $imgData;
-                $finfo = new \finfo(FILEINFO_MIME_TYPE);
-                $thumbTipo = $finfo->buffer($imgData) ?: 'image/jpeg';
-                $hasNewThumb = true;
-            }
-        } elseif (!empty($_FILES['thumbnail']['tmp_name']) && $_FILES['thumbnail']['error'] === UPLOAD_ERR_OK) {
-            $ext = strtolower(pathinfo($_FILES['thumbnail']['name'], PATHINFO_EXTENSION));
-            $allowed = ['jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp'];
-            if (isset($allowed[$ext]) && $_FILES['thumbnail']['size'] <= 10*1024*1024) {
-                $thumbData = file_get_contents($_FILES['thumbnail']['tmp_name']);
-                $thumbTipo = $allowed[$ext];
-                $hasNewThumb = true;
-            }
-        }
-
-        try {
-            if ($hasNewThumb) {
-                $this->db->prepare("UPDATE elearning_cursos SET titulo=?,descricao=?,status=?,carga_horaria=?,thumbnail=?,thumbnail_tipo=? WHERE id=?")
-                    ->execute([$titulo, $desc, $status, $ch, $thumbData, $thumbTipo, $id]);
-            } else {
-                $this->db->prepare("UPDATE elearning_cursos SET titulo=?,descricao=?,status=?,carga_horaria=? WHERE id=?")
-                    ->execute([$titulo, $desc, $status, $ch, $id]);
-            }
-            $this->json(['success' => true, 'message' => 'Curso atualizado!']);
-        } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
-    }
-
-    // ---------- SERVIR THUMBNAIL (BLOB) ----------
-    public function thumbnailCurso(): void
-    {
-        $id = (int)($_GET['id'] ?? 0);
-        if (!$id) { http_response_code(404); exit; }
-        try {
-            $st = $this->db->prepare("SELECT thumbnail, thumbnail_tipo FROM elearning_cursos WHERE id=? AND thumbnail IS NOT NULL");
-            $st->execute([$id]);
-            $row = $st->fetch(\PDO::FETCH_ASSOC);
-            if (!$row || !$row['thumbnail']) { http_response_code(404); exit; }
-            $tipo = $row['thumbnail_tipo'] ?: 'image/jpeg';
-            header('Content-Type: ' . $tipo);
-            header('Content-Length: ' . strlen($row['thumbnail']));
-            header('Cache-Control: public, max-age=86400');
-            header('ETag: "thumb-' . $id . '-' . md5(substr($row['thumbnail'], 0, 256)) . '"');
-            echo $row['thumbnail'];
-            exit;
-        } catch (\PDOException $e) { http_response_code(500); exit; }
-    }
-
-    public function deleteCurso(): void
-    {
-        $this->requireGestor();
-        if (!$this->canDelete()) $this->json(['success' => false, 'message' => 'Sem permissão.']);
-        $id = (int)($_POST['id'] ?? 0);
-        if (!$id) $this->json(['success' => false, 'message' => 'ID inválido.']);
-        try { $this->db->prepare("DELETE FROM elearning_cursos WHERE id=?")->execute([$id]);
-            $this->json(['success' => true, 'message' => 'Curso excluído!']);
-        } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
-    }
-
-    // ---------- AULAS ----------
-    public function aulas(int $cursoId): void
-    {
-        $this->requireGestor();
-        try {
-            $st = $this->db->prepare("SELECT * FROM elearning_cursos WHERE id=?");
-            $st->execute([$cursoId]); $curso = $st->fetch(\PDO::FETCH_ASSOC);
-            if (!$curso) { http_response_code(404); echo 'Curso não encontrado.'; exit; }
-            $st2 = $this->db->prepare("SELECT a.*, COUNT(m.id) AS total_materiais FROM elearning_aulas a LEFT JOIN elearning_materiais m ON m.id_aula=a.id WHERE a.id_curso=? GROUP BY a.id ORDER BY a.ordem");
-            $st2->execute([$cursoId]); $aulas = $st2->fetchAll(\PDO::FETCH_ASSOC);
-
-            // Buscar materiais de todas as aulas deste curso
-            $aulaIds = array_column($aulas, 'id');
-            $materiais = [];
-            if (!empty($aulaIds)) {
-                $placeholders = implode(',', array_fill(0, count($aulaIds), '?'));
-                $stm = $this->db->prepare("SELECT id, id_aula, tipo, titulo, arquivo_path, conteudo_texto, tamanho_bytes, ordem, criado_em FROM elearning_materiais WHERE id_aula IN ($placeholders) ORDER BY ordem, criado_em");
-                $stm->execute($aulaIds);
-                foreach ($stm->fetchAll(\PDO::FETCH_ASSOC) as $mat) {
-                    $materiais[$mat['id_aula']][] = $mat;
-                }
-            }
-            // Anexar materiais às aulas
-            foreach ($aulas as &$aula) {
-                $aula['materiais'] = $materiais[$aula['id']] ?? [];
-            }
-            unset($aula);
-        } catch (\PDOException $e) { $aulas = []; }
-        $this->render('elearning/gestor/aulas', ['title' => 'Aulas — '.($curso['titulo'] ?? ''), 'curso' => $curso, 'aulas' => $aulas,'canEdit' => $this->canEdit(),'canDelete' => $this->canDelete()]);
-    }
-
-    public function storeAula(): void
-    {
-        $this->requireGestor();
-        if (!$this->canEdit()) $this->json(['success' => false, 'message' => 'Sem permissão.']);
-        $cid = (int)($_POST['id_curso'] ?? 0); $titulo = trim($_POST['titulo'] ?? '');
-        if (!$cid || !$titulo) $this->json(['success' => false, 'message' => 'Dados obrigatórios.']);
-        try {
-            $this->db->prepare("INSERT INTO elearning_aulas (id_curso,titulo,descricao,ordem,criado_em) VALUES (?,?,?,?,NOW())")
-                ->execute([$cid, $titulo, trim($_POST['descricao'] ?? ''), (int)($_POST['ordem'] ?? 0)]);
-            $this->json(['success' => true, 'message' => 'Aula criada!', 'id' => $this->db->lastInsertId()]);
-        } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
-    }
-
-    public function deleteAula(): void
-    {
-        $this->requireGestor();
-        if (!$this->canDelete()) $this->json(['success' => false, 'message' => 'Sem permissão.']);
-        $id = (int)($_POST['id'] ?? 0);
-        if (!$id) $this->json(['success' => false, 'message' => 'ID inválido.']);
-        try { $this->db->prepare("DELETE FROM elearning_aulas WHERE id=?")->execute([$id]);
-            $this->json(['success' => true, 'message' => 'Aula excluída!']);
-        } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
-    }
-
-    // ---------- MATERIAIS ----------
-    public function uploadMaterial(): void
-    {
-        $this->requireGestor();
-        if (!$this->canEdit()) $this->json(['success' => false, 'message' => 'Sem permissão.']);
-        $aulaId = (int)($_POST['id_aula'] ?? 0); $tipo = $_POST['tipo'] ?? ''; $titulo = trim($_POST['titulo'] ?? '');
-        if (!$aulaId || !in_array($tipo, ['video','pdf','imagem','slide','texto']) || !$titulo)
-            $this->json(['success' => false, 'message' => 'Dados inválidos.']);
-
-        // Tipo TEXTO — salvar conteúdo diretamente, sem arquivo
-        if ($tipo === 'texto') {
-            $conteudo = trim($_POST['conteudo_texto'] ?? '');
-            if (!$conteudo) $this->json(['success' => false, 'message' => 'Conteúdo do texto é obrigatório.']);
-            try {
-                $this->db->prepare("INSERT INTO elearning_materiais (id_aula,tipo,titulo,arquivo_path,conteudo_texto,tamanho_bytes,ordem,criado_em) VALUES (?,?,?,NULL,?,?,?,NOW())")
-                    ->execute([$aulaId, $tipo, $titulo, $conteudo, strlen($conteudo), (int)($_POST['ordem'] ?? 0)]);
-                $this->json(['success' => true, 'message' => 'Material de texto salvo!']);
-            } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
+        if (!is_file($path)) {
+            http_response_code(404);
+            echo 'Arquivo não encontrado.';
             return;
         }
 
-        // Tipos com arquivo (video, pdf, imagem, slide)
-        if (empty($_FILES['arquivo']['tmp_name']))
-            $this->json(['success' => false, 'message' => 'Arquivo obrigatório para este tipo.']);
-        $limites = ['video' => 20,'pdf' => 20,'imagem' => 10,'slide' => 20];
-        $exts    = ['video' => ['mp4','avi','mov','webm'],'pdf' => ['pdf'],'imagem' => ['jpg','jpeg','png','gif','webp'],'slide' => ['pptx','ppt','pdf']];
-        $ext = strtolower(pathinfo($_FILES['arquivo']['name'], PATHINFO_EXTENSION));
-        if ($_FILES['arquivo']['size'] > $limites[$tipo] * 1024 * 1024)
-            $this->json(['success' => false, 'message' => "Arquivo excede {$limites[$tipo]}MB."]);
-        if (!in_array($ext, $exts[$tipo]))
-            $this->json(['success' => false, 'message' => "Extensão não permitida para $tipo."]);
-        try {
-            $st = $this->db->prepare("SELECT id_curso FROM elearning_aulas WHERE id=?"); $st->execute([$aulaId]);
-            $aula = $st->fetch(\PDO::FETCH_ASSOC);
-            if (!$aula) $this->json(['success' => false, 'message' => 'Aula não encontrada.']);
-            $cid = $aula['id_curso'];
-            
-            // --- GOOGLE DRIVE STORAGE ---
-            $driveId = null;
-            $storageType = 'local';
-            $driveFolder = $_ENV['GOOGLE_DRIVE_FOLDER_ID'] ?? null;
+        $size = filesize($path);
+        $start = 0;
+        $end = $size - 1;
 
-            if ($driveFolder) {
-                try {
-                    $driveService = new GoogleDriveService();
-                    $driveId = $driveService->uploadFile($_FILES['arquivo']['tmp_name'], $titulo . '.' . $ext, $_FILES['arquivo']['type']);
-                    $storageType = 'google_drive';
-                    $path = $driveService->getStreamLink($driveId);
-                } catch (\Exception $e) {
-                    // Fallback to local if Drive fails? Or error out?
-                    // $this->json(['success' => false, 'message' => 'Erro Google Drive: ' . $e->getMessage()]);
-                    // For now, let's fallback to local to be safe, or just continue.
-                }
+        header('Content-Type: ' . $mime);
+        header('Content-Disposition: ' . ($download ? 'attachment' : 'inline') . '; filename="' . rawurlencode($downloadName) . '"');
+        header('Accept-Ranges: bytes');
+
+        if ($supportRange && isset($_SERVER['HTTP_RANGE']) && preg_match('/bytes=(\d*)-(\d*)/', $_SERVER['HTTP_RANGE'], $matches)) {
+            if ($matches[1] !== '') {
+                $start = (int) $matches[1];
             }
-
-            if ($storageType === 'local') {
-                $sub = $tipo === 'slide' ? 'slides' : $tipo . 's';
-                $dir = __DIR__ . "/../../public/uploads/elearning/cursos/{$cid}/{$sub}/";
-                if (!is_dir($dir)) mkdir($dir, 0755, true);
-                $fn = uniqid($tipo . '_') . '.' . $ext;
-                if (!move_uploaded_file($_FILES['arquivo']['tmp_name'], $dir . $fn))
-                    $this->json(['success' => false, 'message' => 'Falha ao salvar arquivo.']);
-                $path = "/uploads/elearning/cursos/{$cid}/{$sub}/{$fn}";
+            if ($matches[2] !== '') {
+                $end = (int) $matches[2];
             }
-
-            $this->db->prepare("INSERT INTO elearning_materiais (id_aula,tipo,titulo,arquivo_path,drive_id,storage_type,tamanho_bytes,ordem,criado_em) VALUES (?,?,?,?,?,?,?,?,NOW())")
-                ->execute([$aulaId, $tipo, $titulo, $path, $driveId, $storageType, $_FILES['arquivo']['size'], (int)($_POST['ordem'] ?? 0)]);
-            
-            $this->json(['success' => true, 'message' => 'Material enviado!', 'path' => $path]);
-        } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
-    }
-
-    public function deleteMaterial(): void
-    {
-        $this->requireGestor();
-        if (!$this->canDelete()) $this->json(['success' => false, 'message' => 'Sem permissão.']);
-        $id = (int)($_POST['id'] ?? 0); if (!$id) $this->json(['success' => false, 'message' => 'ID inválido.']);
-        try {
-            $st = $this->db->prepare("SELECT arquivo_path, drive_id, storage_type FROM elearning_materiais WHERE id=?"); $st->execute([$id]);
-            $m = $st->fetch(\PDO::FETCH_ASSOC);
-            if ($m && $m['storage_type'] === 'google_drive' && !empty($m['drive_id'])) {
-                try {
-                    $driveService = new GoogleDriveService();
-                    $driveService->deleteFile($m['drive_id']);
-                } catch (\Exception $e) {}
-            } else if ($m && !empty($m['arquivo_path'])) { 
-                $full = __DIR__ . '/../../public' . $m['arquivo_path']; 
-                if (file_exists($full)) @unlink($full); 
+            $end = min($end, $size - 1);
+            if ($start > $end) {
+                $start = 0;
+                $end = $size - 1;
             }
-            $this->db->prepare("DELETE FROM elearning_materiais WHERE id=?")->execute([$id]);
-            $this->json(['success' => true, 'message' => 'Material excluído!']);
-        } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
-    }
-
-    public function updateMaterial(): void
-    {
-        $this->requireGestor();
-        if (!$this->canEdit()) $this->json(['success' => false, 'message' => 'Sem permissão.']);
-        $id = (int)($_POST['id'] ?? 0);
-        $titulo = trim($_POST['titulo'] ?? '');
-        if (!$id || !$titulo) $this->json(['success' => false, 'message' => 'Dados inválidos.']);
-
-        try {
-            // Buscar material atual
-            $st = $this->db->prepare("SELECT * FROM elearning_materiais WHERE id=?");
-            $st->execute([$id]);
-            $mat = $st->fetch(\PDO::FETCH_ASSOC);
-            if (!$mat) $this->json(['success' => false, 'message' => 'Material não encontrado.']);
-
-            if ($mat['tipo'] === 'texto') {
-                // Atualizar título e conteúdo do texto
-                $conteudo = trim($_POST['conteudo_texto'] ?? '');
-                if (!$conteudo) $this->json(['success' => false, 'message' => 'Conteúdo do texto é obrigatório.']);
-                $this->db->prepare("UPDATE elearning_materiais SET titulo=?, conteudo_texto=?, tamanho_bytes=? WHERE id=?")
-                    ->execute([$titulo, $conteudo, strlen($conteudo), $id]);
-            } else {
-                // Atualizar título (e opcionalmente o arquivo)
-                if (!empty($_FILES['arquivo']['tmp_name']) && $_FILES['arquivo']['error'] === UPLOAD_ERR_OK) {
-                    $tipo = $mat['tipo'];
-                    $limites = ['video' => 20,'pdf' => 20,'imagem' => 10,'slide' => 20];
-                    $exts = ['video' => ['mp4','avi','mov','webm'],'pdf' => ['pdf'],'imagem' => ['jpg','jpeg','png','gif','webp'],'slide' => ['pptx','ppt','pdf']];
-                    $ext = strtolower(pathinfo($_FILES['arquivo']['name'], PATHINFO_EXTENSION));
-                    if ($_FILES['arquivo']['size'] > ($limites[$tipo] ?? 20) * 1024 * 1024)
-                        $this->json(['success' => false, 'message' => "Arquivo excede limite."]);
-                    if (!in_array($ext, $exts[$tipo] ?? []))
-                        $this->json(['success' => false, 'message' => "Extensão não permitida."]);
-
-                    // Buscar id_curso via aula
-                    $sta = $this->db->prepare("SELECT id_curso FROM elearning_aulas WHERE id=?");
-                    $sta->execute([$mat['id_aula']]);
-                    $aula = $sta->fetch(\PDO::FETCH_ASSOC);
-                    $cid = $aula['id_curso'] ?? 0;
-
-                    $driveId = null;
-                    $storageType = 'local';
-                    $driveFolder = $_ENV['GOOGLE_DRIVE_FOLDER_ID'] ?? null;
-
-                    if ($driveFolder) {
-                        try {
-                            $driveService = new GoogleDriveService();
-                            $driveId = $driveService->uploadFile($_FILES['arquivo']['tmp_name'], $titulo . '.' . $ext, $_FILES['arquivo']['type']);
-                            $storageType = 'google_drive';
-                            $path = $driveService->getStreamLink($driveId);
-
-                            // Delete old Drive file if exists
-                            if ($mat['storage_type'] === 'google_drive' && !empty($mat['drive_id'])) {
-                                $driveService->deleteFile($mat['drive_id']);
-                            }
-                        } catch (\Exception $e) {}
-                    }
-
-                    if ($storageType === 'local') {
-                        $sub = $tipo === 'slide' ? 'slides' : $tipo . 's';
-                        $dir = __DIR__ . "/../../public/uploads/elearning/cursos/{$cid}/{$sub}/";
-                        if (!is_dir($dir)) mkdir($dir, 0755, true);
-                        $fn = uniqid($tipo . '_') . '.' . $ext;
-                        if (!move_uploaded_file($_FILES['arquivo']['tmp_name'], $dir . $fn))
-                            $this->json(['success' => false, 'message' => 'Falha ao salvar arquivo.']);
-                        $path = "/uploads/elearning/cursos/{$cid}/{$sub}/{$fn}";
-
-                        // Excluir arquivo local antigo
-                        if ($mat['storage_type'] === 'local' && !empty($mat['arquivo_path'])) {
-                            $old = __DIR__ . '/../../public' . $mat['arquivo_path'];
-                            if (file_exists($old)) @unlink($old);
-                        }
-                    }
-
-                    $this->db->prepare("UPDATE elearning_materiais SET titulo=?, arquivo_path=?, drive_id=?, storage_type=?, tamanho_bytes=? WHERE id=?")
-                        ->execute([$titulo, $path, $driveId, $storageType, $_FILES['arquivo']['size'], $id]);
-                } else {
-                    // Só atualizar título
-                    $this->db->prepare("UPDATE elearning_materiais SET titulo=? WHERE id=?")->execute([$titulo, $id]);
-                }
-            }
-            $this->json(['success' => true, 'message' => 'Material atualizado!']);
-        } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
-    }
-
-    // ---------- PROVAS ----------
-    public function provas(int $cursoId): void
-    {
-        $this->requireGestor();
-        try {
-            $st = $this->db->prepare("SELECT * FROM elearning_cursos WHERE id=?"); $st->execute([$cursoId]); $curso = $st->fetch(\PDO::FETCH_ASSOC);
-            $st2 = $this->db->prepare("SELECT p.*, COUNT(q.id) AS total_questoes FROM elearning_provas p LEFT JOIN elearning_questoes q ON q.id_prova=p.id WHERE p.id_curso=? GROUP BY p.id"); $st2->execute([$cursoId]);
-            $provas = $st2->fetchAll(\PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) { $provas = []; }
-        $this->render('elearning/gestor/provas', ['title' => 'Provas — '.($curso['titulo'] ?? ''), 'curso' => $curso, 'provas' => $provas,'canEdit' => $this->canEdit(),'canDelete' => $this->canDelete()]);
-    }
-
-    public function storeProva(): void
-    {
-        $this->requireGestor();
-        if (!$this->canEdit()) $this->json(['success' => false, 'message' => 'Sem permissão.']);
-        $cid = (int)($_POST['id_curso'] ?? 0); $titulo = trim($_POST['titulo'] ?? '');
-        if (!$cid || !$titulo) $this->json(['success' => false, 'message' => 'Dados obrigatórios.']);
-        try {
-            $this->db->prepare("INSERT INTO elearning_provas (id_curso,titulo,nota_minima,tentativas_max,tempo_min,ativa,criado_em) VALUES (?,?,?,?,?,1,NOW())")
-                ->execute([$cid, $titulo, (float)($_POST['nota_minima'] ?? 70), max(1,(int)($_POST['tentativas_max'] ?? 3)), max(0,(int)($_POST['tempo_min'] ?? 0))]);
-            $this->json(['success' => true, 'message' => 'Prova criada!', 'id' => $this->db->lastInsertId()]);
-        } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
-    }
-
-    public function storeQuestao(): void
-    {
-        $this->requireGestor();
-        if (!$this->canEdit()) $this->json(['success' => false, 'message' => 'Sem permissão.']);
-        $pid = (int)($_POST['id_prova'] ?? 0); $enunc = trim($_POST['enunciado'] ?? '');
-        if (!$pid || !$enunc) $this->json(['success' => false, 'message' => 'Dados obrigatórios.']);
-        $tipo = in_array($_POST['tipo'] ?? '', ['multipla','verdadeiro_falso','dissertativa']) ? $_POST['tipo'] : 'multipla';
-        try {
-            $this->db->prepare("INSERT INTO elearning_questoes (id_prova,enunciado,tipo,pontos,ordem) VALUES (?,?,?,?,?)")
-                ->execute([$pid, $enunc, $tipo, max(0.5,(float)($_POST['pontos'] ?? 1)), (int)($_POST['ordem'] ?? 0)]);
-            $qid = $this->db->lastInsertId();
-            $alts = $_POST['alternativas'] ?? []; $correta = (int)($_POST['correta'] ?? -1);
-            foreach ($alts as $i => $texto) {
-                if (!trim($texto)) continue;
-                $this->db->prepare("INSERT INTO elearning_alternativas (id_questao,texto,correta,ordem) VALUES (?,?,?,?)")
-                    ->execute([$qid, trim($texto), ($i == $correta ? 1 : 0), $i]);
-            }
-            $this->json(['success' => true, 'message' => 'Questão criada!', 'id' => $qid]);
-        } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
-    }
-
-    // ---------- MATRÍCULAS ----------
-    public function matriculas(int $cursoId): void
-    {
-        $this->requireGestor();
-        try {
-            $st = $this->db->prepare("SELECT * FROM elearning_cursos WHERE id=?"); $st->execute([$cursoId]); $curso = $st->fetch(\PDO::FETCH_ASSOC);
-            $st2 = $this->db->prepare("SELECT m.*, u.name AS usuario_nome, u.email AS usuario_email FROM elearning_matriculas m JOIN users u ON u.id=m.id_usuario WHERE m.id_curso=? ORDER BY m.data_matricula DESC");
-            $st2->execute([$cursoId]); $matriculas = $st2->fetchAll(\PDO::FETCH_ASSOC);
-            $usuarios = $this->db->query("SELECT id, name, email FROM users ORDER BY name")->fetchAll(\PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) { $matriculas = []; $usuarios = []; }
-        $this->render('elearning/gestor/matriculas', ['title' => 'Matrículas — '.($curso['titulo'] ?? ''), 'curso' => $curso,'matriculas' => $matriculas,'usuarios' => $usuarios,'canEdit' => $this->canEdit()]);
-    }
-
-    public function matricularColaborador(): void
-    {
-        $this->requireGestor();
-        if (!$this->canEdit()) $this->json(['success' => false, 'message' => 'Sem permissão.']);
-        $cid = (int)($_POST['id_curso'] ?? 0); $uid = (int)($_POST['id_usuario'] ?? 0);
-        if (!$cid || !$uid) $this->json(['success' => false, 'message' => 'Dados inválidos.']);
-        try {
-            $this->db->prepare("INSERT IGNORE INTO elearning_matriculas (id_usuario,id_curso,data_matricula,status,progresso_pct) VALUES (?,?,NOW(),'em_andamento',0)")->execute([$uid, $cid]);
-            $this->json(['success' => true, 'message' => 'Colaborador matriculado!']);
-        } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
-    }
-
-    // ---------- PROGRESSO ----------
-    public function progressoDashboard(int $cursoId): void
-    {
-        $this->requireGestor();
-        try {
-            $st = $this->db->prepare("SELECT * FROM elearning_cursos WHERE id=?"); $st->execute([$cursoId]); $curso = $st->fetch(\PDO::FETCH_ASSOC);
-            $st2 = $this->db->prepare("SELECT m.*, u.name AS usuario_nome FROM elearning_matriculas m JOIN users u ON u.id=m.id_usuario WHERE m.id_curso=? ORDER BY m.progresso_pct DESC");
-            $st2->execute([$cursoId]); $progresso = $st2->fetchAll(\PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) { $progresso = []; }
-        $this->render('elearning/gestor/progresso', ['title' => 'Progresso — '.($curso['titulo'] ?? ''), 'curso' => $curso, 'progresso' => $progresso]);
-    }
-
-    // ---------- CERTIFICADO ----------
-    public function emitirCertificado(): void
-    {
-        $this->requireGestor();
-        if (!$this->canEdit()) $this->json(['success' => false, 'message' => 'Sem permissão.']);
-        $mid = (int)($_POST['matricula_id'] ?? 0);
-        if (!$mid) $this->json(['success' => false, 'message' => 'ID inválido.']);
-        try {
-            $st = $this->db->prepare("SELECT m.id_usuario, m.id_curso FROM elearning_matriculas m WHERE m.id=?"); $st->execute([$mid]);
-            $dados = $st->fetch(\PDO::FETCH_ASSOC);
-            if (!$dados) $this->json(['success' => false, 'message' => 'Matrícula não encontrada.']);
-            $stT = $this->db->prepare("SELECT t.id FROM elearning_tentativas t JOIN elearning_provas p ON p.id=t.id_prova WHERE t.id_usuario=? AND p.id_curso=? AND t.aprovado=1 ORDER BY t.finalizado_em DESC LIMIT 1");
-            $stT->execute([$dados['id_usuario'], $dados['id_curso']]); $tent = $stT->fetch(\PDO::FETCH_ASSOC);
-            $codigo = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0x0fff)|0x4000, mt_rand(0,0x3fff)|0x8000, mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff));
-            $this->db->prepare("INSERT INTO elearning_certificados (id_usuario,id_curso,id_tentativa,codigo_validacao,emitido_em) VALUES (?,?,?,?,NOW()) ON DUPLICATE KEY UPDATE codigo_validacao=VALUES(codigo_validacao),emitido_em=NOW()")
-                ->execute([$dados['id_usuario'], $dados['id_curso'], $tent['id'] ?? null, $codigo]);
-            $this->json(['success' => true, 'message' => 'Certificado emitido!', 'codigo' => $codigo]);
-        } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
-    }
-
-    // ---------- DIPLOMAS ----------
-    public function diplomaConfig(): void
-    {
-        $this->requireGestor();
-        if (!$this->canDelete()) { // Somente admins (seguindo a lógica que admins podem excluir)
-            echo "Acesso negado."; exit;
+            http_response_code(206);
+            header("Content-Range: bytes {$start}-{$end}/{$size}");
         }
-        try {
-            $st = $this->db->prepare("SELECT * FROM elearning_config_diploma WHERE id = 1");
-            $st->execute();
-            $config = $st->fetch(\PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) { $config = null; }
 
-        $this->render('elearning/gestor/diploma_config', [
-            'title' => 'Configurar Diploma',
-            'config' => $config
-        ]);
-    }
+        $length = $end - $start + 1;
+        header('Content-Length: ' . $length);
 
-    public function saveDiplomaConfig(): void
-    {
-        $this->requireGestor();
-        if (!$this->canDelete()) $this->json(['success' => false, 'message' => 'Sem permissão.']);
-        
-        $layout = (int)($_POST['layout_ativo'] ?? 1);
-        $assinatura = trim($_POST['assinatura_texto'] ?? 'Diretoria SGQDJ');
-        $logoX = (int)($_POST['logo_x'] ?? 50);
-        $logoY = (int)($_POST['logo_y'] ?? 10);
-        $logoW = (int)($_POST['logo_width'] ?? 150);
-        
-        try {
-            if (!empty($_FILES['logo']['tmp_name']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
-                $type = $_FILES['logo']['type'];
-                $blob = file_get_contents($_FILES['logo']['tmp_name']);
-                $this->db->prepare("UPDATE elearning_config_diploma SET logo_diploma = ?, logo_tipo = ?, layout_ativo = ?, assinatura_texto = ?, logo_x = ?, logo_y = ?, logo_width = ? WHERE id = 1")
-                    ->execute([$blob, $type, $layout, $assinatura, $logoX, $logoY, $logoW]);
-            } else {
-                $this->db->prepare("UPDATE elearning_config_diploma SET layout_ativo = ?, assinatura_texto = ?, logo_x = ?, logo_y = ?, logo_width = ? WHERE id = 1")
-                    ->execute([$layout, $assinatura, $logoX, $logoY, $logoW]);
-            }
-            $this->json(['success' => true, 'message' => 'Configuração salva!']);
-        } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
-    }
-
-    public function diplomaLogo(): void
-    {
-        try {
-            $st = $this->db->prepare("SELECT logo_diploma, logo_tipo FROM elearning_config_diploma WHERE id = 1");
-            $st->execute();
-            $row = $st->fetch(\PDO::FETCH_ASSOC);
-            if (!$row || !$row['logo_diploma']) {
-                http_response_code(404); exit;
-            }
-            header('Content-Type: ' . $row['logo_tipo']);
-            header('Content-Length: ' . strlen($row['logo_diploma']));
-            echo $row['logo_diploma'];
-            exit;
-        } catch (\PDOException $e) { http_response_code(500); exit; }
+        $handle = fopen($path, 'rb');
+        fseek($handle, $start);
+        $remaining = $length;
+        while (!feof($handle) && $remaining > 0) {
+            $read = min(8192, $remaining);
+            echo fread($handle, $read);
+            $remaining -= $read;
+            flush();
+        }
+        fclose($handle);
+        exit;
     }
 }

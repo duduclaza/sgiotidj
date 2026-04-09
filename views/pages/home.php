@@ -75,6 +75,22 @@ $dashboardModules = [
         'href' => '/pops-e-its'
     ],
     [
+        'id' => 'elearning_gestor',
+        'label' => 'E-Learning Professor',
+        'desc' => 'Criar cursos, aulas, provas, certificados e relatórios acadêmicos.',
+        'icon' => 'ph-chalkboard-teacher',
+        'color' => 'sky',
+        'href' => '/elearning/gestor'
+    ],
+    [
+        'id' => 'elearning_colaborador',
+        'label' => 'E-Learning Aluno',
+        'desc' => 'Assistir aulas, realizar provas, acompanhar progresso e emitir certificados.',
+        'icon' => 'ph-student',
+        'color' => 'emerald',
+        'href' => '/elearning/colaborador'
+    ],
+    [
         'id' => 'admin_usuarios',
         'label' => 'Administração',
         'desc' => 'Gerenciar usuários, perfis e solicitações.',

@@ -37,7 +37,7 @@ function e($string) {
     <title>SGQ OTI DJ - Sistema de Gestão da Qualidade</title>
     <script>if(window.console){const o=console.warn;console.warn=(...a)=>{if(a[0]&&String(a[0]).includes('cdn.tail'))return;o.apply(console,a)}}</script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/src/Support/modal-styles.css?v=<?= file_exists(__DIR__ . '/../src/Support/modal-styles.css') ? filemtime(__DIR__ . '/../src/Support/modal-styles.css') : time() ?>">
+    <link rel="stylesheet" href="/assets/modal-styles.css?v=<?= file_exists(__DIR__ . '/../public/assets/modal-styles.css') ? filemtime(__DIR__ . '/../public/assets/modal-styles.css') : time() ?>">
     <style>
         .submenu { transition: all 0.3s ease; }
         .submenu.hidden { max-height: 0; opacity: 0; }

@@ -278,6 +278,11 @@ const modulesByCategory = {
   ]
 };
 
+modulesByCategory['EducaÃ§Ã£o Corporativa'] = [
+  { key: 'elearning_gestor', name: 'E-Learning: Professor 👨‍🏫' },
+  { key: 'elearning_colaborador', name: 'E-Learning: Aluno 🎓' }
+];
+
 // Flatten modules for legacy support
 const modules = Object.values(modulesByCategory).flat();
 

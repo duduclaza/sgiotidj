@@ -1,115 +1,138 @@
 <?php
-// views/pages/elearning/gestor/dashboard.php
+$stats = $data['stats'] ?? [];
+$courses = $data['courses'] ?? [];
+$storage = $data['storage'] ?? [];
+$charts = $data['charts'] ?? [];
+$schemaReady = (bool) ($data['schema_ready'] ?? false);
 ?>
-<style>
-  .el-fade-in { animation: elFadeIn .4s ease; }
-  @keyframes elFadeIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
-  .el-card-hover { transition: transform .2s, box-shadow .2s; }
-  .el-card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,.12); }
-  .el-gradient-header { background: linear-gradient(135deg, #1e40af 0%, #6366f1 50%, #8b5cf6 100%); }
-  .el-thumb { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); }
-</style>
 
-<div class="space-y-6 el-fade-in">
+<section class="space-y-8">
+    <div class="overflow-hidden rounded-[2rem] border border-slate-200 bg-[linear-gradient(135deg,_#0f172a,_#1d4ed8_55%,_#0f766e)] p-8 text-white shadow-2xl">
+        <div class="grid gap-8 xl:grid-cols-[1.35fr,0.95fr]">
+            <div class="space-y-5">
+                <p class="text-xs font-semibold uppercase tracking-[0.35em] text-sky-100/70">Submodulo Professor</p>
+                <h1 class="max-w-3xl text-4xl font-black tracking-tight sm:text-5xl">Orquestre cursos, video-aulas, avaliacoes e certificados com o padrao visual do SGI.</h1>
+                <p class="max-w-3xl text-base leading-relaxed text-sky-50/80">Este painel resume publicacao de cursos, adesao dos alunos, taxa de aprovacao e o consumo dos minutos de video enviados ao Bunny Stream.</p>
+                <div class="flex flex-wrap gap-3">
+                    <a href="/elearning/gestor/cursos" class="rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]">Gerenciar cursos</a>
+                    <a href="/elearning/gestor/armazenamento" class="rounded-full border border-white/20 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10">Painel de armazenamento</a>
+                    <a href="/elearning/gestor/relatorios" class="rounded-full border border-white/20 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10">Relatorios</a>
+                </div>
+            </div>
 
-  <!-- Hero Header -->
-  <div class="el-gradient-header rounded-2xl p-6 sm:p-8 text-white shadow-lg">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <div>
-        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
-          <span class="text-3xl">🎓</span> eLearning Gestor
-        </h1>
-        <p class="text-blue-100 text-sm mt-1">Gerencie cursos, aulas, provas e certificados</p>
-      </div>
-      <?php if ($canEdit): ?>
-      <a href="/elearning/gestor/cursos"
-        class="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition border border-white/30 shadow-sm">
-        ➕ Gerenciar Cursos
-      </a>
-      <?php endif; ?>
-    </div>
-  </div>
-
-  <!-- Stats Cards -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-    <div class="bg-white rounded-2xl shadow-md p-6 border-l-4 border-indigo-500 el-card-hover">
-      <div class="flex items-center justify-between">
-        <div>
-          <div class="text-3xl font-bold text-indigo-600"><?= (int)$totalCursos ?></div>
-          <div class="text-sm text-gray-500 mt-1 font-medium">Cursos Cadastrados</div>
+            <div class="grid gap-4 sm:grid-cols-2">
+                <?php foreach ([
+                    ['label' => 'Cursos', 'value' => $stats['total_courses'] ?? 0, 'icon' => 'ph-books'],
+                    ['label' => 'Aulas', 'value' => $stats['total_lessons'] ?? 0, 'icon' => 'ph-play-circle'],
+                    ['label' => 'Alunos matriculados', 'value' => $stats['total_students'] ?? 0, 'icon' => 'ph-users-three'],
+                    ['label' => 'Taxa media de aprovacao', 'value' => number_format((float) ($stats['approval_rate'] ?? 0), 0) . '%', 'icon' => 'ph-chart-line-up'],
+                ] as $card): ?>
+                    <article class="rounded-[1.75rem] border border-white/10 bg-white/10 p-5 backdrop-blur-xl">
+                        <div class="flex items-center justify-between">
+                            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-white">
+                                <i class="ph <?= $card['icon'] ?> text-xl"></i>
+                            </div>
+                            <span class="text-xs font-semibold uppercase tracking-[0.25em] text-white/60">Professor</span>
+                        </div>
+                        <p class="mt-5 text-3xl font-black text-white"><?= e((string) $card['value']) ?></p>
+                        <p class="mt-2 text-sm text-sky-50/80"><?= e($card['label']) ?></p>
+                    </article>
+                <?php endforeach; ?>
+            </div>
         </div>
-        <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center text-2xl">📚</div>
-      </div>
-    </div>
-    <div class="bg-white rounded-2xl shadow-md p-6 border-l-4 border-green-500 el-card-hover">
-      <div class="flex items-center justify-between">
-        <div>
-          <div class="text-3xl font-bold text-green-600"><?= (int)$totalMatriculas ?></div>
-          <div class="text-sm text-gray-500 mt-1 font-medium">Matrículas Totais</div>
-        </div>
-        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-2xl">👥</div>
-      </div>
-    </div>
-    <div class="bg-white rounded-2xl shadow-md p-6 border-l-4 border-purple-500 el-card-hover">
-      <div class="flex items-center justify-between">
-        <div>
-          <div class="text-3xl font-bold text-purple-600"><?= (int)$totalConcluidos ?></div>
-          <div class="text-sm text-gray-500 mt-1 font-medium">Cursos Concluídos</div>
-        </div>
-        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-2xl">🏆</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Courses Grid -->
-  <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
-    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-gray-50 to-white">
-      <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">📚 Cursos Recentes</h2>
-      <a href="/elearning/gestor/cursos" class="text-indigo-600 hover:text-indigo-700 text-sm font-semibold transition">Ver todos →</a>
     </div>
 
-    <?php if (empty($cursos)): ?>
-    <div class="p-12 text-center">
-      <div class="text-5xl mb-4">📚</div>
-      <h3 class="text-lg font-semibold text-gray-600 mb-1">Nenhum curso cadastrado</h3>
-      <p class="text-sm text-gray-400 mb-4">Comece criando seu primeiro curso</p>
-      <a href="/elearning/gestor/cursos" class="inline-flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition">
-        ➕ Criar Curso
-      </a>
-    </div>
-    <?php else: ?>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-5">
-      <?php foreach ($cursos as $c): ?>
-      <?php
-        $sc = ['ativo'=>'green','rascunho'=>'yellow','inativo'=>'gray'][$c['status']] ?? 'gray';
-      ?>
-      <div class="el-card-hover bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
-        <?php if (!empty($c['has_thumbnail'])): ?>
-        <img src="/elearning/gestor/cursos/thumbnail?id=<?= (int)$c['id'] ?>" class="w-full h-32 object-cover" alt="">
-        <?php else: ?>
-        <div class="el-thumb h-32 flex items-center justify-center"><span class="text-4xl text-white/80">🎓</span></div>
-        <?php endif; ?>
-        <div class="p-4 flex flex-col flex-1">
-          <div class="flex items-start justify-between gap-2 mb-2">
-            <h3 class="font-bold text-gray-900 text-sm leading-tight"><?= htmlspecialchars($c['titulo']) ?></h3>
-            <span class="flex-shrink-0 px-1.5 py-0.5 rounded text-[10px] font-bold bg-<?= $sc ?>-100 text-<?= $sc ?>-700">
-              <?= strtoupper($c['status']) ?>
-            </span>
-          </div>
-          <div class="text-xs text-gray-400 mb-2"><?= htmlspecialchars($c['gestor_nome'] ?? '-') ?></div>
-          <div class="flex items-center gap-3 text-xs text-gray-400 mt-auto pt-2 border-t border-gray-50">
-            <span>👥 <?= (int)($c['total_matriculas'] ?? 0) ?></span>
-          </div>
-          <div class="flex flex-wrap gap-1.5 mt-3">
-            <a href="/elearning/gestor/cursos/<?= (int)$c['id'] ?>/aulas" class="text-[10px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded-md transition">Aulas</a>
-            <a href="/elearning/gestor/cursos/<?= (int)$c['id'] ?>/provas" class="text-[10px] font-semibold text-purple-600 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-md transition">Provas</a>
-            <a href="/elearning/gestor/cursos/<?= (int)$c['id'] ?>/matriculas" class="text-[10px] font-semibold text-green-600 bg-green-50 hover:bg-green-100 px-2 py-0.5 rounded-md transition">Matrículas</a>
-            <a href="/elearning/gestor/cursos/<?= (int)$c['id'] ?>/progresso" class="text-[10px] font-semibold text-teal-600 bg-teal-50 hover:bg-teal-100 px-2 py-0.5 rounded-md transition">Progresso</a>
-          </div>
+    <?php if (!$schemaReady): ?>
+        <div class="rounded-[1.75rem] border border-amber-300 bg-amber-50 px-5 py-4 text-sm leading-relaxed text-amber-950">
+            O front-end do modulo foi implantado, mas o schema MariaDB ainda nao existe neste ambiente. Execute o SQL do E-Learning para habilitar persistencia, uploads e relatorios reais.
         </div>
-      </div>
-      <?php endforeach; ?>
-    </div>
     <?php endif; ?>
-  </div>
-</div>
+
+    <div class="grid gap-6 xl:grid-cols-[1.35fr,0.95fr]">
+        <section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-xl">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">Cursos ativos</p>
+                    <h2 class="mt-2 text-3xl font-black tracking-tight text-slate-900">Radar de operacao</h2>
+                </div>
+                <a href="/elearning/gestor/cursos" class="rounded-full border border-slate-200 px-4 py-2 text-sm font-black text-slate-700 transition hover:bg-slate-50">Ver todos</a>
+            </div>
+            <div class="mt-6 grid gap-4 lg:grid-cols-2">
+                <?php if (!$courses): ?>
+                    <div class="rounded-[1.75rem] border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-slate-500 lg:col-span-2">Nenhum curso cadastrado ainda.</div>
+                <?php endif; ?>
+                <?php foreach (array_slice($courses, 0, 4) as $course): ?>
+                    <article class="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-slate-50 shadow-sm">
+                        <div class="aspect-[16/9] bg-slate-900">
+                            <img src="<?= e($course['cover_url']) ?>" alt="<?= e($course['title']) ?>" class="h-full w-full object-cover">
+                        </div>
+                        <div class="space-y-4 p-5">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <span class="rounded-full bg-slate-900 px-3 py-1 text-[11px] font-black uppercase tracking-[0.24em] text-white"><?= e($course['status_label'] ?? 'Rascunho') ?></span>
+                                <span class="rounded-full bg-sky-100 px-3 py-1 text-[11px] font-black uppercase tracking-[0.24em] text-sky-700"><?= e($course['category'] ?? 'Geral') ?></span>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-black tracking-tight text-slate-900"><?= e($course['title']) ?></h3>
+                                <p class="mt-2 text-sm text-slate-600"><?= (int) ($course['lessons_count'] ?? 0) ?> aulas, <?= (int) ($course['enrollments_count'] ?? 0) ?> alunos, progresso medio de <?= number_format((float) ($course['avg_progress'] ?? 0), 0) ?>%.</p>
+                            </div>
+                            <div class="flex flex-wrap gap-3">
+                                <a href="/elearning/gestor/cursos/<?= (int) $course['id'] ?>/aulas" class="rounded-full bg-slate-900 px-4 py-2 text-sm font-black text-white transition hover:scale-[1.02]">Abrir curso</a>
+                                <a href="/elearning/gestor/cursos/<?= (int) $course['id'] ?>/provas" class="rounded-full border border-slate-200 px-4 py-2 text-sm font-black text-slate-700 transition hover:bg-white">Provas</a>
+                            </div>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+        </section>
+
+        <aside class="space-y-6">
+            <section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-xl">
+                <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">Armazenamento</p>
+                <h2 class="mt-2 text-3xl font-black tracking-tight text-slate-900">Capacidade de video</h2>
+                <div class="mt-5 space-y-3">
+                    <div class="flex items-center justify-between text-sm text-slate-600">
+                        <span>Uso atual</span>
+                        <strong class="text-slate-900"><?= e($storage['used_human'] ?? '0 min') ?></strong>
+                    </div>
+                    <div class="flex items-center justify-between text-sm text-slate-600">
+                        <span>Disponivel</span>
+                        <strong class="text-slate-900"><?= e($storage['available_human'] ?? '10.000 min') ?></strong>
+                    </div>
+                    <div class="h-3 overflow-hidden rounded-full bg-slate-100">
+                        <div class="h-full rounded-full <?= ($storage['alert_level'] ?? 'healthy') === 'critical' ? 'bg-rose-500' : ((($storage['alert_level'] ?? 'healthy') === 'warning') ? 'bg-amber-500' : 'bg-emerald-500') ?>" style="width: <?= min(100, max(0, (float) ($storage['percent_used'] ?? 0))) ?>%"></div>
+                    </div>
+                    <p class="text-sm font-semibold text-slate-600">Consumo de <?= number_format((float) ($storage['percent_used'] ?? 0), 2, ',', '.') ?>% sobre os minutos contratados.</p>
+                    <?php if (($storage['alert_level'] ?? 'healthy') !== 'healthy'): ?>
+                        <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                            <?= ($storage['is_upload_blocked'] ?? false)
+                                ? 'Limite de minutos de video atingido. Contrate mais capacidade para continuar enviando novos conteudos.'
+                                : 'Alerta de 80% atingido. Planeje a ampliacao de minutos para nao interromper uploads.' ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </section>
+
+            <section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-xl">
+                <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">Graficos</p>
+                <h2 class="mt-2 text-3xl font-black tracking-tight text-slate-900">Matriculas por curso</h2>
+                <div class="mt-5 space-y-4">
+                    <?php if (empty($charts['enrollments'])): ?>
+                        <p class="text-sm text-slate-500">Os graficos aparecerao assim que houver cursos e matriculas registradas.</p>
+                    <?php endif; ?>
+                    <?php foreach ($charts['enrollments'] as $bar): ?>
+                        <?php $width = ($stats['total_students'] ?? 0) > 0 ? ((int) $bar['value'] / max(1, (int) $stats['total_students'])) * 100 : 0; ?>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="font-semibold text-slate-700"><?= e($bar['label']) ?></span>
+                                <strong class="text-slate-900"><?= (int) $bar['value'] ?></strong>
+                            </div>
+                            <div class="h-3 overflow-hidden rounded-full bg-slate-100">
+                                <div class="h-full rounded-full bg-[linear-gradient(90deg,_#2563eb,_#0ea5e9)]" style="width: <?= min(100, $width) ?>%"></div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </section>
+        </aside>
+    </div>
+</section>

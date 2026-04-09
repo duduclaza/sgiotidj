@@ -1,466 +1,354 @@
 <?php
+
 namespace App\Controllers;
 
-use App\Config\Database;
-use App\Controllers\AuthController;
+use App\Services\ELearningService;
 use App\Services\PermissionService;
 
 class ELearningColaboradorController
 {
-    private $db;
+    private ELearningService $service;
 
-    public function __construct() { $this->db = Database::getInstance(); }
+    public function __construct()
+    {
+        $this->service = new ELearningService();
+    }
 
-    private function requireColaborador(): void
+    public function meusCursos(): void
+    {
+        $this->requireAluno();
+        $this->render('elearning/colaborador/dashboard', [
+            'title' => 'E-Learning Aluno',
+            'data' => $this->service->studentDashboardData($this->userId()),
+        ]);
+    }
+
+    public function matricularSe(): void
+    {
+        $this->requireAluno();
+
+        try {
+            $this->service->selfEnroll((int) ($_POST['course_id'] ?? $_POST['curso_id'] ?? 0), $this->userId());
+            $this->json(['success' => true, 'message' => 'Matrícula realizada com sucesso.']);
+        } catch (\Throwable $exception) {
+            $this->jsonError($exception);
+        }
+    }
+
+    public function verCurso($cursoId): void
+    {
+        $this->requireAluno();
+
+        try {
+            $this->render('elearning/colaborador/course', [
+                'title' => 'Curso | E-Learning Aluno',
+                'data' => $this->service->studentCourseData($this->userId(), (int) $cursoId),
+            ]);
+        } catch (\Throwable $exception) {
+            $this->renderError($exception->getMessage());
+        }
+    }
+
+    public function continuar($cursoId): void
+    {
+        $this->requireAluno();
+
+        try {
+            $course = $this->service->studentCourseData($this->userId(), (int) $cursoId);
+            foreach ($course['lessons'] as $lesson) {
+                if ((int) ($lesson['is_completed'] ?? 0) !== 1) {
+                    header('Location: /elearning/colaborador/materiais/' . (int) $lesson['id'] . '/assistir');
+                    exit;
+                }
+            }
+
+            if (!empty($course['lessons'][0]['id'])) {
+                header('Location: /elearning/colaborador/materiais/' . (int) $course['lessons'][0]['id'] . '/assistir');
+                exit;
+            }
+        } catch (\Throwable) {
+        }
+
+        header('Location: /elearning/colaborador');
+        exit;
+    }
+
+    public function assistirAula($lessonId): void
+    {
+        $this->requireAluno();
+
+        try {
+            $this->render('elearning/colaborador/lesson', [
+                'title' => 'Aula | E-Learning Aluno',
+                'data' => $this->service->studentLessonData($this->userId(), (int) $lessonId),
+            ]);
+        } catch (\Throwable $exception) {
+            $this->renderError($exception->getMessage());
+        }
+    }
+
+    public function registrarProgresso(): void
+    {
+        $this->requireAluno();
+
+        try {
+            $result = $this->service->markLessonProgress(
+                (int) ($_POST['lesson_id'] ?? $_POST['id_material'] ?? 0),
+                $this->userId(),
+                (float) ($_POST['progress_percent'] ?? $_POST['pct'] ?? 100)
+            );
+            $this->json(['success' => true, 'data' => $result]);
+        } catch (\Throwable $exception) {
+            $this->jsonError($exception);
+        }
+    }
+
+    public function fazerProva(int $provaId): void
+    {
+        $this->requireAluno();
+
+        try {
+            $this->render('elearning/colaborador/exam', [
+                'title' => 'Prova | E-Learning Aluno',
+                'data' => $this->service->examData($this->userId(), $provaId),
+            ]);
+        } catch (\Throwable $exception) {
+            $this->renderError($exception->getMessage());
+        }
+    }
+
+    public function submeterProva(): void
+    {
+        $this->requireAluno();
+
+        try {
+            $result = $this->service->submitExam(
+                (int) ($_POST['exam_id'] ?? $_POST['prova_id'] ?? 0),
+                $this->userId(),
+                $_POST['answers'] ?? $_POST['respostas'] ?? []
+            );
+            $this->json([
+                'success' => true,
+                'message' => 'Prova enviada com sucesso.',
+                'attempt_id' => $result['attempt_id'],
+                'approved' => $result['approved'],
+                'score_percent' => $result['score_percent'],
+            ]);
+        } catch (\Throwable $exception) {
+            $this->jsonError($exception);
+        }
+    }
+
+    public function resultadoProva(int $tentativaId): void
+    {
+        $this->requireAluno();
+
+        try {
+            $this->render('elearning/colaborador/exam_result', [
+                'title' => 'Resultado da Prova',
+                'data' => $this->service->examResultData($this->userId(), $tentativaId),
+            ]);
+        } catch (\Throwable $exception) {
+            $this->renderError($exception->getMessage());
+        }
+    }
+
+    public function meusCertificados(): void
+    {
+        $this->requireAluno();
+        $this->render('elearning/colaborador/certificates', [
+            'title' => 'Certificados',
+            'data' => $this->service->studentCertificatesData($this->userId()),
+        ]);
+    }
+
+    public function historico(): void
+    {
+        $this->requireAluno();
+        $this->render('elearning/colaborador/history', [
+            'title' => 'Histórico de Cursos',
+            'data' => $this->service->studentHistoryData($this->userId()),
+        ]);
+    }
+
+    public function downloadCertificado(string $codigo): void
+    {
+        $this->requireAluno();
+
+        try {
+            $data = $this->service->certificateDownloadData($codigo, $this->userId());
+            extract($data, EXTR_OVERWRITE);
+            include __DIR__ . '/../../views/pages/elearning/colaborador/certificate_print.php';
+        } catch (\Throwable $exception) {
+            $this->renderError($exception->getMessage());
+        }
+    }
+
+    public function streamLessonVideo(int $lessonId): void
+    {
+        $this->requireAluno();
+        $file = $this->service->lessonVideoData($lessonId, $this->userId(), false);
+        if (!$file) {
+            http_response_code(404);
+            echo 'Vídeo não encontrado.';
+            return;
+        }
+
+        if (($file['provider'] ?? '') === 'bunny' && !empty($file['playback_url'])) {
+            if (empty($file['is_ready'])) {
+                http_response_code(202);
+                header('Content-Type: text/html; charset=UTF-8');
+                echo '<!doctype html><html lang="pt-br"><head><meta charset="utf-8"><meta http-equiv="refresh" content="8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Video em processamento</title><style>body{margin:0;font-family:Outfit,Segoe UI,sans-serif;background:#020617;color:#e2e8f0;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}.card{max-width:640px;background:#0f172a;border:1px solid #1e293b;border-radius:24px;padding:32px;box-shadow:0 25px 60px rgba(0,0,0,.35)}h1{margin:0 0 12px;font-size:32px}p{line-height:1.6;color:#cbd5e1}a{display:inline-block;margin-top:16px;padding:12px 18px;border-radius:999px;background:#38bdf8;color:#082f49;text-decoration:none;font-weight:700}</style></head><body><div class="card"><h1>Video em processamento</h1><p>' . htmlspecialchars((string) ($file['processing_message'] ?? 'O Bunny Stream ainda esta preparando o video desta aula.'), ENT_QUOTES, 'UTF-8') . '</p><p>Esta tela atualiza sozinha em alguns segundos.</p><a href="javascript:window.location.reload()">Atualizar pagina agora</a></div></body></html>';
+                return;
+            }
+            header('Location: ' . $file['playback_url']);
+            exit;
+        }
+
+        $this->streamFile($file['path'], $file['mime'], false, $file['name'], true);
+    }
+
+    public function videoStatusAula(int $lessonId): void
+    {
+        $this->requireAluno();
+
+        try {
+            $file = $this->service->lessonVideoData($lessonId, $this->userId(), false);
+            if (!$file) {
+                $this->json([
+                    'success' => true,
+                    'lesson_id' => $lessonId,
+                    'has_video' => false,
+                ]);
+            }
+
+            $this->json([
+                'success' => true,
+                'lesson_id' => $lessonId,
+                'has_video' => true,
+                'provider' => (string) ($file['provider'] ?? 'local'),
+                'status' => (string) ($file['status'] ?? ''),
+                'status_label' => (string) ($file['status_label'] ?? 'Pronto'),
+                'is_ready' => !empty($file['is_ready']),
+                'processing_message' => (string) ($file['processing_message'] ?? ''),
+                'duration_human' => (string) ($file['duration_human'] ?? ''),
+                'playback_url' => (string) ($file['playback_url'] ?? ''),
+                'embed_url' => (string) ($file['embed_url'] ?? ''),
+                'name' => (string) ($file['name'] ?? ''),
+            ]);
+        } catch (\Throwable $exception) {
+            $this->jsonError($exception);
+        }
+    }
+
+    public function downloadAttachment(int $attachmentId): void
+    {
+        $this->requireAluno();
+        $file = $this->service->attachmentData($attachmentId, $this->userId(), false);
+        if (!$file) {
+            http_response_code(404);
+            echo 'Anexo não encontrado.';
+            return;
+        }
+
+        $this->streamFile($file['path'], $file['mime'], true, $file['name']);
+    }
+
+    private function requireAluno(): void
     {
         AuthController::requireAuth();
-        $uid = (int)($_SESSION['user_id'] ?? 0);
-        if (!PermissionService::hasPermission($uid, 'elearning_colaborador', 'view')) {
-            http_response_code(403); echo '<h1>Acesso Negado</h1>'; exit;
+        if (!PermissionService::hasPermission($this->userId(), 'elearning_colaborador', 'view')) {
+            http_response_code(403);
+            echo '<h1>Acesso negado</h1>';
+            exit;
         }
+    }
+
+    private function userId(): int
+    {
+        return (int) ($_SESSION['user_id'] ?? 0);
     }
 
     private function render(string $view, array $data = []): void
     {
         extract($data);
         $viewFile = __DIR__ . '/../../views/pages/' . $view . '.php';
-        $title = $data['title'] ?? 'eLearning';
-        $layout = $data['layout'] ?? 'main';
-        include __DIR__ . '/../../views/layouts/' . $layout . '.php';
+        include __DIR__ . '/../../views/layouts/elearning_student.php';
     }
 
-    private function json(array $p): void
+    private function renderError(string $message): void
     {
-        if (ob_get_level()) ob_clean();
+        http_response_code(422);
+        $this->render('elearning/colaborador/error', [
+            'title' => 'E-Learning Aluno',
+            'message' => $message,
+        ]);
+    }
+
+    private function json(array $payload): void
+    {
+        if (ob_get_level()) {
+            ob_clean();
+        }
+
         header('Content-Type: application/json');
-        echo json_encode($p);
+        echo json_encode($payload);
         exit;
     }
 
-    // ---------- CATÁLOGO DE CURSOS ----------
-    public function meusCursos(): void
+    private function jsonError(\Throwable $exception): void
     {
-        $this->requireColaborador();
-        $uid = (int)($_SESSION['user_id'] ?? 0);
-        try {
-            // Buscar TODOS os cursos ativos (catálogo), com status de matrícula do usuário
-            $st = $this->db->prepare("
-                SELECT c.id, c.titulo, c.descricao, c.carga_horaria, c.status,
-                       CASE WHEN c.thumbnail IS NOT NULL THEN 1 ELSE 0 END AS has_thumbnail,
-                       m.id AS matricula_id, m.progresso_pct, m.status AS matricula_status, m.concluido_em,
-                       u.name AS gestor_nome,
-                       COUNT(DISTINCT a.id) AS total_aulas
-                FROM elearning_cursos c
-                JOIN users u ON u.id = c.id_gestor
-                LEFT JOIN elearning_aulas a ON a.id_curso = c.id
-                LEFT JOIN elearning_matriculas m ON m.id_curso = c.id AND m.id_usuario = ?
-                WHERE c.status = 'ativo'
-                GROUP BY c.id, m.id, m.progresso_pct, m.status, m.concluido_em, u.name
-                ORDER BY c.criado_em DESC
-            ");
-            $st->execute([$uid]);
-            $cursos = $st->fetchAll(\PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) { $cursos = []; }
-        $this->render('elearning/colaborador/meus_cursos', [
-            'title' => 'Catálogo de Cursos — eLearning', 
-            'cursos' => $cursos,
-            'layout' => 'elearning_student'
+        $this->json([
+            'success' => false,
+            'message' => $exception->getMessage(),
         ]);
     }
 
-    // ---------- AUTO-MATRÍCULA ----------
-    public function matricularSe(): void
+    private function streamFile(string $path, string $mime, bool $download, string $downloadName, bool $supportRange = false): void
     {
-        $this->requireColaborador();
-        $uid = (int)($_SESSION['user_id'] ?? 0);
-        $cursoId = (int)($_POST['curso_id'] ?? 0);
-        $redirect = isset($_POST['redirect']) && $_POST['redirect'] === '1';
-        
-        if (!$cursoId) $this->json(['success' => false, 'message' => 'ID do curso inválido.']);
-        try {
-            // Verificar se o curso está ativo
-            $stC = $this->db->prepare("SELECT id FROM elearning_cursos WHERE id=? AND status='ativo'");
-            $stC->execute([$cursoId]); 
-            if (!$stC->fetch()) $this->json(['success' => false, 'message' => 'Curso não disponível.']);
-            
-            $this->db->prepare("INSERT IGNORE INTO elearning_matriculas (id_usuario, id_curso, data_matricula, status, progresso_pct) VALUES (?,?,NOW(),'em_andamento',0)")
-                ->execute([$uid, $cursoId]);
-                
-            $this->json([
-                'success' => true, 
-                'message' => 'Matrícula realizada com sucesso!',
-                'redirect_url' => $redirect ? "/elearning/colaborador/cursos/{$cursoId}" : null
-            ]);
-        } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
-    }
-
-    // ---------- DETALHE DO CURSO ----------
-    public function verCurso($cursoId): void
-    {
-        $this->requireColaborador();
-        $uid = (int)($_SESSION['user_id'] ?? 0);
-        $cursoId = (int)$cursoId;
-        
-        if (!$cursoId) { 
-            header('Location: /elearning/colaborador'); exit;
+        if (!is_file($path)) {
+            http_response_code(404);
+            echo 'Arquivo não encontrado.';
+            return;
         }
 
-        try {
-            // Verificar matrícula
-            $stM = $this->db->prepare("SELECT * FROM elearning_matriculas WHERE id_usuario=? AND id_curso=?");
-            $stM->execute([$uid, $cursoId]); $matricula = $stM->fetch(\PDO::FETCH_ASSOC);
-            if (!$matricula) { http_response_code(403); echo 'Você não está matriculado neste curso.'; exit; }
+        $size = filesize($path);
+        $start = 0;
+        $end = $size - 1;
 
-            $stC = $this->db->prepare("SELECT * FROM elearning_cursos WHERE id=? AND status='ativo'");
-            $stC->execute([$cursoId]); $curso = $stC->fetch(\PDO::FETCH_ASSOC);
-            if (!$curso) { http_response_code(404); echo 'Curso não encontrado.'; exit; }
+        header('Content-Type: ' . $mime);
+        header('Content-Disposition: ' . ($download ? 'attachment' : 'inline') . '; filename="' . rawurlencode($downloadName) . '"');
+        header('Accept-Ranges: bytes');
 
-            // Buscar aulas
-            $stA = $this->db->prepare("SELECT * FROM elearning_aulas WHERE id_curso=? ORDER BY ordem");
-            $stA->execute([$cursoId]); $aulas = $stA->fetchAll(\PDO::FETCH_ASSOC);
-
-            // Buscar materiais (todos do curso)
-            $stMatAll = $this->db->prepare("SELECT m.* FROM elearning_materiais m JOIN elearning_aulas a ON a.id=m.id_aula WHERE a.id_curso=? ORDER BY m.ordem");
-            $stMatAll->execute([$cursoId]);
-            $materiaisRaw = $stMatAll->fetchAll(\PDO::FETCH_ASSOC);
-            
-            // Agrupar materiais por aula e marcar vistos
-            $materiaisByAula = [];
-            foreach ($materiaisRaw as $m) {
-                $materiaisByAula[$m['id_aula']][] = $m;
+        if ($supportRange && isset($_SERVER['HTTP_RANGE']) && preg_match('/bytes=(\d*)-(\d*)/', $_SERVER['HTTP_RANGE'], $matches)) {
+            if ($matches[1] !== '') {
+                $start = (int) $matches[1];
             }
-
-            // Progresso por material do usuário logado
-            $stP = $this->db->prepare("SELECT id_material, visualizado FROM elearning_progresso WHERE id_usuario=?");
-            $stP->execute([$uid]); $progressoRaw = $stP->fetchAll(\PDO::FETCH_ASSOC);
-            $progresso = [];
-            foreach ($progressoRaw as $p) $progresso[$p['id_material']] = $p['visualizado'];
-
-            // Provas disponíveis
-            $stPr = $this->db->prepare("SELECT p.id, p.titulo, p.nota_minima, p.tentativas_max, COUNT(t.id) AS tentativas_feitas FROM elearning_provas p LEFT JOIN elearning_tentativas t ON t.id_prova=p.id AND t.id_usuario=? WHERE p.id_curso=? AND p.ativa=1 GROUP BY p.id");
-            $stPr->execute([$uid, $cursoId]); $provas = $stPr->fetchAll(\PDO::FETCH_ASSOC);
-
-            // Certificado
-            $stCert = $this->db->prepare("SELECT * FROM elearning_certificados WHERE id_usuario=? AND id_curso=?");
-            $stCert->execute([$uid, $cursoId]); $certificado = $stCert->fetch(\PDO::FETCH_ASSOC);
-
-        } catch (\PDOException $e) { $aulas = []; $provas = []; $certificado = null; $progresso = []; $materiaisByAula = []; }
-
-        $this->render('elearning/colaborador/curso_detalhe', [
-            'title' => ($curso['titulo'] ?? 'Curso') . ' — eLearning',
-            'curso' => $curso,
-            'aulas' => $aulas,
-            'materiaisByAula' => $materiaisByAula,
-            'provas' => $provas,
-            'progresso' => $progresso,
-            'certificado' => $certificado,
-            'matricula' => $matricula,
-            'layout' => 'elearning_student'
-        ]);
-    }
-
-    // ---------- CONTINUAR/INICIAR CURSO (Smart Redirect) ----------
-    public function continuar($cursoId): void
-    {
-        $this->requireColaborador();
-        $uid = (int)($_SESSION['user_id'] ?? 0);
-        $cursoId = (int)$cursoId;
-
-        try {
-            // 1. Verificar matrícula
-            $stM = $this->db->prepare("SELECT id FROM elearning_matriculas WHERE id_usuario=? AND id_curso=?");
-            $stM->execute([$uid, $cursoId]);
-            if (!$stM->fetch()) { header('Location: /elearning/colaborador'); exit; }
-
-            // 2. Tentar encontrar o primeiro material NÃO visualizado
-            $stNext = $this->db->prepare("
-                SELECT m.id 
-                FROM elearning_materiais m 
-                JOIN elearning_aulas a ON a.id = m.id_aula 
-                LEFT JOIN elearning_progresso p ON p.id_material = m.id AND p.id_usuario = ?
-                WHERE a.id_curso = ? AND (p.visualizado IS NULL OR p.visualizado = 0)
-                ORDER BY a.ordem ASC, m.ordem ASC 
-                LIMIT 1
-            ");
-            $stNext->execute([$uid, $cursoId]);
-            $next = $stNext->fetch(\PDO::FETCH_ASSOC);
-
-            if ($next) {
-                header("Location: /elearning/colaborador/materiais/{$next['id']}/assistir");
-                exit;
+            if ($matches[2] !== '') {
+                $end = (int) $matches[2];
             }
-
-            // 3. Se todos visualizados, pegar o primeiríssimo ou ir pra página do curso
-            $stFirst = $this->db->prepare("
-                SELECT m.id 
-                FROM elearning_materiais m 
-                JOIN elearning_aulas a ON a.id = m.id_aula 
-                WHERE a.id_curso = ?
-                ORDER BY a.ordem ASC, m.ordem ASC 
-                LIMIT 1
-            ");
-            $stFirst->execute([$cursoId]);
-            $first = $stFirst->fetch(\PDO::FETCH_ASSOC);
-
-            if ($first) {
-                header("Location: /elearning/colaborador/materiais/{$first['id']}/assistir");
-            } else {
-                header("Location: /elearning/colaborador/cursos/{$cursoId}");
+            $end = min($end, $size - 1);
+            if ($start > $end) {
+                $start = 0;
+                $end = $size - 1;
             }
-            exit;
-        } catch (\Exception $e) {
-            header('Location: /elearning/colaborador'); exit;
+            http_response_code(206);
+            header("Content-Range: bytes {$start}-{$end}/{$size}");
         }
-    }
 
-    // ---------- ASSISTIR AULA (detalhes do material) ----------
-    public function assistirAula($materialId): void
-    {
-        $this->requireColaborador();
-        $uid = (int)($_SESSION['user_id'] ?? 0);
-        $materialId = (int)$materialId;
-        if (!$materialId) { die('ID inválido.'); }
+        $length = $end - $start + 1;
+        header('Content-Length: ' . $length);
 
-        try {
-            // 1. Buscar o material atual e o curso
-            $stMat = $this->db->prepare("SELECT m.*, a.id_curso FROM elearning_materiais m JOIN elearning_aulas a ON a.id=m.id_aula WHERE m.id=?");
-            $stMat->execute([$materialId]); $material = $stMat->fetch(\PDO::FETCH_ASSOC);
-            if (!$material) { die('Material não encontrado.'); }
-            
-            $cursoId = $material['id_curso'];
-
-            // 2. Buscar o curso
-            $stC = $this->db->prepare("SELECT * FROM elearning_cursos WHERE id=?");
-            $stC->execute([$cursoId]); $curso = $stC->fetch(\PDO::FETCH_ASSOC);
-
-            // 3. Buscar matrícula e progresso do usuário
-            $stMatr = $this->db->prepare("SELECT * FROM elearning_matriculas WHERE id_usuario=? AND id_curso=?");
-            $stMatr->execute([$uid, $cursoId]); $matricula = $stMatr->fetch(\PDO::FETCH_ASSOC);
-            if (!$matricula) { die('Acesso negado - Não matriculado.'); }
-
-            // 4. Buscar progresso do material atual
-            $stProg = $this->db->prepare("SELECT * FROM elearning_progresso WHERE id_usuario=? AND id_material=?");
-            $stProg->execute([$uid, $materialId]);
-            $material['progresso'] = $stProg->fetch(\PDO::FETCH_ASSOC);
-
-            // 5. Buscar todas as aulas e materiais do curso para o menu lateral
-            $stAulas = $this->db->prepare("SELECT * FROM elearning_aulas WHERE id_curso=? ORDER BY ordem ASC");
-            $stAulas->execute([$cursoId]);
-            $aulas = $stAulas->fetchAll(\PDO::FETCH_ASSOC);
-
-            foreach ($aulas as &$aula) {
-                $stMats = $this->db->prepare("
-                    SELECT m.*, p.visualizado, p.pct_assistido 
-                    FROM elearning_materiais m 
-                    LEFT JOIN elearning_progresso p ON p.id_material = m.id AND p.id_usuario = ?
-                    WHERE m.id_aula = ? 
-                    ORDER BY m.ordem ASC
-                ");
-                $stMats->execute([$uid, $aula['id']]);
-                $aula['materiais'] = $stMats->fetchAll(\PDO::FETCH_ASSOC);
-            }
-
-            // Marcar início do progresso do material atual
-            $this->db->prepare("INSERT INTO elearning_progresso (id_usuario,id_material,data_inicio) VALUES (?,?,NOW()) ON DUPLICATE KEY UPDATE data_inicio=COALESCE(data_inicio,NOW())")
-                ->execute([$uid, $materialId]);
-
-            // Renderizar usando o layout dedicado sem sidebar
-            $title = $material['titulo'] . ' - ' . $curso['titulo'];
-            $viewFile = __DIR__ . '/../../views/pages/elearning/colaborador/assistir.php';
-            include __DIR__ . '/../../views/layouts/elearning_player.php';
-
-        } catch (\Exception $e) {
-            die('Erro ao carregar aula: ' . $e->getMessage());
+        $handle = fopen($path, 'rb');
+        fseek($handle, $start);
+        $remaining = $length;
+        while (!feof($handle) && $remaining > 0) {
+            $read = min(8192, $remaining);
+            echo fread($handle, $read);
+            $remaining -= $read;
+            flush();
         }
-    }
-
-    // ---------- REGISTRAR PROGRESSO ----------
-    public function registrarProgresso(): void
-    {
-        $this->requireColaborador();
-        $uid        = (int)($_SESSION['user_id'] ?? 0);
-        $materialId = (int)($_POST['id_material'] ?? 0);
-        $pct        = min(100, max(0, (float)($_POST['pct'] ?? 100)));
-        if (!$materialId) $this->json(['success' => false, 'message' => 'ID inválido.']);
-        try {
-            $concluido = $pct >= 90 ? 'NOW()' : 'NULL';
-            $this->db->prepare("
-                INSERT INTO elearning_progresso (id_usuario, id_material, visualizado, pct_assistido, data_conclusao)
-                VALUES (?, ?, ?, ?, " . ($pct >= 90 ? 'NOW()' : 'NULL') . ")
-                ON DUPLICATE KEY UPDATE
-                    visualizado = IF(VALUES(pct_assistido) >= 90, 1, visualizado),
-                    pct_assistido = GREATEST(pct_assistido, VALUES(pct_assistido)),
-                    data_conclusao = IF(VALUES(pct_assistido) >= 90 AND data_conclusao IS NULL, NOW(), data_conclusao)
-            ")->execute([$uid, $materialId, $pct >= 90 ? 1 : 0, $pct]);
-
-            // Recalcular progresso geral do curso
-            $stCurso = $this->db->prepare("SELECT a.id_curso FROM elearning_materiais m JOIN elearning_aulas a ON a.id=m.id_aula WHERE m.id=?");
-            $stCurso->execute([$materialId]); $r = $stCurso->fetch(\PDO::FETCH_ASSOC);
-            if ($r) {
-                $totalMat = $this->db->prepare("SELECT COUNT(*) FROM elearning_materiais m JOIN elearning_aulas a ON a.id=m.id_aula WHERE a.id_curso=?");
-                $totalMat->execute([$r['id_curso']]); $tot = (int)$totalMat->fetchColumn();
-
-                $visMat = $this->db->prepare("SELECT COUNT(*) FROM elearning_progresso pg JOIN elearning_materiais m ON m.id=pg.id_material JOIN elearning_aulas a ON a.id=m.id_aula WHERE a.id_curso=? AND pg.id_usuario=? AND pg.visualizado=1");
-                $visMat->execute([$r['id_curso'], $uid]); $vis = (int)$visMat->fetchColumn();
-
-                $novoPct = $tot > 0 ? round($vis / $tot * 100, 2) : 0;
-                $status  = $novoPct >= 100 ? 'concluido' : 'em_andamento';
-                $this->db->prepare("UPDATE elearning_matriculas SET progresso_pct=?, status=?, concluido_em=IF(?='concluido' AND concluido_em IS NULL, NOW(), concluido_em) WHERE id_usuario=? AND id_curso=?")
-                    ->execute([$novoPct, $status, $status, $uid, $r['id_curso']]);
-            }
-
-            $this->json(['success' => true, 'pct' => $pct]);
-        } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
-    }
-
-    // ---------- FAZER PROVA ----------
-    public function fazerProva(int $provaId): void
-    {
-        $this->requireColaborador();
-        $uid = (int)($_SESSION['user_id'] ?? 0);
-        try {
-            $stPr = $this->db->prepare("SELECT p.*, c.titulo AS titulo_curso FROM elearning_provas p JOIN elearning_cursos c ON c.id=p.id_curso WHERE p.id=? AND p.ativa=1");
-            $stPr->execute([$provaId]); $prova = $stPr->fetch(\PDO::FETCH_ASSOC);
-            if (!$prova) { http_response_code(404); echo 'Prova não encontrada.'; exit; }
-
-            // --- RESTRIÇÃO: Verificar se concluiu todos os materiais do curso ---
-            $stCheck = $this->db->prepare("
-                SELECT 
-                    (SELECT COUNT(*) FROM elearning_materiais m JOIN elearning_aulas a ON a.id = m.id_aula WHERE a.id_curso = ?) as total,
-                    (SELECT COUNT(*) FROM elearning_progresso pg JOIN elearning_materiais m ON m.id = pg.id_material JOIN elearning_aulas a ON a.id = m.id_aula WHERE a.id_curso = ? AND pg.id_usuario = ? AND pg.visualizado = 1) as concluidos
-            ");
-            $stCheck->execute([$prova['id_curso'], $prova['id_curso'], $uid]);
-            $resCheck = $stCheck->fetch(\PDO::FETCH_ASSOC);
-            
-            if ($resCheck['concluidos'] < $resCheck['total']) {
-                echo "<script>alert('Você precisa concluir todos os materiais do curso antes de realizar a prova.'); window.history.back();</script>";
-                exit;
-            }
-
-            // Verificar tentativas
-            $stT = $this->db->prepare("SELECT COUNT(*) FROM elearning_tentativas WHERE id_usuario=? AND id_prova=?");
-            $stT->execute([$uid, $provaId]); $tentativas = (int)$stT->fetchColumn();
-            if ($tentativas >= $prova['tentativas_max']) { echo 'Número máximo de tentativas atingido.'; exit; }
-
-            // Iniciar nova tentativa
-            $this->db->prepare("INSERT INTO elearning_tentativas (id_usuario,id_prova,iniciado_em,numero_tentativa) VALUES (?,?,NOW(),?)")
-                ->execute([$uid, $provaId, $tentativas + 1]);
-            $tentativaId = (int)$this->db->lastInsertId();
-
-            $stQ = $this->db->prepare("SELECT q.*, GROUP_CONCAT(CONCAT(a.id,'|',a.texto,'|',0) ORDER BY a.ordem SEPARATOR ';;') AS alternativas_raw FROM elearning_questoes q LEFT JOIN elearning_alternativas a ON a.id_questao=q.id WHERE q.id_prova=? GROUP BY q.id ORDER BY q.ordem");
-            $stQ->execute([$provaId]); $questoes = $stQ->fetchAll(\PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) { $questoes = []; $tentativaId = 0; }
-        $this->render('elearning/colaborador/fazer_prova', [
-            'title' => 'Prova — ' . ($prova['titulo'] ?? ''),
-            'prova' => $prova, 'questoes' => $questoes, 'tentativaId' => $tentativaId,
-        ]);
-    }
-
-    public function submeterProva(): void
-    {
-        $this->requireColaborador();
-        $uid        = (int)($_SESSION['user_id'] ?? 0);
-        $tentId     = (int)($_POST['tentativa_id'] ?? 0);
-        $respostas  = $_POST['respostas'] ?? [];
-        if (!$tentId) $this->json(['success' => false, 'message' => 'Tentativa inválida.']);
-        try {
-            // Verificar que a tentativa pertence ao usuário
-            $stT = $this->db->prepare("SELECT t.*, p.nota_minima, p.id AS prova_id FROM elearning_tentativas t JOIN elearning_provas p ON p.id=t.id_prova WHERE t.id=? AND t.id_usuario=?");
-            $stT->execute([$tentId, $uid]); $tent = $stT->fetch(\PDO::FETCH_ASSOC);
-            if (!$tent || $tent['finalizado_em']) $this->json(['success' => false, 'message' => 'Tentativa inválida ou já finalizada.']);
-
-            // Buscar questões e calcular nota
-            $stQ = $this->db->prepare("SELECT q.id, q.pontos, q.tipo, a.id AS alt_id, a.correta FROM elearning_questoes q LEFT JOIN elearning_alternativas a ON a.id_questao=q.id WHERE q.id_prova=?");
-            $stQ->execute([$tent['prova_id']]); $questoesRows = $stQ->fetchAll(\PDO::FETCH_ASSOC);
-
-            $pontosPossiveis = 0; $pontosObtidos = 0;
-            $questoesMap = [];
-            foreach ($questoesRows as $row) {
-                if (!isset($questoesMap[$row['id']])) {
-                    $questoesMap[$row['id']] = ['pontos' => $row['pontos'], 'tipo' => $row['tipo'], 'corretas' => []];
-                    $pontosPossiveis += $row['pontos'];
-                }
-                if ($row['alt_id'] && $row['correta']) $questoesMap[$row['id']]['corretas'][] = $row['alt_id'];
-            }
-
-            foreach ($questoesMap as $qid => $q) {
-                $resposta = (int)($respostas[$qid] ?? 0);
-                $correta  = in_array($resposta, $q['corretas']) ? 1 : 0;
-                if ($correta) $pontosObtidos += $q['pontos'];
-                $this->db->prepare("INSERT INTO elearning_respostas (id_tentativa,id_questao,id_alternativa,correta) VALUES (?,?,?,?)")
-                    ->execute([$tentId, $qid, $resposta ?: null, $correta]);
-            }
-
-            $notaPct  = $pontosPossiveis > 0 ? round($pontosObtidos / $pontosPossiveis * 100, 2) : 0;
-            $aprovado = $notaPct >= $tent['nota_minima'] ? 1 : 0;
-            $this->db->prepare("UPDATE elearning_tentativas SET finalizado_em=NOW(), nota_obtida=?, aprovado=? WHERE id=?")
-                ->execute([$notaPct, $aprovado, $tentId]);
-
-            $this->json(['success' => true, 'nota' => $notaPct, 'aprovado' => (bool)$aprovado, 'tentativa_id' => $tentId]);
-        } catch (\PDOException $e) { $this->json(['success' => false, 'message' => $e->getMessage()]); }
-    }
-
-    // ---------- RESULTADO DA PROVA ----------
-    public function resultadoProva(int $tentativaId): void
-    {
-        $this->requireColaborador();
-        $uid = (int)($_SESSION['user_id'] ?? 0);
-        try {
-            $stT = $this->db->prepare("SELECT t.*, p.titulo AS titulo_prova, p.nota_minima FROM elearning_tentativas t JOIN elearning_provas p ON p.id=t.id_prova WHERE t.id=? AND t.id_usuario=?");
-            $stT->execute([$tentativaId, $uid]); $tentativa = $stT->fetch(\PDO::FETCH_ASSOC);
-            if (!$tentativa) { http_response_code(404); echo 'Resultado não encontrado.'; exit; }
-
-            $stR = $this->db->prepare("SELECT r.*, q.enunciado, q.pontos, a.texto AS alt_texto FROM elearning_respostas r JOIN elearning_questoes q ON q.id=r.id_questao LEFT JOIN elearning_alternativas a ON a.id=r.id_alternativa WHERE r.id_tentativa=? ORDER BY q.ordem");
-            $stR->execute([$tentativaId]); $respostas = $stR->fetchAll(\PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) { $respostas = []; }
-        $this->render('elearning/colaborador/resultado_prova', [
-            'title' => 'Resultado — ' . ($tentativa['titulo_prova'] ?? ''),
-            'tentativa' => $tentativa, 'respostas' => $respostas,
-        ]);
-    }
-
-    // ---------- MEUS CERTIFICADOS ----------
-    public function meusCertificados(): void
-    {
-        $this->requireColaborador();
-        $uid = (int)($_SESSION['user_id'] ?? 0);
-        try {
-            $st = $this->db->prepare("SELECT cert.*, c.titulo AS titulo_curso, c.carga_horaria FROM elearning_certificados cert JOIN elearning_cursos c ON c.id=cert.id_curso WHERE cert.id_usuario=? ORDER BY cert.emitido_em DESC");
-            $st->execute([$uid]); $certificados = $st->fetchAll(\PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) { $certificados = []; }
-        $this->render('elearning/colaborador/meus_certificados', ['title' => 'Meus Certificados', 'certificados' => $certificados]);
-    }
-
-    public function downloadCertificado(string $codigo): void
-    {
-        $this->requireColaborador();
-        $uid = (int)($_SESSION['user_id'] ?? 0);
-        try {
-            $st = $this->db->prepare("
-                SELECT cert.*, c.titulo AS titulo_curso, c.carga_horaria, 
-                       u.name AS nome_usuario, ug.name AS gestor_nome,
-                       cert.emitido_em
-                FROM elearning_certificados cert
-                JOIN elearning_cursos c ON c.id = cert.id_curso
-                JOIN users u ON u.id = cert.id_usuario
-                JOIN users ug ON ug.id = c.id_gestor
-                WHERE cert.codigo_validacao = ? AND cert.id_usuario = ?
-            ");
-            $st->execute([$codigo, $uid]);
-            $cert = $st->fetch(\PDO::FETCH_ASSOC);
-            if (!$cert) { http_response_code(404); echo 'Certificado não encontrado.'; exit; }
-
-            // Fetch template configuration
-            $stTpl = $this->db->prepare("SELECT * FROM elearning_config_diploma WHERE id = 1");
-            $stTpl->execute();
-            $tplConfig = $stTpl->fetch(\PDO::FETCH_ASSOC);
-
-            // Gerar PDF simples inline se TCPDF não disponível
-            // Se TCPDF disponível: usar biblioteca. Caso contrário: HTML para impressão.
-            header('Content-Type: text/html; charset=utf-8');
-            include __DIR__ . '/../../views/pages/elearning/colaborador/certificado_template.php';
-        } catch (\PDOException $e) {
-            http_response_code(500); echo 'Erro ao gerar certificado: ' . $e->getMessage();
-        }
+        fclose($handle);
+        exit;
     }
 }

@@ -9,7 +9,7 @@ $viewFile = $viewFile ?? __DIR__ . '/../pages/home.php';
 $sidebar = __DIR__ . '/../partials/sidebar.php';
 // Cache Busting inteligente: usa a data de modificação real do arquivo
 // Assim o cache é mantido até que o desenvolvedor altere o arquivo
-$stylePath = __DIR__ . '/../../src/Support/modal-styles.css';
+$stylePath = __DIR__ . '/../../public/assets/modal-styles.css';
 $assetVersion = file_exists($stylePath) ? filemtime($stylePath) : time();
 // Safe helper fallbacks in case global helpers are not loaded
 if (!function_exists('e')) {
@@ -81,8 +81,8 @@ if ($userRole === 'super_admin' || $userRole === 'admin') {
       border-radius: 6px !important;
     }
   </style>
-  <link rel="stylesheet" href="/src/Support/modal-styles.css?v=<?= urlencode($assetVersion) ?>">
-  <script src="/src/Support/modal-utils.js?v=<?= urlencode($assetVersion) ?>"></script>
+  <link rel="stylesheet" href="/assets/modal-styles.css?v=<?= urlencode($assetVersion) ?>">
+  <script src="/assets/modal-utils.js?v=<?= urlencode($assetVersion) ?>"></script>
   <script>
     // ===== TOGGLE SUBMENU - GLOBAL FUNCTION =====
     // Definir PRIMEIRO, antes de qualquer outra coisa
@@ -199,6 +199,8 @@ if ($userRole === 'super_admin' || $userRole === 'admin') {
               'cadastros'                 => ['label' => 'Cadastros',               'icon' => 'ph-note-pencil'],
               'perfil'                    => ['label' => 'Meu Perfil',              'icon' => 'ph-user-circle'],
               'profile'                   => ['label' => 'Meu Perfil',              'icon' => 'ph-user-circle'],
+              'elearning/gestor'          => ['label' => 'E-Learning Professor',    'icon' => 'ph-chalkboard-teacher'],
+              'elearning/colaborador'     => ['label' => 'E-Learning Aluno',        'icon' => 'ph-student'],
               'usabilidade'               => ['label' => 'Usabilidade',             'icon' => 'ph-chart-bar'],
             ];
 

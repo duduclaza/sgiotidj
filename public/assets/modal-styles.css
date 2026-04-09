@@ -1,0 +1,468 @@
+/* Modal Styles - Sistema SGQ */
+/* Estilo moderno e elegante para todos os modais do sistema */
+
+.modal-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(30, 41, 59, 0.9)) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  z-index: 999999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: auto !important;
+}
+
+.modal-overlay.active {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.modal-container {
+  background: linear-gradient(145deg, #ffffff, #f8fafc) !important;
+  border-radius: 1.5rem !important;
+  box-shadow: 
+    0 32px 64px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  max-width: 90vw !important;
+  max-height: 85vh !important;
+  overflow: hidden !important;
+  transform: scale(0.9) translateY(20px) !important;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  position: relative !important;
+  margin: auto !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Dark Mode Overrides for Modal Container */
+.dark .modal-container {
+  background: linear-gradient(145deg, #1e293b, #0f172a) !important;
+  box-shadow: 
+    0 32px 64px -12px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(51, 65, 85, 0.8) !important;
+}
+
+.modal-overlay.active .modal-container {
+  transform: scale(1) translateY(0) !important;
+}
+
+.modal-header {
+  padding: 2rem 2rem 1.5rem 2rem !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+  background: linear-gradient(135deg, #ffffff, #f8fafc) !important;
+  border-radius: 1.5rem 1.5rem 0 0 !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+.dark .modal-header {
+  background: linear-gradient(135deg, #1e293b, #0f172a) !important;
+  border-bottom-color: rgba(51, 65, 85, 0.8) !important;
+}
+
+.modal-title {
+  font-size: 1.375rem !important;
+  font-weight: 700 !important;
+  color: #1e293b !important;
+  margin: 0 !important;
+  background: linear-gradient(135deg, #1e293b, #475569) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  letter-spacing: -0.025em !important;
+}
+
+.dark .modal-title {
+  color: #f8fafc !important;
+  background: linear-gradient(135deg, #f8fafc, #cbd5e1) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+.modal-close {
+  padding: 0.75rem !important;
+  border-radius: 1rem !important;
+  color: #64748b !important;
+  background: rgba(248, 250, 252, 0.8) !important;
+  border: 1px solid rgba(226, 232, 240, 0.5) !important;
+  cursor: pointer !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+.dark .modal-close {
+  color: #94a3b8 !important;
+  background: rgba(30, 41, 59, 0.8) !important;
+  border-color: rgba(51, 65, 85, 0.5) !important;
+}
+
+.modal-close:hover {
+  color: #ef4444 !important;
+  background: rgba(254, 242, 242, 0.9) !important;
+  border-color: rgba(248, 113, 113, 0.3) !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15) !important;
+}
+
+.modal-body {
+  padding: 2rem !important;
+  overflow-y: auto !important;
+  max-height: calc(90vh - 180px) !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+.dark .modal-body {
+  background: rgba(15, 23, 42, 0.7) !important;
+  color: #f1f5f9 !important;
+}
+
+.modal-footer {
+  padding: 1.5rem 2rem 2rem 2rem !important;
+  border-top: 1px solid rgba(226, 232, 240, 0.8) !important;
+  background: linear-gradient(135deg, #f8fafc, #ffffff) !important;
+  border-radius: 0 0 1.5rem 1.5rem !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 1rem !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+.dark .modal-footer {
+  background: linear-gradient(135deg, #0f172a, #1e293b) !important;
+  border-top-color: rgba(51, 65, 85, 0.8) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .modal-container {
+    max-width: 95vw !important;
+    max-height: 95vh !important;
+    margin: 0.5rem !important;
+  }
+  
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 1rem !important;
+  }
+  
+  .modal-body {
+    max-height: calc(95vh - 120px) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-container {
+    max-width: 98vw !important;
+    max-height: 98vh !important;
+    margin: 0.25rem !important;
+  }
+  
+  .modal-header,
+  .modal-footer {
+    padding: 0.75rem !important;
+  }
+  
+  .modal-body {
+    padding: 0.75rem !important;
+    max-height: calc(98vh - 100px) !important;
+  }
+  
+  .modal-footer {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+  
+  .modal-footer button {
+    width: 100% !important;
+  }
+}
+
+/* Estilos para botões dos modais */
+.modal-footer button {
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 0.75rem !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer !important;
+  border: 1px solid transparent !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.modal-footer button:before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent) !important;
+  transition: left 0.5s !important;
+}
+
+.modal-footer button:hover:before {
+  left: 100% !important;
+}
+
+/* Botão primário (Salvar, Confirmar, etc.) */
+.modal-footer button.bg-blue-600,
+.modal-footer button[class*="bg-blue"] {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+  color: white !important;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+.modal-footer button.bg-blue-600:hover,
+.modal-footer button[class*="bg-blue"]:hover {
+  background: linear-gradient(135deg, #2563eb, #1e40af) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5) !important;
+}
+
+/* Botão secundário (Cancelar) */
+.modal-footer button.bg-white,
+.modal-footer button[class*="text-gray"] {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #64748b !important;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.dark .modal-footer button.bg-white,
+.dark .modal-footer button[class*="text-gray"] {
+  background: rgba(30, 41, 59, 0.9) !important;
+  color: #94a3b8 !important;
+  border-color: rgba(51, 65, 85, 0.8) !important;
+}
+
+.modal-footer button.bg-white:hover,
+.modal-footer button[class*="text-gray"]:hover {
+  background: rgba(248, 250, 252, 0.95) !important;
+  color: #475569 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.dark .modal-footer button.bg-white:hover,
+.dark .modal-footer button[class*="text-gray"]:hover {
+  background: rgba(51, 65, 85, 0.95) !important;
+  color: #cbd5e1 !important;
+}
+
+/* Botão de perigo (Excluir) */
+.modal-footer button.bg-red-600,
+.modal-footer button[class*="bg-red"] {
+  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+  color: white !important;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4) !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+}
+
+.modal-footer button.bg-red-600:hover,
+.modal-footer button[class*="bg-red"]:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.5) !important;
+}
+
+/* Animation keyframes */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes modalFadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9) translateY(30px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+/* Ensure modals are always on top of everything */
+.modal-overlay {
+  z-index: 999999 !important;
+}
+
+/* Override any iframe restrictions */
+.modal-overlay,
+.modal-container {
+  position: fixed !important;
+  pointer-events: auto !important;
+}
+
+/* Estilos especiais para alertas e confirmações */
+.modal-container.alert-modal {
+  max-width: 28rem !important;
+  background: linear-gradient(145deg, #ffffff, #fefefe) !important;
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+.modal-container.alert-modal .modal-header {
+  padding: 1.5rem 1.5rem 1rem 1.5rem !important;
+  text-align: center !important;
+  border-bottom: none !important;
+}
+
+.modal-container.alert-modal .modal-title {
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  color: #1f2937 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.75rem !important;
+}
+
+.dark .modal-container.alert-modal .modal-title {
+  color: #f8fafc !important;
+}
+
+.modal-container.alert-modal .modal-title:before {
+  content: '⚠️' !important;
+  font-size: 1.5rem !important;
+}
+
+.modal-container.alert-modal .modal-body {
+  padding: 0 1.5rem 1rem 1.5rem !important;
+  text-align: center !important;
+  color: #4b5563 !important;
+  font-size: 0.95rem !important;
+  line-height: 1.6 !important;
+}
+
+.dark .modal-container.alert-modal .modal-body {
+  color: #94a3b8 !important;
+}
+
+.modal-container.alert-modal .modal-footer {
+  padding: 1rem 1.5rem 1.5rem 1.5rem !important;
+  justify-content: center !important;
+  gap: 0.75rem !important;
+}
+
+/* Estilos para modais de sucesso */
+.modal-container.success-modal .modal-title:before {
+  content: '✅' !important;
+  color: #10b981 !important;
+}
+
+.modal-container.success-modal .modal-title {
+  color: #059669 !important;
+}
+
+/* Estilos para modais de erro */
+.modal-container.error-modal .modal-title:before {
+  content: '❌' !important;
+  color: #ef4444 !important;
+}
+
+.modal-container.error-modal .modal-title {
+  color: #dc2626 !important;
+}
+
+/* Estilos para modais de confirmação */
+.modal-container.confirm-modal .modal-title:before {
+  content: '❓' !important;
+  color: #f59e0b !important;
+}
+
+.modal-container.confirm-modal .modal-title {
+  color: #d97706 !important;
+}
+
+/* Animação de entrada mais suave para alertas */
+.modal-overlay.active .modal-container.alert-modal {
+  animation: alertBounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+}
+
+@keyframes alertBounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(-50px);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05) translateY(0);
+  }
+  70% {
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Melhorias para scrollbar personalizada */
+.modal-body::-webkit-scrollbar {
+  width: 6px !important;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.5) !important;
+  border-radius: 3px !important;
+}
+
+.dark .modal-body::-webkit-scrollbar-track {
+  background: rgba(30, 41, 59, 0.5) !important;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #cbd5e1, #94a3b8) !important;
+  border-radius: 3px !important;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #94a3b8, #64748b) !important;
+}
