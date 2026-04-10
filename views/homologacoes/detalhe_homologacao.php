@@ -548,11 +548,11 @@
 
                 <div class="space-y-2">
                     <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                        <i class="ph-bold ph-paperclip"></i> Anexar Evidências (Máx. 10 files)
-                        <span class="text-[10px] font-normal text-slate-500 dark:text-slate-400 opacity-70">PNG, JPG ou PDF</span>
+                        <i class="ph-bold ph-paperclip"></i> Anexar Evidências (Máx. 15 imagens)
+                        <span class="text-[10px] font-normal text-slate-500 dark:text-slate-400 opacity-70">PNG ou JPG</span>
                     </label>
                     <div class="relative group">
-                        <input type="file" name="laudo_anexos[]" id="input_laudo_anexos" multiple accept=".png,.jpg,.jpeg" onchange="validarLimiteArquivosImagem(this, 'file_list_preview', 5)" 
+                        <input type="file" name="laudo_anexos[]" id="input_laudo_anexos" multiple accept=".png,.jpg,.jpeg" onchange="validarLimiteArquivosImagem(this, 'file_list_preview', 15)" 
                                class="block w-full text-xs text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 dark:file:bg-slate-700 dark:file:text-slate-200 cursor-pointer border border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-4 transition-all hover:border-primary-400 dark:hover:border-primary-500">
                         <div id="file_list_preview" class="mt-2 text-[10px] flex flex-wrap gap-2"></div>
                     </div>

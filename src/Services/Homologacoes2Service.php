@@ -1242,7 +1242,9 @@ class Homologacoes2Service
             return 0;
         }
 
-        if ($totalFiles > 10) {
+        $maxFiles = $tipo === 'laudo' ? 15 : 10;
+        if ($totalFiles > $maxFiles) {
+            throw new \RuntimeException(sprintf('Envie no maximo %d arquivos por etapa.', $maxFiles));
             throw new \RuntimeException('Envie no máximo 10 arquivos por etapa.');
         }
 
