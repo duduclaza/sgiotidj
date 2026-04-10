@@ -33,13 +33,24 @@ $lessonVideo = $lesson['video'] ?? null;
             <div class="overflow-hidden rounded-[2rem] border border-white/10 bg-black shadow-soft">
                 <?php if ($lessonVideo): ?>
                     <?php if (($lessonVideo['provider'] ?? '') === 'bunny' && empty($lessonVideo['is_ready'])): ?>
-                        <div class="flex aspect-video flex-col items-center justify-center gap-4 bg-slate-950 px-8 text-center text-slate-300" id="lessonProcessingPanel" data-lesson-id="<?= (int) ($lesson['id'] ?? 0) ?>">
-                            <div class="space-y-3">
-                                <p class="text-xs font-semibold uppercase tracking-[0.35em] text-amber-300/80">Processando video</p>
-                                <h3 class="text-3xl font-black text-white">O Bunny Stream ainda esta preparando esta aula</h3>
-                                <p class="max-w-2xl text-sm leading-relaxed text-slate-300" id="lessonProcessingMessage"><?= e($lessonVideo['processing_message'] ?? 'Atualize a pagina em alguns instantes para assistir ao conteudo.') ?></p>
+                        <div class="flex aspect-video items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.14),_transparent_38%),linear-gradient(135deg,_#020617,_#0f172a_55%,_#155e75)] px-6 py-8 text-center text-slate-300" id="lessonProcessingPanel" data-lesson-id="<?= (int) ($lesson['id'] ?? 0) ?>">
+                            <div class="w-full max-w-2xl rounded-[1.75rem] border border-white/10 bg-slate-950/55 px-6 py-8 shadow-soft backdrop-blur-xl">
+                                <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
+                                    <span class="relative flex h-3 w-3">
+                                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-300/70"></span>
+                                        <span class="relative inline-flex h-3 w-3 rounded-full bg-sky-200"></span>
+                                    </span>
+                                </div>
+                                <div class="mt-5 space-y-3">
+                                    <p class="text-xs font-semibold uppercase tracking-[0.35em] text-sky-200/75">SGI STREAM</p>
+                                    <h3 class="text-3xl font-black text-white">Estamos preparando esta aula</h3>
+                                    <p class="mx-auto max-w-2xl text-sm leading-relaxed text-slate-300" id="lessonProcessingMessage"><?= e($lessonVideo['processing_message'] ?? 'Atualize a pagina em alguns instantes para assistir ao conteudo.') ?></p>
+                                </div>
+                                <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+                                    <span class="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-300">Atualizacao automatica</span>
+                                    <button type="button" id="lessonProcessingButton" onclick="window.location.reload()" class="rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]">Atualizar pagina</button>
+                                </div>
                             </div>
-                            <button type="button" id="lessonProcessingButton" onclick="window.location.reload()" class="rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]">Atualizar pagina</button>
                         </div>
                     <?php elseif (($lessonVideo['provider'] ?? '') === 'bunny'): ?>
                         <iframe
@@ -255,7 +266,7 @@ if (lessonProcessingPanel) {
             }
 
             if (lessonProcessingMessage) {
-                lessonProcessingMessage.textContent = result.processing_message || 'O Bunny Stream ainda esta preparando o video desta aula.';
+                lessonProcessingMessage.textContent = result.processing_message || 'O SGI STREAM ainda esta preparando o video desta aula.';
             }
 
             if (lessonProcessingButton) {

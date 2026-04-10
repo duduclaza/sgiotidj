@@ -127,18 +127,22 @@ $enrollmentStatus = static function (string $status): array {
                     <?php
                     $hasVideo = !empty($lesson['video_id']);
                     $videoProvider = (string) ($lesson['video_provider'] ?? '');
+                    $isVideoProcessing = $hasVideo && $videoProvider === 'bunny';
                     $videoBadgeLabel = !$hasVideo
                         ? 'Sem video'
-                        : ($videoProvider === 'bunny' ? 'Sincronizando' : 'Pronto');
+                        : ($isVideoProcessing ? 'Em preparo' : 'Pronto');
                     $videoBadgeClass = !$hasVideo
                         ? 'bg-slate-200 text-slate-700'
-                        : ($videoProvider === 'bunny' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700');
+                        : ($isVideoProcessing ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700');
                     $videoActionLabel = !$hasVideo
                         ? ''
-                        : ($videoProvider === 'bunny' ? 'Ver status' : 'Abrir video');
-                    $videoStatusMessage = $hasVideo && $videoProvider === 'bunny'
-                        ? 'O painel acompanha o processamento do Bunny automaticamente.'
+                        : ($isVideoProcessing ? 'Acompanhar' : 'Abrir video');
+                    $videoStatusMessage = $isVideoProcessing
+                        ? 'Estamos preparando este video no SGI STREAM.'
                         : '';
+                    $videoPanelClass = $isVideoProcessing
+                        ? 'border-amber-200 bg-[linear-gradient(135deg,_#fff7ed,_#ffffff_55%,_#fef3c7)]'
+                        : 'border-slate-200 bg-slate-50';
                     ?>
                     <article class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-lg" data-lesson-card="<?= (int) ($lesson['id'] ?? 0) ?>">
                         <div class="flex flex-wrap items-start justify-between gap-4">
@@ -164,10 +168,10 @@ $enrollmentStatus = static function (string $status): array {
                         </div>
 
                         <div class="mt-5 grid gap-4 lg:grid-cols-2">
-                            <div class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4" data-video-panel data-lesson-id="<?= (int) ($lesson['id'] ?? 0) ?>" data-video-provider="<?= e($videoProvider) ?>" data-has-video="<?= $hasVideo ? '1' : '0' ?>" data-video-ready="<?= $hasVideo && $videoProvider !== 'bunny' ? '1' : '0' ?>">
+                            <div class="rounded-[1.5rem] border p-4 shadow-sm <?= e($videoPanelClass) ?>" data-video-panel data-lesson-id="<?= (int) ($lesson['id'] ?? 0) ?>" data-video-provider="<?= e($videoProvider) ?>" data-has-video="<?= $hasVideo ? '1' : '0' ?>" data-video-ready="<?= $hasVideo && $videoProvider !== 'bunny' ? '1' : '0' ?>">
                                 <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Vídeo</p>
-                                <p class="mt-3 text-sm text-slate-600" data-role="video-details"><?= !empty($lesson['video_id']) ? e($lesson['video_name']) . ' • ' . e($lesson['video_size_human'] ?? '0 B') . ' • ' . e($lesson['video_duration_human'] ?? '0 min') : 'Nenhum vídeo enviado' ?></p>
-                                <p class="mt-2 text-xs font-medium text-slate-500" data-role="video-status-message"><?= e($videoStatusMessage) ?></p>
+                                <p class="mt-3 text-sm leading-relaxed text-slate-600 [overflow-wrap:anywhere]" data-role="video-details"><?= !empty($lesson['video_id']) ? e($lesson['video_name']) . ' • ' . e($lesson['video_size_human'] ?? '0 B') . ' • ' . e($lesson['video_duration_human'] ?? '0 min') : 'Nenhum video enviado' ?></p>
+                                <p class="mt-2 text-sm leading-relaxed text-slate-500" data-role="video-status-message"><?= e($videoStatusMessage) ?></p>
                                 <div class="mt-4 flex flex-wrap gap-2">
                                     <?php if (!empty($lesson['video_id'])): ?>
                                         <a href="/elearning/gestor/videos/<?= (int) $lesson['id'] ?>" target="_blank" class="rounded-full bg-slate-900 px-4 py-2 text-sm font-black text-white transition hover:scale-[1.02]" data-role="video-open-button"><?= e($videoActionLabel) ?></a>
@@ -409,16 +413,25 @@ $enrollmentStatus = static function (string $status): array {
                     <input type="file" name="attachments[]" id="lesson_attachments" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.doc,.docx,.xls,.xlsx,.ppt,.pptx,image/*,application/pdf" class="block w-full rounded-2xl border border-dashed border-slate-300 px-4 py-4 text-sm text-slate-700">
                     <p class="mt-2 text-xs uppercase tracking-[0.2em] text-slate-400">Múltiplos arquivos • até 20 MB por item</p>
                 </div>
-                <div id="lesson-upload-feedback" class="hidden md:col-span-2 rounded-[1.5rem] border border-sky-200 bg-sky-50 p-4 text-slate-700">
-                    <div class="flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                            <p id="lesson-upload-stage" class="text-sm font-black text-slate-900">Preparando upload</p>
-                            <p id="lesson-upload-caption" class="mt-1 text-xs uppercase tracking-[0.18em] text-slate-500">Etapa 1 de 2</p>
+                <div id="lesson-upload-feedback" class="hidden md:col-span-2 overflow-hidden rounded-[1.75rem] border border-slate-200 bg-[linear-gradient(135deg,_#0f172a,_#1d4ed8_62%,_#0f766e)] p-5 text-white shadow-lg">
+                    <div class="flex flex-wrap items-start justify-between gap-4">
+                        <div class="flex items-start gap-4">
+                            <div class="mt-1 flex h-11 w-11 items-center justify-center rounded-2xl bg-white/12">
+                                <span class="relative flex h-3 w-3">
+                                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300/70"></span>
+                                    <span class="relative inline-flex h-3 w-3 rounded-full bg-emerald-200"></span>
+                                </span>
+                            </div>
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-sky-100/70">Upload de video</p>
+                                <p id="lesson-upload-stage" class="mt-2 text-lg font-black text-white">Preparando envio</p>
+                                <p id="lesson-upload-caption" class="mt-1 text-sm leading-relaxed text-sky-50/80">Organizando o arquivo para iniciar o envio.</p>
+                            </div>
                         </div>
-                        <strong id="lesson-upload-percent" class="text-sm font-black text-sky-700">0%</strong>
+                        <strong id="lesson-upload-percent" class="rounded-full bg-white/10 px-4 py-2 text-sm font-black text-white/90">0%</strong>
                     </div>
-                    <div class="mt-4 h-2 overflow-hidden rounded-full bg-sky-100">
-                        <div id="lesson-upload-bar" class="h-full rounded-full bg-sky-500 transition-all duration-300" style="width:0%"></div>
+                    <div class="mt-5 h-2.5 overflow-hidden rounded-full bg-white/10">
+                        <div id="lesson-upload-bar" class="h-full rounded-full bg-white transition-all duration-500" style="width:0%"></div>
                     </div>
                 </div>
                 <div class="md:col-span-2 flex justify-end gap-3">
@@ -604,8 +617,8 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         lessonUploadFeedback.classList.add('hidden');
-        if (lessonUploadStage) lessonUploadStage.textContent = 'Preparando upload';
-        if (lessonUploadCaption) lessonUploadCaption.textContent = 'Etapa 1 de 2';
+        if (lessonUploadStage) lessonUploadStage.textContent = 'Preparando envio';
+        if (lessonUploadCaption) lessonUploadCaption.textContent = 'Organizando o arquivo para iniciar o envio.';
         if (lessonUploadPercent) lessonUploadPercent.textContent = '0%';
         if (lessonUploadBar) lessonUploadBar.style.width = '0%';
     }
@@ -637,30 +650,30 @@ window.addEventListener('DOMContentLoaded', () => {
 
             xhr.upload.addEventListener('progress', (event) => {
                 if (!event.lengthComputable) {
-                    setLessonUploadFeedback('Enviando arquivo para o servidor...', 18, 'Etapa 1 de 2');
+                    setLessonUploadFeedback('Enviando video para o servidor...', 18, 'Transferindo o arquivo inicial.');
                     return;
                 }
 
                 const browserPercent = Math.round((event.loaded / event.total) * 100);
                 const stagedPercent = Math.max(8, Math.min(68, Math.round(browserPercent * 0.68)));
                 setLessonUploadFeedback(
-                    'Enviando arquivo para o servidor...',
+                    'Enviando video para o servidor...',
                     stagedPercent,
-                    `Etapa 1 de 2 • ${browserPercent}% do envio local`
+                    `Upload local concluido em ${browserPercent}%`
                 );
             });
 
             xhr.upload.addEventListener('load', () => {
                 setLessonUploadFeedback(
-                    'Arquivo recebido. Finalizando envio no Bunny Stream...',
+                    'Arquivo recebido. Iniciando preparo no SGI STREAM...',
                     78,
-                    'Etapa 2 de 2'
+                    'Agora estamos organizando o video para publicacao.'
                 );
             });
 
             xhr.onreadystatechange = () => {
                 if (xhr.readyState === XMLHttpRequest.HEADERS_RECEIVED) {
-                    setLessonUploadFeedback('Servidor processando a aula...', 86, 'Etapa 2 de 2');
+                    setLessonUploadFeedback('Estamos processando o video...', 86, 'Voce pode continuar na tela enquanto finalizamos a etapa final.');
                     return;
                 }
 
@@ -670,7 +683,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
                 try {
                     const result = parseLessonUploadResult(xhr);
-                    setLessonUploadFeedback('Aula salva. Atualizando painel...', 100, 'Concluido');
+                    setLessonUploadFeedback('Aula salva. Atualizando painel...', 100, 'Tudo certo por aqui.');
                     resolve(result);
                 } catch (error) {
                     reject(error);
@@ -703,7 +716,7 @@ window.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        button.textContent = ready ? 'Abrir video' : 'Ver status';
+        button.textContent = ready ? 'Abrir video' : 'Acompanhar';
         button.className = ready
             ? 'rounded-full bg-slate-900 px-4 py-2 text-sm font-black text-white transition hover:scale-[1.02]'
             : 'rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-black text-amber-700 transition hover:bg-amber-100';
@@ -734,7 +747,7 @@ window.addEventListener('DOMContentLoaded', () => {
         if (message) {
             message.textContent = isReady
                 ? 'Video pronto para abrir.'
-                : (payload.processing_message || 'O Bunny Stream ainda esta preparando o video desta aula.');
+                : (payload.processing_message || 'O SGI STREAM ainda esta preparando o video desta aula.');
         }
 
         return isReady;
@@ -921,7 +934,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const watchedLessonId = Number(sessionStorage.getItem('elearning-professor-watch-lesson') || 0);
         if (watchedLessonId > 0) {
             window.setTimeout(() => {
-                showProfessorToast('A aula foi salva. O painel vai acompanhar o Bunny automaticamente.', 'success');
+                showProfessorToast('A aula foi salva. Vamos acompanhar o processamento do SGI STREAM automaticamente.', 'success');
             }, 400);
         }
 

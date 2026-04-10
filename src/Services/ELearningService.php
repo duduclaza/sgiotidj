@@ -2751,7 +2751,7 @@ class ELearningService
                 'is_ready' => $isReady,
                 'processing_message' => $isReady
                     ? null
-                    : 'O video ainda esta sendo processado pelo Bunny Stream. Atualize a pagina em alguns instantes.',
+                    : 'O video ainda esta sendo preparado no SGI STREAM. Atualize a pagina em alguns instantes.',
             ];
         }
 

@@ -41,7 +41,7 @@ class BunnyStreamService
             return;
         }
 
-        throw new RuntimeException('A integra��o com Bunny Stream ainda n�o foi configurada neste ambiente.');
+        throw new RuntimeException('A integracao com o SGI STREAM ainda nao foi configurada neste ambiente.');
     }
 
     public function libraryId(): int
@@ -80,7 +80,7 @@ class BunnyStreamService
         $created = $this->createVideo($title);
         $videoId = (string) ($created['video_id'] ?? '');
         if ($videoId === '') {
-            throw new RuntimeException('O Bunny Stream n�o retornou o identificador do v�deo criado.');
+            throw new RuntimeException('O SGI STREAM nao retornou o identificador do video criado.');
         }
 
         try {
@@ -138,7 +138,7 @@ class BunnyStreamService
 
         $ch = curl_init(self::API_BASE . $path);
         if ($ch === false) {
-            throw new RuntimeException('N�o foi poss�vel iniciar a requisi��o ao Bunny Stream.');
+            throw new RuntimeException('Nao foi possivel iniciar a requisicao ao SGI STREAM.');
         }
 
         $headers = [
@@ -161,7 +161,7 @@ class BunnyStreamService
 
         $body = curl_exec($ch);
         if ($body === false) {
-            $message = $this->curlErrorMessage($ch, 'Falha ao comunicar com o Bunny Stream.');
+            $message = $this->curlErrorMessage($ch, 'Falha ao comunicar com o SGI STREAM.');
             throw new RuntimeException($message);
         }
 
@@ -169,7 +169,7 @@ class BunnyStreamService
 
         if ($statusCode >= 400) {
             $message = $this->extractErrorMessage($body);
-            throw new RuntimeException("Bunny Stream respondeu com erro [{$statusCode}]: {$message}");
+            throw new RuntimeException("SGI STREAM respondeu com erro [{$statusCode}]: {$message}");
         }
 
         if (!$expectsJson || $body === '' || $body === 'null') {
@@ -178,7 +178,7 @@ class BunnyStreamService
 
         $decoded = json_decode($body, true);
         if (!is_array($decoded)) {
-            throw new RuntimeException('O Bunny Stream retornou uma resposta inv�lida.');
+            throw new RuntimeException('O SGI STREAM retornou uma resposta invalida.');
         }
 
         return $decoded;
@@ -190,14 +190,14 @@ class BunnyStreamService
 
         $handle = @fopen($filePath, 'rb');
         if ($handle === false) {
-            throw new RuntimeException('N�o foi poss�vel abrir o arquivo para envio ao Bunny Stream.');
+            throw new RuntimeException('Nao foi possivel abrir o arquivo para envio ao SGI STREAM.');
         }
 
         $fileSize = (int) (@filesize($filePath) ?: 0);
         $ch = curl_init(self::API_BASE . $path);
         if ($ch === false) {
             fclose($handle);
-            throw new RuntimeException('N�o foi poss�vel iniciar o upload no Bunny Stream.');
+            throw new RuntimeException('Nao foi possivel iniciar o upload no SGI STREAM.');
         }
 
         curl_setopt_array($ch, [
@@ -218,7 +218,7 @@ class BunnyStreamService
 
         $body = curl_exec($ch);
         if ($body === false) {
-            $message = $this->curlErrorMessage($ch, 'Falha ao enviar o arquivo para o Bunny Stream.');
+            $message = $this->curlErrorMessage($ch, 'Falha ao enviar o arquivo para o SGI STREAM.');
             fclose($handle);
             throw new RuntimeException($message);
         }
@@ -228,7 +228,7 @@ class BunnyStreamService
 
         if ($statusCode >= 400) {
             $message = $this->extractErrorMessage($body);
-            throw new RuntimeException("Upload para Bunny Stream falhou [{$statusCode}]: {$message}");
+            throw new RuntimeException("Upload para SGI STREAM falhou [{$statusCode}]: {$message}");
         }
     }
 
@@ -303,7 +303,7 @@ class BunnyStreamService
             || str_contains($lower, 'self-signed')
             || str_contains($lower, 'certificate chain')
         ) {
-            $message .= ' Ajuste o CA bundle do Bunny no ambiente ou desative a verificacao SSL apenas no preview local.';
+            $message .= ' Ajuste o CA bundle do SGI STREAM no ambiente ou desative a verificacao SSL apenas no preview local.';
         }
 
         return $message;

@@ -78,7 +78,7 @@ $schemaReady = (bool) ($data['schema_ready'] ?? false);
                     <li>Cada aula aceita apenas 1 video em MP4, com maximo de 80 MB.</li>
                     <li>Cada anexo aceita ate 20 MB e pode ser baixado pelo aluno.</li>
                     <li>O certificado exige progresso completo e minimo de 70% na prova obrigatoria.</li>
-                    <li>O limite global de video no Bunny Stream e bloqueado ao atingir 10.000 minutos.</li>
+                    <li>O limite global de video no SGI STREAM e bloqueado ao atingir 10.000 minutos.</li>
                 </ul>
             </section>
 

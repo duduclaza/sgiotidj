@@ -72,24 +72,50 @@ class GarantiasController
             $descricao_defeito = trim($_POST['descricao_defeito'] ?? '');
             $usuario_id = $_SESSION['user_id'] ?? null;
             $notificar_setores = $_POST['notificar_setores'] ?? [];
+            $nomesArquivos = array_filter((array) ($_FILES['imagens']['name'] ?? []), static fn($nome) => trim((string) $nome) !== '');
+
+            $this->logGarantiaRequisicao('create:start', [
+                'user_id' => $usuario_id,
+                'nome_requisitante' => $nome_requisitante,
+                'produto' => $produto,
+                'setores' => array_values((array) $notificar_setores),
+                'qtd_imagens_enviadas' => count($nomesArquivos),
+                'ip' => $_SERVER['REMOTE_ADDR'] ?? null,
+            ]);
 
             // Validações
             if (empty($nome_requisitante)) {
+                $this->logGarantiaRequisicao('create:validation_failed', [
+                    'field' => 'nome_requisitante',
+                    'user_id' => $usuario_id,
+                ]);
                 echo json_encode(['success' => false, 'message' => 'Nome do requisitante é obrigatório']);
                 return;
             }
             
             if (empty($produto)) {
+                $this->logGarantiaRequisicao('create:validation_failed', [
+                    'field' => 'produto',
+                    'user_id' => $usuario_id,
+                ]);
                 echo json_encode(['success' => false, 'message' => 'Produto é obrigatório']);
                 return;
             }
             
             if (empty($descricao_defeito)) {
+                $this->logGarantiaRequisicao('create:validation_failed', [
+                    'field' => 'descricao_defeito',
+                    'user_id' => $usuario_id,
+                ]);
                 echo json_encode(['success' => false, 'message' => 'Descrição do defeito é obrigatória']);
                 return;
             }
 
             if (empty($notificar_setores) || !is_array($notificar_setores)) {
+                $this->logGarantiaRequisicao('create:validation_failed', [
+                    'field' => 'notificar_setores',
+                    'user_id' => $usuario_id,
+                ]);
                 echo json_encode(['success' => false, 'message' => 'Selecione ao menos um setor para notificar.']);
                 return;
             }
@@ -114,6 +140,11 @@ class GarantiasController
             }
             
             $ticket = sprintf("%s-%04d", $prefixo, $sequencial);
+            $this->logGarantiaRequisicao('create:ticket_generated', [
+                'ticket' => $ticket,
+                'prefixo' => $prefixo,
+                'sequencial' => $sequencial,
+            ]);
             
             // Processar imagens
             $imagens = [];
@@ -132,6 +163,11 @@ class GarantiasController
                     }
                 }
             }
+            $this->logGarantiaRequisicao('create:images_processed', [
+                'ticket' => $ticket,
+                'qtd_imagens_processadas' => count($imagens),
+                'nomes_imagens' => array_map(static fn(array $imagem) => $imagem['nome'] ?? '', $imagens),
+            ]);
             
             // Inserir no banco
             $stmt = $this->db->prepare("
@@ -150,18 +186,41 @@ class GarantiasController
             ]);
             
             $id = $this->db->lastInsertId();
+            $this->logGarantiaRequisicao('create:saved', [
+                'id' => (int) $id,
+                'ticket' => $ticket,
+                'user_id' => $usuario_id,
+                'setores' => array_values((array) $notificar_setores),
+                'qtd_imagens' => count($imagens),
+            ]);
             
             // Enviar notificação por email/in-app para setores selecionados + admins
-            $this->enviarNotificacaoNovaRequisicao([
-                'id'               => (int)$id,
-                'ticket'           => $ticket,
-                'nome_requisitante'=> $nome_requisitante,
-                'produto'          => $produto,
-                'descricao_defeito'=> $descricao_defeito,
-                'data'             => date('d/m/Y H:i'),
-                'qtd_imagens'      => count($imagens),
-                'notificar_setores'=> $notificar_setores,
-            ]);
+            try {
+                $this->enviarNotificacaoNovaRequisicao([
+                    'id'               => (int)$id,
+                    'ticket'           => $ticket,
+                    'nome_requisitante'=> $nome_requisitante,
+                    'produto'          => $produto,
+                    'descricao_defeito'=> $descricao_defeito,
+                    'data'             => date('d/m/Y H:i'),
+                    'qtd_imagens'      => count($imagens),
+                    'notificar_setores'=> $notificar_setores,
+                ]);
+                $this->logGarantiaRequisicao('create:notify_finished', [
+                    'id' => (int) $id,
+                    'ticket' => $ticket,
+                ]);
+            } catch (\Throwable $notifyError) {
+                $this->logGarantiaRequisicao('create:notify_failed', [
+                    'id' => (int) $id,
+                    'ticket' => $ticket,
+                    'error' => $notifyError->getMessage(),
+                    'error_type' => get_class($notifyError),
+                    'file' => $notifyError->getFile(),
+                    'line' => $notifyError->getLine(),
+                ]);
+                error_log("Erro ao notificar requisiÃ§Ã£o {$ticket}: " . $notifyError->getMessage());
+            }
             
             echo json_encode([
                 'success' => true,
@@ -177,7 +236,19 @@ class GarantiasController
                 ]
             ]);
             
-        } catch (\Exception $e) {
+            $this->logGarantiaRequisicao('create:response_success', [
+                'id' => (int) $id,
+                'ticket' => $ticket,
+            ]);
+        } catch (\Throwable $e) {
+            $this->logGarantiaRequisicao('create:error', [
+                'user_id' => $usuario_id ?? null,
+                'ticket' => $ticket ?? null,
+                'error' => $e->getMessage(),
+                'error_type' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
             error_log("Erro ao criar requisição: " . $e->getMessage());
             echo json_encode([
                 'success' => false,
@@ -195,6 +266,11 @@ class GarantiasController
             $notifMessage = "Ticket {$dados['ticket']} | {$dados['nome_requisitante']} | {$dados['produto']}";
             $reqId        = (int)($dados['id'] ?? 0);
             $appUrl       = $_ENV['APP_URL'] ?? 'https://djbr.sgqoti.com.br';
+            $this->logGarantiaRequisicao('notify:start', [
+                'id' => $reqId,
+                'ticket' => $dados['ticket'] ?? null,
+                'setores' => array_values((array) $setoresSelecionados),
+            ]);
 
             // 1. Notificação in-app para admins/super_admins (sininho)
             try {
@@ -212,6 +288,10 @@ class GarantiasController
                     $admins = [];
                 }
             }
+            $this->logGarantiaRequisicao('notify:admins_loaded', [
+                'ticket' => $dados['ticket'] ?? null,
+                'qtd_admins' => count($admins),
+            ]);
             foreach ($admins as $adminId) {
                 NotificationsController::create(
                     (int)$adminId,
@@ -225,6 +305,9 @@ class GarantiasController
 
             // 2. Notificação in-app + email para usuários dos setores selecionados
             if (empty($setoresSelecionados)) {
+                $this->logGarantiaRequisicao('notify:no_sectors', [
+                    'ticket' => $dados['ticket'] ?? null,
+                ]);
                 error_log("🔔 Nenhum setor selecionado para notificação de requisição {$dados['ticket']}");
                 return;
             }
@@ -249,6 +332,11 @@ class GarantiasController
                     error_log("Erro ao buscar usuarios dos setores: " . $e2->getMessage());
                 }
             }
+            $this->logGarantiaRequisicao('notify:users_loaded', [
+                'ticket' => $dados['ticket'] ?? null,
+                'setores' => array_values((array) $setoresSelecionados),
+                'qtd_usuarios_setor' => count($usersDoSetor),
+            ]);
 
             $emails = [];
             foreach ($usersDoSetor as $u) {
@@ -270,12 +358,22 @@ class GarantiasController
             $emails = array_values(array_unique($emails));
 
             if (empty($emails)) {
+                $this->logGarantiaRequisicao('notify:no_valid_emails', [
+                    'ticket' => $dados['ticket'] ?? null,
+                    'setores' => array_values((array) $setoresSelecionados),
+                    'qtd_usuarios_setor' => count($usersDoSetor),
+                ]);
                 error_log("🔔 Notificações in-app criadas para setores, mas sem emails válidos para o ticket {$dados['ticket']}");
                 return;
             }
 
             error_log("📧 Enviando notificação por email para setores [" . implode(', ', $setoresSelecionados) . "]: " . implode(', ', $emails));
 
+            $this->logGarantiaRequisicao('notify:email_dispatch', [
+                'ticket' => $dados['ticket'] ?? null,
+                'setores' => array_values((array) $setoresSelecionados),
+                'emails' => $emails,
+            ]);
             $emailService   = new EmailService();
             $subject        = "🔔 Nova Requisição de Garantia: {$dados['ticket']}";
             $setoresTexto   = implode(', ', $setoresSelecionados);
@@ -319,9 +417,22 @@ class GarantiasController
 </div></body></html>";
 
             $altBody = "SGQ - Requisição de Garantia\nTicket: {$dados['ticket']}\nRequisitante: {$dados['nome_requisitante']}\nProduto: {$dados['produto']}\nSetores: {$setoresTexto}\nAcesse: {$appUrl}/garantias/pendentes";
-            $emailService->send($emails, $subject, $body, $altBody);
+            $emailEnviado = $emailService->send($emails, $subject, $body, $altBody);
+            $this->logGarantiaRequisicao('notify:email_result', [
+                'ticket' => $dados['ticket'] ?? null,
+                'success' => $emailEnviado,
+                'emails' => $emails,
+                'last_error' => $emailEnviado ? null : $emailService->getLastError(),
+            ]);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            $this->logGarantiaRequisicao('notify:error', [
+                'ticket' => $dados['ticket'] ?? null,
+                'error' => $e->getMessage(),
+                'error_type' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
             error_log("❌ Erro ao enviar notificação de requisição: " . $e->getMessage());
         }
     }
@@ -1940,5 +2051,38 @@ class GarantiasController
                 $observacoes_logistica
             ]);
         }
+    }
+
+    private function logGarantiaRequisicao(string $event, array $context = []): void
+    {
+        $normalized = [];
+        foreach ($context as $key => $value) {
+            if (is_array($value)) {
+                $normalized[$key] = $value;
+                continue;
+            }
+
+            if (is_object($value)) {
+                $normalized[$key] = get_class($value);
+                continue;
+            }
+
+            $normalized[$key] = $value;
+        }
+
+        $flags = 0;
+        if (defined('JSON_UNESCAPED_UNICODE')) {
+            $flags |= JSON_UNESCAPED_UNICODE;
+        }
+        if (defined('JSON_UNESCAPED_SLASHES')) {
+            $flags |= JSON_UNESCAPED_SLASHES;
+        }
+
+        $payload = json_encode($normalized, $flags);
+        if ($payload === false) {
+            $payload = json_encode(['json_error' => json_last_error_msg()]);
+        }
+
+        error_log('[Garantias/Requisicao][' . $event . '] ' . $payload);
     }
 }

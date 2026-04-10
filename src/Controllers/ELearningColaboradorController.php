@@ -196,9 +196,7 @@ class ELearningColaboradorController
 
         if (($file['provider'] ?? '') === 'bunny' && !empty($file['playback_url'])) {
             if (empty($file['is_ready'])) {
-                http_response_code(202);
-                header('Content-Type: text/html; charset=UTF-8');
-                echo '<!doctype html><html lang="pt-br"><head><meta charset="utf-8"><meta http-equiv="refresh" content="8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Video em processamento</title><style>body{margin:0;font-family:Outfit,Segoe UI,sans-serif;background:#020617;color:#e2e8f0;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}.card{max-width:640px;background:#0f172a;border:1px solid #1e293b;border-radius:24px;padding:32px;box-shadow:0 25px 60px rgba(0,0,0,.35)}h1{margin:0 0 12px;font-size:32px}p{line-height:1.6;color:#cbd5e1}a{display:inline-block;margin-top:16px;padding:12px 18px;border-radius:999px;background:#38bdf8;color:#082f49;text-decoration:none;font-weight:700}</style></head><body><div class="card"><h1>Video em processamento</h1><p>' . htmlspecialchars((string) ($file['processing_message'] ?? 'O Bunny Stream ainda esta preparando o video desta aula.'), ENT_QUOTES, 'UTF-8') . '</p><p>Esta tela atualiza sozinha em alguns segundos.</p><a href="javascript:window.location.reload()">Atualizar pagina agora</a></div></body></html>';
+                $this->renderVideoProcessingPage((string) ($file['processing_message'] ?? 'O SGI STREAM ainda esta preparando o video desta aula.'));
                 return;
             }
             header('Location: ' . $file['playback_url']);
@@ -283,6 +281,131 @@ class ELearningColaboradorController
             'title' => 'E-Learning Aluno',
             'message' => $message,
         ]);
+    }
+
+    private function renderVideoProcessingPage(string $message): void
+    {
+        http_response_code(202);
+        header('Content-Type: text/html; charset=UTF-8');
+
+        $safeMessage = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+
+        echo '<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="refresh" content="8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Video em processamento</title>
+    <style>
+        :root { color-scheme: dark; }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            font-family: Outfit, "Segoe UI", sans-serif;
+            background:
+                radial-gradient(circle at top, rgba(56, 189, 248, 0.18), transparent 35%),
+                linear-gradient(135deg, #020617, #0f172a 45%, #155e75);
+            color: #e2e8f0;
+        }
+        .card {
+            width: min(100%, 640px);
+            padding: 36px;
+            border-radius: 28px;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(15, 23, 42, 0.78);
+            box-shadow: 0 25px 60px rgba(2, 6, 23, 0.45);
+            backdrop-filter: blur(16px);
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.08);
+            color: #e0f2fe;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .28em;
+            text-transform: uppercase;
+        }
+        .pulse {
+            position: relative;
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: #7dd3fc;
+        }
+        .pulse::after {
+            content: "";
+            position: absolute;
+            inset: -6px;
+            border-radius: inherit;
+            border: 1px solid rgba(125, 211, 252, 0.55);
+            animation: pulse 1.8s ease-out infinite;
+        }
+        h1 {
+            margin: 20px 0 12px;
+            font-size: clamp(32px, 4vw, 44px);
+            line-height: 1.05;
+        }
+        p {
+            margin: 0;
+            color: #cbd5e1;
+            line-height: 1.7;
+            font-size: 15px;
+        }
+        .meta {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+        .chip {
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.06);
+        }
+        a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 24px;
+            padding: 13px 20px;
+            border-radius: 999px;
+            background: #f8fafc;
+            color: #0f172a;
+            text-decoration: none;
+            font-weight: 800;
+        }
+        @keyframes pulse {
+            0% { transform: scale(.7); opacity: .9; }
+            100% { transform: scale(1.45); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="badge"><span class="pulse"></span>SGI STREAM</div>
+        <h1>Estamos processando o video</h1>
+        <p>' . $safeMessage . '</p>
+        <div class="meta">
+            <span class="chip">Atualizacao automatica a cada 8 segundos</span>
+            <span class="chip">Em breve a aula sera liberada</span>
+        </div>
+        <a href="javascript:window.location.reload()">Atualizar agora</a>
+    </div>
+</body>
+</html>';
+        exit;
     }
 
     private function json(array $payload): void

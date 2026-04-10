@@ -63,11 +63,29 @@ class ResendService
 
             // Preparar destinatários
             $recipients = is_array($to) ? $to : [$to];
-            $recipients = array_filter($recipients); // Remove vazios
+            $recipients = array_values(array_filter($recipients)); // Remove vazios
+            $this->logResend('send:start', [
+                'subject' => $subject,
+                'recipient_count' => count($recipients),
+                'recipients' => $recipients,
+                'attachment_count' => count($attachments),
+                'api_key_configured' => $this->apiKey !== '',
+                'from_email' => $this->fromEmail,
+            ]);
 
             if (empty($recipients)) {
                 $this->lastError = 'Nenhum destinatário válido';
                 error_log("❌ Erro: " . $this->lastError);
+                return false;
+            }
+
+            if ($this->apiKey === '') {
+                $this->lastError = 'RESEND_API_KEY nao configurada';
+                $this->logResend('send:config_missing', [
+                    'subject' => $subject,
+                    'from_email' => $this->fromEmail,
+                ]);
+                error_log('[Resend] ' . $this->lastError);
                 return false;
             }
 
@@ -98,6 +116,16 @@ class ResendService
             }
 
             // Fazer requisição para API Resend
+            if (!function_exists('curl_init')) {
+                $this->lastError = 'Extensao cURL nao disponivel no servidor';
+                $this->logResend('send:curl_unavailable', [
+                    'subject' => $subject,
+                    'recipient_count' => count($recipients),
+                ]);
+                error_log("âŒ " . $this->lastError);
+                return false;
+            }
+
             $ch = curl_init();
 
             curl_setopt_array($ch, [
@@ -121,27 +149,57 @@ class ResendService
 
             if ($curlError) {
                 $this->lastError = "Erro cURL: " . $curlError;
+                $this->logResend('send:curl_error', [
+                    'subject' => $subject,
+                    'http_code' => $httpCode,
+                    'error' => $curlError,
+                ]);
                 error_log("❌ " . $this->lastError);
                 return false;
             }
 
             $responseData = json_decode($response, true);
+            $this->logResend('send:response', [
+                'subject' => $subject,
+                'http_code' => $httpCode,
+                'response_id' => $responseData['id'] ?? null,
+                'message' => $responseData['message'] ?? $responseData['error'] ?? null,
+            ]);
 
             error_log("Resposta API (HTTP {$httpCode}): " . $response);
 
             if ($httpCode >= 200 && $httpCode < 300) {
                 error_log("✅ Email enviado com sucesso via Resend! ID: " . ($responseData['id'] ?? 'N/A'));
+                $this->logResend('send:success', [
+                    'subject' => $subject,
+                    'http_code' => $httpCode,
+                    'recipient_count' => count($recipients),
+                    'response_id' => $responseData['id'] ?? null,
+                ]);
                 return true;
             }
 
             // Erro na API
             $this->lastError = $responseData['message'] ?? $responseData['error'] ?? "Erro HTTP {$httpCode}";
+            $this->logResend('send:api_error', [
+                'subject' => $subject,
+                'http_code' => $httpCode,
+                'message' => $this->lastError,
+                'response' => $responseData,
+            ]);
             error_log("❌ Erro Resend API: " . $this->lastError);
             return false;
 
         }
-        catch (\Exception $e) {
+        catch (\Throwable $e) {
             $this->lastError = $e->getMessage();
+            $this->logResend('send:exception', [
+                'subject' => $subject,
+                'error' => $e->getMessage(),
+                'error_type' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
             error_log("❌ Exceção ao enviar email: " . $e->getMessage());
             return false;
         }
@@ -161,6 +219,27 @@ class ResendService
     public function testConnection(): array
     {
         try {
+            $this->logResend('connection:test_start', [
+                'api_key_configured' => $this->apiKey !== '',
+                'from_email' => $this->fromEmail,
+            ]);
+
+            if ($this->apiKey === '') {
+                $this->logResend('connection:config_missing', []);
+                return [
+                    'success' => false,
+                    'message' => 'RESEND_API_KEY nao configurada'
+                ];
+            }
+
+            if (!function_exists('curl_init')) {
+                $this->logResend('connection:curl_unavailable', []);
+                return [
+                    'success' => false,
+                    'message' => 'Extensao cURL nao disponivel no servidor'
+                ];
+            }
+
             $ch = curl_init();
 
             curl_setopt_array($ch, [
@@ -180,6 +259,10 @@ class ResendService
             curl_close($ch);
 
             if ($curlError) {
+                $this->logResend('connection:curl_error', [
+                    'error' => $curlError,
+                    'http_code' => $httpCode,
+                ]);
                 return [
                     'success' => false,
                     'message' => 'Erro de conexão: ' . $curlError
@@ -187,6 +270,9 @@ class ResendService
             }
 
             if ($httpCode >= 200 && $httpCode < 300) {
+                $this->logResend('connection:success', [
+                    'http_code' => $httpCode,
+                ]);
                 return [
                     'success' => true,
                     'message' => 'Conexão com API Resend OK!'
@@ -194,17 +280,60 @@ class ResendService
             }
 
             $responseData = json_decode($response, true);
+            $this->logResend('connection:api_error', [
+                'http_code' => $httpCode,
+                'response' => $responseData,
+            ]);
             return [
                 'success' => false,
                 'message' => 'Erro API: ' . ($responseData['message'] ?? "HTTP {$httpCode}")
             ];
 
         }
-        catch (\Exception $e) {
+        catch (\Throwable $e) {
+            $this->logResend('connection:exception', [
+                'error' => $e->getMessage(),
+                'error_type' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
             return [
                 'success' => false,
                 'message' => 'Exceção: ' . $e->getMessage()
             ];
         }
+    }
+
+    private function logResend(string $event, array $context = []): void
+    {
+        $normalized = [];
+        foreach ($context as $key => $value) {
+            if (is_array($value)) {
+                $normalized[$key] = $value;
+                continue;
+            }
+
+            if (is_object($value)) {
+                $normalized[$key] = get_class($value);
+                continue;
+            }
+
+            $normalized[$key] = $value;
+        }
+
+        $flags = 0;
+        if (defined('JSON_UNESCAPED_UNICODE')) {
+            $flags |= JSON_UNESCAPED_UNICODE;
+        }
+        if (defined('JSON_UNESCAPED_SLASHES')) {
+            $flags |= JSON_UNESCAPED_SLASHES;
+        }
+
+        $payload = json_encode($normalized, $flags);
+        if ($payload === false) {
+            $payload = json_encode(['json_error' => json_last_error_msg()]);
+        }
+
+        error_log('[Resend][' . $event . '] ' . $payload);
     }
 }

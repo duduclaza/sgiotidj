@@ -382,7 +382,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: formData
             });
             
-            const result = await response.json();
+            const responseText = await response.text();
+            let result = null;
+
+            try {
+                result = responseText ? JSON.parse(responseText) : null;
+            } catch (parseError) {
+                throw new Error(`Resposta invalida do servidor (HTTP ${response.status}).`);
+            }
+
+            if (!result) {
+                throw new Error(`Servidor retornou uma resposta vazia (HTTP ${response.status}).`);
+            }
             
             if (result.success) {
                 // Preencher modal do ticket
