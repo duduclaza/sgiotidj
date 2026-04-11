@@ -45,11 +45,8 @@ $statCards = [
 
                 <div class="space-y-4">
                     <h1 class="max-w-4xl text-4xl font-black tracking-tight text-white sm:text-5xl">
-                        Um cockpit mais limpo para publicar, acompanhar e ajustar cursos sem sair do fluxo.
+                        E-Learning Professor
                     </h1>
-                    <p class="max-w-3xl text-base leading-relaxed text-slate-200/75">
-                        A area do professor agora abre em tela cheia, com navegacao propria, retorno rapido ao SGI e foco nas acoes essenciais do E-Learning.
-                    </p>
                 </div>
 
                 <div class="flex flex-wrap gap-3">
@@ -104,7 +101,7 @@ $statCards = [
             <div class="mt-6 grid gap-4">
                 <?php if (!$courses): ?>
                     <div class="rounded-[1.75rem] border border-dashed border-white/10 bg-slate-950/30 p-10 text-center text-slate-300">
-                        Nenhum curso cadastrado ainda. Comece criando uma trilha limpa para o professor publicar.
+                        Nenhum curso cadastrado ainda.
                     </div>
                 <?php endif; ?>
 

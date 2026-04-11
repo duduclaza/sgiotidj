@@ -25,11 +25,8 @@ $statCards = [
                 </div>
                 <div class="space-y-4">
                     <h2 class="max-w-4xl text-4xl font-black tracking-tight text-white sm:text-5xl">
-                        Aprenda com foco, acompanhe seu ritmo e volte ao SGI quando precisar.
+                        E-Learning Aluno
                     </h2>
-                    <p class="max-w-3xl text-base leading-relaxed text-slate-200/75">
-                        Um painel mais direto para continuar aulas, ver cursos ativos e acompanhar certificados sem excesso de informacao na tela.
-                    </p>
                 </div>
                 <div class="flex flex-wrap gap-3">
                     <?php if ($nextLesson): ?>

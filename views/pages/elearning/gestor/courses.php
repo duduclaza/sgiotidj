@@ -13,11 +13,8 @@ $schemaReady = (bool) ($data['schema_ready'] ?? false);
             <div class="space-y-5">
                 <p class="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-100/70">Estrutura de cursos</p>
                 <h1 class="max-w-4xl text-4xl font-black tracking-tight text-white sm:text-5xl">
-                    Cursos mais limpos, sobrios e prontos para abrir em tela cheia.
+                    Cursos
                 </h1>
-                <p class="max-w-3xl text-base leading-relaxed text-slate-200/75">
-                    Gerencie trilhas, aulas, provas e alunos em uma area dedicada do professor, sem a moldura pesada do SGI principal.
-                </p>
                 <div class="flex flex-wrap gap-3">
                     <?php if ($canEdit): ?>
                         <button type="button" class="rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]" onclick="openCourseModal()">
@@ -68,7 +65,7 @@ $schemaReady = (bool) ($data['schema_ready'] ?? false);
             <div class="grid gap-4 md:grid-cols-2">
                 <?php if (!$courses): ?>
                     <div class="rounded-[1.75rem] border border-dashed border-white/10 bg-white/[0.045] p-10 text-center text-slate-300 md:col-span-2">
-                        Nenhum curso cadastrado ate o momento. A lista esta limpa para voce reconstruir o E-Learning com uma estrutura mais atual.
+                        Nenhum curso cadastrado ate o momento.
                     </div>
                 <?php endif; ?>
 
