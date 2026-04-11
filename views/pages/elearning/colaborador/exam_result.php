@@ -13,7 +13,7 @@ $approved = ($attempt['status'] ?? '') === 'approved';
                 <h2 class="text-4xl font-black tracking-tight text-white"><?= $approved ? 'Aprovado' : 'Reprovado' ?></h2>
                 <p class="max-w-2xl text-base leading-relaxed text-slate-100/80">Você obteve <strong class="text-white"><?= number_format((float) ($attempt['score_percent'] ?? 0), 0) ?>%</strong> na prova <strong class="text-white"><?= e($attempt['exam_title'] ?? 'Avaliação') ?></strong>.</p>
             </div>
-            <div class="rounded-[1.5rem] border border-white/15 bg-slate-950/30 px-5 py-4">
+            <div class="rounded-[1.5rem] border border-white/20 bg-slate-950/30 px-5 py-4">
                 <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-300">Nota mínima</p>
                 <p class="mt-3 text-3xl font-black text-white"><?= number_format((float) ($attempt['passing_score'] ?? 70), 0) ?>%</p>
             </div>
@@ -56,7 +56,7 @@ $approved = ($attempt['status'] ?? '') === 'approved';
 
             <section class="rounded-[1.75rem] border border-white/10 bg-white/5 p-6 shadow-soft backdrop-blur-xl">
                 <div class="flex flex-wrap gap-3">
-                    <a href="/elearning/colaborador/cursos/<?= (int) ($attempt['course_id'] ?? 0) ?>" class="rounded-full border border-white/15 px-4 py-3 text-sm font-black text-white transition hover:bg-white/10">Voltar ao curso</a>
+                    <a href="/elearning/colaborador/cursos/<?= (int) ($attempt['course_id'] ?? 0) ?>" class="rounded-full border border-white/20 px-4 py-3 text-sm font-black text-white transition hover:bg-white/10">Voltar ao curso</a>
                     <a href="/elearning/colaborador/certificados" class="rounded-full bg-sky-500 px-4 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]">Meus certificados</a>
                 </div>
             </section>

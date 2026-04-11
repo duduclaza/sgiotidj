@@ -37,16 +37,16 @@ $enrollmentStatus = static function (string $status): array {
 ?>
 
 <section class="space-y-8">
-    <div class="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl">
+    <div class="overflow-hidden rounded-[2.25rem] border border-white/10 bg-white/[0.045] shadow-soft backdrop-blur-xl">
         <div class="grid gap-0 xl:grid-cols-[1.25fr,0.75fr]">
-            <div class="relative overflow-hidden bg-[linear-gradient(135deg,_#0f172a,_#1d4ed8_58%,_#0891b2)] p-8 text-white">
+            <div class="relative overflow-hidden bg-[linear-gradient(135deg,_rgba(15,23,42,0.96),_rgba(8,47,73,0.78)_58%,_rgba(15,118,110,0.58))] p-8 text-white">
                 <div class="absolute inset-0 opacity-20" style="background-image:url('<?= e($course['cover_url'] ?? '/assets/logo.png') ?>');background-size:cover;background-position:center;"></div>
                 <div class="relative space-y-5">
                     <div class="flex flex-wrap items-center gap-3">
-                        <span class="rounded-full bg-white/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.24em] text-white">Professor</span>
+                        <span class="rounded-full bg-white/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.24em] text-white">Professor</span>
                         <span class="rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.24em] <?= e($courseStatus['class']) ?>"><?= e($courseStatus['label']) ?></span>
                         <?php if (!empty($course['category'])): ?>
-                            <span class="rounded-full border border-white/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.24em] text-sky-100"><?= e($course['category']) ?></span>
+                            <span class="rounded-full border border-white/20 px-3 py-1 text-[11px] font-black uppercase tracking-[0.24em] text-cyan-100"><?= e($course['category']) ?></span>
                         <?php endif; ?>
                     </div>
                     <div>
@@ -61,19 +61,19 @@ $enrollmentStatus = static function (string $status): array {
                     <div class="flex flex-wrap gap-3">
                         <?php if ($canEdit && $activeTab === 'lessons'): ?>
                             <button type="button" class="rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]" onclick="openLessonModal()">Nova aula</button>
-                            <a href="/elearning/gestor/cursos/<?= (int) ($course['id'] ?? 0) ?>/provas" class="rounded-full border border-white/15 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10">Criar prova</a>
+                            <a href="/elearning/gestor/cursos/<?= (int) ($course['id'] ?? 0) ?>/provas" class="rounded-full border border-white/20 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10">Criar prova</a>
                         <?php endif; ?>
                         <?php if ($canEdit && $activeTab === 'exams'): ?>
                             <button type="button" class="rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]" onclick="openExamModal()">Nova prova</button>
-                            <a href="/elearning/gestor/cursos/<?= (int) ($course['id'] ?? 0) ?>/aulas" class="rounded-full border border-white/15 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10">Voltar para aulas</a>
+                            <a href="/elearning/gestor/cursos/<?= (int) ($course['id'] ?? 0) ?>/aulas" class="rounded-full border border-white/20 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10">Voltar para aulas</a>
                         <?php endif; ?>
-                        <a href="/elearning/gestor/diploma/config?course_id=<?= (int) ($course['id'] ?? 0) ?>" class="rounded-full border border-white/15 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10">Certificado</a>
-                        <a href="/elearning/gestor/cursos" class="rounded-full border border-white/15 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10">Voltar</a>
+                        <a href="/elearning/gestor/diploma/config?course_id=<?= (int) ($course['id'] ?? 0) ?>" class="rounded-full border border-white/20 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10">Certificado</a>
+                        <a href="/elearning/gestor/cursos" class="rounded-full border border-white/20 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10">Voltar</a>
                     </div>
                 </div>
             </div>
 
-            <aside class="grid gap-4 bg-slate-50 p-6 sm:grid-cols-2 xl:grid-cols-1">
+            <aside class="grid gap-4 bg-slate-950/50 p-6 sm:grid-cols-2 xl:grid-cols-1">
                 <?php foreach ([
                     ['label' => 'Aulas', 'value' => count($lessons), 'icon' => 'ph-play-circle'],
                     ['label' => 'Provas', 'value' => count($exams), 'icon' => 'ph-clipboard-text'],
@@ -108,7 +108,7 @@ $enrollmentStatus = static function (string $status): array {
             'students' => ['label' => 'Matrículas', 'href' => '/elearning/gestor/cursos/' . (int) ($course['id'] ?? 0) . '/matriculas', 'icon' => 'ph-user-list'],
             'reports' => ['label' => 'Progresso', 'href' => '/elearning/gestor/cursos/' . (int) ($course['id'] ?? 0) . '/progresso', 'icon' => 'ph-chart-line-up'],
         ] as $tabKey => $tab): ?>
-            <a href="<?= e($tab['href']) ?>" class="inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-black transition <?= $activeTab === $tabKey ? 'bg-slate-900 text-white shadow-lg' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50' ?>">
+            <a href="<?= e($tab['href']) ?>" class="inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-black transition <?= $activeTab === $tabKey ? 'bg-white text-slate-950 shadow-soft' : 'border border-white/10 bg-white/[0.045] text-slate-200 hover:bg-white/10' ?>">
                 <i class="ph <?= e($tab['icon']) ?> text-base"></i>
                 <?= e($tab['label']) ?>
             </a>

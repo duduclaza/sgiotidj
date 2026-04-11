@@ -44,7 +44,7 @@ $remainingAttempts = $data['remaining_attempts'] ?? 0;
         <?php endforeach; ?>
 
         <div class="flex flex-wrap justify-end gap-3">
-            <a href="/elearning/colaborador/cursos/<?= (int) ($exam['course_id'] ?? 0) ?>" class="rounded-full border border-white/15 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10">Voltar ao curso</a>
+            <a href="/elearning/colaborador/cursos/<?= (int) ($exam['course_id'] ?? 0) ?>" class="rounded-full border border-white/20 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10">Voltar ao curso</a>
             <button type="submit" class="rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]">Enviar prova</button>
         </div>
     </form>

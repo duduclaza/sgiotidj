@@ -1004,6 +1004,44 @@ class ELearningService
         ];
     }
 
+    public function deleteAllTeacherCourses(int $actorId): array
+    {
+        $this->assertSchemaReady();
+
+        $courses = $this->fetchAll(
+            "SELECT id, title
+             FROM elearning_courses
+             WHERE teacher_id = ? AND deleted_at IS NULL
+             ORDER BY updated_at DESC, created_at DESC",
+            [$actorId]
+        );
+
+        $deleted = [];
+        $warnings = [];
+        foreach ($courses as $course) {
+            $result = $this->deleteCourse((int) $course['id'], $actorId);
+            $deleted[] = $result;
+            foreach ($result['warnings'] ?? [] as $warning) {
+                $warnings[] = [
+                    'course_id' => (int) $course['id'],
+                    'title' => (string) ($course['title'] ?? ''),
+                    'warning' => $warning,
+                ];
+            }
+        }
+
+        $this->logAction($actorId, 'teacher', 'courses.bulk_deleted', 'course', null, [
+            'deleted_count' => count($deleted),
+            'warnings_count' => count($warnings),
+        ]);
+
+        return [
+            'deleted_count' => count($deleted),
+            'deleted' => $deleted,
+            'warnings' => $warnings,
+        ];
+    }
+
     public function saveLesson(array $input, array $files, int $actorId): int
     {
         $this->assertSchemaReady();

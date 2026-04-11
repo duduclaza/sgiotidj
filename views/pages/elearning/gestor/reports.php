@@ -5,15 +5,15 @@ $schemaReady = (bool) ($data['schema_ready'] ?? false);
 ?>
 
 <section class="space-y-8">
-    <div class="flex flex-col gap-5 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-xl xl:flex-row xl:items-end xl:justify-between">
+    <div class="flex flex-col gap-5 rounded-[2.25rem] border border-white/10 bg-[linear-gradient(135deg,_rgba(15,23,42,0.95),_rgba(8,47,73,0.72)_58%,_rgba(15,118,110,0.48))] p-8 text-white shadow-soft xl:flex-row xl:items-end xl:justify-between">
         <div class="space-y-4">
-            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">Relatorios do Professor</p>
-            <h1 class="text-4xl font-black tracking-tight text-slate-900">Matriculas, conclusao, aprovacao e certificados por curso.</h1>
-            <p class="max-w-3xl text-base leading-relaxed text-slate-600">Use este painel para acompanhar desempenho academico, adesao dos alunos e impacto da operacao de E-Learning por curso publicado ou em preparacao.</p>
+            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-100/70">Relatorios do Professor</p>
+            <h1 class="text-4xl font-black tracking-tight text-white">Matriculas, conclusao, aprovacao e certificados por curso.</h1>
+            <p class="max-w-3xl text-base leading-relaxed text-slate-200/75">Use este painel para acompanhar desempenho academico, adesao dos alunos e impacto da operacao de E-Learning por curso publicado ou em preparacao.</p>
         </div>
         <div class="flex flex-wrap gap-3">
-            <a href="/elearning/gestor/cursos" class="rounded-full bg-slate-900 px-5 py-3 text-sm font-black text-white transition hover:scale-[1.02]">Gerenciar cursos</a>
-            <a href="/elearning/gestor/armazenamento" class="rounded-full border border-slate-200 px-5 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-50">Painel de armazenamento</a>
+            <a href="/elearning/gestor/cursos" class="rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]">Gerenciar cursos</a>
+            <a href="/elearning/gestor/armazenamento" class="rounded-full border border-white/20 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10">Painel de armazenamento</a>
         </div>
     </div>
 

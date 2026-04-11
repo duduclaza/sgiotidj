@@ -9,7 +9,7 @@ $lessonVideo = $lesson['video'] ?? null;
 ?>
 
 <section class="space-y-6">
-    <div class="overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-soft backdrop-blur-xl">
+    <div class="overflow-hidden rounded-[2.25rem] border border-white/10 bg-white/[0.045] p-8 shadow-soft backdrop-blur-xl">
         <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div class="space-y-4">
                 <div class="flex flex-wrap items-center gap-3 text-sm text-slate-300">
@@ -85,10 +85,10 @@ $lessonVideo = $lesson['video'] ?? null;
                 <p class="mt-4 text-sm leading-relaxed text-slate-300">A aula e considerada concluida automaticamente ao atingir 90% de progresso no player, mas voce tambem pode registrar a conclusao manualmente apos revisar o conteudo.</p>
                 <div class="mt-6 flex flex-wrap gap-3">
                     <?php if ($previousLessonId): ?>
-                        <a href="/elearning/colaborador/materiais/<?= (int) $previousLessonId ?>/assistir" class="rounded-full border border-white/15 px-4 py-3 text-sm font-black text-white transition hover:bg-white/10">Aula anterior</a>
+                        <a href="/elearning/colaborador/materiais/<?= (int) $previousLessonId ?>/assistir" class="rounded-full border border-white/20 px-4 py-3 text-sm font-black text-white transition hover:bg-white/10">Aula anterior</a>
                     <?php endif; ?>
                     <?php if ($nextLessonId): ?>
-                        <a href="/elearning/colaborador/materiais/<?= (int) $nextLessonId ?>/assistir" class="rounded-full bg-sky-500 px-4 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]">Proxima aula</a>
+                        <a href="/elearning/colaborador/materiais/<?= (int) $nextLessonId ?>/assistir" class="rounded-full bg-white px-4 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]">Proxima aula</a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -112,7 +112,7 @@ $lessonVideo = $lesson['video'] ?? null;
             </section>
 
             <section class="rounded-[1.75rem] border border-white/10 bg-white/5 p-6 shadow-soft backdrop-blur-xl">
-                <p class="text-xs font-semibold uppercase tracking-[0.35em] text-violet-200/70">Playlist</p>
+                <p class="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-100/60">Playlist</p>
                 <h3 class="mt-2 text-2xl font-black tracking-tight text-white">Trilha do curso</h3>
                 <div class="mt-5 space-y-3">
                     <?php foreach ($playlist as $playlistLesson): ?>

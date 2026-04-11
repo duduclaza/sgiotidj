@@ -28,7 +28,7 @@ $summaryRows = [
                     <a href="/elearning/gestor/cursos" class="rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]">
                         Gerenciar cursos
                     </a>
-                    <a href="/elearning/gestor/relatorios" class="rounded-full border border-white/15 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10">
+                    <a href="/elearning/gestor/relatorios" class="rounded-full border border-white/20 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10">
                         Relatorios
                     </a>
                 </div>

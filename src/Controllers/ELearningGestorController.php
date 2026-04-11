@@ -150,6 +150,31 @@ class ELearningGestorController
         }
     }
 
+    public function deleteTodosCursos(): void
+    {
+        $this->requireProfessor();
+        $this->authorizeDelete();
+
+        try {
+            $result = $this->service->deleteAllTeacherCourses($this->userId());
+            $deletedCount = (int) ($result['deleted_count'] ?? 0);
+            $warnings = $result['warnings'] ?? [];
+            $message = $deletedCount === 0
+                ? 'Nao havia cursos para excluir.'
+                : ($warnings
+                    ? "{$deletedCount} curso(s) excluido(s), com avisos para conferencia manual de alguns videos."
+                    : "{$deletedCount} curso(s) excluido(s) com sucesso.");
+
+            $this->json([
+                'success' => true,
+                'message' => $message,
+                'data' => $result,
+            ]);
+        } catch (\Throwable $exception) {
+            $this->jsonError($exception);
+        }
+    }
+
     public function storeAula(): void
     {
         $this->requireProfessor();
@@ -561,7 +586,7 @@ class ELearningGestorController
     {
         extract($data);
         $viewFile = __DIR__ . '/../../views/pages/' . $view . '.php';
-        include __DIR__ . '/../../views/layouts/main.php';
+        include __DIR__ . '/../../views/layouts/elearning_professor.php';
     }
 
     private function json(array $payload): void

@@ -15,7 +15,7 @@ $preselectedCourseId = (int) ($_GET['course_id'] ?? 0);
                 <p class="max-w-3xl text-base leading-relaxed text-sky-50/80">Escolha o template do curso, ajuste cor, texto, acabamento, logo, assinatura e imagem de fundo. A emissao e automatica quando o aluno cumpre progresso e aprovacao minima.</p>
                 <div class="flex flex-wrap gap-3">
                     <a href="/elearning/gestor/cursos" class="rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]">Voltar aos cursos</a>
-                    <a href="/elearning/gestor/armazenamento" class="rounded-full border border-white/15 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10">Minutos de video</a>
+                    <a href="/elearning/gestor/armazenamento" class="rounded-full border border-white/20 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10">Minutos de video</a>
                 </div>
             </div>
             <div class="grid gap-4 sm:grid-cols-2">
