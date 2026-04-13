@@ -492,6 +492,7 @@ $router->get('/elearning/gestor/cursos/{id}/aulas', [App\Controllers\ELearningGe
 $router->post('/elearning/gestor/aulas/store', [App\Controllers\ELearningGestorController::class, 'storeAula']);
 $router->post('/elearning/gestor/aulas/reorder', [App\Controllers\ELearningGestorController::class, 'reorderAula']);
 $router->post('/elearning/gestor/aulas/delete', [App\Controllers\ELearningGestorController::class, 'deleteAula']);
+$router->get('/elearning/gestor/aulas/{id}/video-status', [App\Controllers\ELearningGestorController::class, 'videoStatusAula']);
 $router->get('/elearning/gestor/videos/{id}', [App\Controllers\ELearningGestorController::class, 'streamLessonVideo']);
 $router->get('/elearning/gestor/anexos/{id}/download', [App\Controllers\ELearningGestorController::class, 'downloadAttachment']);
 $router->post('/elearning/gestor/provas/delete', [App\Controllers\ELearningGestorController::class, 'deleteProva']);
@@ -517,6 +518,7 @@ $router->post('/elearning/colaborador/matricular', [App\Controllers\ELearningCol
 $router->get('/elearning/colaborador/cursos/{id}', [App\Controllers\ELearningColaboradorController::class, 'verCurso']);
 $router->get('/elearning/colaborador/cursos/{id}/continuar', [App\Controllers\ELearningColaboradorController::class, 'continuar']);
 $router->get('/elearning/colaborador/materiais/{id}/assistir', [App\Controllers\ELearningColaboradorController::class, 'assistirAula']);
+$router->get('/elearning/colaborador/aulas/{id}/video-status', [App\Controllers\ELearningColaboradorController::class, 'videoStatusAula']);
 $router->get('/elearning/colaborador/videos/{id}', [App\Controllers\ELearningColaboradorController::class, 'streamLessonVideo']);
 $router->get('/elearning/colaborador/anexos/{id}/download', [App\Controllers\ELearningColaboradorController::class, 'downloadAttachment']);
 $router->post('/elearning/colaborador/progresso/registrar', [App\Controllers\ELearningColaboradorController::class, 'registrarProgresso']);
