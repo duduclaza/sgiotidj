@@ -16,23 +16,34 @@ class BunnyStreamService
 
     public function __construct()
     {
-        $this->apiKey = trim((string) ($_ENV['BUNNY_STREAM_API_KEY'] ?? getenv('BUNNY_STREAM_API_KEY') ?: ''));
-        $this->libraryId = (int) trim((string) ($_ENV['BUNNY_STREAM_LIBRARY_ID'] ?? getenv('BUNNY_STREAM_LIBRARY_ID') ?: '0'));
-        $cdnHost = trim((string) ($_ENV['BUNNY_STREAM_CDN_HOST'] ?? getenv('BUNNY_STREAM_CDN_HOST') ?: ''));
+        $this->apiKey = $this->envString([
+            'BUNNY_STREAM_API_KEY',
+            'BUNNY_STREAM_ACCESS_KEY',
+            'BUNNY_API_KEY',
+        ]);
+        $this->libraryId = (int) $this->envString([
+            'BUNNY_STREAM_LIBRARY_ID',
+            'BUNNY_LIBRARY_ID',
+        ], '0');
+        $cdnHost = $this->envString([
+            'BUNNY_STREAM_CDN_HOST',
+            'BUNNY_STREAM_PULL_ZONE',
+            'BUNNY_STREAM_HOSTNAME',
+            'BUNNY_CDN_HOST',
+        ]);
         $cdnHost = preg_replace('~^https?://~i', '', $cdnHost) ?? $cdnHost;
         $this->cdnHost = rtrim($cdnHost, '/');
-        $verifySsl = trim((string) ($_ENV['BUNNY_STREAM_VERIFY_SSL'] ?? getenv('BUNNY_STREAM_VERIFY_SSL') ?: ''));
+        $verifySsl = $this->envString(['BUNNY_STREAM_VERIFY_SSL']);
         $verifyFlag = filter_var($verifySsl, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE);
         $this->verifySsl = $verifyFlag ?? (PHP_SAPI !== 'cli-server');
-        $caBundle = trim((string) ($_ENV['BUNNY_STREAM_CA_BUNDLE'] ?? getenv('BUNNY_STREAM_CA_BUNDLE') ?: ''));
+        $caBundle = $this->envString(['BUNNY_STREAM_CA_BUNDLE']);
         $this->caBundlePath = ($caBundle !== '' && is_file($caBundle)) ? $caBundle : '';
     }
 
     public function isConfigured(): bool
     {
         return $this->apiKey !== ''
-            && $this->libraryId > 0
-            && $this->cdnHost !== '';
+            && $this->libraryId > 0;
     }
 
     public function assertConfigured(): void
@@ -124,11 +135,19 @@ class BunnyStreamService
 
     public function playlistUrl(string $videoId): string
     {
+        if ($this->cdnHost === '') {
+            return '';
+        }
+
         return 'https://' . $this->cdnHost . '/' . $videoId . '/playlist.m3u8';
     }
 
     public function mp4Url(string $videoId, int $resolutionHeight = 720): string
     {
+        if ($this->cdnHost === '') {
+            return '';
+        }
+
         return 'https://' . $this->cdnHost . '/' . $videoId . '/play_' . max(240, $resolutionHeight) . 'p.mp4';
     }
 
@@ -262,12 +281,34 @@ class BunnyStreamService
             'preferred_resolution' => $preferredResolution,
             'embed_url' => $videoId !== '' ? $this->embedUrl($videoId) : null,
             'playback_url' => $videoId !== '' ? $this->playbackUrl($videoId) : null,
-            'playlist_url' => $videoId !== '' ? $this->playlistUrl($videoId) : null,
-            'mp4_url' => $videoId !== '' ? $this->mp4Url($videoId, $preferredResolution) : null,
-            'thumbnail_url' => ($videoId !== '' && !empty($payload['thumbnailFileName']))
+            'playlist_url' => ($videoId !== '' && $this->cdnHost !== '') ? $this->playlistUrl($videoId) : null,
+            'mp4_url' => ($videoId !== '' && $this->cdnHost !== '') ? $this->mp4Url($videoId, $preferredResolution) : null,
+            'thumbnail_url' => ($videoId !== '' && $this->cdnHost !== '' && !empty($payload['thumbnailFileName']))
                 ? 'https://' . $this->cdnHost . '/' . $videoId . '/' . $payload['thumbnailFileName']
                 : null,
         ];
+    }
+
+    private function envString(array $names, string $fallback = ''): string
+    {
+        foreach ($names as $name) {
+            if (array_key_exists($name, $_ENV)) {
+                $value = trim((string) $_ENV[$name]);
+                if ($value !== '') {
+                    return $value;
+                }
+            }
+
+            $envValue = getenv($name);
+            if ($envValue !== false) {
+                $value = trim((string) $envValue);
+                if ($value !== '') {
+                    return $value;
+                }
+            }
+        }
+
+        return $fallback;
     }
 
     private function extendExecutionTime(int $seconds): void
