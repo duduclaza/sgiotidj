@@ -134,16 +134,7 @@ $menu = [
     ]
   ],
 
-  ['label' => 'CRM', 'href' => '/premium-locked?module=CRM', 'icon' => '<i class="ph ph-users-three"></i>', 'is_public' => true, 'badge' => 'PRO'],
-  ['label' => 'Financeiro', 'href' => '/premium-locked?module=Financeiro', 'icon' => '<i class="ph ph-currency-dollar"></i>', 'is_public' => true, 'badge' => 'PRO'],
-  ['label' => 'Contratos', 'href' => '/premium-locked?module=Contratos', 'icon' => '<i class="ph ph-file-text"></i>', 'is_public' => true, 'badge' => 'PRO'],
-  ['label' => 'RH', 'href' => '/premium-locked?module=RH', 'icon' => '<i class="ph ph-user-focus"></i>', 'is_public' => true, 'badge' => 'PRO'],
-  ['label' => 'Estoque', 'href' => '/premium-locked?module=Estoque', 'icon' => '<i class="ph ph-package"></i>', 'is_public' => true, 'badge' => 'PRO'],
-  ['label' => 'Logística', 'href' => '/premium-locked?module=Logística', 'icon' => '<i class="ph ph-truck"></i>', 'is_public' => true, 'badge' => 'PRO'],
-  ['label' => 'Frotas', 'href' => '/premium-locked?module=Frotas', 'icon' => '<i class="ph ph-car"></i>', 'is_public' => true, 'badge' => 'PRO'],
-  ['label' => 'Deptº Técnico', 'href' => '/premium-locked?module=Departamento+Técnico', 'icon' => '<i class="ph ph-wrench"></i>', 'is_public' => true, 'badge' => 'PRO'],
-  ['label' => 'Suprimentos', 'href' => '/premium-locked?module=Suprimentos', 'icon' => '<i class="ph ph-dribbble-logo"></i>', 'is_public' => true, 'badge' => 'PRO'],
-  ['label' => 'Compras', 'href' => '/premium-locked?module=Compras', 'icon' => '<i class="ph ph-shopping-cart"></i>', 'is_public' => true, 'badge' => 'PRO']
+
 ];
 $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/', '/') ?: '/';
 ?>
