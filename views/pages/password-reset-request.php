@@ -7,14 +7,14 @@
 <!-- Form -->
 <form id="formRequestReset" class="space-y-4">
   <div>
-    <label class="auth-label">E-mail corporativo</label>
+    <label class="auth-label">E-mail cadastrado</label>
     <div class="relative">
       <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206"/></svg>
       </span>
       <input type="email" id="email" name="email" required
              class="auth-input"
-             placeholder="nome@empresa.com.br"
+             placeholder="seu@email.com"
              autocomplete="email">
     </div>
   </div>
