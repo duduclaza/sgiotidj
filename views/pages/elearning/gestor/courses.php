@@ -138,9 +138,9 @@ $schemaReady = (bool) ($data['schema_ready'] ?? false);
     </div>
 </section>
 
-<div id="course-modal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm">
-    <div class="w-full max-w-3xl rounded-[2rem] border border-white/10 bg-slate-950 p-8 text-white shadow-2xl">
-        <div class="flex items-start justify-between gap-4">
+<div id="course-modal" class="fixed inset-0 z-[70] hidden items-start justify-center overflow-y-auto bg-slate-950/70 p-3 backdrop-blur-sm sm:p-6">
+    <div class="my-4 flex max-h-[calc(100vh-2rem)] w-full max-w-3xl flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-2xl sm:my-6 sm:max-h-[calc(100vh-3rem)]">
+        <div class="flex items-start justify-between gap-4 border-b border-white/10 px-6 py-5 sm:px-8">
             <div>
                 <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">Curso</p>
                 <h2 id="course-modal-title" class="mt-2 text-3xl font-black tracking-tight text-white">Novo curso</h2>
@@ -148,50 +148,52 @@ $schemaReady = (bool) ($data['schema_ready'] ?? false);
             <button type="button" class="rounded-full border border-white/10 px-4 py-2 text-sm font-black text-white transition hover:bg-white/10" onclick="closeCourseModal()">Fechar</button>
         </div>
 
-        <form id="course-form" class="mt-8 grid gap-5 md:grid-cols-2">
-            <input type="hidden" name="id" id="course-id">
-            <div class="md:col-span-2">
-                <label class="mb-2 block text-sm font-bold text-slate-200">Titulo do curso</label>
-                <input type="text" name="title" id="course-title" class="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-medium text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-200" required>
+        <form id="course-form" class="flex min-h-0 flex-1 flex-col">
+            <div class="grid min-h-0 flex-1 gap-5 overflow-y-auto px-6 py-5 sm:px-8 md:grid-cols-2">
+                <input type="hidden" name="id" id="course-id">
+                <div class="md:col-span-2">
+                    <label class="mb-2 block text-sm font-bold text-slate-200">Titulo do curso</label>
+                    <input type="text" name="title" id="course-title" class="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-medium text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-200" required>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="mb-2 block text-sm font-bold text-slate-200">Descricao</label>
+                    <textarea name="description" id="course-description" rows="4" class="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-medium text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-200"></textarea>
+                </div>
+                <div>
+                    <label class="mb-2 block text-sm font-bold text-slate-200">Categoria</label>
+                    <input list="course-categories" name="category" id="course-category" class="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-medium text-white outline-none transition focus:border-cyan-200">
+                    <datalist id="course-categories">
+                        <?php foreach ($categories as $category): ?>
+                            <option value="<?= e($category) ?>"></option>
+                        <?php endforeach; ?>
+                    </datalist>
+                </div>
+                <div>
+                    <label class="mb-2 block text-sm font-bold text-slate-200">Professor responsavel</label>
+                    <select name="teacher_id" id="course-teacher" class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm font-medium text-white outline-none transition focus:border-cyan-200">
+                        <?php foreach ($teachers as $teacher): ?>
+                            <option value="<?= (int) $teacher['id'] ?>"><?= e($teacher['name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div>
+                    <label class="mb-2 block text-sm font-bold text-slate-200">Carga horaria (h)</label>
+                    <input type="number" min="0" name="workload_hours" id="course-workload" class="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-medium text-white outline-none transition focus:border-cyan-200">
+                </div>
+                <div>
+                    <label class="mb-2 block text-sm font-bold text-slate-200">Status</label>
+                    <select name="status" id="course-status" class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm font-medium text-white outline-none transition focus:border-cyan-200">
+                        <option value="draft">Rascunho</option>
+                        <option value="published">Publicado</option>
+                        <option value="archived">Arquivado</option>
+                    </select>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="mb-2 block text-sm font-bold text-slate-200">Capa / imagem</label>
+                    <input type="file" name="cover" id="course-cover" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="block w-full rounded-2xl border border-dashed border-white/20 px-4 py-4 text-sm text-slate-200">
+                </div>
             </div>
-            <div class="md:col-span-2">
-                <label class="mb-2 block text-sm font-bold text-slate-200">Descricao</label>
-                <textarea name="description" id="course-description" rows="4" class="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-medium text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-200"></textarea>
-            </div>
-            <div>
-                <label class="mb-2 block text-sm font-bold text-slate-200">Categoria</label>
-                <input list="course-categories" name="category" id="course-category" class="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-medium text-white outline-none transition focus:border-cyan-200">
-                <datalist id="course-categories">
-                    <?php foreach ($categories as $category): ?>
-                        <option value="<?= e($category) ?>"></option>
-                    <?php endforeach; ?>
-                </datalist>
-            </div>
-            <div>
-                <label class="mb-2 block text-sm font-bold text-slate-200">Professor responsavel</label>
-                <select name="teacher_id" id="course-teacher" class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm font-medium text-white outline-none transition focus:border-cyan-200">
-                    <?php foreach ($teachers as $teacher): ?>
-                        <option value="<?= (int) $teacher['id'] ?>"><?= e($teacher['name']) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div>
-                <label class="mb-2 block text-sm font-bold text-slate-200">Carga horaria (h)</label>
-                <input type="number" min="0" name="workload_hours" id="course-workload" class="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-medium text-white outline-none transition focus:border-cyan-200">
-            </div>
-            <div>
-                <label class="mb-2 block text-sm font-bold text-slate-200">Status</label>
-                <select name="status" id="course-status" class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm font-medium text-white outline-none transition focus:border-cyan-200">
-                    <option value="draft">Rascunho</option>
-                    <option value="published">Publicado</option>
-                    <option value="archived">Arquivado</option>
-                </select>
-            </div>
-            <div class="md:col-span-2">
-                <label class="mb-2 block text-sm font-bold text-slate-200">Capa / imagem</label>
-                <input type="file" name="cover" id="course-cover" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="block w-full rounded-2xl border border-dashed border-white/20 px-4 py-4 text-sm text-slate-200">
-            </div>
-            <div class="md:col-span-2 flex justify-end gap-3 pt-3">
+            <div class="flex flex-col-reverse gap-3 border-t border-white/10 bg-slate-950 px-6 py-4 sm:flex-row sm:justify-end sm:px-8">
                 <button type="button" class="rounded-full border border-white/10 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10" onclick="closeCourseModal()">Cancelar</button>
                 <button type="submit" class="rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]">Salvar curso</button>
             </div>
