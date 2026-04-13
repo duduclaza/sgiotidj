@@ -13,7 +13,36 @@ class PasswordResetController
     public function __construct()
     {
         $this->db = Database::getInstance();
+        $this->ensureTableExists();
     }
+
+    /**
+     * Garante que a tabela password_resets existe no banco.
+     * Evita erro 500 caso a migration não tenha sido executada.
+     */
+    private function ensureTableExists(): void
+    {
+        try {
+            $this->db->exec("
+                CREATE TABLE IF NOT EXISTS `password_resets` (
+                    `id`         INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+                    `user_id`    INT UNSIGNED  NOT NULL,
+                    `email`      VARCHAR(255)  NOT NULL,
+                    `token`      VARCHAR(10)   NOT NULL,
+                    `expires_at` DATETIME      NOT NULL,
+                    `used`       TINYINT(1)    NOT NULL DEFAULT 0,
+                    `created_at` DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (`id`),
+                    KEY `idx_email`      (`email`),
+                    KEY `idx_user_id`    (`user_id`),
+                    KEY `idx_expires_at` (`expires_at`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            ");
+        } catch (\Exception $e) {
+            error_log("PasswordResetController::ensureTableExists - " . $e->getMessage());
+        }
+    }
+
 
     /**
      * Página de solicitação de recuperação de senha
