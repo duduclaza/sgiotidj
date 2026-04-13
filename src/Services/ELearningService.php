@@ -16,24 +16,6 @@ class ELearningService
     public const ATTACHMENT_LIMIT_BYTES = 20971520; // 20 MB
     public const PASSING_SCORE = 70.0;
 
-<?php
-
-namespace App\Services;
-
-use App\Config\Database;
-use PDO;
-use RuntimeException;
-
-class ELearningService
-{
-    public const DEFAULT_STORAGE_LIMIT_MINUTES = 10000;
-    public const DEFAULT_STORAGE_LIMIT_SECONDS = 600000; // 10.000 min
-    public const LEGACY_STORAGE_LIMIT_BYTES = 536870912000; // 500 GB
-    public const LEGACY_STORAGE_LIMIT_BYTES_V2 = 53687091200; // 50 GB
-    public const VIDEO_LIMIT_BYTES = 83886080; // 80 MB
-    public const ATTACHMENT_LIMIT_BYTES = 20971520; // 20 MB
-    public const PASSING_SCORE = 70.0;
-
     private PDO $db;
     private BunnyStreamService $bunnyStream;
     private ?bool $schemaReady = null;
@@ -90,6 +72,7 @@ class ELearningService
 
         $isSuperAdmin = PermissionService::isSuperAdmin($teacherId);
         $teacherFilter = $isSuperAdmin ? "1=1" : "teacher_id = ?";
+        $courseTeacherFilter = $isSuperAdmin ? "1=1" : "c.teacher_id = ?";
         $teacherParams = $isSuperAdmin ? [] : [$teacherId];
 
         $stats = [
@@ -100,13 +83,13 @@ class ELearningService
             'total_lessons' => (int) $this->fetchValue(
                 "SELECT COUNT(*) FROM elearning_lessons l
                  INNER JOIN elearning_courses c ON c.id = l.course_id
-                 WHERE c.{$teacherFilter} AND c.deleted_at IS NULL AND l.deleted_at IS NULL",
+                 WHERE {$courseTeacherFilter} AND c.deleted_at IS NULL AND l.deleted_at IS NULL",
                 $teacherParams
             ),
             'total_students' => (int) $this->fetchValue(
                 "SELECT COUNT(DISTINCT e.student_id) FROM elearning_enrollments e
                  INNER JOIN elearning_courses c ON c.id = e.course_id
-                 WHERE c.{$teacherFilter} AND c.deleted_at IS NULL AND e.deleted_at IS NULL",
+                 WHERE {$courseTeacherFilter} AND c.deleted_at IS NULL AND e.deleted_at IS NULL",
                 $teacherParams
             ),
             'published_courses' => (int) $this->fetchValue(
@@ -117,13 +100,13 @@ class ELearningService
             'certificates_issued' => (int) $this->fetchValue(
                 "SELECT COUNT(*) FROM elearning_certificates cert
                  INNER JOIN elearning_courses c ON c.id = cert.course_id
-                 WHERE c.{$teacherFilter} AND cert.deleted_at IS NULL AND c.deleted_at IS NULL",
+                 WHERE {$courseTeacherFilter} AND cert.deleted_at IS NULL AND c.deleted_at IS NULL",
                 $teacherParams
             ),
             'exams_applied' => (int) $this->fetchValue(
                 "SELECT COUNT(*) FROM elearning_exam_attempts a
                  INNER JOIN elearning_courses c ON c.id = a.course_id
-                 WHERE c.{$teacherFilter} AND a.status <> 'started' AND c.deleted_at IS NULL",
+                 WHERE {$courseTeacherFilter} AND a.status <> 'started' AND c.deleted_at IS NULL",
                 $teacherParams
             ),
             'approval_rate' => 0,
@@ -132,13 +115,13 @@ class ELearningService
         $approvedAttempts = (int) $this->fetchValue(
             "SELECT COUNT(*) FROM elearning_exam_attempts a
              INNER JOIN elearning_courses c ON c.id = a.course_id
-             WHERE c.{$teacherFilter} AND a.status = 'approved' AND c.deleted_at IS NULL",
+             WHERE {$courseTeacherFilter} AND a.status = 'approved' AND c.deleted_at IS NULL",
             $teacherParams
         );
         $submittedAttempts = (int) $this->fetchValue(
             "SELECT COUNT(*) FROM elearning_exam_attempts a
              INNER JOIN elearning_courses c ON c.id = a.course_id
-             WHERE c.{$teacherFilter} AND a.status IN ('approved','failed') AND c.deleted_at IS NULL",
+             WHERE {$courseTeacherFilter} AND a.status IN ('approved','failed') AND c.deleted_at IS NULL",
             $teacherParams
         );
         $stats['approval_rate'] = $submittedAttempts > 0
@@ -157,7 +140,7 @@ class ELearningService
              LEFT JOIN elearning_lessons l ON l.course_id = c.id AND l.deleted_at IS NULL
              LEFT JOIN elearning_enrollments e ON e.course_id = c.id AND e.deleted_at IS NULL
              LEFT JOIN elearning_certificates cert ON cert.course_id = c.id AND cert.deleted_at IS NULL
-             WHERE c.{$teacherFilter} AND c.deleted_at IS NULL
+             WHERE {$courseTeacherFilter} AND c.deleted_at IS NULL
              GROUP BY c.id
              ORDER BY c.updated_at DESC, c.created_at DESC",
             $teacherParams
@@ -167,7 +150,7 @@ class ELearningService
             "SELECT c.title AS label, COUNT(e.id) AS value
              FROM elearning_courses c
              LEFT JOIN elearning_enrollments e ON e.course_id = c.id AND e.deleted_at IS NULL
-             WHERE c.{$teacherFilter} AND c.deleted_at IS NULL
+             WHERE {$courseTeacherFilter} AND c.deleted_at IS NULL
              GROUP BY c.id
              ORDER BY value DESC, c.title ASC
              LIMIT 6",
@@ -179,7 +162,7 @@ class ELearningService
                     SUM(CASE WHEN e.status IN ('approved','completed') THEN 1 ELSE 0 END) AS value
              FROM elearning_courses c
              LEFT JOIN elearning_enrollments e ON e.course_id = c.id AND e.deleted_at IS NULL
-             WHERE c.{$teacherFilter} AND c.deleted_at IS NULL
+             WHERE {$courseTeacherFilter} AND c.deleted_at IS NULL
              GROUP BY c.id
              ORDER BY value DESC, c.title ASC
              LIMIT 6",
@@ -348,12 +331,181 @@ class ELearningService
         foreach ($lessons as &$lesson) {
             $videoMeta = $this->buildStoredVideoData([
                 'id' => $lesson['video_id'] ?? null,
+                'lesson_id' => $lesson['id'] ?? null,
                 'file_path' => $lesson['video_file_path'] ?? null,
                 'file_name' => $lesson['video_name'] ?? null,
-                'mime_type' => 'video/mp4',
+                'mime_type' => $lesson['video_mime_type'] ?? 'video/mp4',
                 'size_bytes' => $lesson['video_size_bytes'] ?? 0,
                 'estimated_minutes' => $lesson['estimated_minutes'] ?? 0,
             ], false);
+            $lesson['video'] = $videoMeta;
+            $lesson['video_provider'] = is_array($videoMeta) ? ($videoMeta['provider'] ?? null) : null;
+            $lesson['video_name'] = is_array($videoMeta) ? ($videoMeta['name'] ?? $lesson['video_name'] ?? '') : ($lesson['video_name'] ?? '');
+            $lesson['video_size_human'] = $this->formatBytes((int) ($lesson['video_size_bytes'] ?? 0));
+            $lesson['video_duration_human'] = is_array($videoMeta)
+                ? ($videoMeta['duration_human'] ?? $this->formatMinutesLabel(((int) ($lesson['estimated_minutes'] ?? 0)) * 60))
+                : $this->formatMinutesLabel(((int) ($lesson['estimated_minutes'] ?? 0)) * 60);
+            $lesson['video_status_label'] = is_array($videoMeta) ? ($videoMeta['status_label'] ?? 'Pronto') : null;
+            $lesson['video_is_ready'] = is_array($videoMeta) ? !empty($videoMeta['is_ready']) : false;
+            $lesson['attachments'] = $attachmentsByLesson[(int) $lesson['id']] ?? [];
+            foreach ($lesson['attachments'] as &$attachment) {
+                $attachment['size_human'] = $this->formatBytes((int) ($attachment['size_bytes'] ?? 0));
+            }
+            unset($attachment);
+        }
+        unset($lesson);
+
+        $exams = $this->fetchAll(
+            "SELECT ex.*,
+                    COUNT(DISTINCT q.id) AS questions_count,
+                    COUNT(DISTINCT a.id) AS attempts_count
+             FROM elearning_exams ex
+             LEFT JOIN elearning_exam_questions q ON q.exam_id = ex.id AND q.deleted_at IS NULL
+             LEFT JOIN elearning_exam_attempts a ON a.exam_id = ex.id
+             WHERE ex.course_id = ? AND ex.deleted_at IS NULL
+             GROUP BY ex.id
+             ORDER BY ex.created_at DESC, ex.id DESC",
+            [$courseId]
+        );
+
+        foreach ($exams as &$exam) {
+            $questions = $this->fetchAll(
+                "SELECT * FROM elearning_exam_questions
+                 WHERE exam_id = ? AND deleted_at IS NULL
+                 ORDER BY sequence_order ASC, id ASC",
+                [(int) $exam['id']]
+            );
+
+            foreach ($questions as &$question) {
+                $question['options'] = $this->fetchAll(
+                    "SELECT * FROM elearning_exam_options
+                     WHERE question_id = ? AND deleted_at IS NULL
+                     ORDER BY sequence_order ASC, id ASC",
+                    [(int) $question['id']]
+                );
+            }
+            unset($question);
+
+            $exam['questions'] = $questions;
+        }
+        unset($exam);
+
+        $enrollments = $this->fetchAll(
+            "SELECT e.*,
+                    u.name AS student_name,
+                    u.email AS student_email,
+                    MAX(a.score_percent) AS best_score,
+                    COUNT(DISTINCT cert.id) AS certificates_count
+             FROM elearning_enrollments e
+             INNER JOIN users u ON u.id = e.student_id
+             LEFT JOIN elearning_exam_attempts a
+                ON a.course_id = e.course_id AND a.student_id = e.student_id AND a.status IN ('approved','failed')
+             LEFT JOIN elearning_certificates cert
+                ON cert.enrollment_id = e.id AND cert.deleted_at IS NULL
+             WHERE e.course_id = ? AND e.deleted_at IS NULL
+             GROUP BY e.id
+             ORDER BY u.name ASC",
+            [$courseId]
+        );
+
+        $averageProgress = (float) $this->fetchValue(
+            "SELECT COALESCE(AVG(progress_percent), 0)
+             FROM elearning_enrollments
+             WHERE course_id = ? AND deleted_at IS NULL",
+            [$courseId]
+        );
+        $pendingExams = (int) $this->fetchValue(
+            "SELECT COUNT(*)
+             FROM elearning_enrollments
+             WHERE course_id = ? AND status = 'awaiting_exam' AND deleted_at IS NULL",
+            [$courseId]
+        );
+        $completedStudents = (int) $this->fetchValue(
+            "SELECT COUNT(*)
+             FROM elearning_enrollments
+             WHERE course_id = ? AND status IN ('approved','completed') AND deleted_at IS NULL",
+            [$courseId]
+        );
+        $approvedAttempts = (int) $this->fetchValue(
+            "SELECT COUNT(*)
+             FROM elearning_exam_attempts
+             WHERE course_id = ? AND status = 'approved'",
+            [$courseId]
+        );
+        $submittedAttempts = (int) $this->fetchValue(
+            "SELECT COUNT(*)
+             FROM elearning_exam_attempts
+             WHERE course_id = ? AND status IN ('approved','failed')",
+            [$courseId]
+        );
+        $courseVideoSummary = $this->courseVideoSummary($courseId);
+
+        return [
+            'schema_ready' => true,
+            'course' => $this->formatCourseDetail($course),
+            'lessons' => $lessons,
+            'exams' => $exams,
+            'enrollments' => $enrollments,
+            'users' => $this->listStudentOptions(),
+            'templates' => $this->getCertificateTemplates(),
+            'storage' => $this->getStorageSummary(),
+            'reports' => [
+                'average_progress' => round($averageProgress, 2),
+                'pending_exams' => $pendingExams,
+                'completed_students' => $completedStudents,
+                'approval_rate' => $submittedAttempts > 0 ? round(($approvedAttempts / $submittedAttempts) * 100, 2) : 0,
+                'course_video_seconds' => $courseVideoSummary['used_seconds'] ?? 0,
+                'course_video_human' => $courseVideoSummary['used_human'] ?? '0 min',
+            ],
+        ];
+    }
+
+    public function studentDashboardData(int $studentId): array
+    {
+        if (!$this->schemaReady()) {
+            return [
+                'schema_ready' => false,
+                'stats' => [
+                    'in_progress' => 0,
+                    'completed' => 0,
+                    'pending_exams' => 0,
+                    'overall_progress' => 0,
+                ],
+                'enrolled_courses' => [],
+                'available_courses' => [],
+                'next_lesson' => null,
+                'certificates' => [],
+                'history' => [],
+            ];
+        }
+
+        $stats = [
+            'in_progress' => (int) $this->fetchValue(
+                "SELECT COUNT(*)
+                 FROM elearning_enrollments
+                 WHERE student_id = ? AND status IN ('in_progress','awaiting_exam','failed') AND deleted_at IS NULL",
+                [$studentId]
+            ),
+            'completed' => (int) $this->fetchValue(
+                "SELECT COUNT(*)
+                 FROM elearning_enrollments
+                 WHERE student_id = ? AND status IN ('approved','completed') AND deleted_at IS NULL",
+                [$studentId]
+            ),
+            'pending_exams' => (int) $this->fetchValue(
+                "SELECT COUNT(*)
+                 FROM elearning_enrollments
+                 WHERE student_id = ? AND status = 'awaiting_exam' AND deleted_at IS NULL",
+                [$studentId]
+            ),
+            'overall_progress' => (float) $this->fetchValue(
+                "SELECT COALESCE(ROUND(AVG(progress_percent), 0), 0)
+                 FROM elearning_enrollments
+                 WHERE student_id = ? AND deleted_at IS NULL",
+                [$studentId]
+            ),
+        ];
+
         $enrolledCourses = $this->fetchAll(
             "SELECT c.id, c.title, c.category, c.cover_path, c.workload_hours, c.status,
                     e.progress_percent, e.status AS enrollment_status, e.updated_at,
