@@ -289,19 +289,37 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
         <li>
           <?php if ($hasSubmenu): ?>
             <?php $isCategory = isset($item['category']) && $item['category']; ?>
+            <?php
+              if (!$submenuActive) {
+                foreach ($item['submenu'] as $activeCandidate) {
+                  if (isset($activeCandidate['href']) && rtrim((string) $activeCandidate['href'], '/') === $current) {
+                    $submenuActive = true;
+                    break;
+                  }
+                  if (isset($activeCandidate['submenu']) && is_array($activeCandidate['submenu'])) {
+                    foreach ($activeCandidate['submenu'] as $nestedActiveCandidate) {
+                      if (isset($nestedActiveCandidate['href']) && rtrim((string) $nestedActiveCandidate['href'], '/') === $current) {
+                        $submenuActive = true;
+                        break 2;
+                      }
+                    }
+                  }
+                }
+              }
+            ?>
             <div class="submenu-container">
               <button onclick="toggleSubmenu(this)" title="<?= e($item['label']) ?>" class="group flex items-center justify-between w-full px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 hover:bg-slate-800/50 hover:text-white <?php echo $submenuActive?'bg-blue-600/10 text-blue-400 font-semibold shadow-[0_0_15px_rgba(59,130,246,0.1)] border border-blue-500/20':'text-slate-400 border border-transparent'; ?>">
                 <div class="flex items-center gap-3">
                   <span class="text-lg flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/40 group-hover:bg-blue-500/20 group-hover:text-blue-400 transition-colors <?php echo $submenuActive?'!bg-blue-500/30 !text-blue-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]':''; ?>"><?= $item['icon'] ?></span>
                   <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300"><?= e($item['label']) ?></span>
                 </div>
-                <span class="submenu-arrow transition-transform duration-200 text-slate-400 group-hover:text-white">
+                <span class="submenu-arrow transition-transform duration-200 text-slate-400 group-hover:text-white" style="<?= $submenuActive ? 'transform: rotate(180deg);' : '' ?>">
                   <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                   </svg>
                 </span>
               </button>
-              <ul class="submenu ml-6 mt-2 space-y-1 hidden">
+              <ul class="submenu ml-6 mt-2 space-y-1 <?= $submenuActive ? '' : 'hidden' ?>">
                 <?php foreach ($item['submenu'] as $sub):
                   // Verificar se tem roles específicos
                   if (isset($sub['roles']) && is_array($sub['roles'])) {
@@ -335,24 +353,33 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
                   
                   // Verificar se este submenu tem seus próprios submenus
                   $hasNestedSubmenu = isset($sub['has_submenu']) && $sub['has_submenu'] && isset($sub['submenu']);
+                  $nestedSubmenuActive = false;
+                  if ($hasNestedSubmenu) {
+                    foreach ($sub['submenu'] as $nestedActiveCandidate) {
+                      if (isset($nestedActiveCandidate['href']) && rtrim((string) $nestedActiveCandidate['href'], '/') === $current) {
+                        $nestedSubmenuActive = true;
+                        break;
+                      }
+                    }
+                  }
                 ?>
                   <li>
                     <?php $isRetornadosDeprecated = (($sub['module'] ?? '') === 'toners_retornados'); ?>
                     <?php if ($hasNestedSubmenu): ?>
                       <!-- Submenu aninhado -->
                       <div class="submenu-container">
-                        <button onclick="toggleSubmenu(this)" title="<?= e($sub['label']) ?>" class="group flex items-center justify-between w-full px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 hover:bg-slate-800/50 hover:text-white text-slate-400 border border-transparent">
+                        <button onclick="toggleSubmenu(this)" title="<?= e($sub['label']) ?>" class="group flex items-center justify-between w-full px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 hover:bg-slate-800/50 hover:text-white <?= $nestedSubmenuActive ? 'bg-blue-600/10 text-blue-400 border border-blue-500/20' : 'text-slate-400 border border-transparent' ?>">
                           <div class="flex items-center gap-3">
                             <span class="text-base flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800/40 group-hover:bg-blue-500/20 group-hover:text-blue-400 transition-colors"><?= $sub['icon'] ?></span>
                             <span class="sidebar-text opacity-100 whitespace-nowrap overflow-hidden transition-all duration-300"><?= e($sub['label']) ?></span>
                           </div>
-                          <span class="submenu-arrow transition-transform duration-200 text-slate-400 group-hover:text-white">
+                          <span class="submenu-arrow transition-transform duration-200 text-slate-400 group-hover:text-white" style="<?= $nestedSubmenuActive ? 'transform: rotate(180deg);' : '' ?>">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                               <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                             </svg>
                           </span>
                         </button>
-                        <ul class="submenu ml-6 mt-1 space-y-1 hidden">
+                        <ul class="submenu ml-6 mt-1 space-y-1 <?= $nestedSubmenuActive ? '' : 'hidden' ?>">
                           <?php foreach ($sub['submenu'] as $nestedSub):
                             // Verificar se é admin_only
                             if (isset($nestedSub['admin_only']) && $nestedSub['admin_only']) {
@@ -488,21 +515,26 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
   </div>
 </aside>
 
-<!-- Mobile sidebar -->
-<div class="lg:hidden">
-  <div class="h-14 flex items-center justify-between px-4 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-    <button id="menuBtn" class="p-2 rounded-md text-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
+<!-- Mobile shell controls: o mobile usa o mesmo #sidebar completo do desktop como drawer -->
+<div id="mobileShellBar" class="lg:hidden fixed inset-x-0 top-0 z-50 h-14 border-b border-slate-200 bg-white/92 px-3 shadow-sm backdrop-blur-xl">
+  <div class="flex h-full items-center justify-between gap-3">
+    <button id="menuBtn" type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-900 shadow-sm transition hover:bg-slate-50" aria-label="Abrir menu" aria-controls="sidebar" aria-expanded="false">
+      <i class="ph ph-list text-2xl"></i>
     </button>
-    <div class="text-center">
-      <div class="text-sm font-semibold text-white">OTI</div>
-    </div>
-    <span></span>
+    <a href="/inicio" class="flex min-w-0 items-center gap-2">
+      <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900 text-xs font-black text-white">SGI</span>
+      <span class="min-w-0">
+        <span class="block truncate text-sm font-black text-slate-950">Gestao OTI</span>
+        <span class="block truncate text-[11px] font-semibold text-slate-500">Sistema integrado</span>
+      </span>
+    </a>
+    <a href="/profile" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-sm font-black text-slate-900 shadow-sm" aria-label="Meu perfil">
+      <?= strtoupper(substr($_SESSION['user_name'] ?? 'U', 0, 1)) ?>
+    </a>
   </div>
-  <div id="mobileMenu" class="hidden fixed inset-0 bg-black/50 z-40"></div>
-  <div id="mobileDrawer" class="hidden fixed inset-y-0 left-0 w-72 bg-white dark:bg-slate-800 z-50 shadow-lg">
+</div>
+<div id="mobileMenu" class="hidden fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm lg:hidden"></div>
+<div id="mobileDrawer" class="hidden">
     <div class="h-14 flex items-center px-4 border-b border-slate-700">
       <div class="text-white font-semibold">Menu</div>
     </div>
@@ -634,6 +666,70 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
       justify-content: center;
       padding-left: 0;
       padding-right: 0;
+    }
+
+    @media (max-width: 1023px) {
+      #sidebar {
+        display: flex !important;
+        position: fixed !important;
+        inset: 0 auto 0 0;
+        width: min(88vw, 21rem) !important;
+        max-width: 21rem;
+        height: 100dvh;
+        z-index: 60;
+        transform: translateX(-105%);
+        transition: transform 260ms ease, box-shadow 260ms ease;
+        box-shadow: none;
+      }
+
+      #sidebar.mobile-sidebar-open {
+        transform: translateX(0);
+        box-shadow: 24px 0 60px rgba(2, 6, 23, 0.45);
+      }
+
+      body.mobile-menu-open {
+        overflow: hidden;
+        touch-action: none;
+      }
+
+      #sidebar.sidebar-collapsed {
+        width: min(88vw, 21rem) !important;
+      }
+
+      #sidebar.sidebar-collapsed .sidebar-text,
+      #sidebar.sidebar-collapsed .submenu-arrow,
+      #sidebar.sidebar-collapsed .sidebar-header-text,
+      #sidebar.sidebar-collapsed .sidebar-user-info,
+      #sidebar.sidebar-collapsed .sidebar-footer-icons {
+        display: flex !important;
+        width: auto !important;
+        opacity: 1 !important;
+        overflow: visible !important;
+        white-space: normal !important;
+      }
+
+      #sidebar.sidebar-collapsed .sidebar-header-text {
+        display: block !important;
+      }
+
+      #sidebar.sidebar-collapsed .sidebar-header-icon {
+        display: none !important;
+      }
+
+      #sidebar.sidebar-collapsed .page-link,
+      #sidebar.sidebar-collapsed .submenu-container > button {
+        justify-content: flex-start;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+      }
+
+      #sidebar.sidebar-collapsed .submenu-container > button {
+        justify-content: space-between;
+      }
+
+      #sidebar nav {
+        padding-bottom: max(1rem, env(safe-area-inset-bottom));
+      }
     }
 
     /* Efeito brilhante para menu beta */
@@ -810,13 +906,61 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
 
     });
 
-    // Mobile menu
+    // Mobile menu: abre o mesmo sidebar completo do desktop como drawer.
     const btn = document.getElementById('menuBtn');
     const overlay = document.getElementById('mobileMenu');
-    const drawer = document.getElementById('mobileDrawer');
-    function toggle(){ overlay.classList.toggle('hidden'); drawer.classList.toggle('hidden'); }
-    btn?.addEventListener('click', toggle);
-    overlay?.addEventListener('click', toggle);
+    const mobileSidebar = document.getElementById('sidebar');
+
+    function isMobileViewport() {
+      return window.matchMedia('(max-width: 1023px)').matches;
+    }
+
+    function openMobileMenu() {
+      if (!mobileSidebar || !overlay) return;
+      mobileSidebar.classList.add('mobile-sidebar-open');
+      overlay.classList.remove('hidden');
+      document.body.classList.add('mobile-menu-open');
+      btn?.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeMobileMenu() {
+      if (!mobileSidebar || !overlay) return;
+      mobileSidebar.classList.remove('mobile-sidebar-open');
+      overlay.classList.add('hidden');
+      document.body.classList.remove('mobile-menu-open');
+      btn?.setAttribute('aria-expanded', 'false');
+    }
+
+    btn?.addEventListener('click', function() {
+      if (mobileSidebar?.classList.contains('mobile-sidebar-open')) {
+        closeMobileMenu();
+      } else {
+        openMobileMenu();
+      }
+    });
+
+    overlay?.addEventListener('click', closeMobileMenu);
+
+    mobileSidebar?.addEventListener('click', function(event) {
+      const link = event.target.closest('a');
+      if (!link || !isMobileViewport()) return;
+      const href = link.getAttribute('href') || '';
+      if (href && href !== '#') {
+        closeMobileMenu();
+      }
+    });
+
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        closeMobileMenu();
+      }
+    });
+
+    window.addEventListener('resize', function() {
+      if (!isMobileViewport()) {
+        closeMobileMenu();
+      }
+    });
     
     // Auto-expand active submenu
     document.addEventListener('DOMContentLoaded', function() {

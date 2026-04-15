@@ -136,15 +136,15 @@ function e($string) {
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
-    <div class="flex h-screen">
+    <div class="flex h-screen w-full overflow-hidden">
         <!-- Sidebar -->
         <?php include __DIR__ . '/partials/sidebar.php'; ?>
         
         <!-- Main Content -->
-        <main class="flex-1 overflow-y-auto">
+        <main class="flex-1 min-w-0 overflow-y-auto pt-14 lg:pt-0">
             <!-- Aviso de migração de email removido - Resend API ativo -->
             
-            <div class="p-6">
+            <div class="p-4 sm:p-6">
                 <?php
                 $fullPath = __DIR__ . '/' . $viewFile;
                 if (file_exists($fullPath)) {
