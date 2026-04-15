@@ -332,9 +332,16 @@ class ELearningGestorController
                 (string) ($_POST['message'] ?? '')
             );
 
+            $emailSent = (bool) ($result['email_sent'] ?? false);
+            $emailError = (string) ($result['email_error'] ?? '');
+            $message = $emailSent
+                ? 'Lembrete enviado para ' . ($result['student_name'] ?? 'o aluno') . ' no sininho e no email.'
+                : 'Lembrete enviado no sininho de ' . ($result['student_name'] ?? 'o aluno') . '. Email nao enviado: ' . ($emailError ?: 'verifique o cadastro do aluno.');
+
             $this->json([
                 'success' => true,
-                'message' => 'Lembrete enviado para ' . ($result['student_name'] ?? 'o aluno') . '.',
+                'message' => $message,
+                'email_sent' => $emailSent,
                 'data' => $result,
             ]);
         } catch (\Throwable $exception) {

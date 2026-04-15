@@ -1490,17 +1490,29 @@ class ELearningService
         $enrollment = $this->fetchOne(
             "SELECT e.id AS enrollment_id,
                     e.student_id,
+                    e.progress_percent,
+                    e.status AS enrollment_status,
                     u.name AS student_name,
+                    u.email AS student_email,
                     c.id AS course_id,
-                    c.title AS course_title
+                    c.title AS course_title,
+                    c.category AS course_category,
+                    teacher.name AS teacher_name,
+                    COUNT(DISTINCT l.id) AS total_lessons,
+                    COUNT(DISTINCT CASE WHEN sp.is_completed = 1 THEN sp.lesson_id END) AS completed_lessons
              FROM elearning_enrollments e
              INNER JOIN elearning_courses c ON c.id = e.course_id
              INNER JOIN users u ON u.id = e.student_id
+             LEFT JOIN users teacher ON teacher.id = c.teacher_id
+             LEFT JOIN elearning_lessons l ON l.course_id = c.id AND l.deleted_at IS NULL
+             LEFT JOIN elearning_student_progress sp
+                ON sp.lesson_id = l.id AND sp.student_id = e.student_id
              WHERE e.student_id = ?
                AND e.course_id = ?
                AND {$teacherFilter}
                AND e.deleted_at IS NULL
-               AND c.deleted_at IS NULL",
+               AND c.deleted_at IS NULL
+             GROUP BY e.id",
             $params
         );
 
@@ -1514,6 +1526,28 @@ class ELearningService
                 'Voce esta com baixo progresso em %s. Assista a primeira aula ainda esta semana para retomar o ritmo.',
                 (string) ($enrollment['course_title'] ?? 'este curso')
             );
+        }
+
+        $courseUrl = $this->studentCourseUrl($courseId);
+        $emailSent = false;
+        $emailError = null;
+        $studentEmail = trim((string) ($enrollment['student_email'] ?? ''));
+
+        if ($studentEmail !== '' && filter_var($studentEmail, FILTER_VALIDATE_EMAIL)) {
+            $emailService = new ResendService();
+            $subject = 'Lembrete de estudo: ' . (string) ($enrollment['course_title'] ?? 'curso');
+            $emailSent = $emailService->send(
+                $studentEmail,
+                $subject,
+                $this->buildStudentReminderEmailHtml($enrollment, $message, $courseUrl),
+                $this->buildStudentReminderEmailText($enrollment, $message, $courseUrl)
+            );
+
+            if (!$emailSent) {
+                $emailError = $emailService->getLastError() ?: 'Nao foi possivel enviar o email.';
+            }
+        } else {
+            $emailError = 'Aluno sem email valido cadastrado.';
         }
 
         $this->db->prepare(
@@ -1538,8 +1572,123 @@ class ELearningService
             'notification_id' => $notificationId,
             'student_name' => (string) ($enrollment['student_name'] ?? 'Aluno'),
             'course_title' => (string) ($enrollment['course_title'] ?? 'Curso'),
+            'student_email' => $studentEmail,
+            'email_sent' => $emailSent,
+            'email_error' => $emailError,
+            'course_url' => $courseUrl,
             'message' => $message,
         ];
+    }
+
+    private function studentCourseUrl(int $courseId): string
+    {
+        $baseUrl = rtrim((string) ($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://djbr.sgqoti.com.br'), '/');
+        return $baseUrl . '/elearning/colaborador/cursos/' . $courseId;
+    }
+
+    private function buildStudentReminderEmailHtml(array $enrollment, string $message, string $courseUrl): string
+    {
+        $studentName = $this->escapeHtml((string) ($enrollment['student_name'] ?? 'Aluno'));
+        $firstName = $this->escapeHtml(strtok((string) ($enrollment['student_name'] ?? 'Aluno'), ' ') ?: 'Aluno');
+        $courseTitle = $this->escapeHtml((string) ($enrollment['course_title'] ?? 'Curso'));
+        $teacherName = $this->escapeHtml((string) ($enrollment['teacher_name'] ?? 'Professor'));
+        $category = $this->escapeHtml((string) ($enrollment['course_category'] ?? 'E-learning'));
+        $safeMessage = nl2br($this->escapeHtml($message));
+        $safeUrl = $this->escapeHtml($courseUrl);
+        $progress = min(100, max(0, (float) ($enrollment['progress_percent'] ?? 0)));
+        $progressLabel = number_format($progress, 0, ',', '.') . '%';
+        $completedLessons = (int) ($enrollment['completed_lessons'] ?? 0);
+        $totalLessons = (int) ($enrollment['total_lessons'] ?? 0);
+        $lessonLabel = $totalLessons > 0 ? "{$completedLessons}/{$totalLessons}" : 'Comece pela primeira aula';
+
+        return <<<HTML
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lembrete de estudo</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;color:#111827;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f5f5f7;padding:28px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background:#ffffff;border:1px solid #e5e7eb;border-radius:22px;overflow:hidden;box-shadow:0 18px 46px rgba(15,23,42,0.10);">
+          <tr>
+            <td style="padding:26px 28px 18px;background:linear-gradient(135deg,#ffffff 0%,#eef6ff 100%);border-bottom:1px solid #e5e7eb;">
+              <div style="font-size:11px;font-weight:800;letter-spacing:0.22em;text-transform:uppercase;color:#007aff;">SGI E-Learning</div>
+              <h1 style="margin:10px 0 8px;font-size:28px;line-height:1.08;color:#111827;">{$firstName}, vamos retomar esse curso?</h1>
+              <p style="margin:0;color:#4b5563;font-size:15px;line-height:1.55;">Seu professor deixou um lembrete para ajudar voce a avancar com mais tranquilidade.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:26px 28px;">
+              <div style="display:inline-block;margin-bottom:14px;padding:8px 12px;border-radius:8px;background:#f0f7ff;color:#0067d6;font-size:12px;font-weight:800;">{$category}</div>
+              <h2 style="margin:0 0 8px;font-size:22px;line-height:1.18;color:#111827;">{$courseTitle}</h2>
+              <p style="margin:0 0 20px;color:#6b7280;font-size:14px;">Professor: {$teacherName}</p>
+
+              <div style="border:1px solid #e5e7eb;border-radius:16px;padding:18px;background:#fbfbfd;margin-bottom:20px;">
+                <p style="margin:0;color:#111827;font-size:16px;line-height:1.65;">{$safeMessage}</p>
+              </div>
+
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 20px;">
+                <tr>
+                  <td style="width:50%;padding:0 6px 0 0;">
+                    <div style="border:1px solid #e5e7eb;border-radius:14px;padding:14px;background:#ffffff;">
+                      <div style="color:#6b7280;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Progresso</div>
+                      <div style="margin-top:6px;color:#111827;font-size:24px;font-weight:900;">{$progressLabel}</div>
+                    </div>
+                  </td>
+                  <td style="width:50%;padding:0 0 0 6px;">
+                    <div style="border:1px solid #e5e7eb;border-radius:14px;padding:14px;background:#ffffff;">
+                      <div style="color:#6b7280;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Aulas</div>
+                      <div style="margin-top:6px;color:#111827;font-size:24px;font-weight:900;">{$lessonLabel}</div>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <div style="height:10px;background:#edf2f7;border-radius:999px;overflow:hidden;margin:0 0 24px;">
+                <div style="height:10px;width:{$progress}%;background:#007aff;border-radius:999px;"></div>
+              </div>
+
+              <p style="margin:0 0 18px;color:#4b5563;font-size:14px;line-height:1.6;">Plano rapido: abra o curso, assista a primeira aula disponivel e anote uma duvida para conversar com o professor.</p>
+
+              <a href="{$safeUrl}" style="display:inline-block;background:#007aff;color:#ffffff;text-decoration:none;border-radius:8px;padding:14px 18px;font-size:15px;font-weight:800;">Abrir curso agora</a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:18px 28px;background:#f9fafb;border-top:1px solid #e5e7eb;color:#6b7280;font-size:12px;line-height:1.55;">
+              Este e-mail foi enviado automaticamente pelo SGI. O lembrete tambem esta disponivel no sininho de notificacoes.
+            </td>
+          </tr>
+        </table>
+        <p style="margin:16px 0 0;color:#9ca3af;font-size:12px;">{$studentName} recebeu este lembrete porque esta matriculado no curso.</p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+HTML;
+    }
+
+    private function buildStudentReminderEmailText(array $enrollment, string $message, string $courseUrl): string
+    {
+        $studentName = (string) ($enrollment['student_name'] ?? 'Aluno');
+        $courseTitle = (string) ($enrollment['course_title'] ?? 'Curso');
+        $progress = number_format(min(100, max(0, (float) ($enrollment['progress_percent'] ?? 0))), 0, ',', '.') . '%';
+
+        return "Ola, {$studentName}.\n\n"
+            . "Lembrete de estudo para o curso {$courseTitle}.\n\n"
+            . "{$message}\n\n"
+            . "Progresso atual: {$progress}\n"
+            . "Acesse: {$courseUrl}\n\n"
+            . "Este e-mail foi enviado automaticamente pelo SGI.";
+    }
+
+    private function escapeHtml(string $value): string
+    {
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
     }
 
     public function selfEnroll(int $courseId, int $studentId): void

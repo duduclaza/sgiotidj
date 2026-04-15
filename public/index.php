@@ -493,6 +493,7 @@ $router->get('/elearning/gestor', [App\Controllers\ELearningGestorController::cl
 $router->get('/elearning/gestor/cursos', [App\Controllers\ELearningGestorController::class, 'cursos']);
 $router->get('/elearning/gestor/armazenamento', [App\Controllers\ELearningGestorController::class, 'armazenamento']);
 $router->get('/elearning/gestor/relatorios', [App\Controllers\ELearningGestorController::class, 'relatorios']);
+$router->post('/elearning/gestor/lembretes/enviar', [App\Controllers\ELearningGestorController::class, 'enviarLembreteAluno']);
 $router->post('/elearning/gestor/cursos/store', [App\Controllers\ELearningGestorController::class, 'storeCurso']);
 $router->post('/elearning/gestor/cursos/update', [App\Controllers\ELearningGestorController::class, 'updateCurso']);
 $router->post('/elearning/gestor/cursos/delete', [App\Controllers\ELearningGestorController::class, 'deleteCurso']);

@@ -455,17 +455,27 @@ $chartStudents = array_slice($students, 0, 8);
                 body: formData,
                 credentials: 'same-origin',
             });
-            const result = await response.json().catch(() => ({
-                success: false,
-                message: 'Resposta invalida do servidor.',
-            }));
+            const responseText = await response.text();
+            let result;
+
+            try {
+                result = JSON.parse(responseText);
+            } catch (parseError) {
+                const preview = responseText.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140);
+                result = {
+                    success: false,
+                    message: preview
+                        ? `Servidor retornou uma resposta invalida: ${preview}`
+                        : 'Servidor retornou uma resposta invalida.',
+                };
+            }
 
             if (!response.ok || !result.success) {
                 throw new Error(result.message || 'Nao foi possivel enviar o lembrete.');
             }
 
             updateMatchingReminderButtons(studentId, courseId, 'Enviado', true);
-            showFeedback(result.message || 'Lembrete enviado com sucesso.', 'success');
+            showFeedback(result.message || 'Lembrete enviado com sucesso.', result.email_sent === false ? 'info' : 'success');
         } catch (error) {
             button.disabled = false;
             button.textContent = originalLabel;
