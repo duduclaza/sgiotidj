@@ -748,30 +748,46 @@ function showToast(type, titulo, msg) {
 // Success Overlay (New Registration)
 // =====================================================
 function showSuccessOverlay(msg) {
-  const overlay = document.getElementById('successOverlay');
-  const msgEl = document.getElementById('successOverlayMsg');
-  if (!overlay || !msgEl) return;
+  const text = msg || 'Registro de toner com defeito realizado com sucesso!';
 
-  msgEl.textContent = msg || 'Registro de toner com defeito realizado com sucesso!';
-  
-  overlay.classList.remove('hidden');
-  overlay.classList.remove('opacity-0');
-  overlay.classList.add('opacity-100');
+  // Criar overlay dinamicamente no document.body para escapar do page-transition
+  const overlay = document.createElement('div');
+  overlay.id = 'successOverlayDynamic';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:1000000;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,0.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;transition:opacity 0.4s ease;';
+
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:1.5rem;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);padding:2.5rem;display:flex;flex-direction:column;align-items:center;gap:1.5rem;max-width:22rem;width:calc(100% - 2rem);border:1px solid #dcfce7;transform:scale(0.9);transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);">
+      <div style="width:5rem;height:5rem;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;">
+        <div style="position:absolute;inset:0;background:rgba(34,197,94,0.2);border-radius:50%;animation:pulse 1.5s ease-in-out infinite;"></div>
+        <svg width="48" height="48" fill="none" stroke="#16a34a" viewBox="0 0 24 24" style="position:relative;z-index:1;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+      </div>
+      <div style="text-align:center;">
+        <h3 style="font-size:1.5rem;font-weight:900;color:#1e293b;margin:0 0 0.5rem 0;line-height:1.2;">Sucesso!</h3>
+        <p style="font-size:1.125rem;font-weight:700;color:#16a34a;margin:0;">${text}</p>
+        <p style="color:#94a3b8;font-size:0.875rem;margin-top:1rem;font-style:italic;">O hist\u00f3rico est\u00e1 sendo atualizado...</p>
+      </div>
+      <div style="width:100%;height:4px;background:#f1f5f9;border-radius:2px;overflow:hidden;">
+        <div id="successProgressBar" style="height:100%;width:0%;background:linear-gradient(90deg,#22c55e,#16a34a);border-radius:2px;transition:width 2.5s linear;"></div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
   document.body.style.overflow = 'hidden';
 
-  // Trigger progress bar
-  const progress = document.getElementById('successProgress');
-  if (progress) {
-    progress.style.width = '0%';
-    setTimeout(() => { progress.style.width = '100%'; }, 50);
-  }
+  // Animar entrada
+  requestAnimationFrame(() => {
+    overlay.style.opacity = '1';
+    const card = overlay.querySelector('div');
+    if (card) card.style.transform = 'scale(1)';
+    const bar = document.getElementById('successProgressBar');
+    if (bar) setTimeout(() => { bar.style.width = '100%'; }, 80);
+  });
 
-  // Ocultar após 3 segundos e recarregar
+  // Fechar e recarregar
   setTimeout(() => {
-    overlay.classList.replace('opacity-100', 'opacity-0');
-    setTimeout(() => {
-      location.reload();
-    }, 500);
+    overlay.style.opacity = '0';
+    setTimeout(() => location.reload(), 500);
   }, 2700);
 }
 </script>
@@ -1087,32 +1103,3 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<!-- Sucesso Overlay (Centrado e Bonito) -->
-<div id="successOverlay" class="fixed inset-0 z-[1000000] hidden flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-all duration-500 opacity-100">
-  <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-10 flex flex-col items-center gap-6 max-w-sm w-full mx-4 border border-green-100 dark:border-green-900/30 transform transition-all animate-in zoom-in duration-300">
-    
-    <div class="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center relative">
-       <div class="absolute inset-0 bg-green-500/20 rounded-full animate-ping"></div>
-       <svg class="w-12 h-12 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-       </svg>
-    </div>
-
-    <div class="text-center">
-      <h3 class="text-2xl font-black text-slate-800 dark:text-white mb-2 leading-tight">Sucesso!</h3>
-      <p id="successOverlayMsg" class="text-green-600 dark:text-green-400 font-bold text-lg"></p>
-      <p class="text-slate-400 dark:text-slate-500 text-sm mt-4 font-medium italic">O histórico está sendo atualizado...</p>
-    </div>
-
-    <div class="w-full h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-       <div id="successProgress" class="h-full bg-green-500" style="width: 0%; transition: width 2.5s linear;"></div>
-    </div>
-  </div>
-</div>
-
-<style>
-@keyframes progress {
-  from { width: 0%; }
-  to { width: 100%; }
-}
-</style>
