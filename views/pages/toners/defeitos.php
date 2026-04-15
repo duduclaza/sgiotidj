@@ -435,6 +435,9 @@ else: ?>
     </div>
     <?php
 endif; ?>
+
+    <!-- Paginação -->
+    <div id="paginacaoDefeitos" class="px-8 py-4 flex items-center justify-between border-t border-slate-100 dark:border-slate-700/50 bg-slate-50/30 dark:bg-slate-900/20"></div>
   </div>
 
 </section>
@@ -673,25 +676,125 @@ document.getElementById('formDefeito').addEventListener('submit', async (e) => {
 });
 
 // =====================================================
-// Busca inteligente no Histórico
+// Paginação + Busca do Histórico
 // =====================================================
+const ROWS_PER_PAGE = 15;
+let paginaAtual = 1;
+let rowsFiltradas = [];
+
 function filtrarHistorico() {
   const q = (document.getElementById('buscaHistorico')?.value || '').toLowerCase().trim();
-  const rows = document.querySelectorAll('.defeito-row');
-  let visivel = 0;
+  const todasRows = Array.from(document.querySelectorAll('.defeito-row'));
 
-  rows.forEach(row => {
+  rowsFiltradas = todasRows.filter(row => {
     const texto = (row.getAttribute('data-busca') || '').toLowerCase();
-    const mostrar = !q || texto.includes(q);
-    row.style.display = mostrar ? '' : 'none';
-    if (mostrar) visivel++;
+    return !q || texto.includes(q);
   });
 
+  paginaAtual = 1; // resetar para página 1 ao buscar
+  renderPagina();
+}
+
+function renderPagina() {
+  const todasRows = Array.from(document.querySelectorAll('.defeito-row'));
+  const totalFiltradas = rowsFiltradas.length;
+  const totalPaginas = Math.max(1, Math.ceil(totalFiltradas / ROWS_PER_PAGE));
+  paginaAtual = Math.min(paginaAtual, totalPaginas);
+
+  const inicio = (paginaAtual - 1) * ROWS_PER_PAGE;
+  const fim = inicio + ROWS_PER_PAGE;
+
+  // Ocultar todas, mostrar apenas as da página atual
+  todasRows.forEach(row => row.style.display = 'none');
+  rowsFiltradas.slice(inicio, fim).forEach(row => row.style.display = '');
+
+  // Atualizar contador
+  const q = (document.getElementById('buscaHistorico')?.value || '').trim();
   const contador = document.getElementById('contadorResultados');
   if (contador) {
-    contador.textContent = q ? `${visivel} resultado(s) encontrado(s)` : '';
+    if (q) {
+      contador.textContent = `${totalFiltradas} resultado(s)`;
+    } else {
+      contador.textContent = `Pág. ${paginaAtual} / ${totalPaginas}`;
+    }
   }
+
+  // Renderizar paginação
+  renderControlesPaginacao(totalFiltradas, totalPaginas);
 }
+
+function renderControlesPaginacao(total, totalPaginas) {
+  const container = document.getElementById('paginacaoDefeitos');
+  if (!container) return;
+
+  if (totalPaginas <= 1) {
+    container.innerHTML = `<span class="text-xs text-slate-400 dark:text-slate-500">${total} registro(s)</span>`;
+    return;
+  }
+
+  const btnClass = (ativo) => ativo
+    ? 'px-3 py-1.5 text-xs font-bold rounded-lg bg-red-600 text-white shadow-sm shadow-red-500/20 cursor-default'
+    : 'px-3 py-1.5 text-xs font-semibold rounded-lg bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 hover:border-red-300 dark:hover:border-red-700 transition-all cursor-pointer';
+
+  // Gerar botões de páginas (com elipses para muitas páginas)
+  let paginasBtns = [];
+  const range = (a, b) => Array.from({length: b - a + 1}, (_, i) => a + i);
+  let paginas = [];
+  if (totalPaginas <= 7) {
+    paginas = range(1, totalPaginas);
+  } else {
+    if (paginaAtual <= 4) {
+      paginas = [...range(1, 5), '...', totalPaginas];
+    } else if (paginaAtual >= totalPaginas - 3) {
+      paginas = [1, '...', ...range(totalPaginas - 4, totalPaginas)];
+    } else {
+      paginas = [1, '...', paginaAtual - 1, paginaAtual, paginaAtual + 1, '...', totalPaginas];
+    }
+  }
+
+  paginas.forEach(p => {
+    if (p === '...') {
+      paginasBtns.push(`<span class="px-2 text-slate-400 text-xs">…</span>`);
+    } else {
+      paginasBtns.push(`<button onclick="irParaPagina(${p})" class="${btnClass(p === paginaAtual)}">${p}</button>`);
+    }
+  });
+
+  const prevDisabled = paginaAtual === 1 ? 'opacity-40 cursor-not-allowed pointer-events-none' : '';
+  const nextDisabled = paginaAtual === totalPaginas ? 'opacity-40 cursor-not-allowed pointer-events-none' : '';
+
+  container.innerHTML = `
+    <span class="text-xs text-slate-400 dark:text-slate-500">
+      Mostrando <strong class="text-slate-600 dark:text-slate-300">${Math.min((paginaAtual-1)*ROWS_PER_PAGE+1, total)}–${Math.min(paginaAtual*ROWS_PER_PAGE, total)}</strong> de <strong class="text-slate-600 dark:text-slate-300">${total}</strong>
+    </span>
+    <div class="flex items-center gap-1">
+      <button onclick="irParaPagina(${paginaAtual - 1})" class="px-2 py-1.5 text-xs font-semibold rounded-lg bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all ${prevDisabled}">
+        ← Anterior
+      </button>
+      ${paginasBtns.join('')}
+      <button onclick="irParaPagina(${paginaAtual + 1})" class="px-2 py-1.5 text-xs font-semibold rounded-lg bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all ${nextDisabled}">
+        Próxima →
+      </button>
+    </div>
+  `;
+}
+
+function irParaPagina(p) {
+  const todasRows = Array.from(document.querySelectorAll('.defeito-row'));
+  const total = rowsFiltradas.length;
+  const totalPaginas = Math.max(1, Math.ceil(total / ROWS_PER_PAGE));
+  if (p < 1 || p > totalPaginas) return;
+  paginaAtual = p;
+  renderPagina();
+  // Scroll suave até a tabela
+  document.getElementById('tabelaHistorico')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Inicializar paginação ao carregar
+document.addEventListener('DOMContentLoaded', () => {
+  rowsFiltradas = Array.from(document.querySelectorAll('.defeito-row'));
+  renderPagina();
+});
 
 // =====================================================
 // Excluir Defeito
