@@ -2,44 +2,78 @@
 $courses = $data['courses'] ?? [];
 ?>
 
-<section class="space-y-8">
-    <div class="overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-soft backdrop-blur-xl">
-        <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-300/70">Linha do tempo</p>
-        <h2 class="mt-4 text-4xl font-black tracking-tight text-white">Histórico de cursos</h2>
-        <p class="mt-3 max-w-2xl text-base leading-relaxed text-slate-300">Acompanhe cursos concluídos, trilhas reprovadas e o progresso acumulado da sua jornada dentro do módulo E-Learning.</p>
-    </div>
+<div class="el-ios">
+    <div class="el-page el-stack">
+        <header class="el-page-head">
+            <div>
+                <p class="el-eyebrow">Aluno</p>
+                <h1 class="el-title">Historico</h1>
+                <p class="el-subtitle">Acompanhe cursos concluidos, trilhas em andamento e progresso acumulado.</p>
+            </div>
+            <div class="el-actions">
+                <a href="/elearning/colaborador" class="el-btn el-btn-primary"><i class="ph ph-house"></i> Inicio</a>
+                <a href="/elearning/colaborador/certificados" class="el-btn el-btn-secondary"><i class="ph ph-certificate"></i> Certificados</a>
+            </div>
+        </header>
 
-    <div class="overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 shadow-soft backdrop-blur-xl">
-        <div class="overflow-x-auto">
-            <table class="min-w-full text-left">
-                <thead class="border-b border-white/10 bg-slate-950/35">
-                    <tr class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
-                        <th class="px-6 py-4">Curso</th>
-                        <th class="px-6 py-4">Categoria</th>
-                        <th class="px-6 py-4">Carga horária</th>
-                        <th class="px-6 py-4">Progresso</th>
-                        <th class="px-6 py-4">Status</th>
-                        <th class="px-6 py-4">Conclusão</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-white/5 text-sm text-slate-200">
-                    <?php if (!$courses): ?>
+        <section class="el-metric-grid">
+            <article class="el-metric">
+                <div class="el-metric-top"><span class="el-icon blue"><i class="ph ph-books"></i></span></div>
+                <p class="el-metric-value"><?= count($courses) ?></p>
+                <p class="el-metric-label">Cursos no historico</p>
+            </article>
+            <article class="el-metric">
+                <div class="el-metric-top"><span class="el-icon green"><i class="ph ph-check-circle"></i></span></div>
+                <p class="el-metric-value"><?= count(array_filter($courses, fn($course) => in_array((string) ($course['status'] ?? ''), ['approved', 'completed'], true))) ?></p>
+                <p class="el-metric-label">Concluidos</p>
+            </article>
+        </section>
+
+        <section>
+            <div class="el-section-head">
+                <div>
+                    <h2 class="el-section-title">Linha do tempo</h2>
+                    <p class="el-section-copy">Seu percurso dentro do modulo e-learning.</p>
+                </div>
+            </div>
+
+            <div class="el-table-wrap">
+                <table class="el-table">
+                    <thead>
                         <tr>
-                            <td colspan="6" class="px-6 py-10 text-center text-slate-300">Seu histórico será preenchido conforme você avançar nos cursos do módulo.</td>
+                            <th>Curso</th>
+                            <th>Categoria</th>
+                            <th>Carga horaria</th>
+                            <th>Progresso</th>
+                            <th>Status</th>
+                            <th>Conclusao</th>
                         </tr>
-                    <?php endif; ?>
-                    <?php foreach ($courses as $course): ?>
-                        <tr class="hover:bg-white/5">
-                            <td class="px-6 py-4 font-bold text-white"><?= e($course['title']) ?></td>
-                            <td class="px-6 py-4"><?= e($course['category'] ?? 'Geral') ?></td>
-                            <td class="px-6 py-4"><?= (int) ($course['workload_hours'] ?? 0) ?>h</td>
-                            <td class="px-6 py-4"><?= number_format((float) ($course['progress_percent'] ?? 0), 0) ?>%</td>
-                            <td class="px-6 py-4"><?= e((string) ($course['status'] ?? 'in_progress')) ?></td>
-                            <td class="px-6 py-4"><?= !empty($course['completed_at']) ? date('d/m/Y', strtotime((string) $course['completed_at'])) : '--' ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                        <?php if (!$courses): ?>
+                            <tr>
+                                <td colspan="6" style="text-align:center;color:var(--el-muted)">Seu historico sera preenchido conforme voce avancar nos cursos do modulo.</td>
+                            </tr>
+                        <?php endif; ?>
+                        <?php foreach ($courses as $course): ?>
+                            <?php $progress = min(100, max(0, (float) ($course['progress_percent'] ?? 0))); ?>
+                            <tr>
+                                <td><strong><?= e($course['title']) ?></strong></td>
+                                <td><?= e($course['category'] ?? 'Geral') ?></td>
+                                <td><?= (int) ($course['workload_hours'] ?? 0) ?>h</td>
+                                <td>
+                                    <div class="el-progress">
+                                        <div class="el-progress-label"><span><?= number_format($progress, 0) ?>%</span></div>
+                                        <div class="el-progress-track"><div class="el-progress-fill" style="width: <?= $progress ?>%"></div></div>
+                                    </div>
+                                </td>
+                                <td><span class="el-badge <?= in_array((string) ($course['status'] ?? ''), ['approved', 'completed'], true) ? 'green' : 'blue' ?>"><?= e((string) ($course['status'] ?? 'in_progress')) ?></span></td>
+                                <td><?= !empty($course['completed_at']) ? date('d/m/Y', strtotime((string) $course['completed_at'])) : '--' ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </div>
-</section>
+</div>

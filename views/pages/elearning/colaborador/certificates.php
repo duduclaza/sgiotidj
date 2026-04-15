@@ -3,52 +3,68 @@ $certificates = $data['certificates'] ?? [];
 $schemaReady = (bool) ($data['schema_ready'] ?? false);
 ?>
 
-<section class="space-y-8">
-    <div class="overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,_rgba(250,204,21,0.18),_rgba(15,23,42,0.78))] p-8 shadow-soft">
-        <p class="text-xs font-semibold uppercase tracking-[0.35em] text-amber-100/70">Conquistas</p>
-        <h2 class="mt-4 text-4xl font-black tracking-tight text-white">Seus certificados digitais</h2>
-        <p class="mt-3 max-w-2xl text-base leading-relaxed text-slate-100/80">Acesse certificados emitidos automaticamente após concluir os requisitos do curso, incluindo a prova obrigatória e a nota mínima de 70%.</p>
-    </div>
+<div class="el-ios">
+    <div class="el-page el-stack">
+        <header class="el-page-head">
+            <div>
+                <p class="el-eyebrow">Aluno</p>
+                <h1 class="el-title">Certificados</h1>
+                <p class="el-subtitle">Acesse seus certificados digitais emitidos apos concluir os requisitos dos cursos.</p>
+            </div>
+            <div class="el-actions">
+                <a href="/elearning/colaborador" class="el-btn el-btn-primary"><i class="ph ph-house"></i> Inicio</a>
+                <a href="/elearning/colaborador/historico" class="el-btn el-btn-secondary"><i class="ph ph-clock-counter-clockwise"></i> Historico</a>
+            </div>
+        </header>
 
-    <?php if (!$schemaReady): ?>
-        <div class="rounded-[1.75rem] border border-amber-400/30 bg-amber-500/10 px-5 py-4 text-sm leading-relaxed text-amber-50">
-            O ambiente ainda está sem o schema do módulo. Assim que o SQL for aplicado, os certificados emitidos passarão a aparecer aqui.
-        </div>
-    <?php endif; ?>
-
-    <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-        <?php if (!$certificates): ?>
-            <div class="rounded-[1.75rem] border border-white/10 bg-white/5 p-10 text-center text-slate-300 md:col-span-2 xl:col-span-3">Nenhum certificado disponível até o momento.</div>
+        <?php if (!$schemaReady): ?>
+            <div class="el-alert">O ambiente ainda esta sem o schema do modulo. Assim que o SQL for aplicado, os certificados emitidos aparecerao aqui.</div>
         <?php endif; ?>
 
-        <?php foreach ($certificates as $certificate): ?>
-            <article class="overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/5 shadow-soft backdrop-blur-xl">
-                <div class="h-32 bg-[linear-gradient(135deg,_rgba(250,204,21,0.32),_rgba(59,130,246,0.25),_rgba(15,23,42,0.95))]"></div>
-                <div class="space-y-4 p-6">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.3em] text-amber-100/70"><?= e($certificate['template_name'] ?? 'Template do curso') ?></p>
-                        <h3 class="mt-2 text-2xl font-black tracking-tight text-white"><?= e($certificate['course_title']) ?></h3>
-                    </div>
-                    <div class="grid gap-3 text-sm text-slate-300">
-                        <div class="flex items-center justify-between">
-                            <span>Nota</span>
-                            <strong class="text-white"><?= number_format((float) ($certificate['score_percent'] ?? 70), 0) ?>%</strong>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span>Carga horária</span>
-                            <strong class="text-white"><?= (int) ($certificate['workload_hours'] ?? 0) ?>h</strong>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span>Emitido em</span>
-                            <strong class="text-white"><?= !empty($certificate['issued_at']) ? date('d/m/Y', strtotime((string) $certificate['issued_at'])) : '--' ?></strong>
-                        </div>
-                    </div>
-                    <div class="flex flex-wrap gap-3 pt-2">
-                        <a href="/elearning/colaborador/certificados/<?= e($certificate['validation_code']) ?>" class="rounded-full bg-white px-4 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]">Abrir certificado</a>
-                        <span class="rounded-full border border-white/10 px-4 py-3 text-sm font-black text-white"><?= e($certificate['validation_code']) ?></span>
-                    </div>
-                </div>
+        <section class="el-metric-grid">
+            <article class="el-metric">
+                <div class="el-metric-top"><span class="el-icon orange"><i class="ph ph-certificate"></i></span></div>
+                <p class="el-metric-value"><?= count($certificates) ?></p>
+                <p class="el-metric-label">Certificados emitidos</p>
             </article>
-        <?php endforeach; ?>
+            <article class="el-metric">
+                <div class="el-metric-top"><span class="el-icon green"><i class="ph ph-seal-check"></i></span></div>
+                <p class="el-metric-value"><?= count(array_filter($certificates, fn($item) => !empty($item['validation_code']))) ?></p>
+                <p class="el-metric-label">Validaveis</p>
+            </article>
+        </section>
+
+        <section>
+            <div class="el-section-head">
+                <div>
+                    <h2 class="el-section-title">Biblioteca pessoal</h2>
+                    <p class="el-section-copy">Abra, imprima ou confira o codigo de validacao.</p>
+                </div>
+            </div>
+
+            <div class="el-course-grid">
+                <?php if (!$certificates): ?>
+                    <div class="el-empty" style="grid-column:1/-1">Nenhum certificado disponivel ate o momento.</div>
+                <?php endif; ?>
+
+                <?php foreach ($certificates as $certificate): ?>
+                    <article class="el-card">
+                        <div class="el-badges">
+                            <span class="el-badge orange"><?= e($certificate['template_name'] ?? 'Template do curso') ?></span>
+                            <span class="el-badge green"><?= number_format((float) ($certificate['score_percent'] ?? 70), 0) ?>%</span>
+                        </div>
+                        <h3 class="el-course-title" style="margin-top:14px"><?= e($certificate['course_title']) ?></h3>
+                        <div class="el-list" style="margin-top:14px">
+                            <div class="el-list-item"><span>Carga horaria</span><strong><?= (int) ($certificate['workload_hours'] ?? 0) ?>h</strong></div>
+                            <div class="el-list-item"><span>Emitido em</span><strong><?= !empty($certificate['issued_at']) ? date('d/m/Y', strtotime((string) $certificate['issued_at'])) : '--' ?></strong></div>
+                            <div class="el-list-item"><span>Codigo</span><strong><?= e($certificate['validation_code']) ?></strong></div>
+                        </div>
+                        <div class="el-actions" style="margin-top:14px">
+                            <a href="/elearning/colaborador/certificados/<?= e($certificate['validation_code']) ?>" class="el-btn el-btn-primary">Abrir certificado</a>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+        </section>
     </div>
-</section>
+</div>

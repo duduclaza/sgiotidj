@@ -5,197 +5,199 @@ $categories = $data['categories'] ?? [];
 $storage = $data['storage'] ?? [];
 $stats = $data['stats'] ?? [];
 $schemaReady = (bool) ($data['schema_ready'] ?? false);
+$storagePercent = min(100, max(0, (float) ($storage['percent_used'] ?? 0)));
 ?>
 
-<section class="space-y-8">
-    <div class="overflow-hidden rounded-[2.25rem] border border-white/10 bg-[linear-gradient(135deg,_rgba(15,23,42,0.95),_rgba(8,47,73,0.72)_58%,_rgba(15,118,110,0.54))] p-8 shadow-soft sm:p-10">
-        <div class="grid gap-8 xl:grid-cols-[1.1fr,0.9fr]">
-            <div class="space-y-5">
-                <p class="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-100/70">Estrutura de cursos</p>
-                <h1 class="max-w-4xl text-4xl font-black tracking-tight text-white sm:text-5xl">
-                    Cursos
-                </h1>
-                <div class="flex flex-wrap gap-3">
-                    <?php if ($canEdit): ?>
-                        <button type="button" class="rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]" onclick="openCourseModal()">
-                            Novo curso
-                        </button>
-                    <?php endif; ?>
-                    <a href="/elearning/gestor/diploma/config" class="rounded-full border border-white/20 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10">
-                        Certificados
-                    </a>
-                    <?php if ($canDelete && $courses): ?>
-                        <button type="button" class="rounded-full border border-rose-300/30 bg-rose-400/10 px-5 py-3 text-sm font-black text-rose-100 transition hover:bg-rose-400/20" onclick="deleteAllCourses()">
-                            Excluir todos os cursos
-                        </button>
-                    <?php endif; ?>
-                </div>
+<div class="el-ios">
+    <div class="el-page el-stack">
+        <header class="el-page-head">
+            <div>
+                <p class="el-eyebrow">Professor</p>
+                <h1 class="el-title">Cursos</h1>
+                <p class="el-subtitle">Organize trilhas, status, capas, aulas, provas e alunos com uma leitura visual mais limpa.</p>
             </div>
-
-            <div class="grid gap-4 sm:grid-cols-2">
-                <?php foreach ([
-                    ['label' => 'Total de cursos', 'value' => count($courses), 'icon' => 'ph-books'],
-                    ['label' => 'Publicados', 'value' => $stats['published_courses'] ?? 0, 'icon' => 'ph-broadcast'],
-                    ['label' => 'Aulas', 'value' => $stats['total_lessons'] ?? 0, 'icon' => 'ph-play-circle'],
-                    ['label' => 'Alunos', 'value' => $stats['total_students'] ?? 0, 'icon' => 'ph-users-three'],
-                ] as $card): ?>
-                    <article class="rounded-[1.75rem] border border-white/10 bg-slate-950/30 p-5 backdrop-blur-xl">
-                        <div class="flex items-center justify-between">
-                            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-cyan-100">
-                                <i class="ph <?= e($card['icon']) ?> text-xl"></i>
-                            </div>
-                            <span class="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">Curso</span>
-                        </div>
-                        <p class="mt-5 text-3xl font-black text-white"><?= e((string) $card['value']) ?></p>
-                        <p class="mt-2 text-sm text-slate-200/70"><?= e($card['label']) ?></p>
-                    </article>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    </div>
-
-    <?php if (!$schemaReady): ?>
-        <div class="rounded-[1.75rem] border border-amber-300/30 bg-amber-400/10 px-5 py-4 text-sm leading-relaxed text-amber-50">
-            O schema do modulo ainda nao foi aplicado neste ambiente. Os formularios vao orientar a execucao do SQL do E-Learning.
-        </div>
-    <?php endif; ?>
-
-    <div class="grid gap-6 xl:grid-cols-[1.28fr,0.72fr]">
-        <section class="space-y-5">
-            <div class="grid gap-4 md:grid-cols-2">
-                <?php if (!$courses): ?>
-                    <div class="rounded-[1.75rem] border border-dashed border-white/10 bg-white/[0.045] p-10 text-center text-slate-300 md:col-span-2">
-                        Nenhum curso cadastrado ate o momento.
-                    </div>
+            <div class="el-actions">
+                <?php if ($canEdit): ?>
+                    <button type="button" class="el-btn el-btn-primary" onclick="openCourseModal()"><i class="ph ph-plus-circle"></i> Novo curso</button>
                 <?php endif; ?>
-
-                <?php foreach ($courses as $course): ?>
-                    <article class="overflow-hidden rounded-[1.9rem] border border-white/10 bg-white/[0.045] shadow-soft backdrop-blur-xl">
-                        <div class="aspect-[16/9] bg-slate-900">
-                            <img src="<?= e($course['cover_url']) ?>" alt="<?= e($course['title']) ?>" class="h-full w-full object-cover">
-                        </div>
-                        <div class="space-y-5 p-5">
-                            <div class="flex flex-wrap items-center gap-3">
-                                <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-slate-100"><?= e($course['status_label'] ?? 'Rascunho') ?></span>
-                                <span class="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-cyan-100"><?= e($course['category'] ?? 'Geral') ?></span>
-                            </div>
-
-                            <div class="space-y-2">
-                                <h3 class="text-2xl font-black tracking-tight text-white"><?= e($course['title']) ?></h3>
-                                <p class="text-sm text-slate-300"><?= (int) ($course['workload_hours'] ?? 0) ?>h | <?= (int) ($course['lessons_count'] ?? 0) ?> aulas | <?= (int) ($course['enrollments_count'] ?? 0) ?> alunos</p>
-                                <p class="text-sm text-slate-300">Professor: <strong class="text-white"><?= e($course['teacher_name'] ?? 'A definir') ?></strong></p>
-                            </div>
-
-                            <div class="space-y-2">
-                                <div class="flex items-center justify-between text-sm text-slate-300">
-                                    <span>Progresso medio</span>
-                                    <strong class="text-white"><?= number_format((float) ($course['avg_progress'] ?? 0), 0) ?>%</strong>
-                                </div>
-                                <div class="h-2.5 overflow-hidden rounded-full bg-white/10">
-                                    <div class="h-full rounded-full bg-[linear-gradient(90deg,_#67e8f9,_#99f6e4)]" style="width: <?= min(100, max(0, (float) ($course['avg_progress'] ?? 0))) ?>%"></div>
-                                </div>
-                            </div>
-
-                            <div class="flex flex-wrap gap-2">
-                                <a href="/elearning/gestor/cursos/<?= (int) $course['id'] ?>/aulas" class="rounded-full bg-white px-4 py-2 text-sm font-black text-slate-950 transition hover:scale-[1.02]">Abrir</a>
-                                <a href="/elearning/gestor/cursos/<?= (int) $course['id'] ?>/provas" class="rounded-full border border-white/10 px-4 py-2 text-sm font-black text-white transition hover:bg-white/10">Provas</a>
-                                <a href="/elearning/gestor/cursos/<?= (int) $course['id'] ?>/matriculas" class="rounded-full border border-white/10 px-4 py-2 text-sm font-black text-white transition hover:bg-white/10">Alunos</a>
-                                <?php if ($canEdit): ?>
-                                    <button type="button" class="rounded-full border border-white/10 px-4 py-2 text-sm font-black text-white transition hover:bg-white/10" data-course='<?= e(json_encode($course, JSON_HEX_APOS | JSON_HEX_QUOT)) ?>' onclick="openCourseModal(this)">Editar</button>
-                                <?php endif; ?>
-                                <?php if ($canDelete): ?>
-                                    <button type="button" class="rounded-full border border-rose-300/30 px-4 py-2 text-sm font-black text-rose-100 transition hover:bg-rose-400/10" onclick='deleteCourse(<?= (int) $course['id'] ?>, <?= json_encode((string) ($course['title'] ?? ''), JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>Excluir</button>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </article>
-                <?php endforeach; ?>
+                <a href="/elearning/gestor/diploma/config" class="el-btn el-btn-secondary"><i class="ph ph-certificate"></i> Certificados</a>
+                <a href="/elearning/gestor" class="el-btn el-btn-outline"><i class="ph ph-squares-four"></i> Painel</a>
             </div>
+        </header>
+
+        <?php if (!$schemaReady): ?>
+            <div class="el-alert">O schema do e-learning ainda nao foi aplicado. Os formularios ficam prontos para uso assim que a base estiver disponivel.</div>
+        <?php endif; ?>
+
+        <section class="el-metric-grid">
+            <?php foreach ([
+                ['label' => 'Total de cursos', 'value' => count($courses), 'icon' => 'ph-books', 'tone' => 'blue'],
+                ['label' => 'Publicados', 'value' => $stats['published_courses'] ?? 0, 'icon' => 'ph-broadcast', 'tone' => 'green'],
+                ['label' => 'Aulas', 'value' => $stats['total_lessons'] ?? 0, 'icon' => 'ph-play-circle', 'tone' => 'cyan'],
+                ['label' => 'Alunos', 'value' => $stats['total_students'] ?? 0, 'icon' => 'ph-users-three', 'tone' => 'orange'],
+            ] as $card): ?>
+                <article class="el-metric">
+                    <div class="el-metric-top">
+                        <span class="el-icon <?= e($card['tone']) ?>"><i class="ph <?= e($card['icon']) ?>"></i></span>
+                        <span class="el-badge">Curso</span>
+                    </div>
+                    <p class="el-metric-value"><?= e((string) $card['value']) ?></p>
+                    <p class="el-metric-label"><?= e($card['label']) ?></p>
+                </article>
+            <?php endforeach; ?>
         </section>
 
-        <aside class="space-y-6">
-            <section class="rounded-[2rem] border border-white/10 bg-white/[0.045] p-6 shadow-soft backdrop-blur-xl">
-                <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-300/60">Governanca</p>
-                <h2 class="mt-2 text-3xl font-black tracking-tight text-white">Regras enxutas</h2>
-                <ul class="mt-5 space-y-3 text-sm leading-relaxed text-slate-300">
-                    <li>Cada aula aceita 1 video MP4 de ate 80 MB.</li>
-                    <li>Anexos aceitam ate 20 MB por arquivo.</li>
-                    <li>Certificados exigem progresso completo e nota minima de 70%.</li>
-                    <li>Uploads param automaticamente ao atingir a capacidade global do SGI STREAM.</li>
-                </ul>
-            </section>
-
-            <section class="rounded-[2rem] border border-white/10 bg-white/[0.045] p-6 shadow-soft backdrop-blur-xl">
-                <p class="text-xs font-semibold uppercase tracking-[0.35em] text-emerald-100/60">Armazenamento</p>
-                <h2 class="mt-2 text-3xl font-black tracking-tight text-white"><?= e($storage['used_human'] ?? '0 min') ?></h2>
-                <p class="mt-2 text-sm text-slate-300">Consumidos de <?= e($storage['contracted_human'] ?? '10.000 min') ?> contratados.</p>
-                <div class="mt-4 h-3 overflow-hidden rounded-full bg-white/10">
-                    <div class="h-full rounded-full <?= ($storage['alert_level'] ?? 'healthy') === 'critical' ? 'bg-rose-400' : ((($storage['alert_level'] ?? 'healthy') === 'warning') ? 'bg-amber-300' : 'bg-emerald-300') ?>" style="width: <?= min(100, max(0, (float) ($storage['percent_used'] ?? 0))) ?>%"></div>
+        <div class="el-grid">
+            <section class="el-col-8">
+                <div class="el-section-head">
+                    <div>
+                        <h2 class="el-section-title">Trilhas cadastradas</h2>
+                        <p class="el-section-copy"><?= count($courses) ?> curso(s) no ambiente do professor.</p>
+                    </div>
+                    <?php if ($canDelete && $courses): ?>
+                        <button type="button" class="el-btn el-btn-sm el-danger" onclick="deleteAllCourses()">Excluir todos</button>
+                    <?php endif; ?>
                 </div>
-                <p class="mt-3 text-sm text-slate-300">Disponivel: <strong class="text-white"><?= e($storage['available_human'] ?? '0 min') ?></strong></p>
-            </section>
-        </aside>
-    </div>
-</section>
 
-<div id="course-modal" class="fixed inset-0 z-[70] hidden items-start justify-center overflow-y-auto bg-slate-950/70 p-3 backdrop-blur-sm sm:p-6">
-    <div class="my-4 flex max-h-[calc(100vh-2rem)] w-full max-w-3xl flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 text-white shadow-2xl sm:my-6 sm:max-h-[calc(100vh-3rem)]">
-        <div class="flex items-start justify-between gap-4 border-b border-white/10 px-6 py-5 sm:px-8">
+                <div class="el-course-grid">
+                    <?php if (!$courses): ?>
+                        <div class="el-empty" style="grid-column:1/-1">Nenhum curso cadastrado ate o momento.</div>
+                    <?php endif; ?>
+
+                    <?php foreach ($courses as $course): ?>
+                        <?php $progress = min(100, max(0, (float) ($course['avg_progress'] ?? 0))); ?>
+                        <article class="el-course">
+                            <div class="el-cover">
+                                <img src="<?= e($course['cover_url']) ?>" alt="<?= e($course['title']) ?>">
+                            </div>
+                            <div class="el-course-body">
+                                <div class="el-badges">
+                                    <span class="el-badge blue"><?= e($course['status_label'] ?? 'Rascunho') ?></span>
+                                    <span class="el-badge green"><?= e($course['category'] ?? 'Geral') ?></span>
+                                    <span class="el-badge"><?= (int) ($course['workload_hours'] ?? 0) ?>h</span>
+                                </div>
+
+                                <div>
+                                    <h3 class="el-course-title"><?= e($course['title']) ?></h3>
+                                    <p class="el-course-meta">Professor: <?= e($course['teacher_name'] ?? 'A definir') ?></p>
+                                    <p class="el-course-meta"><?= (int) ($course['lessons_count'] ?? 0) ?> aulas | <?= (int) ($course['enrollments_count'] ?? 0) ?> alunos</p>
+                                </div>
+
+                                <div class="el-progress">
+                                    <div class="el-progress-label">
+                                        <span>Progresso medio</span>
+                                        <strong><?= number_format($progress, 0) ?>%</strong>
+                                    </div>
+                                    <div class="el-progress-track"><div class="el-progress-fill" style="width: <?= $progress ?>%"></div></div>
+                                </div>
+
+                                <div class="el-course-actions">
+                                    <a href="/elearning/gestor/cursos/<?= (int) $course['id'] ?>/aulas" class="el-btn el-btn-sm el-btn-primary">Abrir</a>
+                                    <a href="/elearning/gestor/cursos/<?= (int) $course['id'] ?>/provas" class="el-btn el-btn-sm el-btn-secondary">Provas</a>
+                                    <a href="/elearning/gestor/cursos/<?= (int) $course['id'] ?>/matriculas" class="el-btn el-btn-sm el-btn-secondary">Alunos</a>
+                                    <?php if ($canEdit): ?>
+                                        <button type="button" class="el-btn el-btn-sm el-btn-outline" data-course='<?= e(json_encode($course, JSON_HEX_APOS | JSON_HEX_QUOT)) ?>' onclick="openCourseModal(this)">Editar</button>
+                                    <?php endif; ?>
+                                    <?php if ($canDelete): ?>
+                                        <button type="button" class="el-btn el-btn-sm el-danger" onclick='deleteCourse(<?= (int) $course['id'] ?>, <?= json_encode((string) ($course['title'] ?? ''), JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>Excluir</button>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </article>
+                    <?php endforeach; ?>
+                </div>
+            </section>
+
+            <aside class="el-col-4 el-stack">
+                <section class="el-panel">
+                    <h2 class="el-section-title">Armazenamento</h2>
+                    <p class="el-section-copy">Uso atual do SGI Stream para videos de aulas.</p>
+                    <p class="el-metric-value"><?= e($storage['used_human'] ?? '0 min') ?></p>
+                    <p class="el-metric-label">de <?= e($storage['contracted_human'] ?? '10.000 min') ?></p>
+                    <div class="el-progress" style="margin-top:16px">
+                        <div class="el-progress-label">
+                            <span>Consumo</span>
+                            <strong><?= number_format($storagePercent, 1, ',', '.') ?>%</strong>
+                        </div>
+                        <div class="el-progress-track">
+                            <div class="el-progress-fill <?= $storagePercent >= 90 ? 'pink' : ($storagePercent >= 80 ? 'orange' : 'green') ?>" style="width: <?= $storagePercent ?>%"></div>
+                        </div>
+                    </div>
+                    <div class="el-actions" style="margin-top:16px">
+                        <a href="/elearning/gestor/armazenamento" class="el-btn el-btn-secondary">Detalhes</a>
+                    </div>
+                </section>
+
+                <section class="el-panel">
+                    <h2 class="el-section-title">Regras</h2>
+                    <div class="el-list" style="margin-top:14px">
+                        <div class="el-list-item"><span>Video por aula</span><strong>1 MP4</strong></div>
+                        <div class="el-list-item"><span>Tamanho do video</span><strong>80 MB</strong></div>
+                        <div class="el-list-item"><span>Anexo</span><strong>20 MB</strong></div>
+                        <div class="el-list-item"><span>Certificado</span><strong>70%</strong></div>
+                    </div>
+                </section>
+            </aside>
+        </div>
+    </div>
+</div>
+
+<div id="course-modal" class="el-modal hidden">
+    <div class="el-modal-card">
+        <div class="el-modal-head">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">Curso</p>
-                <h2 id="course-modal-title" class="mt-2 text-3xl font-black tracking-tight text-white">Novo curso</h2>
+                <p class="el-eyebrow">Curso</p>
+                <h2 id="course-modal-title" class="el-title el-title-sm">Novo curso</h2>
             </div>
-            <button type="button" class="rounded-full border border-white/10 px-4 py-2 text-sm font-black text-white transition hover:bg-white/10" onclick="closeCourseModal()">Fechar</button>
+            <button type="button" class="el-btn el-btn-outline" onclick="closeCourseModal()">Fechar</button>
         </div>
 
-        <form id="course-form" class="flex min-h-0 flex-1 flex-col">
-            <div class="grid min-h-0 flex-1 gap-5 overflow-y-auto px-6 py-5 sm:px-8 md:grid-cols-2">
-                <input type="hidden" name="id" id="course-id">
-                <div class="md:col-span-2">
-                    <label class="mb-2 block text-sm font-bold text-slate-200">Titulo do curso</label>
-                    <input type="text" name="title" id="course-title" class="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-medium text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-200" required>
-                </div>
-                <div class="md:col-span-2">
-                    <label class="mb-2 block text-sm font-bold text-slate-200">Descricao</label>
-                    <textarea name="description" id="course-description" rows="4" class="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-medium text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-200"></textarea>
-                </div>
-                <div>
-                    <label class="mb-2 block text-sm font-bold text-slate-200">Categoria</label>
-                    <input list="course-categories" name="category" id="course-category" class="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-medium text-white outline-none transition focus:border-cyan-200">
-                    <datalist id="course-categories">
-                        <?php foreach ($categories as $category): ?>
-                            <option value="<?= e($category) ?>"></option>
-                        <?php endforeach; ?>
-                    </datalist>
-                </div>
-                <div>
-                    <label class="mb-2 block text-sm font-bold text-slate-200">Professor responsavel</label>
-                    <select name="teacher_id" id="course-teacher" class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm font-medium text-white outline-none transition focus:border-cyan-200">
-                        <?php foreach ($teachers as $teacher): ?>
-                            <option value="<?= (int) $teacher['id'] ?>"><?= e($teacher['name']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div>
-                    <label class="mb-2 block text-sm font-bold text-slate-200">Carga horaria (h)</label>
-                    <input type="number" min="0" name="workload_hours" id="course-workload" class="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-medium text-white outline-none transition focus:border-cyan-200">
-                </div>
-                <div>
-                    <label class="mb-2 block text-sm font-bold text-slate-200">Status</label>
-                    <select name="status" id="course-status" class="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm font-medium text-white outline-none transition focus:border-cyan-200">
-                        <option value="draft">Rascunho</option>
-                        <option value="published">Publicado</option>
-                        <option value="archived">Arquivado</option>
-                    </select>
-                </div>
-                <div class="md:col-span-2">
-                    <label class="mb-2 block text-sm font-bold text-slate-200">Capa / imagem</label>
-                    <input type="file" name="cover" id="course-cover" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="block w-full rounded-2xl border border-dashed border-white/20 px-4 py-4 text-sm text-slate-200">
-                </div>
+        <form id="course-form" class="el-form-grid">
+            <input type="hidden" name="id" id="course-id">
+            <div class="el-field el-form-full">
+                <label for="course-title">Titulo do curso</label>
+                <input type="text" name="title" id="course-title" required>
             </div>
-            <div class="flex flex-col-reverse gap-3 border-t border-white/10 bg-slate-950 px-6 py-4 sm:flex-row sm:justify-end sm:px-8">
-                <button type="button" class="rounded-full border border-white/10 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10" onclick="closeCourseModal()">Cancelar</button>
-                <button type="submit" class="rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]">Salvar curso</button>
+            <div class="el-field el-form-full">
+                <label for="course-description">Descricao</label>
+                <textarea name="description" id="course-description" rows="4"></textarea>
+            </div>
+            <div class="el-field">
+                <label for="course-category">Categoria</label>
+                <input list="course-categories" name="category" id="course-category">
+                <datalist id="course-categories">
+                    <?php foreach ($categories as $category): ?>
+                        <option value="<?= e($category) ?>"></option>
+                    <?php endforeach; ?>
+                </datalist>
+            </div>
+            <div class="el-field">
+                <label for="course-teacher">Professor responsavel</label>
+                <select name="teacher_id" id="course-teacher">
+                    <?php foreach ($teachers as $teacher): ?>
+                        <option value="<?= (int) $teacher['id'] ?>"><?= e($teacher['name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="el-field">
+                <label for="course-workload">Carga horaria (h)</label>
+                <input type="number" min="0" name="workload_hours" id="course-workload">
+            </div>
+            <div class="el-field">
+                <label for="course-status">Status</label>
+                <select name="status" id="course-status">
+                    <option value="draft">Rascunho</option>
+                    <option value="published">Publicado</option>
+                    <option value="archived">Arquivado</option>
+                </select>
+            </div>
+            <div class="el-field el-form-full">
+                <label for="course-cover">Capa / imagem</label>
+                <input type="file" name="cover" id="course-cover" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+            </div>
+            <div class="el-actions el-form-full" style="justify-content:flex-end">
+                <button type="button" class="el-btn el-btn-outline" onclick="closeCourseModal()">Cancelar</button>
+                <button type="submit" class="el-btn el-btn-primary">Salvar curso</button>
             </div>
         </form>
     </div>

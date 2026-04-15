@@ -6,128 +6,113 @@ $progress = $data['progress'] ?? [];
 $previousLessonId = $data['previous_lesson_id'] ?? null;
 $nextLessonId = $data['next_lesson_id'] ?? null;
 $lessonVideo = $lesson['video'] ?? null;
+$progressPercent = min(100, max(0, (float) ($progress['video_progress_percent'] ?? 0)));
 ?>
 
-<section class="space-y-6">
-    <div class="overflow-hidden rounded-[2.25rem] border border-white/10 bg-white/[0.045] p-8 shadow-soft backdrop-blur-xl">
-        <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div class="space-y-4">
-                <div class="flex flex-wrap items-center gap-3 text-sm text-slate-300">
-                    <a href="/elearning/colaborador" class="font-semibold text-sky-200 transition hover:text-white">Dashboard</a>
-                    <span>/</span>
-                    <a href="/elearning/colaborador/cursos/<?= (int) ($lesson['course_id'] ?? 0) ?>" class="font-semibold text-sky-200 transition hover:text-white"><?= e($lesson['course_title'] ?? 'Curso') ?></a>
-                </div>
-                <p class="text-xs font-semibold uppercase tracking-[0.35em] text-sky-200/70">Aula em video</p>
-                <h2 class="text-4xl font-black tracking-tight text-white"><?= e($lesson['title'] ?? 'Aula') ?></h2>
-                <p class="max-w-3xl text-base leading-relaxed text-slate-300"><?= e($lesson['description'] ?? 'Acompanhe a aula em video e use os materiais de apoio para consolidar o conteudo.') ?></p>
+<div class="el-ios">
+    <div class="el-page el-stack">
+        <header class="el-page-head">
+            <div>
+                <p class="el-eyebrow"><a href="/elearning/colaborador" style="color:inherit">Aluno</a> / <a href="/elearning/colaborador/cursos/<?= (int) ($lesson['course_id'] ?? 0) ?>" style="color:inherit"><?= e($lesson['course_title'] ?? 'Curso') ?></a></p>
+                <h1 class="el-title"><?= e($lesson['title'] ?? 'Aula') ?></h1>
+                <p class="el-subtitle"><?= e($lesson['description'] ?? 'Acompanhe a aula em video e use os materiais de apoio para consolidar o conteudo.') ?></p>
             </div>
-            <div class="rounded-[1.5rem] border border-white/10 bg-slate-950/35 px-5 py-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Progresso da aula</p>
-                <p class="mt-3 text-3xl font-black text-white"><?= number_format((float) ($progress['video_progress_percent'] ?? 0), 0) ?>%</p>
+            <div class="el-actions">
+                <?php if ($previousLessonId): ?>
+                    <a href="/elearning/colaborador/materiais/<?= (int) $previousLessonId ?>/assistir" class="el-btn el-btn-secondary">Aula anterior</a>
+                <?php endif; ?>
+                <?php if ($nextLessonId): ?>
+                    <a href="/elearning/colaborador/materiais/<?= (int) $nextLessonId ?>/assistir" class="el-btn el-btn-primary">Proxima aula</a>
+                <?php endif; ?>
+                <a href="/elearning/colaborador/cursos/<?= (int) ($lesson['course_id'] ?? 0) ?>" class="el-btn el-btn-outline">Curso</a>
             </div>
-        </div>
-    </div>
+        </header>
 
-    <div class="grid gap-8 xl:grid-cols-[1.5fr,0.85fr]">
-        <div class="space-y-6">
-            <div class="overflow-hidden rounded-[2rem] border border-white/10 bg-black shadow-soft">
-                <?php if ($lessonVideo): ?>
-                    <?php if (($lessonVideo['provider'] ?? '') === 'bunny' && empty($lessonVideo['is_ready'])): ?>
-                        <div class="flex aspect-video items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.14),_transparent_38%),linear-gradient(135deg,_#020617,_#0f172a_55%,_#155e75)] px-6 py-8 text-center text-slate-300" id="lessonProcessingPanel" data-lesson-id="<?= (int) ($lesson['id'] ?? 0) ?>">
-                            <div class="w-full max-w-2xl rounded-[1.75rem] border border-white/10 bg-slate-950/55 px-6 py-8 shadow-soft backdrop-blur-xl">
-                                <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
-                                    <span class="relative flex h-3 w-3">
-                                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-300/70"></span>
-                                        <span class="relative inline-flex h-3 w-3 rounded-full bg-sky-200"></span>
-                                    </span>
-                                </div>
-                                <div class="mt-5 space-y-3">
-                                    <p class="text-xs font-semibold uppercase tracking-[0.35em] text-sky-200/75">SGI STREAM</p>
-                                    <h3 class="text-3xl font-black text-white">Estamos preparando esta aula</h3>
-                                    <p class="mx-auto max-w-2xl text-sm leading-relaxed text-slate-300" id="lessonProcessingMessage"><?= e($lessonVideo['processing_message'] ?? 'Atualize a pagina em alguns instantes para assistir ao conteudo.') ?></p>
-                                </div>
-                                <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
-                                    <span class="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-300">Atualizacao automatica</span>
-                                    <button type="button" id="lessonProcessingButton" onclick="window.location.reload()" class="rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]">Atualizar pagina</button>
+        <div class="el-grid">
+            <main class="el-col-8 el-stack">
+                <section class="el-video-frame">
+                    <?php if ($lessonVideo): ?>
+                        <?php if (($lessonVideo['provider'] ?? '') === 'bunny' && empty($lessonVideo['is_ready'])): ?>
+                            <div class="el-video-empty" id="lessonProcessingPanel" data-lesson-id="<?= (int) ($lesson['id'] ?? 0) ?>">
+                                <div class="el-panel" style="max-width:620px;text-align:center;background:rgba(255,255,255,.94);color:var(--el-text)">
+                                    <span class="el-icon cyan"><i class="ph ph-clock-countdown"></i></span>
+                                    <h2 class="el-section-title" style="margin-top:14px">Video em processamento</h2>
+                                    <p class="el-section-copy" id="lessonProcessingMessage"><?= e($lessonVideo['processing_message'] ?? 'Atualize a pagina em alguns instantes para assistir ao conteudo.') ?></p>
+                                    <button type="button" id="lessonProcessingButton" onclick="window.location.reload()" class="el-btn el-btn-primary" style="margin-top:14px">Atualizar pagina</button>
                                 </div>
                             </div>
-                        </div>
-                    <?php elseif (($lessonVideo['provider'] ?? '') === 'bunny'): ?>
-                        <iframe
-                            id="lessonIframe"
-                            src="<?= e(($lessonVideo['embed_url'] ?? '') . '?autoplay=false&t=' . time()) ?>"
-                            class="aspect-video w-full bg-black"
-                            loading="lazy"
-                            allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-                            allowfullscreen
-                        ></iframe>
+                        <?php elseif (($lessonVideo['provider'] ?? '') === 'bunny'): ?>
+                            <iframe
+                                id="lessonIframe"
+                                src="<?= e(($lessonVideo['embed_url'] ?? '') . '?autoplay=false&t=' . time()) ?>"
+                                loading="lazy"
+                                allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+                                allowfullscreen
+                            ></iframe>
+                        <?php else: ?>
+                            <video id="lessonPlayer" controls>
+                                <source src="/elearning/colaborador/videos/<?= (int) $lesson['id'] ?>" type="<?= e($lesson['video_mime_type'] ?? 'video/mp4') ?>">
+                                Seu navegador nao suporta reproducao de video.
+                            </video>
+                        <?php endif; ?>
                     <?php else: ?>
-                        <video id="lessonPlayer" controls class="aspect-video w-full bg-black">
-                            <source src="/elearning/colaborador/videos/<?= (int) $lesson['id'] ?>" type="<?= e($lesson['video_mime_type'] ?? 'video/mp4') ?>">
-                            Seu navegador nao suporta reproducao de video.
-                        </video>
+                        <div class="el-video-empty">Esta aula ainda nao possui video publicado.</div>
                     <?php endif; ?>
-                <?php else: ?>
-                    <div class="flex aspect-video items-center justify-center bg-slate-900 text-center text-slate-400">
-                        Esta aula ainda nao possui video publicado.
-                    </div>
-                <?php endif; ?>
-            </div>
+                </section>
 
-            <div class="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-soft backdrop-blur-xl">
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.35em] text-emerald-200/70">Conclusao</p>
-                        <h3 class="mt-2 text-2xl font-black tracking-tight text-white">Marcar progresso</h3>
+                <section class="el-panel">
+                    <div class="el-section-head">
+                        <div>
+                            <h2 class="el-section-title">Progresso da aula</h2>
+                            <p class="el-section-copy">A conclusao tambem e registrada automaticamente ao atingir 90% do video.</p>
+                        </div>
+                        <button type="button" class="el-btn el-btn-primary" onclick="completeLesson()">Marcar como concluida</button>
                     </div>
-                    <button type="button" class="rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]" onclick="completeLesson()">Marcar aula como concluida</button>
-                </div>
-                <p class="mt-4 text-sm leading-relaxed text-slate-300">A aula e considerada concluida automaticamente ao atingir 90% de progresso no player, mas voce tambem pode registrar a conclusao manualmente apos revisar o conteudo.</p>
-                <div class="mt-6 flex flex-wrap gap-3">
-                    <?php if ($previousLessonId): ?>
-                        <a href="/elearning/colaborador/materiais/<?= (int) $previousLessonId ?>/assistir" class="rounded-full border border-white/20 px-4 py-3 text-sm font-black text-white transition hover:bg-white/10">Aula anterior</a>
-                    <?php endif; ?>
-                    <?php if ($nextLessonId): ?>
-                        <a href="/elearning/colaborador/materiais/<?= (int) $nextLessonId ?>/assistir" class="rounded-full bg-white px-4 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]">Proxima aula</a>
-                    <?php endif; ?>
-                </div>
-            </div>
+                    <div class="el-progress">
+                        <div class="el-progress-label"><span>Assistido</span><strong><?= number_format($progressPercent, 0) ?>%</strong></div>
+                        <div class="el-progress-track"><div class="el-progress-fill" style="width: <?= $progressPercent ?>%"></div></div>
+                    </div>
+                </section>
+            </main>
+
+            <aside class="el-col-4 el-stack">
+                <section class="el-panel">
+                    <h2 class="el-section-title">Materiais</h2>
+                    <div class="el-list" style="margin-top:14px">
+                        <?php if (!$attachments): ?>
+                            <div class="el-empty">Nenhum material extra foi anexado a esta aula.</div>
+                        <?php endif; ?>
+                        <?php foreach ($attachments as $attachment): ?>
+                            <a href="/elearning/colaborador/anexos/<?= (int) $attachment['id'] ?>/download" class="el-list-item">
+                                <span class="el-list-main">
+                                    <strong class="el-list-title"><?= e($attachment['title'] ?: $attachment['file_name']) ?></strong>
+                                    <span class="el-list-subtitle">Baixar material de apoio</span>
+                                </span>
+                                <i class="ph ph-download-simple"></i>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </section>
+
+                <section class="el-panel">
+                    <h2 class="el-section-title">Trilha do curso</h2>
+                    <div class="el-list" style="margin-top:14px">
+                        <?php foreach ($playlist as $playlistLesson): ?>
+                            <a href="/elearning/colaborador/materiais/<?= (int) $playlistLesson['id'] ?>/assistir" class="el-list-item" style="<?= (int) $playlistLesson['id'] === (int) ($lesson['id'] ?? 0) ? 'border-color:rgba(0,122,255,.45);background:var(--el-blue-soft)' : '' ?>">
+                                <span class="el-list-main">
+                                    <strong class="el-list-title"><?= e($playlistLesson['title']) ?></strong>
+                                </span>
+                                <?php if (!empty($playlistLesson['is_completed'])): ?>
+                                    <i class="ph-fill ph-check-circle" style="color:var(--el-green)"></i>
+                                <?php endif; ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </section>
+            </aside>
         </div>
-
-        <aside class="space-y-6">
-            <section class="rounded-[1.75rem] border border-white/10 bg-white/5 p-6 shadow-soft backdrop-blur-xl">
-                <p class="text-xs font-semibold uppercase tracking-[0.35em] text-amber-200/70">Materiais</p>
-                <h3 class="mt-2 text-2xl font-black tracking-tight text-white">Anexos de apoio</h3>
-                <div class="mt-5 space-y-3">
-                    <?php if (!$attachments): ?>
-                        <p class="text-sm text-slate-300">Nenhum material extra foi anexado a esta aula.</p>
-                    <?php endif; ?>
-                    <?php foreach ($attachments as $attachment): ?>
-                        <a href="/elearning/colaborador/anexos/<?= (int) $attachment['id'] ?>/download" class="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-950/35 px-4 py-3 text-sm text-slate-200 transition hover:bg-slate-900">
-                            <span class="truncate"><?= e($attachment['title'] ?: $attachment['file_name']) ?></span>
-                            <i class="ph ph-download-simple"></i>
-                        </a>
-                    <?php endforeach; ?>
-                </div>
-            </section>
-
-            <section class="rounded-[1.75rem] border border-white/10 bg-white/5 p-6 shadow-soft backdrop-blur-xl">
-                <p class="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-100/60">Playlist</p>
-                <h3 class="mt-2 text-2xl font-black tracking-tight text-white">Trilha do curso</h3>
-                <div class="mt-5 space-y-3">
-                    <?php foreach ($playlist as $playlistLesson): ?>
-                        <a href="/elearning/colaborador/materiais/<?= (int) $playlistLesson['id'] ?>/assistir" class="flex items-center justify-between rounded-2xl border px-4 py-3 text-sm transition <?= (int) $playlistLesson['id'] === (int) ($lesson['id'] ?? 0) ? 'border-sky-300/30 bg-sky-400/10 text-white' : 'border-white/10 bg-slate-950/35 text-slate-200 hover:bg-slate-900' ?>">
-                            <span><?= e($playlistLesson['title']) ?></span>
-                            <?php if (!empty($playlistLesson['is_completed'])): ?>
-                                <i class="ph-fill ph-check-circle text-emerald-300"></i>
-                            <?php endif; ?>
-                        </a>
-                    <?php endforeach; ?>
-                </div>
-            </section>
-        </aside>
     </div>
-</section>
+</div>
 
 <?php if ($lessonVideo && ($lessonVideo['provider'] ?? '') === 'bunny' && !empty($lessonVideo['is_ready'])): ?>
     <script src="https://assets.mediadelivery.net/playerjs/playerjs-latest.min.js"></script>
@@ -162,35 +147,27 @@ async function registerProgress(progressPercent, silent = false) {
     const response = await fetch('/elearning/colaborador/progresso/registrar', { method: 'POST', body: formData });
     const result = await response.json();
     if (!result.success) {
-        if (!silent) {
+        if (!silent && typeof showELToast === 'function') {
             showELToast(result.message || 'Nao foi possivel registrar o progresso.', 'error');
         }
         return;
     }
 
     lastSentProgress = Math.max(lastSentProgress, Number(progressPercent || 0));
-    if (!silent) {
+    if (!silent && typeof showELToast === 'function') {
         showELToast('Progresso atualizado.', 'success');
     }
 }
 
 function syncProgressIfNeeded(progressPercent) {
     const normalized = Math.max(0, Math.min(100, Math.round(progressPercent)));
-    if (normalized < 5) {
-        return;
-    }
-    if (normalized < 90 && normalized < lastSentProgress + 10) {
-        return;
-    }
-
+    if (normalized < 5) return;
+    if (normalized < 90 && normalized < lastSentProgress + 10) return;
     registerProgress(normalized, true);
 }
 
 async function completeLesson(silent = false) {
-    if (completionTriggered) {
-        return;
-    }
-
+    if (completionTriggered) return;
     completionTriggered = true;
     await registerProgress(100, silent);
     setTimeout(() => window.location.reload(), 600);
@@ -201,9 +178,7 @@ if (player) {
     player.addEventListener('timeupdate', () => {
         const duration = Number(player.duration || 0);
         const currentTime = Number(player.currentTime || 0);
-        if (duration <= 0) {
-            return;
-        }
+        if (duration <= 0) return;
 
         const percent = (currentTime / duration) * 100;
         if (percent >= 90) {
@@ -223,9 +198,7 @@ if (bunnyIframe && window.playerjs) {
     bunnyPlayer.on('timeupdate', (data) => {
         const seconds = Number(data?.seconds || 0);
         const duration = Number(data?.duration || 0);
-        if (duration <= 0) {
-            return;
-        }
+        if (duration <= 0) return;
 
         const percent = (seconds / duration) * 100;
         if (percent >= 90) {
@@ -247,9 +220,7 @@ if (lessonProcessingPanel) {
     let processingAttempts = 0;
 
     const pollProcessingStatus = async () => {
-        if (processingLessonId <= 0) {
-            return;
-        }
+        if (processingLessonId <= 0) return;
 
         try {
             const response = await fetch(`/elearning/colaborador/aulas/${processingLessonId}/video-status`, {

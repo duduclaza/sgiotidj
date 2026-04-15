@@ -11,6 +11,10 @@ $sidebar = __DIR__ . '/../partials/sidebar.php';
 // Assim o cache é mantido até que o desenvolvedor altere o arquivo
 $stylePath = __DIR__ . '/../../public/assets/modal-styles.css';
 $assetVersion = file_exists($stylePath) ? filemtime($stylePath) : time();
+$elearningStylePath = __DIR__ . '/../../public/assets/elearning-modern.css';
+$elearningAssetVersion = file_exists($elearningStylePath) ? filemtime($elearningStylePath) : time();
+$requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+$isElearningRoute = strpos($requestPath, '/elearning') === 0;
 // Safe helper fallbacks in case global helpers are not loaded
 if (!function_exists('e')) {
   function e($value) { return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8'); }
@@ -82,6 +86,9 @@ if ($userRole === 'super_admin' || $userRole === 'admin') {
     }
   </style>
   <link rel="stylesheet" href="/assets/modal-styles.css?v=<?= urlencode($assetVersion) ?>">
+  <?php if ($isElearningRoute): ?>
+    <link rel="stylesheet" href="/assets/elearning-modern.css?v=<?= urlencode($elearningAssetVersion) ?>">
+  <?php endif; ?>
   <script src="/assets/modal-utils.js?v=<?= urlencode($assetVersion) ?>"></script>
   <script>
     // ===== TOGGLE SUBMENU - GLOBAL FUNCTION =====

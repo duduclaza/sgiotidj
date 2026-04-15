@@ -36,7 +36,7 @@ $enrollmentStatus = static function (string $status): array {
 };
 ?>
 
-<section class="space-y-8">
+<section class="el-ios el-ios-workspace space-y-8">
     <div class="overflow-hidden rounded-[2.25rem] border border-white/10 bg-white/[0.045] shadow-soft backdrop-blur-xl">
         <div class="grid gap-0 xl:grid-cols-[1.25fr,0.75fr]">
             <div class="relative overflow-hidden bg-[linear-gradient(135deg,_rgba(15,23,42,0.96),_rgba(8,47,73,0.78)_58%,_rgba(15,118,110,0.58))] p-8 text-white">
