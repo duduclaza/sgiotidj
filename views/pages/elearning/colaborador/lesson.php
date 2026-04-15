@@ -13,9 +13,13 @@ $progressPercent = min(100, max(0, (float) ($progress['video_progress_percent'] 
     <div class="el-page el-stack">
         <header class="el-page-head">
             <div>
-                <p class="el-eyebrow"><a href="/elearning/colaborador" style="color:inherit">Aluno</a> / <a href="/elearning/colaborador/cursos/<?= (int) ($lesson['course_id'] ?? 0) ?>" style="color:inherit"><?= e($lesson['course_title'] ?? 'Curso') ?></a></p>
+                <p class="el-eyebrow"><a href="/elearning/colaborador" style="color:inherit">Aluno</a> / <a href="/elearning/colaborador/cursos/<?= (int) ($lesson['course_id'] ?? 0) ?>" style="color:inherit">Curso: <?= e($lesson['course_title'] ?? 'Curso') ?></a></p>
+                <div class="el-badges" style="margin-bottom:12px">
+                    <span class="el-badge blue">Aula</span>
+                    <span class="el-badge green">Curso: <?= e($lesson['course_title'] ?? 'Curso') ?></span>
+                </div>
                 <h1 class="el-title"><?= e($lesson['title'] ?? 'Aula') ?></h1>
-                <p class="el-subtitle"><?= e($lesson['description'] ?? 'Acompanhe a aula em video e use os materiais de apoio para consolidar o conteudo.') ?></p>
+                <p class="el-subtitle"><strong>Descricao da aula:</strong> <?= e($lesson['description'] ?? 'Acompanhe a aula em video e use os materiais de apoio para consolidar o conteudo.') ?></p>
             </div>
             <div class="el-actions">
                 <?php if ($previousLessonId): ?>

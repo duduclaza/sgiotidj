@@ -39,8 +39,12 @@ $statCards = [
                 <div>
                     <p class="el-eyebrow">Campus digital</p>
                     <?php if ($nextLesson): ?>
-                        <h2 class="el-title"><?= e($nextLesson['title']) ?></h2>
-                        <p class="el-subtitle">Continue em <?= e($nextLesson['course_title']) ?> de onde voce parou.</p>
+                        <div class="el-badges" style="margin-bottom:12px">
+                            <span class="el-badge blue">Continuar aula</span>
+                            <span class="el-badge green">Curso: <?= e($nextLesson['course_title']) ?></span>
+                        </div>
+                        <h2 class="el-title">Aula: <?= e($nextLesson['title']) ?></h2>
+                        <p class="el-subtitle">Retome esta aula dentro do curso <?= e($nextLesson['course_title']) ?>.</p>
                         <div class="el-actions" style="margin-top:18px">
                             <a href="/elearning/colaborador/materiais/<?= (int) $nextLesson['id'] ?>/assistir" class="el-btn el-btn-primary"><i class="ph ph-play-circle"></i> Continuar aula</a>
                             <a href="/elearning/colaborador/cursos/<?= (int) ($nextLesson['course_id'] ?? 0) ?>" class="el-btn el-btn-secondary">Ver curso</a>
