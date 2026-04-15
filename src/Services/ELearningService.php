@@ -1472,6 +1472,76 @@ class ELearningService
         $this->logAction($actorId, 'teacher', 'enrollment.created', 'course', $courseId, ['student_id' => $studentId]);
     }
 
+    public function sendStudentReminder(int $teacherId, int $studentId, int $courseId, string $message = ''): array
+    {
+        $this->assertSchemaReady();
+
+        if ($studentId <= 0 || $courseId <= 0) {
+            throw new RuntimeException('Aluno ou curso invalido para envio do lembrete.');
+        }
+
+        $isSuperAdmin = PermissionService::isSuperAdmin($teacherId);
+        $teacherFilter = $isSuperAdmin ? '1=1' : 'c.teacher_id = ?';
+        $params = [$studentId, $courseId];
+        if (!$isSuperAdmin) {
+            $params[] = $teacherId;
+        }
+
+        $enrollment = $this->fetchOne(
+            "SELECT e.id AS enrollment_id,
+                    e.student_id,
+                    u.name AS student_name,
+                    c.id AS course_id,
+                    c.title AS course_title
+             FROM elearning_enrollments e
+             INNER JOIN elearning_courses c ON c.id = e.course_id
+             INNER JOIN users u ON u.id = e.student_id
+             WHERE e.student_id = ?
+               AND e.course_id = ?
+               AND {$teacherFilter}
+               AND e.deleted_at IS NULL
+               AND c.deleted_at IS NULL",
+            $params
+        );
+
+        if (!$enrollment) {
+            throw new RuntimeException('Aluno nao encontrado nesta turma.');
+        }
+
+        $message = trim($message);
+        if ($message === '') {
+            $message = sprintf(
+                'Voce esta com baixo progresso em %s. Assista a primeira aula ainda esta semana para retomar o ritmo.',
+                (string) ($enrollment['course_title'] ?? 'este curso')
+            );
+        }
+
+        $this->db->prepare(
+            "INSERT INTO notifications
+                (user_id, title, message, type, related_type, related_id, created_at)
+             VALUES
+                (:user_id, :title, :message, 'info', 'elearning_colaborador', :related_id, NOW())"
+        )->execute([
+            ':user_id' => $studentId,
+            ':title' => 'Lembrete de estudo',
+            ':message' => $message,
+            ':related_id' => $courseId,
+        ]);
+
+        $notificationId = (int) $this->db->lastInsertId();
+        $this->logAction($teacherId, 'teacher', 'student.reminder.sent', 'course', $courseId, [
+            'student_id' => $studentId,
+            'notification_id' => $notificationId,
+        ]);
+
+        return [
+            'notification_id' => $notificationId,
+            'student_name' => (string) ($enrollment['student_name'] ?? 'Aluno'),
+            'course_title' => (string) ($enrollment['course_title'] ?? 'Curso'),
+            'message' => $message,
+        ];
+    }
+
     public function selfEnroll(int $courseId, int $studentId): void
     {
         $this->assertSchemaReady();
@@ -3191,6 +3261,10 @@ class ELearningService
                 (string) ($student['student_name'] ?? 'Aluno'),
                 (string) ($student['course_title'] ?? 'curso')
             );
+            $student['reminder_message'] = sprintf(
+                'Voce precisa revisar %s antes da proxima tentativa. Assista novamente as aulas-chave e fale com o professor para tirar duvidas.',
+                (string) ($student['course_title'] ?? 'este curso')
+            );
         } elseif ($progress < 35 && $submittedAttempts === 0) {
             $student['risk_level'] = 'warning';
             $student['risk_label'] = 'Pouco engajamento';
@@ -3199,6 +3273,10 @@ class ELearningService
                 (string) ($student['student_name'] ?? 'Aluno'),
                 (string) ($student['course_title'] ?? 'curso')
             );
+            $student['reminder_message'] = sprintf(
+                'Voce esta com baixo progresso em %s. Assista a primeira aula ainda esta semana para retomar o ritmo.',
+                (string) ($student['course_title'] ?? 'este curso')
+            );
         } elseif ($status === 'awaiting_exam') {
             $student['risk_level'] = 'attention';
             $student['risk_label'] = 'Pronto para prova';
@@ -3206,6 +3284,10 @@ class ELearningService
                 '%s concluiu as aulas de %s e esta aguardando prova. Envie um checklist rapido antes da avaliacao.',
                 (string) ($student['student_name'] ?? 'Aluno'),
                 (string) ($student['course_title'] ?? 'curso')
+            );
+            $student['reminder_message'] = sprintf(
+                'Voce concluiu as aulas de %s. Revise o conteudo antes da avaliacao e procure o professor se tiver duvidas.',
+                (string) ($student['course_title'] ?? 'este curso')
             );
         } elseif ($bestScore !== null && $bestScore < self::PASSING_SCORE) {
             $student['risk_level'] = 'warning';
@@ -3216,6 +3298,10 @@ class ELearningService
                 $student['score_label'],
                 (string) ($student['course_title'] ?? 'curso')
             );
+            $student['reminder_message'] = sprintf(
+                'Seu aproveitamento em %s ficou abaixo do esperado. Revise as aulas indicadas antes da proxima tentativa.',
+                (string) ($student['course_title'] ?? 'este curso')
+            );
         } elseif (in_array($status, ['approved', 'completed'], true)) {
             $student['risk_level'] = 'success';
             $student['risk_label'] = 'Bom resultado';
@@ -3224,6 +3310,10 @@ class ELearningService
                 (string) ($student['student_name'] ?? 'Aluno'),
                 (string) ($student['course_title'] ?? 'curso')
             );
+            $student['reminder_message'] = sprintf(
+                'Parabens pelo avanco em %s. Continue acompanhando os materiais para manter o aprendizado em dia.',
+                (string) ($student['course_title'] ?? 'este curso')
+            );
         } else {
             $student['risk_level'] = 'neutral';
             $student['risk_label'] = 'Acompanhar';
@@ -3231,6 +3321,10 @@ class ELearningService
                 '%s esta cursando %s. Acompanhe o ritmo e incentive a continuidade.',
                 (string) ($student['student_name'] ?? 'Aluno'),
                 (string) ($student['course_title'] ?? 'curso')
+            );
+            $student['reminder_message'] = sprintf(
+                'Continue avancando em %s. Separe alguns minutos esta semana para assistir a proxima aula.',
+                (string) ($student['course_title'] ?? 'este curso')
             );
         }
 

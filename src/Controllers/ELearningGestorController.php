@@ -319,6 +319,29 @@ class ELearningGestorController
         }
     }
 
+    public function enviarLembreteAluno(): void
+    {
+        $this->requireProfessor();
+        $this->authorizeEdit();
+
+        try {
+            $result = $this->service->sendStudentReminder(
+                $this->userId(),
+                (int) ($_POST['student_id'] ?? 0),
+                (int) ($_POST['course_id'] ?? 0),
+                (string) ($_POST['message'] ?? '')
+            );
+
+            $this->json([
+                'success' => true,
+                'message' => 'Lembrete enviado para ' . ($result['student_name'] ?? 'o aluno') . '.',
+                'data' => $result,
+            ]);
+        } catch (\Throwable $exception) {
+            $this->jsonError($exception);
+        }
+    }
+
     public function saveDiplomaConfig(): void
     {
         $this->requireProfessor();

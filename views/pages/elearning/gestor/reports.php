@@ -150,18 +150,20 @@ $chartStudents = array_slice($students, 0, 8);
                                 <th>Nota</th>
                                 <th>Status</th>
                                 <th>Orientacao</th>
+                                <th>Acao</th>
                             </tr>
                         </thead>
                         <tbody id="studentReportBody">
                             <?php if (!$students): ?>
                                 <tr data-empty-row>
-                                    <td colspan="6" style="text-align:center;color:var(--el-muted)">Nenhum aluno matriculado para acompanhamento.</td>
+                                    <td colspan="7" style="text-align:center;color:var(--el-muted)">Nenhum aluno matriculado para acompanhamento.</td>
                                 </tr>
                             <?php endif; ?>
                             <?php foreach ($students as $student): ?>
                                 <?php
                                 $riskTone = $riskBadge((string) ($student['risk_level'] ?? 'neutral'));
                                 $progress = min(100, max(0, (float) ($student['progress_percent'] ?? 0)));
+                                $reminderMessage = (string) ($student['reminder_message'] ?? $student['insight'] ?? 'Continue acompanhando o curso esta semana.');
                                 ?>
                                 <tr data-report-row>
                                     <td>
@@ -178,10 +180,22 @@ $chartStudents = array_slice($students, 0, 8);
                                     <td><?= e($student['score_label'] ?? 'Sem prova') ?></td>
                                     <td><span class="el-badge <?= e($riskTone) ?>"><?= e($student['status_label'] ?? 'Cursando') ?></span></td>
                                     <td style="min-width:280px"><?= e($student['insight'] ?? 'Acompanhar evolucao do aluno.') ?></td>
+                                    <td>
+                                        <button
+                                            type="button"
+                                            class="el-btn el-btn-sm el-btn-primary"
+                                            data-reminder-button
+                                            data-student-id="<?= (int) ($student['student_id'] ?? 0) ?>"
+                                            data-course-id="<?= (int) ($student['course_id'] ?? 0) ?>"
+                                            data-message="<?= e($reminderMessage) ?>"
+                                        >
+                                            Enviar lembrete
+                                        </button>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                             <tr id="studentReportNoResults" style="display:none">
-                                <td colspan="6" style="text-align:center;color:var(--el-muted)">Nenhum aluno encontrado para essa pesquisa.</td>
+                                <td colspan="7" style="text-align:center;color:var(--el-muted)">Nenhum aluno encontrado para essa pesquisa.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -259,7 +273,10 @@ $chartStudents = array_slice($students, 0, 8);
                             <div class="el-empty">Nenhum aluno em alerta no momento.</div>
                         <?php endif; ?>
                         <?php foreach ($insights as $student): ?>
-                            <?php $riskTone = $riskBadge((string) ($student['risk_level'] ?? 'neutral')); ?>
+                            <?php
+                            $riskTone = $riskBadge((string) ($student['risk_level'] ?? 'neutral'));
+                            $reminderMessage = (string) ($student['reminder_message'] ?? $student['insight'] ?? 'Continue acompanhando o curso esta semana.');
+                            ?>
                             <article class="el-list-item" style="align-items:flex-start">
                                 <span class="el-icon <?= e($riskTone) ?>"><i class="ph ph-lightbulb"></i></span>
                                 <div class="el-list-main">
@@ -268,6 +285,17 @@ $chartStudents = array_slice($students, 0, 8);
                                     </div>
                                     <h3 class="el-list-title" style="margin-top:8px"><?= e($student['student_name'] ?? 'Aluno') ?></h3>
                                     <p class="el-list-subtitle"><?= e($student['insight'] ?? '') ?></p>
+                                    <button
+                                        type="button"
+                                        class="el-btn el-btn-sm el-btn-primary"
+                                        style="margin-top:12px"
+                                        data-reminder-button
+                                        data-student-id="<?= (int) ($student['student_id'] ?? 0) ?>"
+                                        data-course-id="<?= (int) ($student['course_id'] ?? 0) ?>"
+                                        data-message="<?= e($reminderMessage) ?>"
+                                    >
+                                        Enviar lembrete
+                                    </button>
                                 </div>
                             </article>
                         <?php endforeach; ?>
@@ -381,6 +409,73 @@ $chartStudents = array_slice($students, 0, 8);
 
         pagination.appendChild(makePageButton('Proxima', Math.min(totalPages, currentPage + 1), currentPage === totalPages));
     }
+
+    function showFeedback(message, type = 'info') {
+        if (typeof window.showProfessorToast === 'function') {
+            window.showProfessorToast(message, type);
+            return;
+        }
+
+        if (type === 'error') {
+            alert(message);
+        }
+    }
+
+    function updateMatchingReminderButtons(studentId, courseId, label, disabled) {
+        document
+            .querySelectorAll(`[data-reminder-button][data-student-id="${studentId}"][data-course-id="${courseId}"]`)
+            .forEach((button) => {
+                button.disabled = disabled;
+                button.textContent = label;
+            });
+    }
+
+    async function sendStudentReminder(button) {
+        const studentId = button.dataset.studentId || '';
+        const courseId = button.dataset.courseId || '';
+        const originalLabel = button.dataset.originalLabel || button.textContent.trim() || 'Enviar lembrete';
+        button.dataset.originalLabel = originalLabel;
+
+        if (!studentId || !courseId) {
+            showFeedback('Nao foi possivel identificar o aluno ou curso.', 'error');
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = 'Enviando...';
+
+        const formData = new FormData();
+        formData.append('student_id', studentId);
+        formData.append('course_id', courseId);
+        formData.append('message', button.dataset.message || '');
+
+        try {
+            const response = await fetch('/elearning/gestor/lembretes/enviar', {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin',
+            });
+            const result = await response.json().catch(() => ({
+                success: false,
+                message: 'Resposta invalida do servidor.',
+            }));
+
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || 'Nao foi possivel enviar o lembrete.');
+            }
+
+            updateMatchingReminderButtons(studentId, courseId, 'Enviado', true);
+            showFeedback(result.message || 'Lembrete enviado com sucesso.', 'success');
+        } catch (error) {
+            button.disabled = false;
+            button.textContent = originalLabel;
+            showFeedback(error.message || 'Nao foi possivel enviar o lembrete.', 'error');
+        }
+    }
+
+    document.querySelectorAll('[data-reminder-button]').forEach((button) => {
+        button.addEventListener('click', () => sendStudentReminder(button));
+    });
 
     searchInput?.addEventListener('input', () => {
         currentPage = 1;

@@ -1077,6 +1077,11 @@ $current = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/',
     
     // Determinar URL de destino baseada no tipo de notificação
     function getNotificationTargetUrl(type, relatedType, relatedId) {
+      if (relatedType === 'elearning_colaborador') {
+        const courseId = Number(relatedId || 0);
+        return courseId > 0 ? `/elearning/colaborador/cursos/${courseId}` : '/elearning/colaborador';
+      }
+
       const navigationMap = {
         'access_request': '/admin/access-requests',
         'garantia': '/garantias',

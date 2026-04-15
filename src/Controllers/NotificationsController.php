@@ -191,6 +191,10 @@ class NotificationsController
                 case 'toner_defeito':
                     $redirectUrl = '/toners/defeitos';
                     break;
+                case 'elearning_colaborador':
+                    $courseId = (int) ($notification['related_id'] ?? 0);
+                    $redirectUrl = $courseId > 0 ? '/elearning/colaborador/cursos/' . $courseId : '/elearning/colaborador';
+                    break;
                 default:
                     $redirectUrl = '/dashboard';
                     break;
