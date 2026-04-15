@@ -755,17 +755,20 @@ function showSuccessOverlay(msg) {
   msgEl.textContent = msg || 'Registro de toner com defeito realizado com sucesso!';
   
   overlay.classList.remove('hidden');
+  overlay.classList.remove('opacity-0');
+  overlay.classList.add('opacity-100');
   document.body.style.overflow = 'hidden';
 
   // Trigger progress bar
   const progress = document.getElementById('successProgress');
   if (progress) {
+    progress.style.width = '0%';
     setTimeout(() => { progress.style.width = '100%'; }, 50);
   }
 
   // Ocultar após 3 segundos e recarregar
   setTimeout(() => {
-    overlay.classList.add('opacity-0');
+    overlay.classList.replace('opacity-100', 'opacity-0');
     setTimeout(() => {
       location.reload();
     }, 500);
@@ -828,37 +831,6 @@ function showSuccessOverlay(msg) {
                             class="block w-full rounded-lg border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-950 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 resize-none transition-all"
                             placeholder="Descreva detalhadamente a análise realizada..."
                             required></textarea>
-                    </div>
-
-<style>
-@keyframes progress {
-  from { width: 0%; }
-  to { width: 100%; }
-}
-</style>
-
-<!-- Sucesso Overlay (Centrado e Bonito) -->
-<div id="successOverlay" class="fixed inset-0 z-[1000000] hidden flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-all duration-500">
-  <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-10 flex flex-col items-center gap-6 max-w-sm w-full mx-4 border border-green-100 dark:border-green-900/30 transform transition-all animate-in zoom-in duration-300">
-    
-    <div class="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center relative">
-       <div class="absolute inset-0 bg-green-500/20 rounded-full animate-ping"></div>
-       <svg class="w-12 h-12 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-       </svg>
-    </div>
-
-    <div class="text-center">
-      <h3 class="text-2xl font-black text-slate-800 dark:text-white mb-2 leading-tight">Sucesso!</h3>
-      <p id="successOverlayMsg" class="text-green-600 dark:text-green-400 font-bold text-lg"></p>
-      <p class="text-slate-400 dark:text-slate-500 text-sm mt-4 font-medium italic">O histórico está sendo atualizado...</p>
-    </div>
-
-    <div class="w-full h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-       <div id="successProgress" class="h-full bg-green-500" style="width: 0%; transition: width 2.5s linear;"></div>
-    </div>
-  </div>
-</div>
                     </div>
                     
                     <div id="devolutivaUploads">
@@ -1114,3 +1086,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 </script>
+
+<!-- Sucesso Overlay (Centrado e Bonito) -->
+<div id="successOverlay" class="fixed inset-0 z-[1000000] hidden flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-all duration-500 opacity-100">
+  <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-10 flex flex-col items-center gap-6 max-w-sm w-full mx-4 border border-green-100 dark:border-green-900/30 transform transition-all animate-in zoom-in duration-300">
+    
+    <div class="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center relative">
+       <div class="absolute inset-0 bg-green-500/20 rounded-full animate-ping"></div>
+       <svg class="w-12 h-12 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+       </svg>
+    </div>
+
+    <div class="text-center">
+      <h3 class="text-2xl font-black text-slate-800 dark:text-white mb-2 leading-tight">Sucesso!</h3>
+      <p id="successOverlayMsg" class="text-green-600 dark:text-green-400 font-bold text-lg"></p>
+      <p class="text-slate-400 dark:text-slate-500 text-sm mt-4 font-medium italic">O histórico está sendo atualizado...</p>
+    </div>
+
+    <div class="w-full h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+       <div id="successProgress" class="h-full bg-green-500" style="width: 0%; transition: width 2.5s linear;"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes progress {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+</style>
