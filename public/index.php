@@ -3,6 +3,15 @@
 date_default_timezone_set('America/Sao_Paulo');
 // Renomeia a sessão para invalidar cookies antigos que causam o ERR_TOO_MANY_REDIRECTS
 session_name('SGQ_SESSAO_V2');
+// Hardening session cookies for better browser compatibility and security
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'domain' => '',
+    'secure' => true, // Site is on HTTPS as per .env APP_URL
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
 session_start();
 
 // No-cache headers

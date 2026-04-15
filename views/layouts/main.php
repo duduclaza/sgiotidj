@@ -24,11 +24,11 @@ $userRole = $_SESSION['user_role'] ?? 'guest';
 $bgImage = 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop'; // Default
 
 if ($userRole === 'super_admin' || $userRole === 'admin') {
-    $bgImage = 'file:///C:/Users/djkyk/.gemini/antigravity/brain/807ab793-0c7d-4d15-b4e1-8ad010530f9d/neural_admin_bg_1774541701240.png';
+    $bgImage = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop'; 
 } elseif ($userRole === 'tecnico' || $userRole === 'producao') {
-    $bgImage = 'file:///C:/Users/djkyk/.gemini/antigravity/brain/807ab793-0c7d-4d15-b4e1-8ad010530f9d/neural_operation_bg_1774541723584.png';
+    $bgImage = 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=2070&auto=format&fit=crop';
 } else {
-    $bgImage = 'file:///C:/Users/djkyk/.gemini/antigravity/brain/807ab793-0c7d-4d15-b4e1-8ad010530f9d/auth_bg_1774540185692.png';
+    $bgImage = 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069&auto=format&fit=crop';
 }
 ?>
 <!doctype html>
