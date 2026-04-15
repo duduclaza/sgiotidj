@@ -19,6 +19,9 @@ $isActiveNav = static function (array $item) use ($requestPath): bool {
 
     return false;
 };
+
+$elearningStylePath = __DIR__ . '/../../public/assets/elearning-modern.css';
+$elearningAssetVersion = file_exists($elearningStylePath) ? filemtime($elearningStylePath) : time();
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -31,6 +34,7 @@ $isActiveNav = static function (array $item) use ($requestPath): bool {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="/assets/elearning-modern.css?v=<?= urlencode($elearningAssetVersion) ?>">
     <script>
         tailwind.config = {
             theme: {
@@ -46,57 +50,46 @@ $isActiveNav = static function (array $item) use ($requestPath): bool {
         };
     </script>
     <style>
-        body { font-family: 'Outfit', sans-serif; }
-        .el-noise::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            opacity: .14;
-            background-image:
-                radial-gradient(circle at 14% 20%, rgba(56, 189, 248, .12), transparent 24%),
-                radial-gradient(circle at 84% 16%, rgba(45, 212, 191, .10), transparent 20%),
-                radial-gradient(circle at 52% 82%, rgba(148, 163, 184, .08), transparent 28%);
-        }
+        body { font-family: 'Outfit', sans-serif; background: #f5f5f7; }
     </style>
 </head>
-<body class="el-noise min-h-screen bg-[#020617] text-slate-100 antialiased">
-    <div class="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(15,23,42,0.96),_rgba(2,6,23,1)_44%),radial-gradient(circle_at_top_right,_rgba(8,47,73,0.42),_transparent_24%),linear-gradient(180deg,_#020617,_#020617)]">
-        <header class="sticky top-0 z-40 border-b border-white/10 bg-slate-950/75 backdrop-blur-2xl">
+<body class="min-h-screen bg-[#f5f5f7] text-slate-900 antialiased">
+    <div class="min-h-screen bg-[#f5f5f7]">
+        <header class="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur-2xl">
             <div class="mx-auto flex max-w-[92rem] flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
                 <a href="/elearning/colaborador" class="flex items-center gap-3">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,_#e0f2fe,_#7dd3fc_58%,_#99f6e4)] text-slate-950 shadow-soft">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-[#e8f2ff] text-[#007aff] shadow-sm">
                         <i class="ph-fill ph-graduation-cap text-2xl"></i>
                     </div>
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.34em] text-slate-400">SGI</p>
-                        <h1 class="text-lg font-black tracking-tight text-white">E-Learning Aluno</h1>
+                        <p class="text-xs font-semibold text-slate-500">SGI</p>
+                        <h1 class="text-lg font-black text-slate-950">E-Learning Aluno</h1>
                     </div>
                 </a>
 
-                <nav class="flex flex-wrap items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] p-2">
+                <nav class="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 p-1.5">
                     <?php foreach ($navItems as $item): ?>
                         <?php $active = $isActiveNav($item); ?>
-                        <a href="<?= e($item['href']) ?>" class="rounded-full px-4 py-2 text-sm font-semibold transition <?= $active ? 'bg-white text-slate-950 shadow-soft' : 'text-slate-200 hover:bg-white/10 hover:text-white' ?>">
+                        <a href="<?= e($item['href']) ?>" class="rounded-lg px-4 py-2 text-sm font-semibold transition <?= $active ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-600 hover:bg-white hover:text-slate-950' ?>">
                             <?= e($item['label']) ?>
                         </a>
                     <?php endforeach; ?>
-                    <a href="/inicio" class="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/10 hover:text-white">Voltar ao SGI</a>
+                    <a href="/inicio" class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:text-slate-950">Voltar ao SGI</a>
                 </nav>
 
                 <div class="flex items-center gap-3">
                     <div class="hidden text-right sm:block">
-                        <p class="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200/70">Aluno</p>
-                        <p class="text-sm font-bold text-white"><?= e($_SESSION['user_name'] ?? 'Usuario') ?></p>
+                        <p class="text-xs font-semibold text-slate-500">Aluno</p>
+                        <p class="text-sm font-bold text-slate-950"><?= e($_SESSION['user_name'] ?? 'Usuario') ?></p>
                     </div>
-                    <div class="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-sm font-black text-white">
+                    <div class="flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 bg-white text-sm font-black text-slate-900 shadow-sm">
                         <?= strtoupper(substr($_SESSION['user_name'] ?? 'U', 0, 1)) ?>
                     </div>
                 </div>
             </div>
         </header>
 
-        <main class="mx-auto max-w-[92rem] px-4 py-8 sm:px-6 lg:px-8">
+        <main class="mx-auto max-w-[92rem] px-4 py-6 sm:px-6 lg:px-8">
             <?php include $viewFile; ?>
         </main>
     </div>
