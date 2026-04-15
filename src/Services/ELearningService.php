@@ -204,6 +204,8 @@ class ELearningService
             return [
                 'schema_ready' => false,
                 'courses' => [],
+                'students' => [],
+                'insights' => [],
                 'storage' => $storage,
             ];
         }
@@ -239,9 +241,56 @@ class ELearningService
         }
         unset($course);
 
+        $students = $this->fetchAll(
+            "SELECT e.id AS enrollment_id,
+                    e.student_id,
+                    u.name AS student_name,
+                    u.email AS student_email,
+                    c.id AS course_id,
+                    c.title AS course_title,
+                    c.category AS course_category,
+                    e.status AS enrollment_status,
+                    e.progress_percent,
+                    e.updated_at AS enrollment_updated_at,
+                    COUNT(DISTINCT l.id) AS total_lessons,
+                    COUNT(DISTINCT CASE WHEN sp.is_completed = 1 THEN sp.lesson_id END) AS completed_lessons,
+                    MAX(CASE WHEN a.status IN ('approved','failed') THEN a.score_percent ELSE NULL END) AS best_score,
+                    COUNT(DISTINCT CASE WHEN a.status IN ('approved','failed') THEN a.id END) AS submitted_attempts,
+                    COUNT(DISTINCT CASE WHEN a.status = 'approved' THEN a.id END) AS approved_attempts,
+                    COUNT(DISTINCT CASE WHEN a.status = 'failed' THEN a.id END) AS failed_attempts,
+                    MAX(CASE WHEN a.status IN ('approved','failed') THEN a.finished_at ELSE NULL END) AS last_attempt_at
+             FROM elearning_enrollments e
+             INNER JOIN elearning_courses c ON c.id = e.course_id
+             INNER JOIN users u ON u.id = e.student_id
+             LEFT JOIN elearning_lessons l ON l.course_id = c.id AND l.deleted_at IS NULL
+             LEFT JOIN elearning_student_progress sp
+                ON sp.lesson_id = l.id AND sp.student_id = e.student_id
+             LEFT JOIN elearning_exam_attempts a
+                ON a.course_id = c.id AND a.student_id = e.student_id
+             WHERE {$teacherFilter} AND c.deleted_at IS NULL AND e.deleted_at IS NULL
+             GROUP BY e.id
+             ORDER BY
+                CASE
+                    WHEN e.status = 'failed' THEN 0
+                    WHEN COUNT(DISTINCT CASE WHEN a.status = 'failed' THEN a.id END) > 0 THEN 1
+                    WHEN e.progress_percent < 40 THEN 2
+                    ELSE 3
+                END,
+                u.name ASC,
+                c.title ASC",
+            $teacherParams
+        );
+
+        foreach ($students as &$student) {
+            $student = $this->formatStudentReportRow($student);
+        }
+        unset($student);
+
         return [
             'schema_ready' => true,
             'courses' => $courses,
+            'students' => $students,
+            'insights' => $this->buildStudentReportInsights($students),
             'storage' => $storage,
         ];
     }
@@ -3108,6 +3157,99 @@ class ELearningService
     {
         $course['cover_url'] = '/elearning/gestor/cursos/thumbnail?id=' . (int) $course['id'];
         return $course;
+    }
+
+    private function formatStudentReportRow(array $student): array
+    {
+        $progress = round((float) ($student['progress_percent'] ?? 0), 2);
+        $bestScore = $student['best_score'] !== null ? round((float) $student['best_score'], 2) : null;
+        $failedAttempts = (int) ($student['failed_attempts'] ?? 0);
+        $approvedAttempts = (int) ($student['approved_attempts'] ?? 0);
+        $submittedAttempts = (int) ($student['submitted_attempts'] ?? 0);
+        $status = (string) ($student['enrollment_status'] ?? 'in_progress');
+        $totalLessons = (int) ($student['total_lessons'] ?? 0);
+        $completedLessons = (int) ($student['completed_lessons'] ?? 0);
+
+        $student['progress_percent'] = $progress;
+        $student['best_score'] = $bestScore;
+        $student['score_label'] = $bestScore === null ? 'Sem prova' : number_format($bestScore, 0) . '%';
+        $student['lessons_label'] = $totalLessons > 0 ? "{$completedLessons}/{$totalLessons}" : '0/0';
+        $student['performance_percent'] = $bestScore !== null ? $bestScore : $progress;
+        $student['status_label'] = match ($status) {
+            'approved' => 'Aprovado',
+            'completed' => 'Concluido',
+            'awaiting_exam' => 'Aguardando prova',
+            'failed' => 'Reprovado',
+            default => 'Cursando',
+        };
+
+        if ($status === 'failed' || ($failedAttempts > 0 && $approvedAttempts === 0)) {
+            $student['risk_level'] = 'critical';
+            $student['risk_label'] = 'Orientar agora';
+            $student['insight'] = sprintf(
+                '%s foi reprovado em %s. Revise os pontos da prova, indique as aulas-chave e combine uma nova tentativa assistida.',
+                (string) ($student['student_name'] ?? 'Aluno'),
+                (string) ($student['course_title'] ?? 'curso')
+            );
+        } elseif ($progress < 35 && $submittedAttempts === 0) {
+            $student['risk_level'] = 'warning';
+            $student['risk_label'] = 'Pouco engajamento';
+            $student['insight'] = sprintf(
+                '%s esta com baixo progresso em %s. Envie um lembrete e sugira assistir a primeira aula ainda esta semana.',
+                (string) ($student['student_name'] ?? 'Aluno'),
+                (string) ($student['course_title'] ?? 'curso')
+            );
+        } elseif ($status === 'awaiting_exam') {
+            $student['risk_level'] = 'attention';
+            $student['risk_label'] = 'Pronto para prova';
+            $student['insight'] = sprintf(
+                '%s concluiu as aulas de %s e esta aguardando prova. Envie um checklist rapido antes da avaliacao.',
+                (string) ($student['student_name'] ?? 'Aluno'),
+                (string) ($student['course_title'] ?? 'curso')
+            );
+        } elseif ($bestScore !== null && $bestScore < self::PASSING_SCORE) {
+            $student['risk_level'] = 'warning';
+            $student['risk_label'] = 'Nota baixa';
+            $student['insight'] = sprintf(
+                '%s teve aproveitamento de %s em %s. Recomende revisao direcionada antes da proxima tentativa.',
+                (string) ($student['student_name'] ?? 'Aluno'),
+                $student['score_label'],
+                (string) ($student['course_title'] ?? 'curso')
+            );
+        } elseif (in_array($status, ['approved', 'completed'], true)) {
+            $student['risk_level'] = 'success';
+            $student['risk_label'] = 'Bom resultado';
+            $student['insight'] = sprintf(
+                '%s concluiu %s. Use como referencia positiva para a turma.',
+                (string) ($student['student_name'] ?? 'Aluno'),
+                (string) ($student['course_title'] ?? 'curso')
+            );
+        } else {
+            $student['risk_level'] = 'neutral';
+            $student['risk_label'] = 'Acompanhar';
+            $student['insight'] = sprintf(
+                '%s esta cursando %s. Acompanhe o ritmo e incentive a continuidade.',
+                (string) ($student['student_name'] ?? 'Aluno'),
+                (string) ($student['course_title'] ?? 'curso')
+            );
+        }
+
+        return $student;
+    }
+
+    private function buildStudentReportInsights(array $students): array
+    {
+        $priority = array_values(array_filter(
+            $students,
+            static fn(array $student): bool => in_array((string) ($student['risk_level'] ?? ''), ['critical', 'warning', 'attention'], true)
+        ));
+
+        usort($priority, static function (array $a, array $b): int {
+            $weight = ['critical' => 0, 'warning' => 1, 'attention' => 2, 'neutral' => 3, 'success' => 4];
+            return ($weight[(string) ($a['risk_level'] ?? 'neutral')] ?? 3) <=> ($weight[(string) ($b['risk_level'] ?? 'neutral')] ?? 3);
+        });
+
+        return array_slice($priority, 0, 5);
     }
 
     private function listTeacherOptions(): array
