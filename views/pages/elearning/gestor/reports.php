@@ -118,6 +118,28 @@ $chartStudents = array_slice($students, 0, 8);
                     </div>
                 </div>
 
+                <div class="el-list-item" style="margin-bottom:14px">
+                    <div class="el-list-main">
+                        <label for="studentReportSearch" class="el-label">Pesquisar aluno, curso, status ou orientacao</label>
+                        <input
+                            type="search"
+                            id="studentReportSearch"
+                            placeholder="Ex.: Ana Clara, reprovado, aguardando prova..."
+                            autocomplete="off"
+                            style="margin-top:8px"
+                        >
+                    </div>
+                    <div style="min-width:150px">
+                        <label for="studentReportPageSize" class="el-label">Por pagina</label>
+                        <select id="studentReportPageSize" style="margin-top:8px">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="el-table-wrap" style="margin-bottom:20px">
                     <table class="el-table">
                         <thead>
@@ -130,9 +152,9 @@ $chartStudents = array_slice($students, 0, 8);
                                 <th>Orientacao</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="studentReportBody">
                             <?php if (!$students): ?>
-                                <tr>
+                                <tr data-empty-row>
                                     <td colspan="6" style="text-align:center;color:var(--el-muted)">Nenhum aluno matriculado para acompanhamento.</td>
                                 </tr>
                             <?php endif; ?>
@@ -141,7 +163,7 @@ $chartStudents = array_slice($students, 0, 8);
                                 $riskTone = $riskBadge((string) ($student['risk_level'] ?? 'neutral'));
                                 $progress = min(100, max(0, (float) ($student['progress_percent'] ?? 0)));
                                 ?>
-                                <tr>
+                                <tr data-report-row>
                                     <td>
                                         <strong><?= e($student['student_name'] ?? 'Aluno') ?></strong>
                                         <div class="el-muted"><?= e($student['student_email'] ?? '') ?></div>
@@ -158,8 +180,16 @@ $chartStudents = array_slice($students, 0, 8);
                                     <td style="min-width:280px"><?= e($student['insight'] ?? 'Acompanhar evolucao do aluno.') ?></td>
                                 </tr>
                             <?php endforeach; ?>
+                            <tr id="studentReportNoResults" style="display:none">
+                                <td colspan="6" style="text-align:center;color:var(--el-muted)">Nenhum aluno encontrado para essa pesquisa.</td>
+                            </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <div class="el-list-item" style="margin-bottom:24px">
+                    <span id="studentReportSummary" class="el-muted">Carregando alunos...</span>
+                    <div id="studentReportPagination" class="el-actions"></div>
                 </div>
 
                 <div class="el-section-head">
@@ -271,3 +301,97 @@ $chartStudents = array_slice($students, 0, 8);
         </div>
     </div>
 </div>
+
+<script>
+(function () {
+    const searchInput = document.getElementById('studentReportSearch');
+    const pageSizeSelect = document.getElementById('studentReportPageSize');
+    const summary = document.getElementById('studentReportSummary');
+    const pagination = document.getElementById('studentReportPagination');
+    const noResultsRow = document.getElementById('studentReportNoResults');
+    const rows = Array.from(document.querySelectorAll('[data-report-row]'));
+    let currentPage = 1;
+
+    function normalizeText(value) {
+        return String(value || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase();
+    }
+
+    function makePageButton(label, page, disabled = false, active = false) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = label;
+        button.className = 'el-btn el-btn-sm ' + (active ? 'el-btn-primary' : 'el-btn-secondary');
+        button.disabled = disabled;
+        button.addEventListener('click', () => {
+            currentPage = page;
+            renderStudentGrid();
+        });
+        return button;
+    }
+
+    function renderStudentGrid() {
+        if (!summary || !pagination) {
+            return;
+        }
+
+        if (rows.length === 0) {
+            summary.textContent = 'Nenhum aluno matriculado';
+            pagination.innerHTML = '';
+            return;
+        }
+
+        const query = normalizeText(searchInput?.value || '');
+        const pageSize = Math.max(1, Number(pageSizeSelect?.value || 10));
+        const filteredRows = rows.filter((row) => normalizeText(row.textContent).includes(query));
+        const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize));
+        currentPage = Math.min(Math.max(1, currentPage), totalPages);
+
+        rows.forEach((row) => {
+            row.style.display = 'none';
+        });
+
+        const start = (currentPage - 1) * pageSize;
+        const pageRows = filteredRows.slice(start, start + pageSize);
+        pageRows.forEach((row) => {
+            row.style.display = '';
+        });
+
+        if (noResultsRow) {
+            noResultsRow.style.display = filteredRows.length === 0 ? '' : 'none';
+        }
+
+        if (filteredRows.length === 0) {
+            summary.textContent = 'Nenhum aluno encontrado';
+        } else {
+            const end = Math.min(start + pageRows.length, filteredRows.length);
+            summary.textContent = `${start + 1}-${end} de ${filteredRows.length} aluno(s)`;
+        }
+
+        pagination.innerHTML = '';
+        pagination.appendChild(makePageButton('Anterior', Math.max(1, currentPage - 1), currentPage === 1));
+
+        const firstPage = Math.max(1, currentPage - 2);
+        const lastPage = Math.min(totalPages, currentPage + 2);
+        for (let page = firstPage; page <= lastPage; page += 1) {
+            pagination.appendChild(makePageButton(String(page), page, false, page === currentPage));
+        }
+
+        pagination.appendChild(makePageButton('Proxima', Math.min(totalPages, currentPage + 1), currentPage === totalPages));
+    }
+
+    searchInput?.addEventListener('input', () => {
+        currentPage = 1;
+        renderStudentGrid();
+    });
+
+    pageSizeSelect?.addEventListener('change', () => {
+        currentPage = 1;
+        renderStudentGrid();
+    });
+
+    renderStudentGrid();
+})();
+</script>
