@@ -264,8 +264,9 @@ const modulesByCategory = {
     { key: 'calculadora_toners', name: 'Calculadora de Dimensionamento 🧮' }
   ],
   'Educação Corporativa': [
-    { key: 'elearning_gestor',      name: 'E-Learning: Liderança 👔' },
-    { key: 'elearning_colaborador', name: 'E-Learning: Operacional 🎒' }
+    { key: 'elearning_gestor',      name: 'E-Learning: Professor 👨‍🏫' },
+    { key: 'elearning_colaborador', name: 'E-Learning: Aluno 🎓' },
+    { key: 'elearning_relatorios',  name: 'E-Learning: Relatórios 📊' }
   ],
   'Administração Central': [
     { key: 'admin_usuarios', name: 'Gestão de Profissionais 👥' },
@@ -277,11 +278,6 @@ const modulesByCategory = {
     { key: 'email_config', name: 'Servidores de Notificação' }
   ]
 };
-
-modulesByCategory['EducaÃ§Ã£o Corporativa'] = [
-  { key: 'elearning_gestor', name: 'E-Learning: Professor 👨‍🏫' },
-  { key: 'elearning_colaborador', name: 'E-Learning: Aluno 🎓' }
-];
 
 // Flatten modules for legacy support
 const modules = Object.values(modulesByCategory).flat();

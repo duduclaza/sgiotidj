@@ -9,202 +9,347 @@ $schemaReady = (bool) ($data['schema_ready'] ?? false);
 
 $statCards = [
     ['label' => 'Em andamento', 'value' => $stats['in_progress'] ?? 0, 'icon' => 'ph-book-open-text'],
-    ['label' => 'Concluidos', 'value' => $stats['completed'] ?? 0, 'icon' => 'ph-check-circle'],
+    ['label' => 'Concluídos', 'value' => $stats['completed'] ?? 0, 'icon' => 'ph-check-circle'],
     ['label' => 'Provas pendentes', 'value' => $stats['pending_exams'] ?? 0, 'icon' => 'ph-clipboard-text'],
     ['label' => 'Progresso geral', 'value' => ($stats['overall_progress'] ?? 0) . '%', 'icon' => 'ph-chart-line-up'],
 ];
 ?>
 
-<section class="space-y-8">
-    <div class="overflow-hidden rounded-[2.25rem] border border-white/10 bg-[linear-gradient(135deg,_rgba(15,23,42,0.94),_rgba(8,47,73,0.64)_58%,_rgba(13,148,136,0.38))] p-8 shadow-soft sm:p-10">
-        <div class="grid gap-8 xl:grid-cols-[1.15fr,0.85fr]">
-            <div class="space-y-6">
-                <div class="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-[11px] font-black uppercase tracking-[0.32em] text-cyan-50/80">
-                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-300"></span>
-                    Campus digital
-                </div>
-                <div class="space-y-4">
-                    <h2 class="max-w-4xl text-4xl font-black tracking-tight text-white sm:text-5xl">
-                        E-Learning Aluno
-                    </h2>
-                </div>
-                <div class="flex flex-wrap gap-3">
-                    <?php if ($nextLesson): ?>
-                        <a href="/elearning/colaborador/materiais/<?= (int) $nextLesson['id'] ?>/assistir" class="rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]">Continuar aula</a>
-                    <?php endif; ?>
-                    <a href="/elearning/colaborador/historico" class="rounded-full border border-white/20 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10">Ver historico</a>
-                    <a href="/inicio" class="rounded-full border border-white/20 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10">Retornar ao SGI</a>
-                </div>
-            </div>
+<style>
+/* Subtly brutalist / Highly structural design */
+.aluno-container {
+    background-color: #fcfcfc;
+    color: #111;
+    font-family: 'Inter', system-ui, sans-serif;
+    padding: 2rem;
+}
+.aluno-hero {
+    background: #000;
+    color: #fff;
+    border-radius: 0;
+    border: 2px solid #000;
+    box-shadow: 8px 8px 0px #000;
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.aluno-hero:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: 12px 12px 0px #000;
+}
+.aluno-card {
+    background: #fff;
+    border: 2px solid #000;
+    box-shadow: 4px 4px 0px #000;
+    border-radius: 0;
+    transition: all 0.2s;
+}
+.aluno-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px #000;
+}
+.aluno-btn {
+    background: #fff;
+    color: #000;
+    border: 2px solid #000;
+    padding: 10px 20px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    cursor: pointer;
+    box-shadow: 3px 3px 0px #000;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.aluno-btn:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0px #000;
+    background: #000;
+    color: #fff;
+}
+.aluno-btn-primary {
+    background: #000;
+    color: #fff;
+    border: 2px solid #000;
+    padding: 10px 20px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    cursor: pointer;
+    box-shadow: 3px 3px 0px #000;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.aluno-btn-primary:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0px #000;
+    background: #3b82f6; /* Blue hover for primary action */
+    color: #fff;
+    border-color: #3b82f6;
+}
+.aluno-progress-track {
+    height: 12px;
+    background: #f1f5f9;
+    border: 2px solid #000;
+    position: relative;
+    overflow: hidden;
+}
+.aluno-progress-fill {
+    height: 100%;
+    background: #3b82f6;
+    border-right: 2px solid #000;
+    transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.badge-solid {
+    background: #000;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 4px 8px;
+    border: 1px solid #000;
+}
+.badge-outline {
+    background: transparent;
+    color: #000;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 4px 8px;
+    border: 1px solid #000;
+}
+</style>
 
-            <div class="grid gap-4 sm:grid-cols-2">
-                <?php foreach ($statCards as $card): ?>
-                    <article class="rounded-[1.75rem] border border-white/10 bg-slate-950/30 p-5 backdrop-blur-xl">
-                        <div class="flex items-center justify-between">
-                            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-cyan-100">
-                                <i class="ph <?= e($card['icon']) ?> text-xl"></i>
-                            </div>
-                            <span class="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">Aluno</span>
-                        </div>
-                        <p class="mt-5 text-3xl font-black text-white"><?= e((string) $card['value']) ?></p>
-                        <p class="mt-2 text-sm text-slate-200/70"><?= e($card['label']) ?></p>
-                    </article>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    </div>
-
+<div class="aluno-container min-h-screen">
+    
     <?php if (!$schemaReady): ?>
-        <div class="rounded-[1.75rem] border border-amber-400/30 bg-amber-500/10 px-5 py-4 text-sm leading-relaxed text-amber-50">
-            O modulo esta pronto visualmente, mas o schema MariaDB ainda nao foi aplicado neste ambiente.
+        <div class="mb-8 border-l-8 border-red-500 bg-white p-4 shadow-[4px_4px_0px_#000] border-2 border-r-black border-t-black border-b-black lg:col-span-12">
+            <p class="font-black text-red-600 uppercase">Sistema em Manutenção</p>
+            <p class="text-sm font-bold text-gray-800">O front do módulo já está disponível, mas o esquema do banco de dados ainda não foi aplicado.</p>
         </div>
     <?php endif; ?>
 
-    <div class="grid gap-8 xl:grid-cols-[1.4fr,0.9fr]">
-        <div class="space-y-8">
-            <section class="space-y-4">
-                <div class="flex items-center justify-between gap-4">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-100/60">Meus cursos</p>
-                        <h3 class="text-3xl font-black tracking-tight text-white">Cursos matriculados</h3>
-                    </div>
-                    <span class="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-bold uppercase tracking-[0.25em] text-white/70"><?= count($enrolledCourses) ?> ativos</span>
-                </div>
-
-                <div class="grid gap-4">
-                    <?php if (!$enrolledCourses): ?>
-                        <div class="rounded-[1.75rem] border border-dashed border-white/10 bg-white/[0.045] p-8 text-center text-slate-300">Nenhum curso matriculado ainda.</div>
-                    <?php endif; ?>
-
-                    <?php foreach ($enrolledCourses as $course): ?>
-                        <article class="overflow-hidden rounded-[1.9rem] border border-white/10 bg-white/[0.045] shadow-soft backdrop-blur-xl">
-                            <div class="grid gap-0 lg:grid-cols-[220px,1fr]">
-                                <div class="min-h-[180px] bg-slate-900">
-                                    <img src="<?= e($course['cover_url']) ?>" alt="<?= e($course['title']) ?>" class="h-full w-full object-cover">
-                                </div>
-                                <div class="flex flex-col justify-between gap-5 p-6">
-                                    <div class="space-y-3">
-                                        <div class="flex flex-wrap items-center gap-3">
-                                            <span class="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.24em] text-cyan-100"><?= e($course['category'] ?? 'Geral') ?></span>
-                                            <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.24em] text-slate-200"><?= e((string) ($course['enrollment_status'] ?? 'in_progress')) ?></span>
-                                        </div>
-                                        <h4 class="text-2xl font-black tracking-tight text-white"><?= e($course['title']) ?></h4>
-                                        <div class="flex flex-wrap gap-5 text-sm text-slate-300">
-                                            <span>Professor: <strong class="text-white"><?= e($course['teacher_name'] ?? 'A definir') ?></strong></span>
-                                            <span>Carga horaria: <strong class="text-white"><?= (int) ($course['workload_hours'] ?? 0) ?>h</strong></span>
-                                        </div>
-                                    </div>
-
-                                    <div class="space-y-3">
-                                        <div class="flex items-center justify-between text-sm text-slate-300">
-                                            <span>Progresso do curso</span>
-                                            <span class="font-black text-white"><?= number_format((float) ($course['progress_percent'] ?? 0), 0) ?>%</span>
-                                        </div>
-                                        <div class="h-2.5 overflow-hidden rounded-full bg-white/10">
-                                            <div class="h-full rounded-full bg-[linear-gradient(90deg,_#67e8f9,_#99f6e4)]" style="width: <?= min(100, max(0, (float) ($course['progress_percent'] ?? 0))) ?>%"></div>
-                                        </div>
-                                        <div class="flex flex-wrap gap-3 pt-1">
-                                            <a href="/elearning/colaborador/cursos/<?= (int) $course['id'] ?>" class="rounded-full bg-white px-4 py-2 text-sm font-black text-slate-950 transition hover:scale-[1.02]">Abrir curso</a>
-                                            <a href="/elearning/colaborador/cursos/<?= (int) $course['id'] ?>/continuar" class="rounded-full border border-white/10 px-4 py-2 text-sm font-black text-white transition hover:bg-white/10">Continuar</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </article>
-                    <?php endforeach; ?>
-                </div>
-            </section>
-
-            <section class="space-y-4">
+    <!-- HERO SECTION / NEXT LESSON GIGANTE -->
+    <div class="aluno-hero grid grid-cols-1 lg:grid-cols-2 group">
+        <div class="p-10 lg:p-16 flex flex-col justify-center relative z-10">
+            <div class="inline-flex items-center gap-2 mb-6">
+                <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                <span class="text-xs font-black uppercase tracking-widest text-gray-300">Campus Digital</span>
+            </div>
+            
+            <?php if ($nextLesson): ?>
+                <h2 class="text-xl font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-800 pb-2 inline-block">Retomar Estudos</h2>
+                <h1 class="text-4xl lg:text-6xl font-black mb-4 leading-none tracking-tighter text-white group-hover:text-amber-300 transition-colors">
+                    <?= e($nextLesson['title']) ?>
+                </h1>
+                <p class="text-sm text-gray-400 mb-8 max-w-md">De <strong class="text-white"><?= e($nextLesson['course_title']) ?></strong></p>
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.35em] text-emerald-100/60">Disponiveis</p>
-                    <h3 class="text-3xl font-black tracking-tight text-white">Catalogo para matricula</h3>
+                    <a href="/elearning/colaborador/materiais/<?= (int) $nextLesson['id'] ?>/assistir" class="aluno-btn-primary">
+                        <i class="ph-fill ph-play-circle text-xl"></i> Continuar Aula
+                    </a>
                 </div>
-
-                <div class="grid gap-4 md:grid-cols-2">
-                    <?php if (!$availableCourses): ?>
-                        <div class="rounded-[1.75rem] border border-dashed border-white/10 bg-white/[0.045] p-8 text-center text-slate-300 md:col-span-2">Todos os cursos publicados ja estao na sua trilha atual.</div>
-                    <?php endif; ?>
-
-                    <?php foreach ($availableCourses as $course): ?>
-                        <article class="overflow-hidden rounded-[1.9rem] border border-white/10 bg-white/[0.045] shadow-soft backdrop-blur-xl">
-                            <div class="aspect-[16/9] bg-slate-900">
-                                <img src="<?= e($course['cover_url']) ?>" alt="<?= e($course['title']) ?>" class="h-full w-full object-cover">
-                            </div>
-                            <div class="space-y-4 p-5">
-                                <div class="space-y-2">
-                                    <span class="rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.24em] text-emerald-100"><?= e($course['category'] ?? 'Geral') ?></span>
-                                    <h4 class="text-xl font-black tracking-tight text-white"><?= e($course['title']) ?></h4>
-                                    <p class="text-sm leading-relaxed text-slate-300"><?= e($course['description'] ?? 'Curso disponivel para matricula imediata.') ?></p>
-                                </div>
-                                <div class="flex items-center justify-between text-sm text-slate-300">
-                                    <span><?= (int) ($course['workload_hours'] ?? 0) ?>h</span>
-                                    <span><?= e($course['teacher_name'] ?? 'Professor') ?></span>
-                                </div>
-                                <button type="button" class="w-full rounded-full bg-white px-4 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.01]" onclick="enrollCourse(<?= (int) $course['id'] ?>)">Matricular agora</button>
-                            </div>
-                        </article>
-                    <?php endforeach; ?>
+            <?php else: ?>
+                <h1 class="text-4xl lg:text-6xl font-black mb-4 leading-none tracking-tighter text-white">
+                    Minha<br>Jornada
+                </h1>
+                <p class="text-sm text-gray-400 mb-8 max-w-md">Sem pendências imediatas. Explore o catálogo para encontrar novos conhecimentos.</p>
+            <?php endif; ?>
+            
+            <div class="mt-12 flex gap-4">
+                <a href="/elearning/colaborador/historico" class="text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-white transition-colors border-b border-transparent hover:border-white pb-1">Ver histórico completo &rarr;</a>
+            </div>
+        </div>
+        
+        <!-- Decoration / Abstract Image -->
+        <div class="hidden lg:block relative bg-gray-900 border-l-2 border-gray-800">
+            <div class="absolute inset-0 bg-[url('https://placehold.co/800x600?text=LEARN')] bg-cover bg-center mix-blend-overlay opacity-20 filter grayscale transition duration-700 group-hover:grayscale-0 group-hover:opacity-40"></div>
+            <!-- Decorative overlay box -->
+            <div class="absolute bottom-10 right-10 w-40 h-40 border-4 border-dashed border-gray-700 flex items-center justify-center p-4">
+                <div class="text-center">
+                    <div class="text-3xl font-black text-white"><?= $stats['overall_progress'] ?? 0 ?>%</div>
+                    <div class="text-[10px] font-bold uppercase text-gray-500">Global</div>
                 </div>
-            </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- METRICS STRIP -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+        <?php foreach ($statCards as $i => $card): ?>
+            <div class="aluno-card p-4 <?= $i === 3 ? 'bg-amber-300' : 'bg-white' ?>">
+                <div class="flex justify-between items-center mb-4">
+                    <i class="ph <?= e($card['icon']) ?> text-2xl <?= $i === 3 ? 'text-black' : 'text-blue-600' ?>"></i>
+                    <span class="text-[10px] font-black uppercase text-gray-400"><?= sprintf('%02d', $i+1) ?></span>
+                </div>
+                <div class="text-3xl font-black tracking-tighter mb-1"><?= e((string) $card['value']) ?></div>
+                <div class="text-[11px] font-bold uppercase text-gray-800 tracking-wider"><?= e($card['label']) ?></div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+
+    <!-- MAIN CONTENT GRID -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        
+        <!-- LEFT: Trilhas Matriculadas -->
+        <div class="lg:col-span-8 space-y-8">
+            <div class="flex items-center justify-between border-b-4 border-black pb-4">
+                <h3 class="text-2xl font-black uppercase tracking-tighter flex items-center gap-2">
+                    <span class="w-4 h-4 bg-black inline-block"></span> Cursos Ativos
+                </h3>
+                <span class="badge-solid"><?= count($enrolledCourses) ?> Trilhas</span>
+            </div>
+
+            <div class="grid gap-6">
+                <?php if (!$enrolledCourses): ?>
+                    <div class="border-4 border-dashed border-gray-300 p-12 text-center bg-gray-50">
+                        <i class="ph ph-empty text-4xl text-gray-400 mb-2"></i>
+                        <p class="font-bold text-gray-500 uppercase tracking-widest">Nenhuma trilha matriculada ainda.</p>
+                    </div>
+                <?php endif; ?>
+
+                <?php foreach ($enrolledCourses as $course): ?>
+                    <div class="aluno-card p-6 relative overflow-hidden group">
+                        <div class="grid grid-cols-1 sm:grid-cols-[200px,1fr] gap-6 relative z-10">
+                            <!-- Course Cover -->
+                            <div class="aspect-video sm:aspect-square bg-gray-100 border-2 border-black relative overflow-hidden">
+                                <img src="<?= e($course['cover_url']) ?>" alt="Capa" class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition duration-500">
+                                <div class="absolute top-2 right-2 badge-solid"><?= (int) ($course['workload_hours'] ?? 0) ?>H</div>
+                            </div>
+                            
+                            <!-- Course Info -->
+                            <div class="flex flex-col justify-between">
+                                <div>
+                                    <div class="flex gap-2 mb-3 max-w-full overflow-x-auto pb-2">
+                                        <span class="badge-outline whitespace-nowrap"><?= e($course['category'] ?? 'Geral') ?></span>
+                                        <span class="badge-solid whitespace-nowrap"><?= e((string) ($course['enrollment_status'] ?? 'in_progress')) ?></span>
+                                    </div>
+                                    <h4 class="text-xl sm:text-2xl font-black uppercase tracking-tight leading-none mb-1 group-hover:text-blue-600 transition-colors"><?= e($course['title']) ?></h4>
+                                    <p class="text-xs font-bold text-gray-500 mt-2">Prof. <?= e($course['teacher_name'] ?? 'A definir') ?></p>
+                                </div>
+                                
+                                <div class="mt-6">
+                                    <div class="flex justify-between text-[10px] font-black uppercase tracking-widest mb-1">
+                                        <span>Progresso</span>
+                                        <span><?= number_format((float) ($course['progress_percent'] ?? 0), 0) ?>%</span>
+                                    </div>
+                                    <div class="aluno-progress-track mb-4">
+                                        <div class="aluno-progress-fill" style="width: <?= min(100, max(0, (float) ($course['progress_percent'] ?? 0))) ?>%"></div>
+                                    </div>
+                                    
+                                    <div class="flex gap-3">
+                                        <a href="/elearning/colaborador/cursos/<?= (int) $course['id'] ?>/continuar" class="aluno-btn-primary flex-1 justify-center text-[11px]">Continuar</a>
+                                        <a href="/elearning/colaborador/cursos/<?= (int) $course['id'] ?>" class="aluno-btn flex-1 justify-center text-[11px]">Visão Geral</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- DISPONÍVEIS (Catálogo) -->
+            <div class="flex items-center justify-between border-b-4 border-black pb-4 mt-16 pt-8">
+                <h3 class="text-2xl font-black uppercase tracking-tighter flex items-center gap-2">
+                    <span class="w-4 h-4 bg-white border-2 border-black inline-block"></span> Novas Oportunidades
+                </h3>
+            </div>
+
+            <div class="grid gap-6 md:grid-cols-2">
+                <?php if (!$availableCourses): ?>
+                    <div class="border-4 border-dashed border-gray-300 p-8 text-center bg-gray-50 md:col-span-2">
+                        <p class="font-bold text-gray-500 uppercase tracking-widest text-xs">Todos os cursos publicados já estão na sua trilha.</p>
+                    </div>
+                <?php endif; ?>
+
+                <?php foreach ($availableCourses as $course): ?>
+                    <div class="aluno-card bg-white hover:bg-amber-50 group flex flex-col">
+                        <div class="h-32 bg-gray-200 border-b-2 border-black overflow-hidden relative">
+                            <img src="<?= e($course['cover_url']) ?>" alt="Capa" class="w-full h-full object-cover filter grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500">
+                        </div>
+                        <div class="p-5 flex flex-col flex-1">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="badge-outline"><?= e($course['category'] ?? 'Geral') ?></span>
+                                <span class="text-xs font-black"><?= (int) ($course['workload_hours'] ?? 0) ?>h</span>
+                            </div>
+                            <h4 class="text-lg font-black uppercase tracking-tight leading-tight mb-2 flex-grow">
+                                <?= e($course['title']) ?>
+                            </h4>
+                            <p class="text-[10px] font-bold text-gray-500 uppercase truncate mb-4">Prof. <?= e($course['teacher_name'] ?? 'Padrão') ?></p>
+                            
+                            <button type="button" class="aluno-btn w-full justify-center text-xs" onclick="enrollCourse(<?= (int) $course['id'] ?>)">
+                                Matricular agora
+                            </button>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
         </div>
 
-        <aside class="space-y-6">
-            <section class="rounded-[1.9rem] border border-white/10 bg-white/[0.045] p-6 shadow-soft backdrop-blur-xl">
-                <p class="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-100/60">Proxima acao</p>
-                <h3 class="mt-3 text-2xl font-black tracking-tight text-white">Sua proxima aula</h3>
-                <?php if ($nextLesson): ?>
-                    <p class="mt-3 text-sm leading-relaxed text-slate-300">Retome <strong class="text-white"><?= e($nextLesson['title']) ?></strong> do curso <strong class="text-white"><?= e($nextLesson['course_title']) ?></strong>.</p>
-                    <a href="/elearning/colaborador/materiais/<?= (int) $nextLesson['id'] ?>/assistir" class="mt-5 inline-flex rounded-full bg-white px-4 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]">Abrir aula</a>
-                <?php else: ?>
-                    <p class="mt-3 text-sm leading-relaxed text-slate-300">Sem pendencias imediatas. O painel sera atualizado quando novos conteudos forem liberados.</p>
-                <?php endif; ?>
-            </section>
+        <!-- RIGHT: Sidebars (Certificados, Histórico) -->
+        <div class="lg:col-span-4 space-y-8">
+            
+            <!-- Certificados -->
+            <div class="aluno-card p-6 bg-gray-900 border-black text-white relative overflow-hidden group">
+                <div class="absolute -right-10 -top-10 w-40 h-40 border-8 border-gray-800 rounded-full opacity-50 pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
+                
+                <h3 class="text-xl font-black uppercase tracking-tighter mb-6 relative z-10 flex items-center gap-2">
+                    <i class="ph-fill ph-seal-check text-yellow-400"></i> Certificados
+                </h3>
 
-            <section class="rounded-[1.9rem] border border-white/10 bg-white/[0.045] p-6 shadow-soft backdrop-blur-xl">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.35em] text-amber-100/60">Certificados</p>
-                        <h3 class="mt-2 text-2xl font-black tracking-tight text-white">Disponiveis</h3>
-                    </div>
-                    <i class="ph-fill ph-seal-check text-3xl text-amber-200"></i>
-                </div>
-                <div class="mt-5 space-y-3">
+                <div class="space-y-3 relative z-10">
                     <?php if (!$certificates): ?>
-                        <p class="text-sm text-slate-300">Assim que voce concluir um curso elegivel, o certificado aparecera aqui.</p>
+                        <p class="text-[11px] font-bold text-gray-500 uppercase tracking-widest border border-gray-800 p-4">Assista às aulas e passe nas provas para obter seus certificados.</p>
                     <?php endif; ?>
+
                     <?php foreach (array_slice($certificates, 0, 3) as $certificate): ?>
-                        <a href="/elearning/colaborador/certificados/<?= e($certificate['validation_code']) ?>" class="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-950/35 px-4 py-3 transition hover:bg-white/10">
-                            <div>
-                                <p class="text-sm font-bold text-white"><?= e($certificate['course_title']) ?></p>
-                                <p class="text-xs uppercase tracking-[0.2em] text-slate-400"><?= date('d/m/Y', strtotime((string) $certificate['issued_at'])) ?></p>
+                        <a href="/elearning/colaborador/certificados/<?= e($certificate['validation_code']) ?>" class="block border border-gray-700 p-3 hover:border-yellow-400 transition-colors bg-black">
+                            <p class="text-sm font-bold uppercase truncate mb-1" title="<?= e($certificate['course_title']) ?>"><?= e($certificate['course_title']) ?></p>
+                            <div class="flex justify-between items-center mt-2">
+                                <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest"><?= date('d/m/Y', strtotime((string) $certificate['issued_at'])) ?></span>
+                                <span class="text-[10px] font-black text-yellow-400 uppercase">Imprimir &rarr;</span>
                             </div>
-                            <span class="rounded-full bg-amber-200 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-slate-950">Abrir</span>
                         </a>
                     <?php endforeach; ?>
                 </div>
-            </section>
+            </div>
 
-            <section class="rounded-[1.9rem] border border-white/10 bg-white/[0.045] p-6 shadow-soft backdrop-blur-xl">
-                <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-300/60">Historico recente</p>
-                <div class="mt-4 space-y-3">
+            <!-- Histórico Compacto -->
+            <div class="border-4 border-black p-6 bg-white shadow-[6px_6px_0px_#000]">
+                <h3 class="font-black uppercase text-lg mb-4 flex items-center justify-between border-b-2 border-black pb-2">
+                    Histórico <i class="ph ph-clock-counter-clockwise"></i>
+                </h3>
+                <div class="space-y-4">
                     <?php if (!$history): ?>
-                        <p class="text-sm text-slate-300">Seu historico ficara disponivel conforme voce concluir suas primeiras trilhas.</p>
+                        <p class="text-[11px] font-bold text-gray-400 uppercase">Nenhum evento registrado.</p>
                     <?php endif; ?>
                     <?php foreach (array_slice($history, 0, 4) as $item): ?>
-                        <div class="rounded-2xl border border-white/10 bg-slate-950/35 px-4 py-3">
-                            <p class="text-sm font-bold text-white"><?= e($item['title']) ?></p>
-                            <div class="mt-2 flex items-center justify-between text-xs uppercase tracking-[0.2em] text-slate-400">
-                                <span><?= e((string) $item['status']) ?></span>
-                                <span><?= !empty($item['completed_at']) ? date('d/m/Y', strtotime((string) $item['completed_at'])) : '--' ?></span>
+                        <div class="flex gap-3 items-start group">
+                            <div class="w-1.5 h-1.5 bg-black mt-1.5 group-hover:scale-150 transition-transform"></div>
+                            <div>
+                                <p class="text-xs font-black uppercase leading-tight group-hover:text-blue-600 transition-colors"><?= e($item['title']) ?></p>
+                                <p class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-1">
+                                    <?= e((string) $item['status']) ?> &bull; <?= !empty($item['completed_at']) ? date('d/m/Y', strtotime((string) $item['completed_at'])) : '--' ?>
+                                </p>
                             </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
-            </section>
-        </aside>
+            </div>
+
+            <a href="/inicio" class="block w-full border-2 border-black bg-gray-100 hover:bg-red-500 hover:text-white transition-colors p-4 text-center text-sm font-black uppercase tracking-widest cursor-pointer mt-8">
+                Sair do Modulo Educacional &times;
+            </a>
+            
+        </div>
     </div>
-</section>
+</div>
 
 <script>
 async function enrollCourse(courseId) {
@@ -214,11 +359,12 @@ async function enrollCourse(courseId) {
     const response = await fetch('/elearning/colaborador/matricular', { method: 'POST', body: formData });
     const result = await response.json();
     if (!result.success) {
-        showELToast(result.message || 'Nao foi possivel concluir a matricula.', 'error');
+        if(typeof showELToast === 'function') showELToast(result.message || 'Não foi possível concluir a matricula.', 'error');
+        else alert(result.message || 'Erro ao matricular');
         return;
     }
 
-    showELToast(result.message || 'Matricula concluida com sucesso.', 'success');
+    if(typeof showELToast === 'function') showELToast(result.message || 'Matricula concluída com sucesso.', 'success');
     setTimeout(() => window.location.reload(), 700);
 }
 </script>

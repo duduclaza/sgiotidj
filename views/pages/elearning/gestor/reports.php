@@ -4,94 +4,200 @@ $storage = $data['storage'] ?? [];
 $schemaReady = (bool) ($data['schema_ready'] ?? false);
 ?>
 
-<section class="space-y-8">
-    <div class="flex flex-col gap-5 rounded-[2.25rem] border border-white/10 bg-[linear-gradient(135deg,_rgba(15,23,42,0.95),_rgba(8,47,73,0.72)_58%,_rgba(15,118,110,0.48))] p-8 text-white shadow-soft xl:flex-row xl:items-end xl:justify-between">
-        <div class="space-y-4">
-            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-100/70">Relatorios do Professor</p>
-            <h1 class="text-4xl font-black tracking-tight text-white">Matriculas, conclusao, aprovacao e certificados por curso.</h1>
-            <p class="max-w-3xl text-base leading-relaxed text-slate-200/75">Use este painel para acompanhar desempenho academico, adesao dos alunos e impacto da operacao de E-Learning por curso publicado ou em preparacao.</p>
-        </div>
-        <div class="flex flex-wrap gap-3">
-            <a href="/elearning/gestor/cursos" class="rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:scale-[1.02]">Gerenciar cursos</a>
-            <a href="/elearning/gestor/armazenamento" class="rounded-full border border-white/20 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10">Painel de armazenamento</a>
+<style>
+.analytics-container {
+    background-color: #f7f7f7;
+    color: #000;
+    font-family: 'Inter', system-ui, sans-serif;
+    padding: 2rem;
+}
+.analytics-card {
+    background: #fff;
+    border: 3px solid #000;
+    box-shadow: 6px 6px 0px #000;
+    padding: 1.5rem;
+    transition: transform 0.2s;
+}
+.analytics-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 8px 8px 0px #000;
+}
+.analytics-badge {
+    background: #fff;
+    color: #000;
+    border: 2px solid #000;
+    font-weight: 900;
+    text-transform: uppercase;
+    font-size: 10px;
+    padding: 4px 8px;
+    display: inline-block;
+    box-shadow: 2px 2px 0px #000;
+}
+.analytics-badge.dark {
+    background: #000;
+    color: #fff;
+}
+.data-block {
+    border-bottom: 2px solid #000;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+.data-block:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+.progress-bar-container {
+    border: 2px solid #000;
+    height: 1.5rem;
+    background: #fff;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+.progress-bar-fill {
+    height: 100%;
+    background: #000;
+    border-right: 2px solid #000;
+}
+</style>
+
+<div class="analytics-container min-h-screen">
+
+    <!-- HERO HEADER -->
+    <div class="border-4 border-black bg-white p-8 mb-12 relative overflow-hidden shadow-[12px_12px_0px_#000]">
+        <!-- Abstract Decoration -->
+        <div class="absolute -top-20 -right-20 w-64 h-64 rounded-full border-8 border-yellow-300 opacity-50"></div>
+        <div class="absolute -bottom-10 right-20 w-32 h-32 bg-blue-500 transform rotate-45 border-4 border-black"></div>
+        
+        <div class="relative z-10 w-full lg:w-2/3">
+            <div class="analytics-badge mb-4">Módulo Independente</div>
+            <h1 class="text-5xl lg:text-7xl font-black uppercase tracking-tighter leading-none mb-4">People<br>Analytics</h1>
+            <p class="text-lg font-bold text-gray-700 max-w-2xl border-l-4 border-black pl-4">Acompanhamento avançado de desempenho acadêmico, retenção e impacto das jornadas educacionais sobre os colaboradores corporativos.</p>
         </div>
     </div>
 
     <?php if (!$schemaReady): ?>
-        <div class="rounded-[1.75rem] border border-amber-300 bg-amber-50 px-5 py-4 text-sm leading-relaxed text-amber-950">
-            O schema do modulo ainda nao foi aplicado neste ambiente, entao os indicadores reais aparecerao apos a execucao do SQL do E-Learning.
+        <div class="mb-8 border-4 border-red-500 bg-red-100 p-6 shadow-[6px_6px_0px_#ef4444]">
+            <p class="font-black text-red-900 border-b-2 border-red-500 pb-2 mb-2 uppercase text-xl">Integração Pendente</p>
+            <p class="text-red-900 font-bold">Os indicadores abaixo são estruturais. O banco de dados (schema E-Learning) ainda requer atualização no ambiente atual para exibir dados vivos.</p>
         </div>
     <?php endif; ?>
 
-    <div class="grid gap-6 xl:grid-cols-[1.2fr,0.8fr]">
-        <section class="space-y-5">
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-10">
+        
+        <!-- MAIN DATA COLUMN -->
+        <div class="xl:col-span-8 space-y-10">
+            
+            <div class="flex items-center justify-between border-b-4 border-black pb-2">
+                <h2 class="text-2xl font-black uppercase tracking-tighter">Performance por Trilha</h2>
+                <div class="analytics-badge dark"><?= count($courses) ?> Mapeadas</div>
+            </div>
+
             <?php if (!$courses): ?>
-                <div class="rounded-[1.75rem] border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
-                    Nenhum curso encontrado para este professor.
+                <div class="analytics-card text-center py-16 bg-gray-100">
+                    <i class="ph ph-database text-6xl mb-4"></i>
+                    <p class="font-black text-xl uppercase tracking-widest">Sem base de dados geométrica</p>
+                    <p class="font-bold text-gray-500 mt-2">Nenhum curso ou aluno associado disponível para extração de kpi's.</p>
                 </div>
             <?php endif; ?>
 
-            <?php foreach ($courses as $course): ?>
-                <article class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-lg">
-                    <div class="flex flex-wrap items-start justify-between gap-4">
-                        <div class="space-y-2">
-                            <div class="flex flex-wrap gap-3">
-                                <span class="rounded-full bg-slate-900 px-3 py-1 text-[11px] font-black uppercase tracking-[0.24em] text-white"><?= e($course['status_label'] ?? 'Rascunho') ?></span>
-                                <span class="rounded-full bg-sky-100 px-3 py-1 text-[11px] font-black uppercase tracking-[0.24em] text-sky-700"><?= e($course['category'] ?? 'Geral') ?></span>
+            <div class="grid gap-6">
+                <?php foreach ($courses as $course): ?>
+                    <div class="analytics-card flex flex-col md:flex-row gap-6">
+                        
+                        <!-- Left: Info -->
+                        <div class="flex-1 border-r-0 md:border-r-2 border-black md:pr-6">
+                            <div class="flex gap-2 mb-4">
+                                <span class="analytics-badge"><?= e($course['status_label'] ?? 'Rascunho') ?></span>
+                                <span class="analytics-badge bg-yellow-300 text-black border-none"><?= e($course['category'] ?? 'Geral') ?></span>
                             </div>
-                            <h2 class="text-2xl font-black tracking-tight text-slate-900"><?= e($course['title']) ?></h2>
-                            <p class="text-sm text-slate-500"><?= (int) ($course['enrollments_count'] ?? 0) ?> matricula(s) | <?= (int) ($course['certificates_count'] ?? 0) ?> certificado(s) | <?= (int) ($course['completed_count'] ?? 0) ?> concluido(s)</p>
+                            <h3 class="text-2xl font-black uppercase tracking-tight leading-tight mb-2"><?= e($course['title']) ?></h3>
+                            
+                            <div class="grid grid-cols-3 gap-2 mt-6">
+                                <div class="bg-gray-100 border-2 border-black p-2 text-center">
+                                    <div class="text-xl font-black"><?= (int) ($course['enrollments_count'] ?? 0) ?></div>
+                                    <div class="text-[9px] font-bold uppercase">Matrículas</div>
+                                </div>
+                                <div class="bg-gray-100 border-2 border-black p-2 text-center">
+                                    <div class="text-xl font-black"><?= (int) ($course['completed_count'] ?? 0) ?></div>
+                                    <div class="text-[9px] font-bold uppercase">Concluídos</div>
+                                </div>
+                                <div class="bg-yellow-100 border-2 border-black p-2 text-center">
+                                    <div class="text-xl font-black"><?= (int) ($course['certificates_count'] ?? 0) ?></div>
+                                    <div class="text-[9px] font-bold uppercase">Certificados</div>
+                                </div>
+                            </div>
                         </div>
-                        <a href="/elearning/gestor/cursos/<?= (int) $course['id'] ?>/progresso" class="rounded-full border border-slate-200 px-4 py-2 text-sm font-black text-slate-700 transition hover:bg-slate-50">Abrir curso</a>
-                    </div>
 
-                    <div class="mt-6 grid gap-4 md:grid-cols-3">
-                        <div class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
-                            <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Progresso medio</p>
-                            <p class="mt-3 text-3xl font-black text-slate-900"><?= number_format((float) ($course['avg_progress'] ?? 0), 0) ?>%</p>
-                        </div>
-                        <div class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
-                            <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Taxa de aprovacao</p>
-                            <p class="mt-3 text-3xl font-black text-slate-900"><?= number_format((float) ($course['approval_rate'] ?? 0), 0) ?>%</p>
-                        </div>
-                        <div class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
-                            <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Reprovados</p>
-                            <p class="mt-3 text-3xl font-black text-slate-900"><?= (int) ($course['failed_count'] ?? 0) ?></p>
+                        <!-- Right: KPIs -->
+                        <div class="w-full md:w-64 flex flex-col justify-center">
+                            
+                            <div class="data-block">
+                                <div class="flex justify-between items-end mb-1">
+                                    <span class="text-[10px] font-black uppercase tracking-widest">Andamento</span>
+                                    <span class="font-black text-xl"><?= number_format((float) ($course['avg_progress'] ?? 0), 0) ?>%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill bg-blue-500" style="width: <?= min(100, max(0, (float) ($course['avg_progress'] ?? 0))) ?>%"></div>
+                                </div>
+                            </div>
+
+                            <div class="data-block border-none !mb-0 !pb-0">
+                                <div class="flex justify-between items-end mb-1">
+                                    <span class="text-[10px] font-black uppercase tracking-widest">Aprovação</span>
+                                    <span class="font-black text-xl text-green-600"><?= number_format((float) ($course['approval_rate'] ?? 0), 0) ?>%</span>
+                                </div>
+                                <div class="progress-bar-container bg-red-100">
+                                    <div class="progress-bar-fill bg-green-500" style="width: <?= min(100, max(0, (float) ($course['approval_rate'] ?? 0))) ?>%"></div>
+                                </div>
+                                <div class="flex justify-between text-[10px] uppercase font-bold mt-2 text-gray-500">
+                                    <span>GAPs Críticos</span>
+                                    <span class="text-red-500"><?= (int) ($course['failed_count'] ?? 0) ?> reprovas</span>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
 
-                    <div class="mt-5">
-                        <div class="flex items-center justify-between text-sm text-slate-500">
-                            <span>Andamento medio da turma</span>
-                            <strong class="text-slate-900"><?= number_format((float) ($course['avg_progress'] ?? 0), 0) ?>%</strong>
-                        </div>
-                        <div class="mt-3 h-3 overflow-hidden rounded-full bg-slate-100">
-                            <div class="h-full rounded-full bg-[linear-gradient(90deg,_#2563eb,_#06b6d4)]" style="width: <?= min(100, max(0, (float) ($course['avg_progress'] ?? 0))) ?>%"></div>
-                        </div>
-                    </div>
-                </article>
-            <?php endforeach; ?>
-        </section>
-
-        <aside class="space-y-6">
-            <section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-xl">
-                <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">Minutos globais</p>
-                <h2 class="mt-2 text-3xl font-black tracking-tight text-slate-900"><?= e($storage['used_human'] ?? '0 min') ?></h2>
-                <p class="mt-3 text-sm leading-relaxed text-slate-600">Consumidos de <?= e($storage['contracted_human'] ?? '10.000 min') ?> contratados para videos do modulo.</p>
-                <div class="mt-5 h-3 overflow-hidden rounded-full bg-slate-100">
-                    <div class="h-full rounded-full <?= ($storage['alert_level'] ?? 'healthy') === 'critical' ? 'bg-rose-500' : ((($storage['alert_level'] ?? 'healthy') === 'warning') ? 'bg-amber-500' : 'bg-emerald-500') ?>" style="width: <?= min(100, max(0, (float) ($storage['percent_used'] ?? 0))) ?>%"></div>
+        <!-- RIGHT SIDEBAR (STORAGE & ALERTS) -->
+        <div class="xl:col-span-4 space-y-8">
+            
+            <div class="analytics-card bg-black text-white relative">
+                <i class="ph-fill ph-hard-drives text-6xl absolute -right-4 -bottom-4 text-gray-800 pointer-events-none"></i>
+                <div class="border-b-2 border-gray-700 pb-2 mb-6">
+                    <h3 class="font-black uppercase tracking-widest">Server Load</h3>
                 </div>
-                <p class="mt-3 text-sm font-semibold text-slate-600">Disponivel: <strong class="text-slate-900"><?= e($storage['available_human'] ?? '0 min') ?></strong></p>
-            </section>
+                
+                <div class="text-6xl font-black tracking-tighter mb-2"><?= e($storage['used_human'] ?? '0 m') ?></div>
+                <p class="font-bold text-gray-400 mb-8 border-b-2 border-gray-800 pb-4">De <?= e($storage['contracted_human'] ?? '10k min') ?> / Vídeo Storage</p>
 
-            <section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-xl">
-                <p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">Foco operacional</p>
-                <ul class="mt-5 space-y-3 text-sm leading-relaxed text-slate-600">
-                    <li>Priorize cursos com alto volume de matriculas e baixa aprovacao.</li>
-                    <li>Monitore provas obrigatorias para evitar bloqueio de certificados.</li>
-                    <li>Use os minutos globais como indicador de necessidade de expansao.</li>
+                <?php 
+                    $lvl = $storage['alert_level'] ?? 'healthy';
+                    $barColor = $lvl === 'critical' ? 'bg-red-500' : ($lvl === 'warning' ? 'bg-yellow-500' : 'bg-green-500');
+                ?>
+                <div class="progress-bar-container border-gray-700 bg-gray-900 mb-2">
+                    <div class="progress-bar-fill border-gray-700 <?= $barColor ?>" style="width: <?= min(100, max(0, (float) ($storage['percent_used'] ?? 0))) ?>%"></div>
+                </div>
+                <div class="text-right text-[10px] font-black uppercase text-gray-500">Disponível: <?= e($storage['available_human'] ?? '0 min') ?></div>
+            </div>
+
+            <div class="analytics-card bg-yellow-300">
+                <h3 class="font-black uppercase text-xl border-b-4 border-black pb-2 mb-4">Decisões RH</h3>
+                <ul class="space-y-4 font-bold text-sm">
+                    <li class="flex gap-2 items-start"><i class="ph-fill ph-warning-circle text-red-500 mt-0.5"></i> <span class="leading-tight">Atenção imediata para trilhas com taxa de reprovação acima de 30%.</span></li>
+                    <li class="flex gap-2 items-start"><i class="ph-fill ph-check-circle text-green-600 mt-0.5"></i> <span class="leading-tight">Valide se os módulos obrigatórios estão bloqueando progressão de cargos.</span></li>
+                    <li class="flex gap-2 items-start"><i class="ph-fill ph-info text-blue-600 mt-0.5"></i> <span class="leading-tight">Storage: Avalie purgar turmas arquivadas se o consumo ultrapassar 80%.</span></li>
                 </ul>
-            </section>
-        </aside>
+            </div>
+
+            <a href="/inicio" class="block w-full border-4 border-black bg-white hover:bg-black hover:text-white transition-colors p-4 text-center font-black uppercase tracking-widest cursor-pointer shadow-[6px_6px_0px_#000]">
+                Retroceder ao HUB Geral
+            </a>
+
+        </div>
     </div>
-</section>
+</div>

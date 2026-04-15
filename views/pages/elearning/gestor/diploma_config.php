@@ -89,89 +89,100 @@
   .tpl-5 b { font-weight: 800; color: #d97706; }
   .tpl-5 .name { font-family: 'Montserrat', sans-serif; font-size: 32px; color: #d97706; background: rgba(251, 191, 36, 0.1); padding: 5px 30px; border-radius: 999px; }
 
-  /* Controls */
-  .upload-logo-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; transition: all .2s; cursor: pointer; }
-  .upload-logo-zone:hover { border-color: #6366f1; background: #f1f5f9; }
+  /* Controls - Brutalist */
+  .upload-logo-zone { border: 4px dashed #000; background: #fff; padding: 20px; transition: all .2s; cursor: pointer; box-shadow: 4px 4px 0px #000; }
+  .upload-logo-zone:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px #000; }
+  
+  .brut-input { border: 2px solid #000; background: #fff; border-radius: 0; box-shadow: 2px 2px 0px #000; font-family: 'Inter', sans-serif; }
+  .brut-input:focus { outline: none; box-shadow: 4px 4px 0px #000; transform: translate(-2px, -2px); }
+  
+  .brut-btn { border: 2px solid #000; background: #000; color: #fff; font-weight: 900; text-transform: uppercase; box-shadow: 4px 4px 0px #000; transition: all 0.2s; border-radius: 0; }
+  .brut-btn:hover { background: #fff; color: #000; transform: translate(-2px, -2px); box-shadow: 6px 6px 0px #000; }
+  
+  .brut-pill { border: 2px solid #000; background: #fff; font-weight: 900; text-transform: uppercase; border-radius: 0; transition: all 0.2s; box-shadow: 2px 2px 0px #000; }
+  .brut-pill.active { background: #000; color: #fff; transform: translate(2px, 2px); box-shadow: 0px 0px 0px #000; }
 </style>
 
-<div class="space-y-6 el-fade-in pb-20">
+<div class="p-8 el-fade-in pb-20 bg-[#f7f7f7] min-h-screen">
 
   <!-- Header -->
-  <div class="bg-gradient-to-r from-gray-900 to-indigo-900 rounded-2xl p-6 text-white shadow-lg flex items-center justify-between">
+  <div class="border-4 border-black bg-white p-6 shadow-[8px_8px_0px_#000] flex items-center justify-between mb-10">
     <div>
-      <a href="/elearning/gestor/cursos" class="text-indigo-300 hover:text-white text-sm transition">← Voltar aos Cursos</a>
-      <h1 class="text-2xl font-bold mt-2 flex items-center gap-2">
-        <span class="text-2xl">🎓</span> Diplomas Premium
+      <a href="/elearning/gestor/cursos" class="text-xs font-black uppercase inline-block border-b-2 border-black pb-1 hover:bg-black hover:text-white transition-colors mb-4">&larr; Voltar aos Cursos</a>
+      <h1 class="text-4xl font-black uppercase tracking-tighter flex items-center gap-2">
+        <i class="ph-fill ph-certificate"></i> Motor de Diplomas
       </h1>
-      <p class="text-indigo-100 text-sm mt-1">Personalize o layout e posicione livremente a sua marca</p>
+      <p class="font-bold text-gray-500 mt-1 uppercase tracking-widest text-[10px]">Editor Espacial Master / Arraste para posicionar a marca</p>
     </div>
     <div class="flex gap-3">
-      <button onclick="salvarConfig()" id="btnSalvarGeral" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg transition flex items-center gap-2">
-        <span id="saveLabel">💾 Salvar Alterações</span>
+      <button onclick="salvarConfig()" id="btnSalvarGeral" class="brut-btn px-6 py-3 flex items-center gap-2">
+        <span id="saveLabel">Salvar Configuração &crarr;</span>
       </button>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
     <!-- LEFT: Settings (Col 1) -->
-    <div class="space-y-6">
+    <div class="space-y-8">
       
       <!-- Logo Upload & Size -->
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">🖼️ Logomarca</h3>
+      <div class="bg-white border-2 border-black p-5 shadow-[4px_4px_0px_#000]">
+        <h3 class="text-sm font-black uppercase tracking-widest border-b-2 border-black pb-2 mb-4">Branding</h3>
         <input type="file" id="logoInput" class="hidden" onchange="handleLogoSelect(this)" accept="image/*">
         
-        <div class="upload-logo-zone text-center mb-4" onclick="document.getElementById('logoInput').click()">
+        <div class="upload-logo-zone text-center mb-6" onclick="document.getElementById('logoInput').click()">
           <div id="logoSelectPrompt">
-            <div class="text-3xl mb-1 text-gray-300">🏢</div>
-            <p class="text-[10px] font-bold text-gray-500">Subir Logo</p>
+            <i class="ph ph-upload-simple text-4xl mb-2"></i>
+            <p class="text-[10px] font-black uppercase">Subir Logo (PNG/JPG)</p>
           </div>
         </div>
 
-        <div class="space-y-3">
-          <label class="block text-[10px] font-bold text-gray-400 uppercase">Tamanho do Logo</label>
+        <div class="space-y-2">
+          <div class="flex justify-between">
+            <label class="block text-[10px] font-black uppercase">Escala</label>
+            <div class="text-[10px] font-black uppercase"><span id="widthValue"><?= $config['logo_width'] ?? 150 ?></span>px</div>
+          </div>
           <input type="range" id="logoWidthRange" min="50" max="400" value="<?= $config['logo_width'] ?? 150 ?>" 
-                 class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                 class="w-full h-2 bg-gray-200 border border-black cursor-pointer accent-black"
                  oninput="updateLogoSize(this.value)">
-          <div class="text-[10px] text-right text-gray-400 mt-1"><span id="widthValue"><?= $config['logo_width'] ?? 150 ?></span>px</div>
         </div>
       </div>
 
       <!-- Signature -->
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">✍️ Assinatura</h3>
+      <div class="bg-white border-2 border-black p-5 shadow-[4px_4px_0px_#000]">
+        <h3 class="text-sm font-black uppercase tracking-widest border-b-2 border-black pb-2 mb-4">Validação</h3>
         <input type="text" id="assinaturaTexto" value="<?= htmlspecialchars($config['assinatura_texto'] ?? 'Diretoria SGQDJ') ?>" 
-               class="w-full border border-gray-100 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition"
+               class="w-full brut-input px-4 py-2 font-bold transition"
                oninput="updatePreviewText()">
       </div>
 
       <!-- Positioning Info -->
-      <div class="bg-amber-50 rounded-2xl p-4 border border-amber-100">
-          <p class="text-[10px] text-amber-800 leading-relaxed">
-            ✨ <b>Dica PRO:</b> No preview ao lado, você pode <b>clicar e arrastar</b> o logo para onde quiser! A posição será salva automaticamente em percentagem.
+      <div class="bg-yellow-300 border-2 border-black p-4 shadow-[4px_4px_0px_#000]">
+          <p class="text-[10px] text-black font-bold uppercase leading-relaxed">
+            <i class="ph-fill ph-target"></i> No canvas ao lado, você pode <b>clicar e arrastar</b> o logo para posicionar. As coordenadas serão salvas no banco.
           </p>
       </div>
 
     </div>
 
     <!-- MAIN: Editor (Col 2-4) -->
-    <div class="lg:col-span-3 space-y-6">
+    <div class="lg:col-span-3 space-y-8">
       
       <!-- Layout Selector Pills -->
-      <div class="bg-white rounded-2xl p-2 shadow-sm border border-gray-100 overflow-x-auto">
-        <div class="flex gap-2 min-w-max">
+      <div class="bg-white border-2 border-black p-4 shadow-[4px_4px_0px_#000] overflow-x-auto">
+        <div class="flex gap-4 min-w-max">
           <?php 
           $layouts = [
-            '1' => '🏆 Imperial Gold',
-            '2' => '🌊 Modern Azure',
-            '3' => '🌑 Royal Knight',
-            '4' => '📜 Vintage Scroll',
-            '5' => '🎨 Creative Flow'
+            '1' => 'Imperial',
+            '2' => 'Modern',
+            '3' => 'Knight',
+            '4' => 'Vintage',
+            '5' => 'Creative'
           ];
           foreach($layouts as $id => $name): ?>
           <button onclick="selectLayout(<?= $id ?>)" id="layoutBtn_<?= $id ?>" 
-                  class="layout-pill px-4 py-2 rounded-xl text-xs font-bold transition-all <?= ($config['layout_ativo'] ?? 1) == $id ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-500 hover:bg-gray-100' ?>">
+                  class="brut-pill px-6 py-2 text-xs <?= ($config['layout_ativo'] ?? 1) == $id ? 'active' : '' ?>">
             <?= $name ?>
           </button>
           <?php endforeach; ?>
@@ -179,7 +190,7 @@
       </div>
 
       <!-- DIPLOMA PREVIEW CANVAS -->
-      <div class="flex items-center justify-center p-8 bg-gray-100 rounded-3xl border border-gray-200 shadow-inner">
+      <div class="flex items-center justify-center p-8 bg-gray-200 border-4 border-dashed border-gray-400">
         <div id="diplomaPreview" class="diploma-container tpl-<?= $config['layout_ativo'] ?? 1 ?>">
           
           <!-- Draggable Logo -->
@@ -270,15 +281,11 @@ function stopDrag() {
 // --- Layout Selection ---
 function selectLayout(id) {
   currentLayout = id;
-  const pills = document.querySelectorAll('.layout-pill');
-  pills.forEach(p => {
-    p.classList.remove('bg-indigo-600', 'text-white', 'shadow-md');
-    p.classList.add('text-gray-500', 'hover:bg-gray-100');
-  });
+  const pills = document.querySelectorAll('.brut-pill');
+  pills.forEach(p => p.classList.remove('active'));
   
   const active = document.getElementById('layoutBtn_' + id);
-  active.classList.add('bg-indigo-600', 'text-white', 'shadow-md');
-  active.classList.remove('text-gray-500', 'hover:bg-gray-100');
+  active.classList.add('active');
   
   document.getElementById('diplomaPreview').className = 'diploma-container tpl-' + id;
 }
@@ -338,7 +345,7 @@ async function salvarConfig() {
 
 function showToast(msg, type) {
   const div = document.createElement('div');
-  div.className = `fixed bottom-6 right-6 z-[100] px-6 py-3 rounded-2xl shadow-2xl text-white font-bold el-fade-in ${type==='success'?'bg-emerald-600':'bg-rose-600'}`;
+  div.className = `fixed bottom-6 right-6 z-[100] px-6 py-4 shadow-[4px_4px_0px_#000] border-2 border-black text-black font-black uppercase text-xs tracking-widest el-fade-in ${type==='success'?'bg-yellow-300':'bg-red-500 text-white'}`;
   div.textContent = msg;
   document.body.appendChild(div);
   setTimeout(() => div.remove(), 3500);
