@@ -1,0 +1,366 @@
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Learning Module - Design Preview</title>
+    <link rel="stylesheet" href="/assets/elearning-modern.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: var(--slate-50); }
+        .preview-section {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .preview-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--slate-900);
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--primary-500);
+            padding-bottom: 0.75rem;
+        }
+        code {
+            background: var(--slate-100);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-section">
+        <h1 class="text-4xl font-bold mb-8">🎨 E-Learning Module - Design System Preview</h1>
+
+        <!-- Hero Section -->
+        <div class="preview-title">Hero Section</div>
+        <div class="el-hero mb-8">
+            <h1>Educação Corporativa Moderna</h1>
+            <p>Transforme o aprendizado da sua organização com um sistema integrado, moderno e fácil de usar.</p>
+            <div class="flex gap-3 flex-wrap">
+                <button class="el-btn el-btn-lg el-btn-primary">Começar Agora</button>
+                <button class="el-btn el-btn-lg el-btn-outline">Saiba Mais</button>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="preview-title">Stats Cards</div>
+        <div class="el-stat-grid mb-8">
+            <div class="el-stat-card">
+                <div class="el-stat-icon">📚</div>
+                <div class="el-stat-value">48</div>
+                <div class="el-stat-label">Cursos Ativos</div>
+                <div class="el-stat-detail">todos publicados</div>
+            </div>
+            <div class="el-stat-card">
+                <div class="el-stat-icon">👥</div>
+                <div class="el-stat-value">1.2K</div>
+                <div class="el-stat-label">Alunos Inscritos</div>
+                <div class="el-stat-detail">em progresso</div>
+            </div>
+            <div class="el-stat-card">
+                <div class="el-stat-icon">✓</div>
+                <div class="el-stat-value">86%</div>
+                <div class="el-stat-label">Taxa de Conclusão</div>
+                <div class="el-stat-detail">acima da meta</div>
+            </div>
+            <div class="el-stat-card">
+                <div class="el-stat-icon">🎓</div>
+                <div class="el-stat-value">342</div>
+                <div class="el-stat-label">Certificados</div>
+                <div class="el-stat-detail">emitidos</div>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="preview-title">Buttons</div>
+        <div class="space-y-4 mb-8">
+            <div class="flex gap-3 flex-wrap">
+                <button class="el-btn el-btn-primary">Primary Button</button>
+                <button class="el-btn el-btn-secondary">Secondary Button</button>
+                <button class="el-btn el-btn-outline">Outline Button</button>
+                <button class="el-btn el-btn-success">Success Button</button>
+                <button class="el-btn el-btn-danger">Danger Button</button>
+            </div>
+            <div class="flex gap-3 flex-wrap">
+                <button class="el-btn el-btn-sm el-btn-primary">Small Primary</button>
+                <button class="el-btn el-btn-lg el-btn-primary">Large Primary</button>
+                <button class="el-btn el-btn-block el-btn-primary">Block Button</button>
+            </div>
+        </div>
+
+        <!-- Cards -->
+        <div class="preview-title">Cards</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <div class="el-card">
+                <div class="el-card-header">
+                    <h3 class="el-card-title">Card Title</h3>
+                </div>
+                <div class="el-card-body">
+                    <p class="el-text-sm">This is a simple card with header, body and footer sections. Great for organizing content.</p>
+                </div>
+                <div class="el-card-footer">
+                    <button class="el-btn el-btn-sm el-btn-primary">Action</button>
+                    <button class="el-btn el-btn-sm el-btn-secondary">Cancel</button>
+                </div>
+            </div>
+
+            <div class="el-card el-card-active">
+                <div class="el-card-header">
+                    <h3 class="el-card-title">Active Card</h3>
+                </div>
+                <div class="el-card-body">
+                    <p class="el-text-sm">Cards can have an active state that highlights them with a primary color background.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Course Cards -->
+        <div class="preview-title">Course Cards</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            <div class="el-course-card">
+                <div class="el-course-image">📖</div>
+                <div class="el-course-content">
+                    <span class="el-badge el-badge-primary">Publicado</span>
+                    <h3 class="el-course-title">Introdução ao Python</h3>
+                    <p class="el-course-teacher">📌 Prof. João Silva</p>
+                    <div class="el-course-stats">
+                        <div class="el-course-stat">🎓 12 aulas</div>
+                        <div class="el-course-stat">⏱ 20h</div>
+                        <div class="el-course-stat">👥 156 alunos</div>
+                    </div>
+                    <div class="el-course-progress">
+                        <div class="el-course-progress-label">
+                            <span>Progresso</span>
+                            <span>75%</span>
+                        </div>
+                        <div class="el-progress-container">
+                            <div class="el-progress-bar" style="width: 75%;"></div>
+                        </div>
+                    </div>
+                    <div class="el-course-actions">
+                        <a href="#" class="el-btn el-btn-sm el-btn-primary">Aulas</a>
+                        <a href="#" class="el-btn el-btn-sm el-btn-secondary">Provas</a>
+                        <a href="#" class="el-btn el-btn-sm el-btn-secondary">Alunos</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="el-course-card">
+                <div class="el-course-image" style="background: linear-gradient(135deg, #4ade80, #22c55e);">🟢</div>
+                <div class="el-course-content">
+                    <span class="el-badge el-badge-success">Concluído</span>
+                    <h3 class="el-course-title">Gestão de Projetos</h3>
+                    <p class="el-course-teacher">📌 Profa. Maria Costa</p>
+                    <div class="el-course-stats">
+                        <div class="el-course-stat">🎓 8 aulas</div>
+                        <div class="el-course-stat">⏱ 16h</div>
+                        <div class="el-course-stat">👥 89 alunos</div>
+                    </div>
+                    <div class="el-course-progress">
+                        <div class="el-course-progress-label">
+                            <span>Progresso</span>
+                            <span>100%</span>
+                        </div>
+                        <div class="el-progress-container">
+                            <div class="el-progress-bar success" style="width: 100%;"></div>
+                        </div>
+                    </div>
+                    <div class="el-course-actions">
+                        <a href="#" class="el-btn el-btn-sm el-btn-primary">Aulas</a>
+                        <a href="#" class="el-btn el-btn-sm el-btn-secondary">Provas</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="el-course-card">
+                <div class="el-course-image" style="background: linear-gradient(135deg, #facc15, #eab308);">⭐</div>
+                <div class="el-course-content">
+                    <span class="el-badge el-badge-warning">Em Breve</span>
+                    <h3 class="el-course-title">Liderança Transformacional</h3>
+                    <p class="el-course-teacher">📌 Prof. Carlos Santos</p>
+                    <div class="el-course-stats">
+                        <div class="el-course-stat">🎓 10 aulas</div>
+                        <div class="el-course-stat">⏱ 18h</div>
+                        <div class="el-course-stat">👥 Inscrições abertas</div>
+                    </div>
+                    <div class="el-course-progress">
+                        <div class="el-course-progress-label">
+                            <span>Progresso</span>
+                            <span>0%</span>
+                        </div>
+                        <div class="el-progress-container">
+                            <div class="el-progress-bar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div class="el-course-actions">
+                        <a href="#" class="el-btn el-btn-sm el-btn-primary">Inscrever-se</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bars -->
+        <div class="preview-title">Progress Bars</div>
+        <div class="space-y-4 mb-8">
+            <div>
+                <p class="el-text-sm mb-2">Primary (50%)</p>
+                <div class="el-progress-container">
+                    <div class="el-progress-bar" style="width: 50%;"></div>
+                </div>
+            </div>
+            <div>
+                <p class="el-text-sm mb-2">Success (90%)</p>
+                <div class="el-progress-container">
+                    <div class="el-progress-bar success" style="width: 90%;"></div>
+                </div>
+            </div>
+            <div>
+                <p class="el-text-sm mb-2">Warning (75%)</p>
+                <div class="el-progress-container">
+                    <div class="el-progress-bar warning" style="width: 75%;"></div>
+                </div>
+            </div>
+            <div>
+                <p class="el-text-sm mb-2">Error (100%)</p>
+                <div class="el-progress-container">
+                    <div class="el-progress-bar error" style="width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Badges -->
+        <div class="preview-title">Badges</div>
+        <div class="flex gap-2 flex-wrap mb-8">
+            <span class="el-badge el-badge-primary">Primary Badge</span>
+            <span class="el-badge el-badge-success">Success Badge</span>
+            <span class="el-badge el-badge-warning">Warning Badge</span>
+            <span class="el-badge el-badge-error">Error Badge</span>
+        </div>
+
+        <!-- Alerts -->
+        <div class="preview-title">Alerts</div>
+        <div class="space-y-4 mb-8">
+            <div class="el-alert el-alert-info">
+                <div class="el-alert-icon">ℹ️</div>
+                <div class="el-alert-content">
+                    <div class="el-alert-title">Informação</div>
+                    <p class="el-text-sm">Esta é uma mensagem informativa. Use para dicas e informações gerais.</p>
+                </div>
+            </div>
+            <div class="el-alert el-alert-success">
+                <div class="el-alert-icon">✓</div>
+                <div class="el-alert-content">
+                    <div class="el-alert-title">Sucesso</div>
+                    <p class="el-text-sm">Operação completada com sucesso! O curso foi publicado.</p>
+                </div>
+            </div>
+            <div class="el-alert el-alert-warning">
+                <div class="el-alert-icon">⚠️</div>
+                <div class="el-alert-content">
+                    <div class="el-alert-title">Atenção</div>
+                    <p class="el-text-sm">Você está próximo do limite de armazenamento. Considere aumentar a capacidade.</p>
+                </div>
+            </div>
+            <div class="el-alert el-alert-error">
+                <div class="el-alert-icon">✕</div>
+                <div class="el-alert-content">
+                    <div class="el-alert-title">Erro</div>
+                    <p class="el-text-sm">Houve um erro ao processar o vídeo. Por favor, tente novamente.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lesson Cards -->
+        <div class="preview-title">Lesson Cards</div>
+        <div class="space-y-3 mb-8">
+            <div class="el-lesson-card">
+                <div class="el-lesson-number">1</div>
+                <div class="el-lesson-content">
+                    <h3 class="el-lesson-title">Introdução ao Curso</h3>
+                    <p class="el-lesson-description">Visão geral dos tópicos que serão abordados neste módulo e objetivos de aprendizado.</p>
+                    <div class="el-lesson-metadata">
+                        <span>⏱ 15 min</span>
+                        <span>📎 2 anexos</span>
+                        <span>📌 Publicado</span>
+                    </div>
+                </div>
+            </div>
+            <div class="el-lesson-card">
+                <div class="el-lesson-number">2</div>
+                <div class="el-lesson-content">
+                    <h3 class="el-lesson-title">Conceitos Fundamentais</h3>
+                    <p class="el-lesson-description">Aprenda os conceitos básicos que formam a base para todo o conteúdo posterior.</p>
+                    <div class="el-lesson-metadata">
+                        <span>⏱ 45 min</span>
+                        <span>📎 5 anexos</span>
+                        <span>📌 Publicado</span>
+                    </div>
+                </div>
+            </div>
+            <div class="el-lesson-card">
+                <div class="el-lesson-number">3</div>
+                <div class="el-lesson-content">
+                    <h3 class="el-lesson-title">Prática e Exemplos</h3>
+                    <p class="el-lesson-description">Exercícios práticos para consolidar o aprendizado com exemplos reais.</p>
+                    <div class="el-lesson-metadata">
+                        <span>⏱ 60 min</span>
+                        <span>📎 8 anexos</span>
+                        <span>📌 Publicado</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Forms -->
+        <div class="preview-title">Forms</div>
+        <div class="el-card max-w-2xl mb-8">
+            <div class="el-card-header">
+                <h3 class="el-card-title">Novo Curso</h3>
+            </div>
+            <form class="el-card-body space-y-4">
+                <div class="el-form-group">
+                    <label class="el-label">Título do Curso *</label>
+                    <input type="text" class="el-input" placeholder="Digite o título...">
+                    <p class="el-form-help">Um título descritivo ajuda alunos a entender o conteúdo</p>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="el-form-group">
+                        <label class="el-label">Categoria</label>
+                        <select class="el-select">
+                            <option>Desenvolvimento</option>
+                            <option>Gestão</option>
+                            <option>Compliance</option>
+                        </select>
+                    </div>
+                    <div class="el-form-group">
+                        <label class="el-label">Carga Horária (h)</label>
+                        <input type="number" class="el-input" placeholder="0" min="0">
+                    </div>
+                </div>
+                <div class="el-form-group">
+                    <label class="el-label">Descrição</label>
+                    <textarea class="el-textarea" placeholder="Descrição detalhada do curso..."></textarea>
+                </div>
+                <div class="flex gap-3">
+                    <button type="submit" class="el-btn el-btn-primary">Criar Curso</button>
+                    <button type="reset" class="el-btn el-btn-secondary">Cancelar</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Typography -->
+        <div class="preview-title">Typography</div>
+        <div class="space-y-4 mb-8">
+            <h1 class="el-h1">Heading 1</h1>
+            <h2 class="el-h2">Heading 2</h2>
+            <h3 class="el-h3">Heading 3</h3>
+            <h4 class="el-h4">Heading 4</h4>
+            <p class="el-text-base">This is base text with normal weight</p>
+            <p class="el-text-sm">This is smaller text</p>
+            <p class="el-text-xs">THIS IS EXTRA SMALL TEXT</p>
+            <p class="el-text-muted">This is muted/secondary text</p>
+        </div>
+    </div>
+</body>
+</html>

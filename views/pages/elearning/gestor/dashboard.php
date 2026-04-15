@@ -11,106 +11,112 @@ $statCards = [
         'label' => 'Cursos Cadastrados',
         'value' => $stats['total_courses'] ?? 0,
         'detail' => ($stats['published_courses'] ?? 0) . ' publicados',
-        'icon' => 'ph-books',
+        'icon' => '📚',
+        'color' => 'primary',
     ],
     [
         'label' => 'Aulas Ativas',
         'value' => $stats['total_lessons'] ?? 0,
         'detail' => 'conteudos no ar',
-        'icon' => 'ph-play-circle',
+        'icon' => '▶️',
+        'color' => 'secondary',
     ],
     [
         'label' => 'Alunos Matriculados',
         'value' => $stats['total_students'] ?? 0,
         'detail' => 'matriculas unicas',
-        'icon' => 'ph-users-three',
+        'icon' => '👥',
+        'color' => 'success',
     ],
     [
         'label' => 'Taxa de Aprovacao',
         'value' => number_format((float) ($stats['approval_rate'] ?? 0), 0) . '%',
         'detail' => 'nas provas enviadas',
-        'icon' => 'ph-check-circle',
+        'icon' => '✓',
+        'color' => 'primary',
     ],
 ];
 ?>
 
+<link rel="stylesheet" href="/assets/elearning-modern.css?v=<?= time() ?>">
 <style>
-/* Brutalist Premium Overrides */
-.el-brut-container {
-    background-color: #f7f7f7;
-    color: #111;
-    font-family: 'Inter', system-ui, sans-serif;
-    padding: 2rem;
+.el-dashboard {}
+.el-dashboard-hero {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 50%, #7c3aed 100%);
+    border-radius: 1.25rem;
+    padding: 2.5rem;
+    color: white;
+    margin-bottom: 2.5rem;
+    position: relative;
+    overflow: hidden;
 }
-.el-brut-card {
-    background: #fff;
-    border: 2px solid #000;
-    box-shadow: 6px 6px 0px #000;
-    border-radius: 0;
-    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+.el-dashboard-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1), transparent);
+    border-radius: 50%;
 }
-.el-brut-card:hover {
-    transform: translate(-3px, -3px);
-    box-shadow: 9px 9px 0px #000;
-}
-.el-brut-btn {
-    background: #000;
-    color: #fff;
-    border: 2px solid #000;
-    padding: 12px 24px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: -0.02em;
-    cursor: pointer;
+.el-dashboard-hero > * {
     position: relative;
     z-index: 1;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: background 0.2s, color 0.2s;
 }
-.el-brut-btn:hover {
-    background: #fff;
-    color: #000;
-}
-.el-brut-btn-outline {
-    background: transparent;
-    color: #000;
-    border: 2px solid #000;
-    padding: 12px 24px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: -0.02em;
-    cursor: pointer;
-    box-shadow: 4px 4px 0px #000;
-    transition: all 0.2s;
-}
-.el-brut-btn-outline:hover {
-    transform: translate(2px, 2px);
-    box-shadow: 2px 2px 0px #000;
-}
-.el-brut-title {
-    font-size: 3.5rem;
-    font-weight: 900;
-    line-height: 1;
-    letter-spacing: -0.04em;
-    text-transform: uppercase;
-    mix-blend-mode: exclusion;
-    color: #000;
-}
-.el-grid-asym {
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    gap: 2rem;
-}
-.el-badge {
-    background: #eef2ff;
-    border: 1px solid #000;
+.el-dashboard-hero h1 {
+    font-size: 2.5rem;
     font-weight: 800;
-    font-size: 0.70rem;
-    padding: 4px 8px;
+    margin-bottom: 0.5rem;
+}
+.el-dashboard-hero p {
+    font-size: 1.125rem;
+    opacity: 0.95;
+    margin-bottom: 1.5rem;
+}
+.el-stat-badge {
+    display: inline-block;
+    background: rgba(255,255,255, 0.15);
+    border: 1px solid rgba(255,255,255, 0.3);
+    color: white;
+    padding: 0.375rem 1rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.05em;
+}
+.el-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+.el-alert-premium {
+    background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);
+    border: 1px solid #facc15;
+    border-radius: 1rem;
+    padding: 1.25rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+}
+.el-alert-premium-icon {
+    font-size: 1.75rem;
+    flex-shrink: 0;
+}
+.el-alert-premium-content {
+    flex: 1;
+}
+.el-alert-premium-title {
+    font-weight: 700;
+    color: #78350f;
+    margin-bottom: 0.25rem;
+}
+.el-alert-premium-text {
+    font-size: 0.875rem;
+    color: #92400e;
 }
 </style>
 
@@ -148,31 +154,15 @@ $statCards = [
         <div class="col-span-12 lg:col-span-4 relative flex items-center justify-center p-8">
             <!-- Decorative Element -->
             <div class="w-full aspect-square border-4 border-black border-dashed rounded-full flex items-center justify-center relative bg-gradient-to-tr from-gray-100 to-white spin-slow">
-                <div class="absolute inset-4 bg-black rounded-full flex items-center justify-center text-white">
-                    <div class="text-center">
-                        <div class="text-5xl font-black mb-1"><?= $stats['total_courses'] ?? 0 ?></div>
-                        <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Trilhas Inseridas</div>
-                    </div>
+    <div class="el-stat-grid">
+        <?php foreach ($statCards as $card): ?>
+            <div class="el-stat-card">
+                <div class="el-stat-icon">
+                    <?= $card['icon'] ?>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- METRICS STRIP -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16 relative z-10">
-        <?php foreach ($statCards as $i => $card): ?>
-            <div class="el-brut-card p-6 flex flex-col justify-between <?= $i % 2 === 0 ? 'bg-white' : 'bg-gray-50' ?>">
-                <div class="flex justify-between items-start mb-8">
-                    <div class="w-10 h-10 border-2 border-black flex items-center justify-center bg-yellow-300 text-black">
-                        <i class="ph <?= e($card['icon']) ?> text-xl"></i>
-                    </div>
-                    <span class="el-badge">Métrica</span>
-                </div>
-                <div>
-                    <div class="text-4xl font-black tracking-tighter mb-1"><?= e((string) $card['value']) ?></div>
-                    <div class="font-bold text-sm text-gray-900 border-b-2 border-black inline-block pb-1 mb-1 uppercase"><?= e($card['label']) ?></div>
-                    <div class="text-[10px] text-gray-500 uppercase font-bold tracking-widest"><?= e($card['detail']) ?></div>
-                </div>
+                <div class="el-stat-value"><?= e((string) $card['value']) ?></div>
+                <div class="el-stat-label"><?= e($card['label']) ?></div>
+                <div class="el-stat-detail"><?= e($card['detail']) ?></div>
             </div>
         <?php endforeach; ?>
     </div>
@@ -193,98 +183,129 @@ $statCards = [
                 </div>
             <?php endif; ?>
 
-            <div class="grid grid-cols-1 gap-6">
-                <?php foreach (array_slice($courses, 0, 4) as $course): ?>
-                    <div class="el-brut-card flex gap-0 group relative overflow-hidden">
-                        <div class="w-48 bg-black shrink-0 relative overflow-hidden border-r-2 border-black">
-                            <img src="<?= e($course['cover_url']) ?>" alt="Capa" class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition duration-500">
-                        </div>
-                        <div class="p-6 flex flex-col justify-between flex-grow bg-white relative">
-                            <!-- Background decoration on hover -->
-                            <div class="absolute inset-0 bg-blue-50 transform scale-x-0 origin-right transition-transform group-hover:scale-x-100 z-0 ease-out duration-300"></div>
-                            
-                            <div class="relative z-10">
-                                <div class="flex gap-2 mb-3">
-                                    <span class="el-badge bg-white"><?= e($course['status_label'] ?? 'Rascunho') ?></span>
-                                    <span class="el-badge bg-black text-white"><?= e($course['category'] ?? 'Geral') ?></span>
-                                </div>
-                                <h3 class="text-2xl font-black uppercase tracking-tight leading-tight mb-2 group-hover:text-blue-600 transition-colors"><?= e($course['title']) ?></h3>
-                                <p class="text-xs font-bold text-gray-600 uppercase tracking-widest">
-                                    <?= (int) ($course['lessons_count'] ?? 0) ?> Aulas &bull; <?= (int) ($course['workload_hours'] ?? 0) ?>H &bull; <?= (int) ($course['enrollments_count'] ?? 0) ?> Alunos
-                                </p>
-                            </div>
+            <div class-->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- PRIMARY SECTION: RECENT COURSES -->
+        <div class="lg:col-span-2">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="el-h2">Cursos Recentes</h2>
+                <a href="/elearning/gestor/cursos" class="el-text-sm text-primary-600 hover:text-primary-700 font-semibold">Ver todos →</a>
+            </div>
 
-                            <div class="relative z-10 mt-6 grid grid-cols-[1fr,auto] gap-4 items-end">
-                                <div>
-                                    <div class="flex justify-between text-[10px] font-black uppercase mb-1">
-                                        <span>Aproveitamento Global</span>
+            <?php if (!$courses): ?>
+                <div class="el-card text-center py-12">
+                    <div class="text-4xl mb-3">📚</div>
+                    <p class="el-text-sm text-muted">Nenhum curso cadastrado ainda</p>
+                </div>
+            <?php else: ?>
+                <div class="space-y-4">
+                    <?php foreach (array_slice($courses, 0, 6) as $course): ?>
+                        <div class="el-course-card">
+                            <div class="el-course-image">
+                                <?php if ($course['cover_url'] && file_exists(str_replace('http://', '', str_replace('https://', '', $course['cover_url'])))): ?>
+                                    <img src="<?= e($course['cover_url']) ?>" alt="<?= e($course['title']) ?>">
+                                <?php else: ?>
+                                    <div style="font-size: 3rem; background: linear-gradient(135deg, #0ea5e9, #7c3aed); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white;">📖</div>
+                                <?php endif; ?>
+                            </div>
+                            <div class="el-course-content">
+                                <div class="flex gap-2 mb-2">
+                                    <span class="el-badge el-badge-primary" style="font-size: 0.7rem;">
+                                        <?= e($course['status_label'] ?? 'Rascunho') ?>
+                                    </span>
+                                    <span class="el-badge el-badge-success" style="font-size: 0.7rem;">
+                                        <?= e($course['category'] ?? 'Geral') ?>
+                                    </span>
+                                </div>
+                                <h3 class="el-course-title"><?= e($course['title']) ?></h3>
+                                <p class="el-course-teacher">
+                                    📌 <?= e($course['teacher_name'] ?? 'A definir') %>
+                                </p>
+                                <div class="el-course-stats">
+                                    <div class="el-course-stat">🎓 <?= (int) ($course['lessons_count'] ?? 0) ?> aulas</div>
+                                    <div class="el-course-stat">⏱ <?= (int) ($course['workload_hours'] ?? 0) ?>h</div>
+                                    <div class="el-course-stat">👥 <?= (int) ($course['enrollments_count'] ?? 0) ?> alunos</div>
+                                </div>
+                                <div class="el-course-progress">
+                                    <div class="el-course-progress-label">
+                                        <span>Progresso médio</span>
                                         <span><?= number_format((float) ($course['avg_progress'] ?? 0), 0) ?>%</span>
                                     </div>
-                                    <div class="h-4 border-2 border-black w-full bg-gray-100 relative overflow-hidden">
-                                        <div class="h-full bg-blue-500 border-r-2 border-black transition-all duration-1000" style="width: <?= min(100, max(0, (float) ($course['avg_progress'] ?? 0))) ?>%"></div>
+                                    <div class="el-progress-container">
+                                        <div class="el-progress-bar" style="width: <?= min(100, max(0, (float) ($course['avg_progress'] ?? 0))) ?>%;"></div>
                                     </div>
                                 </div>
-                                <a href="/elearning/gestor/cursos/<?= (int) $course['id'] ?>/aulas" class="w-10 h-10 border-2 border-black rounded-full flex items-center justify-center bg-yellow-300 hover:bg-black hover:text-yellow-300 transition-colors tooltip cursor-pointer" title="Gerenciar Conteúdo">
-                                    <i class="ph ph-arrow-right font-bold"></i>
-                                </a>
+                                <div class="el-course-actions">
+                                    <a href="/elearning/gestor/cursos/<?= (int) $course['id'] ?>/aulas" class="el-btn el-btn-sm el-btn-primary">Aulas</a>
+                                    <a href="/elearning/gestor/cursos/<?= (int) $course['id'] ?>/provas" class="el-btn el-btn-sm el-btn-secondary">Provas</a>
+                                    <a href="/elearning/gestor/cursos/<?= (int) $course['id'] ?>/matriculas" class="el-btn el-btn-sm el-btn-secondary">Alunos</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
 
-        <!-- SIDEBAR WIDGETS -->
-        <div class="col-span-12 lg:col-span-4 space-y-8">
-            
+        <!-- SIDEBAR: WIDGETS -->
+        <div class="space-y-6">
             <!-- Storage Widget -->
-            <div class="el-brut-card p-6 bg-yellow-300 relative overflow-hidden">
-                <div class="absolute -right-6 -bottom-6 w-32 h-32 border-4 border-black rounded-full opacity-20 pointer-events-none"></div>
-                <div class="flex items-center gap-2 mb-4 relative z-10">
-                    <i class="ph ph-hard-drives text-xl"></i>
-                    <h3 class="font-black uppercase tracking-widest text-sm border-b-2 border-black pb-1">Storage Network</h3>
-                </div>
-                
-                <div class="text-5xl font-black tracking-tighter mb-2 relative z-10"><?= e($storage['used_human'] ?? '0 min') ?></div>
-                <p class="text-xs font-bold uppercase mb-4 relative z-10 pb-4 border-b border-black">De <?= e($storage['contracted_human'] ?? '10.000 min') ?> Contratados</p>
-                
-                <div class="relative z-10">
-                    <div class="h-6 border-2 border-black bg-white w-full relative overflow-hidden">
-                        <?php $warnClass = ($storage['percent_used'] ?? 0) > 80 ? 'bg-red-500' : 'bg-black'; ?>
-                        <div class="h-full <?= $warnClass ?> border-r-2 border-black" style="width: <?= min(100, max(0, (float) ($storage['percent_used'] ?? 0))) ?>%"></div>
+            <div class="el-card">
+                <div class="flex items-center gap-3 mb-4">
+                    <span style="font-size: 1.5rem;">💾</span>
+                    <div>
+                        <p class="el-text-xs">ARMAZENAMENTO</p>
+                        <h3 class="el-h4">SGI Stream</h3>
                     </div>
                 </div>
-                <button class="el-brut-btn bg-white text-black mt-4 w-full justify-center text-xs">Aumentar Limite</button>
+                <div style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--slate-200);">
+                    <div class="el-stat-value" style="font-size: 2rem; color: var(--primary-600);"><?= e($storage['used_human'] ?? '0 min') ?></div>
+                    <p class="el-text-sm">de <?= e($storage['contracted_human'] ?? '10.000 min') ?></p>
+                </div>
+                <div class="el-progress-container" style="margin-bottom: 1rem;">
+                    <?php 
+                        $percent = (float) ($storage['percent_used'] ?? 0);
+                        $barClass = $percent > 90 ? 'error' : ($percent > 80 ? 'warning' : 'success');
+                    ?>
+                    <div class="el-progress-bar <?= $barClass ?>" style="width: <?= min(100, $percent) ?>%;"></div>
+                </div>
+                <p class="el-text-sm">
+                    <strong><?= e($storage['available_human'] ?? '0 min') ?></strong> disponíveis
+                </p>
             </div>
 
-            <!-- Quick Links -->
-            <div class="border-4 border-black p-6 bg-white shadow-[8px_8px_0px_#000]">
-                <h3 class="font-black uppercase text-xl mb-6 flex items-center gap-2">
-                    <span class="w-4 h-4 bg-black inline-block"></span> Hub de Controle
-                </h3>
-                
-                <nav class="flex flex-col gap-3">
-                    <a href="/elearning/gestor/cursos" class="group flex items-center justify-between p-3 border-2 border-gray-200 hover:border-black transition-colors font-bold uppercase text-xs">
-                        <span class="flex items-center gap-2"><i class="ph ph-books group-hover:animate-bounce"></i> Catálogo Base</span>
-                        <i class="ph ph-arrow-up-right opacity-0 group-hover:opacity-100 transition-opacity"></i>
+            <!-- Quick Actions -->
+            <div class="el-card">
+                <p class="el-text-xs mb-3">ações rápidas</p>
+                <h3 class="el-h4 mb-4">Hub de Controle</h3>
+                <nav class="space-y-2 flex flex-col">
+                    <a href="/elearning/gestor/cursos" class="el-btn el-btn-secondary el-btn-block justify-center">
+                        📚 Meus Cursos
                     </a>
-                    
-                    <a href="/elearning/gestor/diploma/config" class="group flex items-center justify-between p-3 border-2 border-gray-200 hover:border-black transition-colors font-bold uppercase text-xs">
-                        <span class="flex items-center gap-2"><i class="ph ph-certificate group-hover:animate-bounce"></i> Gestor de Certificados</span>
-                        <span class="bg-black text-white px-2 py-0.5 text-[10px]"><?= count($templates) ?> Ativos</span>
+                    <a href="/elearning/gestor/diploma/config" class="el-btn el-btn-secondary el-btn-block justify-center">
+                        🎓 Certificados (<?= count($templates) ?>)
                     </a>
-                    
-                    <a href="/elearning/gestor/relatorios" class="group flex items-center justify-between p-3 border-2 border-gray-200 hover:border-black transition-colors font-bold uppercase text-xs bg-gray-50">
-                        <span class="flex items-center gap-2 text-blue-600"><i class="ph ph-chart-polar group-hover:animate-bounce"></i> People Analytics</span>
-                        <i class="ph ph-arrow-right text-blue-600"></i>
+                    <a href="/elearning/gestor/relatorios" class="el-btn el-btn-secondary el-btn-block justify-center">
+                        📊 Relatórios
+                    </a>
+                    <a href="/elearning/gestor/armazenamento" class="el-btn el-btn-secondary el-btn-block justify-center">
+                        🔧 Armazenamento
                     </a>
                 </nav>
             </div>
-            
-            <a href="/inicio" class="block w-full border-2 border-black bg-gray-100 hover:bg-red-500 hover:text-white transition-colors p-4 text-center text-sm font-black uppercase tracking-widest cursor-pointer">
-                Sair do Modulo Educacional &times;
-            </a>
 
-        </div>
-    </div>
-</div>
+            <!-- Governance Card -->
+            <div class="el-card" style="background: linear-gradient(135deg, var(--primary-50) 0%, rgba(124, 58, 237, 0.05) 100%); border-color: var(--primary-200);">
+                <p class="el-text-xs mb-2">regras</p>
+                <h3 class="el-h4 mb-3">Governança</h3>
+                <ul class="el-text-sm space-y-2" style="color: var(--slate-600);">
+                    <li>✓ 1 vídeo MP4 por aula (80 MB)</li>
+                    <li>✓ Anexos até 20 MB</li>
+                    <li>✓ Nota mínima: 70%</li>
+                    <li>✓ Limite global: 10.000 min</li>
+                </ul>
+            </div>
+
+            <a href="/inicio" class="el-btn el-btn-danger el-btn-block justify-center">
+                ✕ Sair do Módulo
+            </a>
