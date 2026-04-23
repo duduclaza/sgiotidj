@@ -716,10 +716,31 @@ function setupFormularioRegistros() {
         try {
             const response = await fetch('/pops-its/registro/create', {
                 method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
                 body: formData
             });
             
-            const result = await response.json();
+            const responseText = await response.text();
+            let result = null;
+
+            if (responseText) {
+                try {
+                    result = JSON.parse(responseText);
+                } catch (parseError) {
+                    throw new Error('Resposta inválida do servidor. Status HTTP: ' + response.status);
+                }
+            }
+
+            if (!response.ok) {
+                throw new Error((result && result.message) ? result.message : 'Erro HTTP ' + response.status);
+            }
+
+            if (!result) {
+                throw new Error('Servidor retornou resposta vazia');
+            }
             
             if (result.success) {
                 alert('✅ ' + result.message);
@@ -733,7 +754,7 @@ function setupFormularioRegistros() {
             }
         } catch (error) {
             console.error('Erro:', error);
-            alert('❌ Erro ao criar registro');
+            alert('❌ Erro ao criar registro: ' + error.message);
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = '📝 Registrar';
@@ -2124,7 +2145,6 @@ function filtrarVisualizacaoPops() {
 }
 
 </script>
-
 
 
 

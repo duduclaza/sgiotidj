@@ -412,6 +412,34 @@ class PopItsController
                 echo json_encode(['success' => false, 'message' => 'Visibilidade inválida']);
                 return;
             }
+
+            $departamentos_permitidos = [];
+            if ($visibilidade === 'departamentos') {
+                $departamentos_permitidos = $_POST['departamentos_permitidos'] ?? [];
+                if (!is_array($departamentos_permitidos)) {
+                    $departamentos_permitidos = [];
+                }
+
+                $departamentos_permitidos = array_values(array_unique(array_filter(array_map('intval', $departamentos_permitidos), static function ($dept_id) {
+                    return $dept_id > 0;
+                })));
+
+                if (empty($departamentos_permitidos)) {
+                    echo json_encode(['success' => false, 'message' => 'Selecione pelo menos um departamento para visibilidade restrita']);
+                    return;
+                }
+
+                $this->criarTabelaDepartamentosSeNaoExistir();
+            }
+
+            $stmt_titulo = $this->db->prepare("SELECT titulo, tipo FROM pops_its_titulos WHERE id = ?");
+            $stmt_titulo->execute([$titulo_id]);
+            $titulo_info = $stmt_titulo->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$titulo_info) {
+                echo json_encode(['success' => false, 'message' => 'Título não encontrado']);
+                return;
+            }
             
             // Validar arquivo
             if (!isset($_FILES['arquivo']) || $_FILES['arquivo']['error'] !== UPLOAD_ERR_OK) {
@@ -458,56 +486,53 @@ class PopItsController
             
             // Ler arquivo
             $arquivo_conteudo = file_get_contents($file['tmp_name']);
+            if ($arquivo_conteudo === false) {
+                echo json_encode(['success' => false, 'message' => 'Erro ao ler arquivo enviado']);
+                return;
+            }
+
             $nome_arquivo = $file['name'];
             $extensao = strtolower(pathinfo($nome_arquivo, PATHINFO_EXTENSION));
             $tamanho_arquivo = $file['size'];
             
-            // Inserir registro
-            $stmt = $this->db->prepare("
-                INSERT INTO pops_its_registros 
-                (titulo_id, versao, arquivo, nome_arquivo, extensao, tamanho_arquivo, publico, criado_por, status) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDENTE')
-            ");
-            
             $publico = ($visibilidade === 'publico') ? 1 : 0;
-            $stmt->execute([
-                $titulo_id, $proxima_versao, $arquivo_conteudo, $nome_arquivo, 
-                $extensao, $tamanho_arquivo, $publico, $user_id
-            ]);
-            
-            $registro_id = $this->db->lastInsertId();
-            
-            // Se não for público, salvar departamentos permitidos
-            if ($visibilidade === 'departamentos') {
-                $departamentos_permitidos = $_POST['departamentos_permitidos'] ?? [];
-                
-                if (empty($departamentos_permitidos)) {
-                    echo json_encode(['success' => false, 'message' => 'Selecione pelo menos um departamento para visibilidade restrita']);
-                    return;
-                }
-                
-                // Criar tabela se não existir
-                $this->criarTabelaDepartamentosSeNaoExistir();
-                
-                // Inserir departamentos permitidos
-                $stmt_dept = $this->db->prepare("
-                    INSERT INTO pops_its_registros_departamentos (registro_id, departamento_id) 
-                    VALUES (?, ?)
+
+            $this->db->beginTransaction();
+            try {
+                // Inserir registro
+                $stmt = $this->db->prepare("
+                    INSERT INTO pops_its_registros
+                    (titulo_id, versao, arquivo, nome_arquivo, extensao, tamanho_arquivo, publico, criado_por, status)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDENTE')
                 ");
-                
-                foreach ($departamentos_permitidos as $dept_id) {
-                    $dept_id = (int)$dept_id;
-                    if ($dept_id > 0) {
+
+                $stmt->execute([
+                    $titulo_id, $proxima_versao, $arquivo_conteudo, $nome_arquivo,
+                    $extensao, $tamanho_arquivo, $publico, $user_id
+                ]);
+
+                $registro_id = $this->db->lastInsertId();
+
+                // Se não for público, salvar departamentos permitidos
+                if ($visibilidade === 'departamentos') {
+                    $stmt_dept = $this->db->prepare("
+                        INSERT INTO pops_its_registros_departamentos (registro_id, departamento_id)
+                        VALUES (?, ?)
+                    ");
+
+                    foreach ($departamentos_permitidos as $dept_id) {
                         $stmt_dept->execute([$registro_id, $dept_id]);
                         error_log("DEPARTAMENTO SALVO: Registro $registro_id -> Departamento $dept_id");
                     }
                 }
+
+                $this->db->commit();
+            } catch (\Throwable $e) {
+                if ($this->db->inTransaction()) {
+                    $this->db->rollBack();
+                }
+                throw $e;
             }
-            
-            // Buscar informações do título para notificação
-            $stmt_titulo = $this->db->prepare("SELECT titulo, tipo FROM pops_its_titulos WHERE id = ?");
-            $stmt_titulo->execute([$titulo_id]);
-            $titulo_info = $stmt_titulo->fetch(\PDO::FETCH_ASSOC);
             
             // Notificar administradores sobre novo registro pendente
             error_log("========================================");
@@ -518,13 +543,19 @@ class PopItsController
             error_log("Registro ID: {$registro_id}");
             error_log("========================================");
             
-            $notificacao_enviada = $this->notificarAdministradores(
-                "📋 Novo " . $titulo_info['tipo'] . " Pendente",
-                "Um novo registro '{$titulo_info['titulo']}' v{$proxima_versao} foi criado e aguarda aprovação.",
-                "pops_its_pendente",
-                "pops_its_registro",
-                $registro_id
-            );
+            $notificacao_enviada = false;
+            try {
+                $notificacao_enviada = $this->notificarAdministradores(
+                    "📋 Novo " . $titulo_info['tipo'] . " Pendente",
+                    "Um novo registro '{$titulo_info['titulo']}' v{$proxima_versao} foi criado e aguarda aprovação.",
+                    "pops_its_pendente",
+                    "pops_its_registro",
+                    $registro_id,
+                    false
+                );
+            } catch (\Throwable $notificationError) {
+                error_log("PopItsController::createRegistro - Notificação não crítica falhou: " . $notificationError->getMessage());
+            }
             
             error_log("========================================");
             error_log("🔔 RESULTADO FINAL DA NOTIFICAÇÃO: " . ($notificacao_enviada ? '✅ SUCESSO' : '❌ FALHA'));
@@ -532,7 +563,10 @@ class PopItsController
             
             echo json_encode(['success' => true, 'message' => "Registro criado com sucesso! Versão v{$proxima_versao} está pendente de aprovação."]);
             
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
             error_log("PopItsController::createRegistro - Erro: " . $e->getMessage());
             echo json_encode(['success' => false, 'message' => 'Erro interno: ' . $e->getMessage()]);
         }
@@ -1883,7 +1917,7 @@ class PopItsController
     }
 
     // Notificar administradores COM PERMISSÃO de aprovar POPs e ITs + ENVIAR EMAIL
-    private function notificarAdministradores($titulo, $mensagem, $tipo, $related_type = null, $related_id = null)
+    private function notificarAdministradores($titulo, $mensagem, $tipo, $related_type = null, $related_id = null, bool $enviarEmail = true)
     {
         try {
             error_log("┌─────────────────────────────────────────────────────────┐");
@@ -1906,7 +1940,7 @@ class PopItsController
                 $checkColumn = $this->db->query("SHOW COLUMNS FROM users LIKE 'pode_aprovar_pops_its'");
                 $hasColumn = $checkColumn->rowCount() > 0;
                 error_log($hasColumn ? "✅ Coluna existe!" : "❌ Coluna NÃO existe!");
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 error_log("❌ ERRO ao verificar coluna: " . $e->getMessage());
             }
             
@@ -1948,6 +1982,7 @@ class PopItsController
             // Criar notificações no sistema para cada admin
             $notificacoes_criadas = 0;
             $emails = [];
+            $emails_enviados = 0;
             
             foreach ($admins as $admin) {
                 error_log("--- CRIANDO NOTIFICAÇÃO PARA {$admin['name']} (ID: {$admin['id']}) ---");
@@ -1966,13 +2001,13 @@ class PopItsController
                         }
                         error_log("✅ NOTIFICAÇÃO CRIADA COM SUCESSO para {$admin['name']}");
                     }
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     error_log("❌ ERRO ao criar notificação para {$admin['name']}: " . $e->getMessage());
                 }
             }
             
             // Enviar EMAIL para todos os admins com permissão
-            if (!empty($emails)) {
+            if ($enviarEmail && !empty($emails)) {
                 try {
                     error_log("📧 ENVIANDO EMAIL PARA " . count($emails) . " ADMINISTRADORES");
                     
@@ -1985,23 +2020,26 @@ class PopItsController
                     );
                     
                     if ($emailEnviado) {
+                        $emails_enviados = count($emails);
                         error_log("✅ EMAIL ENVIADO COM SUCESSO PARA ADMINS");
                     } else {
                         error_log("⚠️ FALHA AO ENVIAR EMAIL (não crítico)");
                     }
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     error_log("⚠️ ERRO AO ENVIAR EMAIL: " . $e->getMessage());
                 }
+            } elseif (!$enviarEmail && !empty($emails)) {
+                error_log("📧 Email de POP/IT pendente pulado nesta requisição; notificações internas foram criadas.");
             }
             
             error_log("=== RESULTADO FINAL ===");
             error_log("NOTIFICAÇÕES CRIADAS: $notificacoes_criadas de " . count($admins));
-            error_log("EMAILS ENVIADOS: " . count($emails));
+            error_log("EMAILS ENVIADOS: " . $emails_enviados);
             error_log("=== FIM NOTIFICAÇÃO ADMINS ===");
             
             return $notificacoes_criadas > 0;
             
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             error_log("❌ ERRO GERAL ao notificar administradores: " . $e->getMessage());
             error_log("STACK TRACE: " . $e->getTraceAsString());
             return false;
